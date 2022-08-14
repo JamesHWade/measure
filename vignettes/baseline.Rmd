@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(tidyverse)
 library(tidymodels)
-library(modeldata)
 library(measure)
 theme_set(theme_light())
 ```
@@ -35,7 +34,7 @@ meats2 <-
   pivot_longer(cols = starts_with("x_"),
                names_to = "channel",
                values_to = "transmittance") |> 
-  mutate(channel = stringr::str_extract(channel, "[:digit:]+") |> as.integer())
+  mutate(channel = str_extract(channel, "[:digit:]+") |> as.integer())
 ```
 
 ```{r}
