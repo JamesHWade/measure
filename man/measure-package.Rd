@@ -8,6 +8,13 @@
 \description{
 Analytical measurements...
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://jameshwade.github.io/measure/}
+}
+
+}
 \author{
 \strong{Maintainer}: James Wade \email{github@jameshwade.com} (\href{https://orcid.org/0000-0002-9740-1905}{ORCID})
 

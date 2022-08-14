@@ -30,3 +30,4 @@ VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
 LazyData: true
+URL: https://jameshwade.github.io/measure/
