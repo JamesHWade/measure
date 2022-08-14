@@ -7,14 +7,11 @@ Authors@R:
            comment = c(ORCID = "0000-0002-9740-1905"))
 Description: Analytical measurements...
 License: MIT + file LICENSE
-Depends: 
-    recipes
 Imports: 
     cli,
     glue,
     lifecycle,
-    rlang (>= 0.4.11),
-    withr
+    rlang
 Suggests: 
     roxygen2,
     testthat (>= 3.0.0)

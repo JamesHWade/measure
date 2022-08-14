@@ -7,7 +7,13 @@
 step_baseline(recipe, ..., role = "predictor")
 }
 \arguments{
-\item{role}{}
+\item{recipe}{A recipe object. The step will be added to the
+sequence of operations for this recipe.}
+
+\item{...}{One or more selector functions to choose variables
+for this step.}
+
+\item{role}{Assign the role of new variables.}
 }
 \description{
 Title
