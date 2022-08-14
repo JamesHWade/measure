@@ -1,0 +1,11 @@
+Package: anylr
+Title: A Recipes Package to Interface with Tidymodels for Analytical Measuremnts
+Version: 0.0.0.9000
+Authors@R: 
+    person("James", "Wade", , "github@jameshwade.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9740-1905"))
+Description: Analytical measurements...
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.0.0
