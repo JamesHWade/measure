@@ -1,0 +1,10 @@
+pandoc: 2.14.2
+pkgdown: 2.0.6
+pkgdown_sha: ~
+articles:
+  baseline: baseline.html
+last_built: 2022-08-14T20:46Z
+urls:
+  reference: https://jameshwade.github.io/measure/reference
+  article: https://jameshwade.github.io/measure/articles
+
