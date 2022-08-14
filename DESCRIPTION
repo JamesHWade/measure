@@ -1,4 +1,4 @@
-Package: anylr
+Package: measure
 Title: A Recipes Package to Interface with Tidymodels for Analytical
     Measurements
 Version: 0.0.0.9000
