@@ -9,6 +9,5 @@
 step_baseline <- function(recipe,
                           ...,
                           role = "predictor") {
-  cli::cli_alert_info("Not yet implemented.")
-  NULL
+  cli::cli_alert_danger("Not yet implemented.")
 }
