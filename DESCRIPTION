@@ -1,6 +1,5 @@
 Package: measure
-Title: A Recipes Package to Interface with Tidymodels for Analytical
-    Measurements
+Title: A Recipes-style Interface to Tidymodels for Analytical Measurements
 Version: 0.0.1
 Authors@R: 
     person("James", "Wade", , "github@jameshwade.com", role = c("aut", "cre"),

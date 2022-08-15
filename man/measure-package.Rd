@@ -4,7 +4,7 @@
 \name{measure-package}
 \alias{measure}
 \alias{measure-package}
-\title{measure: A Recipes Package to Interface with Tidymodels for Analytical Measurements}
+\title{measure: A Recipes-style Interface to Tidymodels for Analytical Measurements}
 \description{
 Analytical measurements...
 }

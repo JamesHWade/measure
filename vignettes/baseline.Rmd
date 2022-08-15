@@ -14,14 +14,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+Let's use the [`meats`](https://modeldata.tidymodels.org/reference/meats.html) data from [`{modeldata}`](https://modeldata.tidymodels.org/) to demonstrate baseline correction.
+
+```{r setup, message = FALSE}
 library(tidyverse)
 library(tidymodels)
 library(measure)
+tidymodels_prefer()
 theme_set(theme_light())
 ```
-
-Let's use the [`meats`](https://modeldata.tidymodels.org/reference/meats.html) data from [`{modeldata}`](https://modeldata.tidymodels.org/) to demonstrate baseline correction.
 
 ## Data Cleanup
 
