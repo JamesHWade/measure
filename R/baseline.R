@@ -1,4 +1,4 @@
-#' Title
+#' Fit and subtract a baseline from a measurment signal
 #'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
@@ -9,6 +9,30 @@
 step_baseline <- function(recipe,
                           ...,
                           role = "predictor") {
+  # terms <- recipes::ellipse_check(...)
+  cli::cli_alert_danger("Not yet implemented.")
+  # recipes::add_step(
+  #   recipe,
+  #   step_baseline_new()
+  # )
+}
+
+step_baseline_new <-
+  function(terms, role, trained, ref_dist, options, skip, id) {
+  cli::cli_alert_danger("Not yet implemented.")
+    # step(
+    #   subclass = "measure",
+    #   terms = terms,
+    #   role = role,
+    #   trained = trained,
+    #   ref_dist = ref_dist,
+    #   options = options,
+    #   skip = skip,
+    #   id = id
+    # )
+  }
+
+prep.step_baseline <- function(x, training, info = NULL, ...) {
   cli::cli_alert_danger("Not yet implemented.")
 }
 
@@ -41,4 +65,8 @@ subtract_rf_baseline <- function(data, yvar, span = 2/3, maxit = c(5, 5)){
                                      maxit = maxit)$fit,
       {{ yvar }} := {{ yvar }} - baseline
     )
+}
+
+bake.step_baseline <- function(object, new_data, ...) {
+  cli::cli_alert_danger("Not yet implemented.")
 }

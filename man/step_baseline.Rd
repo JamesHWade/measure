@@ -2,7 +2,7 @@
 % Please edit documentation in R/baseline.R
 \name{step_baseline}
 \alias{step_baseline}
-\title{Title}
+\title{Fit and subtract a baseline from a measurment signal}
 \usage{
 step_baseline(recipe, ..., role = "predictor")
 }
@@ -16,5 +16,5 @@ for this step.}
 \item{role}{Assign the role of new variables.}
 }
 \description{
-Title
+Fit and subtract a baseline from a measurment signal
 }
