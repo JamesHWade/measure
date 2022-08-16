@@ -1,0 +1,66 @@
+---
+title: "What is a recipe?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{What is a recipe?}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tidymodels)
+library(measure)
+```
+
+
+```{r}
+data("credit_data")
+
+set.seed(55)
+train_test_split <- initial_split(credit_data)
+
+credit_train <- training(train_test_split)
+credit_test <- testing(train_test_split)
+```
+
+### Creating a Recipe
+
+We specify a recipe providing formula and data arguments. Check out [*Tidy Modeling with R*](https://www.tmwr.org/base-r.html) to learn more about specifying formulas in R.
+
+```{r}
+rec_obj <- recipe(Status ~ ., data = credit_train)
+```
+
+The `recipe` funtion returns a recipe object. The formula argument determines the roles of each variables. `Status` is assigned the role of `outcome`, and the 13  other variables are assigned to role of `predictor`.
+
+```{r}
+rec_obj
+```
+
+Diving a bit deeper, the recipe object is a list with 7 elements. Within these elements, we can see more details are saved about our variables. This includes the `type` and `source` stored in `rec_obj$var_info`.
+
+```{r}
+cat(names(rec_obj), sep = "\n")
+rec_obj$var_info
+```
+
+### Adding a Step
+
+The recipe does not yet contain any steps.
+
+```{r}
+rec_obj$steps
+
+rec_obj_add_step <- rec_obj |> 
+  step_impute_knn(all_predictors())
+
+rec_obj_add_step$steps
+```
+
