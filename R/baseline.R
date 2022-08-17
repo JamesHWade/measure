@@ -1,4 +1,4 @@
-#' Fit and subtract a baseline from a measurment signal
+#' Fit and subtract a baseline from a measurement signal
 #'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
