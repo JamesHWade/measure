@@ -1,10 +1,7 @@
 url: https://jameshwade.github.io/measure/
 template:
   bootstrap: 5
-  bslib:
-    danger: "#CA225E"
-    primary: "#CA225E"
-  package: tidytemplate
+  bootswatch: flatly
 
 development:
   mode: auto
