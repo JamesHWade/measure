@@ -4,7 +4,15 @@
 \alias{step_baseline}
 \title{Fit and subtract a baseline from a measurement signal}
 \usage{
-step_baseline(recipe, ..., role = "predictor")
+step_baseline(
+  recipe,
+  ...,
+  role = NA,
+  trained = FALSE,
+  options = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure")
+)
 }
 \arguments{
 \item{recipe}{A recipe object. The step will be added to the

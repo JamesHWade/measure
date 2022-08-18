@@ -11,11 +11,11 @@ Imports:
     dplyr,
     glue,
     IDPmisc,
+    lifecycle,
     rlang
 Suggests: 
     covr,
     knitr,
-    lifecycle,
     rmarkdown,
     roxygen2,
     testthat (>= 3.0.0),
