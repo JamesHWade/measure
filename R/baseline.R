@@ -1,5 +1,6 @@
 #' Fit and subtract a baseline from a measurement signal
 #'
+#' @inheritParams recipes::step_pca
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
 #' @param ... One or more selector functions to choose variables
