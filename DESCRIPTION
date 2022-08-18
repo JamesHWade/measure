@@ -6,6 +6,8 @@ Authors@R:
            comment = c(ORCID = "0000-0002-9740-1905"))
 Description: Analytical measurements...
 License: MIT + file LICENSE
+URL: https://jameshwade.github.io/measure, https://github.com/jameshwade/measure
+BugReports: https://github.com/jameshwade/measure/issues
 Imports: 
     cli,
     dplyr,
@@ -30,4 +32,3 @@ Depends:
     R (>= 2.10),
     recipes
 LazyData: true
-URL: https://jameshwade.github.io/measure/

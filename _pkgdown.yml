@@ -1,7 +1,11 @@
 url: https://jameshwade.github.io/measure/
 template:
   bootstrap: 5
-  bootswatch: flatly
+
+navbar:
+  structure:
+    left:  [intro, reference, articles]
+    right: [search, github]
 
 development:
   mode: auto
