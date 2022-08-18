@@ -8,32 +8,44 @@
 #'
 step_baseline <- function(recipe,
                           ...,
-                          role = "predictor") {
-  # terms <- recipes::ellipse_check(...)
+                          role = NA,
+                          trained = FALSE,
+                          options = NULL,
+                          skip = FALSE,
+                          id = recipes::rand_id("measure")) {
+  terms <- recipes::ellipse_check(...)
   cli::cli_alert_danger("Not yet implemented.")
-  # recipes::add_step(
-  #   recipe,
-  #   step_baseline_new()
-  # )
+  recipes::add_step(
+    recipe,
+    step_baseline_new(
+      terms = terms,
+      trained = trained,
+      role = role,
+      options = options,
+      skip = skip,
+      id = id
+    )
+  )
 }
 
 step_baseline_new <-
-  function(terms, role, trained, ref_dist, options, skip, id) {
+  function(terms, role, trained, options, skip, id) {
   cli::cli_alert_danger("Not yet implemented.")
-    # step(
-    #   subclass = "measure",
-    #   terms = terms,
-    #   role = role,
-    #   trained = trained,
-    #   ref_dist = ref_dist,
-    #   options = options,
-    #   skip = skip,
-    #   id = id
-    # )
+    step(
+      subclass = "measure",
+      terms = terms,
+      role = role,
+      trained = trained,
+      options = options,
+      skip = skip,
+      id = id
+    )
   }
 
 prep.step_baseline <- function(x, training, info = NULL, ...) {
   cli::cli_alert_danger("Not yet implemented.")
+  col_names <- recipes::recipes_eval_select(x$terms, training, info)
+  recipes::check_type(x, quant = TRUE)
 }
 
 

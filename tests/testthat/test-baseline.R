@@ -1,9 +1,8 @@
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
-})
-
 test_that("step baseline runs", {
-  expect_message(step_baseline())
+  expect_message(
+    recipe(meats_long) |>
+      step_baseline(transmittance)
+    )
 })
 
 test_that("robust baseline subtraction works", {

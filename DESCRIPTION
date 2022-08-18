@@ -11,11 +11,11 @@ Imports:
     dplyr,
     glue,
     IDPmisc,
-    lifecycle,
     rlang
 Suggests: 
     covr,
     knitr,
+    lifecycle,
     rmarkdown,
     roxygen2,
     testthat (>= 3.0.0),
@@ -27,6 +27,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 VignetteBuilder: knitr
 Depends: 
-    R (>= 2.10)
+    R (>= 2.10),
+    recipes
 LazyData: true
 URL: https://jameshwade.github.io/measure/
