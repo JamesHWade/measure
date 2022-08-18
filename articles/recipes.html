@@ -105,7 +105,7 @@
 </h3>
 <p>We specify a recipe providing formula and data arguments. Check out <a href="https://www.tmwr.org/base-r.html" class="external-link"><em>Tidy Modeling with R</em></a> to learn more about specifying formulas in R.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rec_obj</span> <span class="op">&lt;-</span> <span class="fu">recipe</span><span class="op">(</span><span class="va">Status</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">credit_train</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">rec_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">Status</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">credit_train</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>recipe</code> funtion returns a recipe object. The formula argument determines the roles of each variables. <code>Status</code> is assigned the role of <code>outcome</code>, and the 13 other variables are assigned to role of <code>predictor</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_obj</span></span>
@@ -154,7 +154,7 @@
 <span><span class="co">#&gt; NULL</span></span>
 <span></span>
 <span><span class="va">rec_obj_add_step</span> <span class="op">&lt;-</span> <span class="va">rec_obj</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">step_impute_knn</span><span class="op">(</span><span class="fu">all_predictors</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_impute_knn.html" class="external-link">step_impute_knn</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_predictors</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rec_obj_add_step</span><span class="op">$</span><span class="va">steps</span></span>
 <span><span class="co">#&gt; [[1]]</span></span>
