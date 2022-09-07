@@ -30,10 +30,21 @@ Our challenge is to strike the right balance between a flexibile package and a u
 
 ## Scope of Data Sources
 
-Analytical measurement systems are as varied as the applications they are used in. The field is necessarily broad and growing. The scientific journal *Analytical Chemistry* defines the field as 
+Analytical measurement systems are as varied as the applications they are used in. The field is necessarily broad and growing. The American Chemical Society[defines the field](https://www.acs.org/content/acs/en/careers/chemical-sciences/areas/analytical-chemistry.html) as:
 
 > the science of obtaining, processing, and communicating information about the composition and structure of matter. In other words, it is the art and science of determining what matter is and how much of it exists. 
 
 Common analytical techniques include chromatography, optical spectroscopy, mass spectrometry, microscopy, and many others. The initial scope of `{measure}` is on common techniques that can represent data in a tibble or series of tibbles.
 
 Researchers who are experts in performing these types of measurements refer their equipment as instruments. However, instrumental variables already have a meaning in the statistics literature, and so we will avoid that terminology.
+
+## Data Sources
+
+There are a number of data sets in `{modeldata}` and `{prospectr}` packages. These include `modeldata::meats` and `prospectr::NIRsoil`. 
+
+Mendeley Data offers data inlcuded as part of various publications. A few possibilities include:
+
+- [Machine Learning of MS dataset](https://data.mendeley.com/datasets/2rcc8488hx)
+- [Data for: A Sensitive Quantitative Analysis of Abiotically Synthesized Short Homopeptides using Ultraperformance Liquid Chromatography and Time-of-Flight Mass Spectrometry](https://data.mendeley.com/datasets/msy7k3myrx)
+- [Crystallography Open Database](https://www.crystallography.net/cod/)
+- [NMRShiftDB](https://nmrshiftdb.nmr.uni-koeln.de/nmrshiftdb/media-type/html/user/anon/page/default.psml/js_pane/P-Help;jsessionid=8DC5FC88F23A161E2276E00C85C184CA)

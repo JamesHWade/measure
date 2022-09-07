@@ -1,28 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://jameshwade.github.io/measure/404 3.html</loc>
-  </url>
-  <url>
     <loc>https://jameshwade.github.io/measure/404.html</loc>
-  </url>
-  <url>
-    <loc>https://jameshwade.github.io/measure/CODE_OF_CONDUCT 3.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/CODE_OF_CONDUCT.html</loc>
   </url>
   <url>
-    <loc>https://jameshwade.github.io/measure/CONTRIBUTING 3.html</loc>
-  </url>
-  <url>
     <loc>https://jameshwade.github.io/measure/CONTRIBUTING.html</loc>
-  </url>
-  <url>
-    <loc>https://jameshwade.github.io/measure/LICENSE 3.html</loc>
-  </url>
-  <url>
-    <loc>https://jameshwade.github.io/measure/LICENSE-text 3.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/LICENSE-text.html</loc>
@@ -31,19 +16,10 @@
     <loc>https://jameshwade.github.io/measure/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://jameshwade.github.io/measure/SUPPORT 3.html</loc>
-  </url>
-  <url>
     <loc>https://jameshwade.github.io/measure/SUPPORT.html</loc>
   </url>
   <url>
-    <loc>https://jameshwade.github.io/measure/articles/baseline 2.html</loc>
-  </url>
-  <url>
     <loc>https://jameshwade.github.io/measure/articles/baseline.html</loc>
-  </url>
-  <url>
-    <loc>https://jameshwade.github.io/measure/articles/index 2.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/articles/index.html</loc>
@@ -55,25 +31,13 @@
     <loc>https://jameshwade.github.io/measure/articles/recipes.html</loc>
   </url>
   <url>
-    <loc>https://jameshwade.github.io/measure/authors 3.html</loc>
-  </url>
-  <url>
     <loc>https://jameshwade.github.io/measure/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://jameshwade.github.io/measure/index 3.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/index.html</loc>
   </url>
   <url>
-    <loc>https://jameshwade.github.io/measure/reference/index 3.html</loc>
-  </url>
-  <url>
     <loc>https://jameshwade.github.io/measure/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://jameshwade.github.io/measure/reference/measure-package 3.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/reference/measure-package.html</loc>
@@ -82,16 +46,10 @@
     <loc>https://jameshwade.github.io/measure/reference/meats_long.html</loc>
   </url>
   <url>
-    <loc>https://jameshwade.github.io/measure/reference/step_baseline 3.html</loc>
-  </url>
-  <url>
     <loc>https://jameshwade.github.io/measure/reference/step_baseline.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/reference/step_subtract_blank.html</loc>
-  </url>
-  <url>
-    <loc>https://jameshwade.github.io/measure/reference/subtract_rf_baseline 3.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/reference/subtract_rf_baseline.html</loc>
