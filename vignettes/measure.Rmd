@@ -46,5 +46,10 @@ Mendeley Data offers data inlcuded as part of various publications. A few possib
 
 - [Machine Learning of MS dataset](https://data.mendeley.com/datasets/2rcc8488hx)
 - [Data for: A Sensitive Quantitative Analysis of Abiotically Synthesized Short Homopeptides using Ultraperformance Liquid Chromatography and Time-of-Flight Mass Spectrometry](https://data.mendeley.com/datasets/msy7k3myrx)
+
+There are also some repositories that might be of use:
+
 - [Crystallography Open Database](https://www.crystallography.net/cod/)
 - [NMRShiftDB](https://nmrshiftdb.nmr.uni-koeln.de/nmrshiftdb/media-type/html/user/anon/page/default.psml/js_pane/P-Help;jsessionid=8DC5FC88F23A161E2276E00C85C184CA)
+- [Spectral Database for Organic Compounds, SDBS](https://sdbs.db.aist.go.jp/sdbs/cgi-bin/cre_index.cgi?lang=eng)
+- [NIST Chemistry WebBook](https://webbook.nist.gov/chemistry/#Search)
