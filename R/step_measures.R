@@ -1,4 +1,4 @@
-#' Fit and subtract a baseline from a measurement signal
+#' Reshape measurement data into
 #'
 #' @inheritParams recipes::step_pca
 #' @param recipe A recipe object. The step will be added to the
@@ -6,19 +6,22 @@
 #' @param ... One or more selector functions to choose variables
 #'  for this step.
 #' @param role Assign the role of new variables.
+#' @param shape The starting shape of the data, either "long" or "wide" using
+#' tidyr-style nomenclature.
 #'
-step_baseline <- function(recipe,
+step_measure_collect <- function(recipe,
                           ...,
                           role = NA,
+                          shape = c("long", "wide"),
                           trained = FALSE,
                           options = NULL,
                           skip = FALSE,
-                          id = recipes::rand_id("measure")) {
+                          id = rand_id("measure")) {
   terms <- recipes::ellipse_check(...)
   warn("Not yet implemented.")
   add_step(
     recipe,
-    step_baseline_new(
+    step_measure_collect_new(
       terms = terms,
       trained = trained,
       role = role,
@@ -29,9 +32,9 @@ step_baseline <- function(recipe,
   )
 }
 
-step_baseline_new <-
+step_measure_collect_new <-
   function(terms, role, trained, options, skip, id) {
-  cli::cli_alert_danger("Not yet implemented.")
+    cli::cli_alert_danger("Not yet implemented.")
     step(
       subclass = "measure",
       terms = terms,
@@ -43,7 +46,7 @@ step_baseline_new <-
     )
   }
 
-prep.step_baseline <- function(x, training, info = NULL, ...) {
+prep.step_measure_collect <- function(x, training, info = NULL, ...) {
   cli::cli_alert_danger("Not yet implemented.")
   col_names <- recipes::recipes_eval_select(x$terms, training, info)
   recipes::check_type(x, quant = TRUE)
@@ -53,19 +56,13 @@ prep.step_baseline <- function(x, training, info = NULL, ...) {
 #' Subtract baseline using robust fitting method
 #'
 #' @param data A dataframe containing the variable for baseline subtraction
-#' @param yvar The name of the column for baseline subtraction
-#' @param span Controls the amount of smoothing based on the fraction of data
-#' to use in computing each fitted value, defaults to `2/3`.
-#' @param maxit The number of iterations to use the robust fit, defaults to
-#' `c(5, 5)` where the first value specifies iterations for asymmetric weighting
-#' function and the second value for symmetric weighting function.
 #'
 #' @return A dataframe matching column in data plus `raw` and `baseline` columns
 #' @export
 #'
 #' @examples
-#' meats_long |> subtract_rf_baseline(yvar = transmittance)
-subtract_rf_baseline <- function(data, yvar, span = 2/3, maxit = c(5, 5)){
+#' meats_long |> subtract_rf_measure_collect(yvar = transmittance)
+measure_collect <- function(data){
 
   # rlang::arg_match0(as.character(rlang::enquo(yvar)), values = names(data))
 
@@ -80,6 +77,6 @@ subtract_rf_baseline <- function(data, yvar, span = 2/3, maxit = c(5, 5)){
     )
 }
 
-bake.step_baseline <- function(object, new_data, ...) {
+bake.step_measure_collect <- function(object, new_data, ...) {
   cli::cli_alert_danger("Not yet implemented.")
 }
