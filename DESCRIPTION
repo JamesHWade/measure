@@ -14,7 +14,8 @@ Imports:
     glue,
     IDPmisc,
     lifecycle,
-    rlang
+    rlang,
+    tidyr
 Suggests: 
     covr,
     knitr,
