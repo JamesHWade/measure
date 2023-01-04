@@ -42,7 +42,7 @@ step_measure_collect <-
   function(recipe,
            ...,
            role = NA,
-           descriptor = NA,
+           identifier = NA,
            trained = FALSE,
            shape = c("long", "wide"),
            #<additional args here>
@@ -54,9 +54,8 @@ step_measure_collect <-
         terms = ellipse_check(...),
         trained = trained,
         role = role,
-        descriptor = descriptor,
         shape = shape,
-        # <additional args here>
+        identifier = identifier,
         skip = skip,
         id = id
       )
@@ -67,9 +66,8 @@ step_measure_collect <-
 step_measure_collect_new <-
   function(terms,
            role,
-           descriptor,
            shape,
-           #<additional args here>,
+           identifier,
            trained,
            skip,
            id) {
@@ -77,9 +75,9 @@ step_measure_collect_new <-
       subclass = "measure_collect",
       terms = terms,
       role = role,
-      descriptor = descriptor,
       trained = trained,
-      # <additional args here>
+      shape = shape,
+      identifier = identifier,
       skip = skip,
       id = id
     )
@@ -89,16 +87,19 @@ step_measure_collect_new <-
 prep.step_measure_collect <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
   check_type(training[, col_names])
-
   # <prepping action here>
+  descriptors <- recipes_eval_select(has_role("descriptor"), training, info)
+  conditions <- recipes_eval_select(has_role("condition"), training, info)
+  x$identifier <- c(descriptors, conditions)
+  cli::cli_inform("Identifiers: {x$identifier}")
 
   step_measure_collect_new(
     terms = x$terms,
     role = x$role,
-    descriptors = x$descriptors,
     trained = TRUE,
     shape = x$shape,
     # <additional args here>
+    identifier = x$identifier,
     skip = x$skip,
     id = x$id
   )
@@ -118,7 +119,9 @@ prep.step_measure_collect <- function(x, training, info = NULL, ...) {
 #'
 measure_collect <- function(data, shape, measures, identifiers) {
 
-  cli::cli_alert("measure_collect called")
+  cli::cli_alert("shape: {shape}")
+
+  print({{measures}})
 
   data <-
     data |>
@@ -128,7 +131,7 @@ measure_collect <- function(data, shape, measures, identifiers) {
     data |>
       dplyr::group_by({{identifiers}}) |>
       tidyr::pivot_longer(
-        cols = measures,
+        cols = {{measures}},
         names_to = "measure",
         values_to = "response"
       ) |>
@@ -142,20 +145,13 @@ measure_collect <- function(data, shape, measures, identifiers) {
 #' @export
 bake.step_measure_collect <- function(object, new_data, ...) {
   check_new_data(names(object$object$xnames), object, new_data)
-  inform("get identifiers")
-  print(object$terms)
-  identifiers <- recipes_eval_select(
-    has_role("descriptor"), new_data, summary(object)
-  )
-  inform("done getting identifiers")
-  cli::cli_inform("Identifiers: {identifiers}")
 
-  res <- recipes::check_name(res, new_data, object)
+  # res <- recipes::check_name(res, new_data, object)
 
   measure_collect(data        = new_data,
                   shape       = object$shape,
-                  measures    = object$terms,
-                  identifiers = identifiers)
+                  measures    = object$terms[[1]],
+                  identifiers = object$identifier)
 }
 
 # print.step_measure_collect <-
