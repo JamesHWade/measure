@@ -15,8 +15,7 @@ step_baseline <- function(recipe,
                           skip = FALSE,
                           id = recipes::rand_id("measure")) {
   terms <- recipes::ellipse_check(...)
-  cli::cli_alert_danger("Not yet implemented.")
-  recipes::add_step(
+  add_step(
     recipe,
     step_baseline_new(
       terms = terms,
@@ -31,7 +30,6 @@ step_baseline <- function(recipe,
 
 step_baseline_new <-
   function(terms, role, trained, options, skip, id) {
-  cli::cli_alert_danger("Not yet implemented.")
     step(
       subclass = "measure",
       terms = terms,
@@ -44,11 +42,17 @@ step_baseline_new <-
   }
 
 prep.step_baseline <- function(x, training, info = NULL, ...) {
-  cli::cli_alert_danger("Not yet implemented.")
   col_names <- recipes::recipes_eval_select(x$terms, training, info)
   recipes::check_type(x, quant = TRUE)
 }
 
+#' @export
+print.step_baseline <-
+  function(x, width = max(20, options()$width - 30), ...) {
+    title <- "Subtract baseline "
+    print_step(names(x$means), x$terms, x$trained, title, width)
+    invisible(x)
+  }
 
 #' Subtract baseline using robust fitting method
 #'
