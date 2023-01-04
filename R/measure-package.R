@@ -2,17 +2,17 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @import rlang
-#' @importFrom glue glue
-#' @importFrom lifecycle deprecated
-## usethis namespace: end
-NULL
-
 #' @import recipes
 #' @import rlang
 #' @importFrom utils globalVariables
 #' @importFrom dplyr select arrange mutate
+#' @importFrom tibble tibble
+#' @importFrom glue glue
+## usethis namespace: end
+NULL
+
+
 
 utils::globalVariables(
-  names = c("baseline")
+  names = c("baseline", ".index", ".measures")
 )

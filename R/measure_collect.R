@@ -15,6 +15,8 @@
 #'  preprocessing have been estimated.
 #' @param shape The starting shape of the data, either "long" or "wide" using
 #' tidyr-style nomenclature.
+#' @param identifiers A combination of roles (descriptors + conditions) used
+#' for subsequent processing
 #' @param skip A logical. Should the step be skipped when the
 #'  recipe is baked by [bake()]? While all operations are baked
 #'  when [prep()] is run, some operations may not be able to be
@@ -22,7 +24,7 @@
 #'  Care should be taken when using `skip = TRUE` as it may affect
 #'  the computations for subsequent operations
 #' @param id A character string that is unique to this step to identify it.
-#' @return <describe return>
+#' @template
 #'
 #' @export
 #' @details To do
@@ -45,7 +47,6 @@ step_measure_collect <-
            identifiers = NA,
            trained = FALSE,
            shape = c("long", "wide"),
-           #<additional args here>
            skip = FALSE,
            id = rand_id("measure_collect")) {
     add_step(

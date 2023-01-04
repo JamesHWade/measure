@@ -13,12 +13,13 @@ Imports:
     dplyr,
     glue,
     IDPmisc,
-    lifecycle,
     rlang,
+    tibble,
     tidyr
 Suggests: 
     covr,
     knitr,
+    qpdf,
     rmarkdown,
     roxygen2,
     testthat (>= 3.0.0),

@@ -27,6 +27,9 @@ currently used.}
 \item{role}{Not used by this step since no new variables are
 created. \if{html}{\out{<change if role is used>}}}
 
+\item{identifiers}{A combination of roles (descriptors + conditions) used
+for subsequent processing}
+
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
 
@@ -42,19 +45,12 @@ the computations for subsequent operations}
 
 \item{id}{A character string that is unique to this step to identify it.}
 }
-\value{
-\if{html}{\out{
-<describe return>
-}}
-}
 \description{
 \code{step_measure_collect} creates a \emph{specification} of a recipe
 step that \if{html}{\out{<what it does>}}
 }
 \details{
-\if{html}{\out{
-<describe details>
-}}
+To do
 }
 \section{Tidying}{
 When you \code{\link[=tidy.recipe]{tidy()}} this step, a tibble with columns
