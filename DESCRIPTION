@@ -19,6 +19,7 @@ Imports:
 Suggests: 
     covr,
     knitr,
+    modeldata,
     qpdf,
     rmarkdown,
     roxygen2,

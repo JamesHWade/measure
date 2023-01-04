@@ -8,5 +8,6 @@
 
 library(testthat)
 library(measure)
-
+library(modeldata)
+data("meats")
 test_check("measure")
