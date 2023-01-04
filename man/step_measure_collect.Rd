@@ -2,14 +2,13 @@
 % Please edit documentation in R/measure_collect.R
 \name{step_measure_collect}
 \alias{step_measure_collect}
-\title{\if{html}{\out{
-<Title>
-}}}
+\title{Nest measure variables for downstream prep and modeling}
 \usage{
 step_measure_collect(
   recipe,
   ...,
   role = NA,
+  identifiers = NA,
   trained = FALSE,
   shape = c("long", "wide"),
   skip = FALSE,

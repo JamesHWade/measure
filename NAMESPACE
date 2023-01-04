@@ -2,6 +2,7 @@
 
 S3method(bake,step_measure_collect)
 S3method(prep,step_measure_collect)
+S3method(print,step_measure_collect)
 S3method(tidy,step_measure_collect)
 export(measure_collect)
 export(step_measure_collect)

@@ -11,6 +11,7 @@ NULL
 #' @import recipes
 #' @import rlang
 #' @importFrom utils globalVariables
+#' @importFrom dplyr select arrange mutate
 
 utils::globalVariables(
   names = c("baseline")

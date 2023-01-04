@@ -1,4 +1,4 @@
-#' <Title>
+#' Nest measure variables for downstream prep and modeling
 #'
 #' `step_measure_collect` creates a *specification* of a recipe
 #'  step that <what it does>
@@ -25,7 +25,7 @@
 #' @return <describe return>
 #'
 #' @export
-#' @details <describe details>
+#' @details To do
 #'
 #' # Tidying
 #'
@@ -42,7 +42,7 @@ step_measure_collect <-
   function(recipe,
            ...,
            role = NA,
-           identifier = NA,
+           identifiers = NA,
            trained = FALSE,
            shape = c("long", "wide"),
            #<additional args here>
@@ -55,7 +55,7 @@ step_measure_collect <-
         trained = trained,
         role = role,
         shape = shape,
-        identifier = identifier,
+        identifiers = identifiers,
         skip = skip,
         id = id
       )
@@ -67,7 +67,7 @@ step_measure_collect_new <-
   function(terms,
            role,
            shape,
-           identifier,
+           identifiers,
            trained,
            skip,
            id) {
@@ -77,7 +77,7 @@ step_measure_collect_new <-
       role = role,
       trained = trained,
       shape = shape,
-      identifier = identifier,
+      identifiers = identifiers,
       skip = skip,
       id = id
     )
@@ -90,16 +90,18 @@ prep.step_measure_collect <- function(x, training, info = NULL, ...) {
   # <prepping action here>
   descriptors <- recipes_eval_select(has_role("descriptor"), training, info)
   conditions <- recipes_eval_select(has_role("condition"), training, info)
-  x$identifier <- c(descriptors, conditions)
-  cli::cli_inform("Identifiers: {x$identifier}")
+  measures  <- recipes_eval_select(x$terms, training, info)
+  x$identifiers <- descriptors
+  cli::cli_inform("Identifiers: {x$identifiers}")
+  cli::cli_inform("Measures: {measures}")
 
   step_measure_collect_new(
-    terms = x$terms,
+    terms = measures,
     role = x$role,
     trained = TRUE,
     shape = x$shape,
     # <additional args here>
-    identifier = x$identifier,
+    identifiers = x$identifiers,
     skip = x$skip,
     id = x$id
   )
@@ -119,49 +121,51 @@ prep.step_measure_collect <- function(x, training, info = NULL, ...) {
 #'
 measure_collect <- function(data, shape, measures, identifiers) {
 
-  cli::cli_alert("shape: {shape}")
-
-  print({{measures}})
-
-  data <-
-    data |>
-    dplyr::mutate(.index = dplyr::row_number())
-
   if (shape == "wide") {
     data |>
-      dplyr::group_by({{identifiers}}) |>
+      dplyr::mutate(.index = dplyr::row_number()) |>
       tidyr::pivot_longer(
         cols = {{measures}},
         names_to = "measure",
         values_to = "response"
       ) |>
-      dplyr::group_nest(.key = ".measures")
+      dplyr::group_by(dplyr::across({{identifiers}}), .index) |>
+      dplyr::group_nest(.key = ".measures") |>
+      dplyr::arrange(.index)
   } else {
     data |>
       dplyr::group_by(dplyr::across({{identifiers}})) |>
-      dplyr::group_nest(.key = ".measures")
+      dplyr::group_nest(.key = ".measures") |>
+      dplyr::mutate(.index = dplyr::row_number()) |>
+      dplyr::relocate(.index, .before = .measures)
   }
 }
 #' @export
 bake.step_measure_collect <- function(object, new_data, ...) {
   check_new_data(names(object$object$xnames), object, new_data)
+  inform("baking prep")
+
+  cli::cli_inform("Shape: {class(object$shape)}")
+  cli::cli_inform("Shape: {object$shape}")
+  cli::cli_inform("Identifiers: {class(object$identifiers)}")
+  cli::cli_inform("Shape: {object$identifiers}")
 
   # res <- recipes::check_name(res, new_data, object)
 
   measure_collect(data        = new_data,
                   shape       = object$shape,
-                  measures    = object$terms[[1]],
-                  identifiers = object$identifier)
+                  measures    = object$terms,
+                  identifiers = object$identifiers)
 }
 
-# print.step_measure_collect <-
-#   function(x, width = max(20, options()$width - 30), ...) {
-#     title <- "Collect measurements"
-#     print_step(names(x$means), x$terms, x$trained, title, width)
-#     invisible(x)
-#   }
+#' @export
+print.step_measure_collect <-
+  function(x, width = max(20, options()$width - 30), ...) {
+    title <- "Collect measurements "
+    print_step(names(x$means), x$terms, x$trained, title, width)
+    invisible(x)
+  }
 
-#' @rdname tidy.recipe
 #' @export
 tidy.step_measure_collect <- function(x, ...) {
   if (is_trained(x)) {
