@@ -30,7 +30,7 @@ Our challenge is to strike the right balance between a flexibile package and a u
 
 ## Scope of Data Sources
 
-Analytical measurement systems are as varied as the applications they are used in. The field is necessarily broad and growing. The American Chemical Society[defines the field](https://www.acs.org/content/acs/en/careers/chemical-sciences/areas/analytical-chemistry.html) as:
+Analytical measurement systems are as varied as the applications they are used in. The field is necessarily broad and growing. The American Chemical Society [defines the field](https://www.acs.org/content/acs/en/careers/chemical-sciences/areas/analytical-chemistry.html) as:
 
 > the science of obtaining, processing, and communicating information about the composition and structure of matter. In other words, it is the art and science of determining what matter is and how much of it exists. 
 
