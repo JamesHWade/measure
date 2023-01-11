@@ -1,7 +1,8 @@
 #' Nest measure variables for downstream prep and modeling
 #'
 #' `step_measure_collect` creates a *specification* of a recipe
-#'  step that <what it does>
+#'  step that nests measurement columns into column `.measures`. This is often
+#'  the first step in preparing measurement data for downstream modeling.
 #'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
@@ -9,14 +10,15 @@
 #'  variables are affected by the step. See [selections()]
 #'  for more details. For the `tidy` method, these are not
 #'  currently used.
-#' @param role Not used by this step since no new variables are
-#'  created. <change if role is used>
+#' @param role A newly created column `.measure` is given role "measure"
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
 #' @param shape The starting shape of the data, either "long" or "wide" using
 #' tidyr-style nomenclature.
 #' @param identifiers A combination of roles (descriptors + conditions) used
 #' for subsequent processing
+#' @param columns A character string of variable names that will
+#'  be populated (eventually) by the `terms` argument.
 #' @param skip A logical. Should the step be skipped when the
 #'  recipe is baked by [bake()]? While all operations are baked
 #'  when [prep()] is run, some operations may not be able to be
@@ -24,15 +26,15 @@
 #'  Care should be taken when using `skip = TRUE` as it may affect
 #'  the computations for subsequent operations
 #' @param id A character string that is unique to this step to identify it.
-#' @template
+#' @template step-return
 #'
 #' @export
-#' @details To do
+#' @details
 #'
 #' # Tidying
 #'
 #' When you [`tidy()`][tidy.recipe()] this step, a tibble with columns
-#' <describe tidying> is returned.
+#' ... fill in later ... is returned.
 #'
 #' @examples
 #' \dontrun{
@@ -43,10 +45,11 @@
 step_measure_collect <-
   function(recipe,
            ...,
-           role = NA,
+           role = "measure",
            identifiers = NA,
            trained = FALSE,
            shape = c("long", "wide"),
+           columns = NULL,
            skip = FALSE,
            id = rand_id("measure_collect")) {
     add_step(
@@ -56,6 +59,7 @@ step_measure_collect <-
         trained = trained,
         role = role,
         shape = shape,
+        columns = columns,
         identifiers = identifiers,
         skip = skip,
         id = id
@@ -68,6 +72,7 @@ step_measure_collect_new <-
   function(terms,
            role,
            shape,
+           columns,
            identifiers,
            trained,
            skip,
@@ -78,6 +83,7 @@ step_measure_collect_new <-
       role = role,
       trained = trained,
       shape = shape,
+      columns = columns,
       identifiers = identifiers,
       skip = skip,
       id = id
@@ -88,20 +94,17 @@ step_measure_collect_new <-
 prep.step_measure_collect <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
   check_type(training[, col_names])
-  # <prepping action here>
-  descriptors <- recipes_eval_select(has_role("descriptor"), training, info)
+  x$identifiers <-
+    recipes_eval_select(has_role(c("descriptor", "condition")), training, info)
   conditions <- recipes_eval_select(has_role("condition"), training, info)
-  measures  <- recipes_eval_select(x$terms, training, info)
-  x$identifiers <- descriptors
-  cli::cli_inform("Identifiers: {x$identifiers}")
-  cli::cli_inform("Measures: {measures}")
+  x$terms  <- recipes_eval_select(x$terms, training, info)
 
   step_measure_collect_new(
-    terms = measures,
+    terms = x$terms,
     role = x$role,
     trained = TRUE,
     shape = x$shape,
-    # <additional args here>
+    columns = col_names,
     identifiers = x$identifiers,
     skip = x$skip,
     id = x$id
@@ -144,15 +147,6 @@ measure_collect <- function(data, shape, measures, identifiers) {
 #' @export
 bake.step_measure_collect <- function(object, new_data, ...) {
   check_new_data(names(object$object$xnames), object, new_data)
-  inform("baking prep")
-
-  cli::cli_inform("Shape: {class(object$shape)}")
-  cli::cli_inform("Shape: {object$shape}")
-  cli::cli_inform("Identifiers: {class(object$identifiers)}")
-  cli::cli_inform("Shape: {object$identifiers}")
-
-  # res <- recipes::check_name(res, new_data, object)
-
   measure_collect(data        = new_data,
                   shape       = object$shape,
                   measures    = object$terms,
@@ -163,19 +157,38 @@ bake.step_measure_collect <- function(object, new_data, ...) {
 print.step_measure_collect <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "Collect measurements "
-    print_step(names(x$means), x$terms, x$trained, title, width)
+    print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }
 
+format_measure_collect <- function(x) {
+  tibble(
+    value = unname(x)
+  )
+}
+
+#' Tidy method for step_measure_collect
+#'
+#' @param x A recipe object
+#' @param ... Other variables to pass to tidy
+#'
+#' @rdname tidy.recipe
 #' @export
 tidy.step_measure_collect <- function(x, ...) {
+  cli::cat_print(names(x))
   if (is_trained(x)) {
-    # res <-
-    # <action here>
+    # TODO update this to be useful tidy method
+    res <- purrr::map_dfr(x$terms, format_measure_collect, .id = "term")
+    # columns = sel2char(x$terms)
+    # res <- tibble(terms = list(columns),
+    #               shape = x$shape,
+    #               identifiers = list(x$identifiers))
   } else {
+    # TODO update this to be useful tidy method
     term_names <- sel2char(x$terms)
     res <- tibble(terms = term_names,
-                  value = na_dbl)
+                  shape = x$shape,
+                  .identifiers = list(x$identifiers))
   }
   res$id <- x$id
   res

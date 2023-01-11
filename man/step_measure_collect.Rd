@@ -7,10 +7,11 @@
 step_measure_collect(
   recipe,
   ...,
-  role = NA,
+  role = "measure",
   identifiers = NA,
   trained = FALSE,
   shape = c("long", "wide"),
+  columns = NULL,
   skip = FALSE,
   id = rand_id("measure_collect")
 )
@@ -24,8 +25,7 @@ variables are affected by the step. See \code{\link[=selections]{selections()}}
 for more details. For the \code{tidy} method, these are not
 currently used.}
 
-\item{role}{Not used by this step since no new variables are
-created. \if{html}{\out{<change if role is used>}}}
+\item{role}{A newly created column \code{.measure} is given role "measure"}
 
 \item{identifiers}{A combination of roles (descriptors + conditions) used
 for subsequent processing}
@@ -36,6 +36,9 @@ preprocessing have been estimated.}
 \item{shape}{The starting shape of the data, either "long" or "wide" using
 tidyr-style nomenclature.}
 
+\item{columns}{A character string of variable names that will
+be populated (eventually) by the \code{terms} argument.}
+
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
 when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
@@ -45,16 +48,18 @@ the computations for subsequent operations}
 
 \item{id}{A character string that is unique to this step to identify it.}
 }
+\value{
+An updated version of \code{recipe} with the new step added to the
+sequence of any existing operations.
+}
 \description{
 \code{step_measure_collect} creates a \emph{specification} of a recipe
-step that \if{html}{\out{<what it does>}}
-}
-\details{
-To do
+step that nests measurement columns into column \code{.measures}. This is often
+the first step in preparing measurement data for downstream modeling.
 }
 \section{Tidying}{
 When you \code{\link[=tidy.recipe]{tidy()}} this step, a tibble with columns
-\if{html}{\out{<describe tidying>}} is returned.
+... fill in later ... is returned.
 }
 
 \examples{
