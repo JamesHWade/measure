@@ -1,6 +1,6 @@
 Package: measure
 Title: A Recipes-style Interface to Tidymodels for Analytical Measurements
-Version: 0.0.1
+Version: 0.0.1.9000
 Authors@R: 
     person("James", "Wade", , "github@jameshwade.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9740-1905"))
