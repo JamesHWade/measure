@@ -124,32 +124,32 @@ prep.step_measure_collect <- function(x, training, info = NULL, ...) {
 #' @export
 #'
 measure_collect <- function(data, shape, measures, identifiers) {
-
   if (shape == "wide") {
     data |>
       dplyr::mutate(.index = dplyr::row_number()) |>
       tidyr::pivot_longer(
-        cols = {{measures}},
+        cols = all_of(measures),
         names_to = "measure",
         values_to = "response"
       ) |>
-      dplyr::group_by(dplyr::across({{identifiers}}), .index) |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(identifiers)), .index) |>
       dplyr::group_nest(.key = ".measures") |>
       dplyr::arrange(.index)
   } else {
     data |>
-      dplyr::group_by(dplyr::across({{identifiers}})) |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(identifiers))) |>
       dplyr::group_nest(.key = ".measures") |>
       dplyr::mutate(.index = dplyr::row_number()) |>
       dplyr::relocate(.index, .before = .measures)
   }
 }
+
 #' @export
 bake.step_measure_collect <- function(object, new_data, ...) {
   check_new_data(names(object$object$xnames), object, new_data)
   measure_collect(data        = new_data,
                   shape       = object$shape,
-                  measures    = object$terms,
+                  measures    = as.character(object$terms),
                   identifiers = object$identifiers)
 }
 
