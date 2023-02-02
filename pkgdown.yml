@@ -1,11 +1,11 @@
 pandoc: 2.19.2
-pkgdown: 2.0.7
+pkgdown: 2.0.6
 pkgdown_sha: ~
 articles:
   baseline: baseline.html
   measure: measure.html
   recipes: recipes.html
-last_built: 2023-01-04T19:23Z
+last_built: 2022-09-07T15:49Z
 urls:
   reference: https://jameshwade.github.io/measure/reference
   article: https://jameshwade.github.io/measure/articles
