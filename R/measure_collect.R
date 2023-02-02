@@ -128,7 +128,7 @@ measure_collect <- function(data, shape, measures, identifiers) {
     data |>
       dplyr::mutate(.index = dplyr::row_number()) |>
       tidyr::pivot_longer(
-        cols = all_of(measures),
+        cols = dplyr::all_of(measures),
         names_to = "measure",
         values_to = "response"
       ) |>
