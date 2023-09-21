@@ -5,6 +5,8 @@
 #'  format used by the package.
 #'
 #' @inheritParams recipes::step_center
+#' @param columns A character string of the selected variable names. This field
+#' is a placeholder and will be populated once [prep()] is used.
 #' @param location_values A numeric vector of values that specify the location
 #' of the measurements (e.g., wavelength etc.) in the same order as the variables
 #' selected by `...`. If not specified, a sequence of integers (starting at 1L)

@@ -14,5 +14,5 @@ NULL
 
 
 utils::globalVariables(
-  names = c("baseline", ".index", ".measures")
+  names = c("baseline", ".index", ".measures", "value", "location", "..row", "temp")
 )
