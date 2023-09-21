@@ -28,6 +28,9 @@ created.}
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
 
+\item{columns}{A character string of the selected variable names. This field
+is a placeholder and will be populated once \code{\link[=prep]{prep()}} is used.}
+
 \item{location_values}{A numeric vector of values that specify the location
 of the measurements (e.g., wavelength etc.) in the same order as the variables
 selected by \code{...}. If not specified, a sequence of integers (starting at 1L)
