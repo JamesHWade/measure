@@ -22,12 +22,12 @@
 #'
 #' Included here are the meats data transformed to a long format with
 #' ```
-#' modeldata::meats |>
-#'   rowid_to_column(var = "id") |>
+#' modeldata::meats %>%
+#'   rowid_to_column(var = "id") %>%
 #'   pivot_longer(cols = starts_with("x_"),
 #'                names_to = "channel",
-#'                values_to = "transmittance") |>
-#'   mutate(channel = str_extract(channel, "[:digit:]+") |> as.integer())
+#'                values_to = "transmittance") %>%
+#'   mutate(channel = str_extract(channel, "[:digit:]+") %>% as.integer())
 #' ```
 #'
 #' @name meats_long

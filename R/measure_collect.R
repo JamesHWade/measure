@@ -125,21 +125,21 @@ prep.step_measure_collect <- function(x, training, info = NULL, ...) {
 #'
 measure_collect <- function(data, shape, measures, identifiers) {
   if (shape == "wide") {
-    data |>
-      dplyr::mutate(.index = dplyr::row_number()) |>
+    data %>%
+      dplyr::mutate(.index = dplyr::row_number()) %>%
       tidyr::pivot_longer(
         cols = dplyr::all_of(measures),
         names_to = "measure",
         values_to = "response"
-      ) |>
-      dplyr::group_by(dplyr::across(dplyr::all_of(identifiers)), .index) |>
-      dplyr::group_nest(.key = ".measures") |>
+      ) %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(identifiers)), .index) %>%
+      dplyr::group_nest(.key = ".measures") %>%
       dplyr::arrange(.index)
   } else {
-    data |>
-      dplyr::group_by(dplyr::across(dplyr::all_of(identifiers))) |>
-      dplyr::group_nest(.key = ".measures") |>
-      dplyr::mutate(.index = dplyr::row_number()) |>
+    data %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(identifiers))) %>%
+      dplyr::group_nest(.key = ".measures") %>%
+      dplyr::mutate(.index = dplyr::row_number()) %>%
       dplyr::relocate(.index, .before = .measures)
   }
 }

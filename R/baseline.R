@@ -68,12 +68,12 @@ print.step_baseline <-
 #' @export
 #'
 #' @examples
-#' meats_long |> subtract_rf_baseline(yvar = transmittance)
+#' meats_long %>% subtract_rf_baseline(yvar = transmittance)
 subtract_rf_baseline <- function(data, yvar, span = 2/3, maxit = c(5, 5)){
 
   # rlang::arg_match0(as.character(rlang::enquo(yvar)), values = names(data))
 
-  data |>
+  data %>%
     dplyr::mutate(
       raw = {{ yvar }},
       baseline = IDPmisc::rfbaseline(x = 1:length({{ yvar }}),
