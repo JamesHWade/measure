@@ -31,12 +31,12 @@ three contents, measured in percent, are determined by analytic chemistry."
 
 Included here are the meats data transformed to a long format with
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{modeldata::meats |>
-  rowid_to_column(var = "id") |>
+\if{html}{\out{<div class="sourceCode">}}\preformatted{modeldata::meats \%>\%
+  rowid_to_column(var = "id") \%>\%
   pivot_longer(cols = starts_with("x_"),
                names_to = "channel",
-               values_to = "transmittance") |>
-  mutate(channel = str_extract(channel, "[:digit:]+") |> as.integer())
+               values_to = "transmittance") \%>\%
+  mutate(channel = str_extract(channel, "[:digit:]+") \%>\% as.integer())
 }\if{html}{\out{</div>}}
 }
 \examples{

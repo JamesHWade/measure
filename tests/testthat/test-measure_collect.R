@@ -1,13 +1,13 @@
 withr::local_seed(1234)
 meats <- modeldata::meats
-meats_rec <- recipe(meats) |>
-  update_role(water, protein, fat, new_role = "descriptor") |>
+meats_rec <- recipe(meats) %>%
+  update_role(water, protein, fat, new_role = "descriptor") %>%
   step_measure_collect(starts_with("x_"), shape = "wide")
 meats_prep <- prep(meats_rec)
 meats_bake <- bake(meats_prep, new_data = NULL)
 
-meats_long_rec <- recipe(meats_long) |>
-  update_role(water, protein, fat, id, new_role = "descriptor") |>
+meats_long_rec <- recipe(meats_long) %>%
+  update_role(water, protein, fat, id, new_role = "descriptor") %>%
   step_measure_collect(channel, transmittance, shape = "long")
 
 meats_long_prep <- prep(meats_long_rec)

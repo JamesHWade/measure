@@ -25,5 +25,5 @@ A dataframe matching column in data plus \code{raw} and \code{baseline} columns
 Subtract baseline using robust fitting method
 }
 \examples{
-meats_long |> subtract_rf_baseline(yvar = transmittance)
+meats_long \%>\% subtract_rf_baseline(yvar = transmittance)
 }
