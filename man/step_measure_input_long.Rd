@@ -7,7 +7,7 @@
 step_measure_input_long(
   recipe,
   ...,
-  location = NULL,
+  location,
   role = "measure",
   trained = FALSE,
   columns = NULL,
