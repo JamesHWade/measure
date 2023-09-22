@@ -39,7 +39,7 @@
 step_measure_input_long <-
   function(recipe,
            ...,
-           location = NULL,
+           location,
            role = "measure",
            trained = FALSE,
            columns = NULL,
