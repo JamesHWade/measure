@@ -46,21 +46,18 @@
     <loc>https://jameshwade.github.io/measure/dev/reference/measure-package.html</loc>
   </url>
   <url>
-    <loc>https://jameshwade.github.io/measure/dev/reference/measure_collect.html</loc>
-  </url>
-  <url>
     <loc>https://jameshwade.github.io/measure/dev/reference/meats_long.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/dev/reference/step_baseline.html</loc>
   </url>
   <url>
-    <loc>https://jameshwade.github.io/measure/dev/reference/step_measure_collect.html</loc>
+    <loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.html</loc>
+  </url>
+  <url>
+    <loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.html</loc>
   </url>
   <url>
     <loc>https://jameshwade.github.io/measure/dev/reference/subtract_rf_baseline.html</loc>
-  </url>
-  <url>
-    <loc>https://jameshwade.github.io/measure/dev/reference/tidy.recipe.html</loc>
   </url>
 </urlset>
