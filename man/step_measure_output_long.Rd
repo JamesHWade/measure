@@ -48,3 +48,39 @@ the corresponding location (i.e., "long" format).
 This step is designed convert analytical measurements from their internal
 data structure to a two column format.
 }
+\examples{
+library(dplyr)
+
+data(glucose_bioreactors)
+bioreactors_small$batch_sample <- NULL
+
+small_tr <- bioreactors_small[  1:200,]
+small_te <- bioreactors_small[201:210,]
+
+small_rec <-
+  recipe(glucose ~ . , data = small_tr) \%>\%
+  update_role(batch_id, day, new_role = "id columns") \%>\%
+  step_measure_input_wide(`400`:`3050`) \%>\%
+  prep()
+
+# Before reformatting:
+
+small_rec \%>\% bake(new_data = small_te)
+
+# After reformatting:
+
+output_rec <-
+  small_rec \%>\%
+  step_measure_output_long() \%>\%
+  prep()
+
+output_rec \%>\% bake(new_data = small_te)
+
+}
+\seealso{
+Other input/output steps: 
+\code{\link{step_measure_input_long}()},
+\code{\link{step_measure_input_wide}()},
+\code{\link{step_measure_output_wide}()}
+}
+\concept{input/output steps}

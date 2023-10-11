@@ -4,6 +4,7 @@
 #'  step that converts measures organized in multiple columns into an internal
 #'  format used by the package.
 #'
+#' @family input/output steps
 #' @inheritParams recipes::step_center
 #' @param columns A character string of the selected variable names. This field
 #' is a placeholder and will be populated once [prep()] is used.
@@ -62,6 +63,8 @@
 #'   prep()
 #'
 #' summary(rec)
+#' @seealso [step_measure_input_log()], [step_measure_output_wide()],
+#' [step_measure_output_long()]
 #' @export
 
 step_measure_input_wide <-

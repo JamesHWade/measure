@@ -2,12 +2,44 @@
 #'
 #' `step_measure_output_wide` creates a *specification* of a recipe
 #'  step that converts measures to multiple columns (i.e., "wide" format).
-#'
+#' @family input/output steps
 #' @inheritParams recipes::step_center
 #' @param prefix A character string used to name the new columns.
 #' @details
 #' This step is designed convert analytical measurements from their internal
 #' data structure to separate columns.
+#'
+#' Wide outputs can be helpful when you want to use standard recipes steps with
+#' the measuresments, such as [recipes::step_pca()], [recipes::step_pls()], and
+#' so on.
+#' @examples
+#' library(dplyr)
+#'
+#' data(glucose_bioreactors)
+#' bioreactors_small$batch_sample <- NULL
+#'
+#' small_tr <- bioreactors_small[  1:200,]
+#' small_te <- bioreactors_small[201:210,]
+#'
+#' small_rec <-
+#'   recipe(glucose ~ . , data = small_tr) %>%
+#'   update_role(batch_id, day, new_role = "id columns") %>%
+#'   step_measure_input_wide(`400`:`3050`) %>%
+#'   prep()
+#'
+#' # Before reformatting:
+#'
+#' small_rec %>% bake(new_data = small_te)
+#'
+#' # After reformatting:
+#'
+#' output_rec <-
+#'   small_rec %>%
+#'   step_measure_output_wide() %>%
+#'   prep()
+#'
+#' output_rec %>% bake(new_data = small_te)
+#'
 #' @export
 
 step_measure_output_wide <-

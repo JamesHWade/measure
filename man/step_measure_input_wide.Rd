@@ -101,3 +101,13 @@ rec <-
 
 summary(rec)
 }
+\seealso{
+\code{\link[=step_measure_input_log]{step_measure_input_log()}}, \code{\link[=step_measure_output_wide]{step_measure_output_wide()}},
+\code{\link[=step_measure_output_long]{step_measure_output_long()}}
+
+Other input/output steps: 
+\code{\link{step_measure_input_long}()},
+\code{\link{step_measure_output_long}()},
+\code{\link{step_measure_output_wide}()}
+}
+\concept{input/output steps}
