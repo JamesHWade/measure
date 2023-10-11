@@ -1,4 +1,4 @@
-# output wide format data
+# output long format data
 
     Code
       print(rec_1)
@@ -13,7 +13,7 @@
       
       -- Operations 
       * Collate long analytical measurements: absorp
-      * Restructure analytical measurements to wide format: "<internal data>"
+      * Restructure analytical measurements to long format: "<internal data>"
 
 ---
 
@@ -39,7 +39,7 @@
         number operation type                trained skip  id    
          <int> <chr>     <chr>               <lgl>   <lgl> <chr> 
       1      1 step      measure_input_long  FALSE   FALSE potato
-      2      2 step      measure_output_wide FALSE   FALSE turnip
+      2      2 step      measure_output_long FALSE   FALSE turnip
 
 ---
 
@@ -59,7 +59,7 @@
       
       -- Operations 
       * Collate long analytical measurements: absorp, ind | Trained
-      * Restructure analytical measurements to wide format: ~"<internal data>" |
+      * Restructure analytical measurements to long format: ~"<internal data>" |
         Trained
 
 ---
@@ -68,14 +68,14 @@
       print(summary(prep_1))
     Output
       # A tibble: 6 x 4
-        variable         type      role      source  
-        <chr>            <list>    <chr>     <chr>   
-      1 .sample_num      <chr [2]> predictor original
-      2 water            <chr [2]> outcome   original
-      3 fat              <chr [2]> outcome   original
-      4 protein          <chr [2]> outcome   original
-      5 measure_1.000000 <chr [2]> predictor derived 
-      6 measure_1.161616 <chr [2]> predictor derived 
+        variable    type      role      source  
+        <chr>       <list>    <chr>     <chr>   
+      1 .sample_num <chr [2]> predictor original
+      2 water       <chr [2]> outcome   original
+      3 fat         <chr [2]> outcome   original
+      4 protein     <chr [2]> outcome   original
+      5 .measure    <chr [2]> predictor derived 
+      6 .location   <chr [2]> predictor derived 
 
 ---
 
@@ -86,5 +86,5 @@
         number operation type                trained skip  id    
          <int> <chr>     <chr>               <lgl>   <lgl> <chr> 
       1      1 step      measure_input_long  TRUE    FALSE potato
-      2      2 step      measure_output_wide TRUE    FALSE turnip
+      2      2 step      measure_output_long TRUE    FALSE turnip
 

@@ -92,10 +92,3 @@ tidy.step_measure_output_wide <- function(x, ...) {
   res
 }
 
-value_to_tibble <- function(x, prefix = "measure_") {
-  x <- matrix(x$value, nrow = 1)
-  colnames(x) <- recipes::names0(ncol(x), prefix = prefix)
-  dplyr::as_tibble(x)
-}
-
-
