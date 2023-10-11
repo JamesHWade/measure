@@ -30,25 +30,25 @@ Before we can perform baseline correction, we need to reshape the data. It is in
 
 ```{r}
 meats2 <- 
-  meats |>
-  rowid_to_column(var = "id") |> 
+  meats %>%
+  rowid_to_column(var = "id") %>% 
   pivot_longer(cols = starts_with("x_"),
                names_to = "channel",
-               values_to = "transmittance") |> 
-  mutate(channel = str_extract(channel, "[:digit:]+") |> as.integer())
+               values_to = "transmittance") %>% 
+  mutate(channel = str_extract(channel, "[:digit:]+") %>% as.integer())
 ```
 
 ```{r}
-meats2 |>
+meats2 %>%
   ggplot(aes(x = channel, y = transmittance, group = id)) + 
   geom_line(alpha = 0.5) + theme_light()
 ```
 
 
 ```{r}
-meats2 |> 
-  group_by(id) |> 
-  subtract_rf_baseline(yvar = transmittance, span = 0.8) |> 
+meats2 %>% 
+  group_by(id) %>% 
+  subtract_rf_baseline(yvar = transmittance, span = 0.8) %>% 
   ggplot(aes(x = channel, color = water, group = id)) + 
   geom_line(aes(y = transmittance), alpha = 0.5) +
   scale_color_viridis_c() + 
