@@ -63,8 +63,6 @@
 #'   prep()
 #'
 #' summary(rec)
-#' @seealso [step_measure_input_log()], [step_measure_output_wide()],
-#' [step_measure_output_long()]
 #' @export
 
 step_measure_input_wide <-
