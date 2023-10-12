@@ -79,6 +79,7 @@ step_measure_output_long_new <-
 
 #' @export
 prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
+  check_has_measure(training, match.call())
   step_measure_output_long_new(
     values_to = x$values_to,
     location_to = x$location_to,
@@ -91,7 +92,6 @@ prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_output_long <- function(object, new_data, ...) {
-
   rnm <- c(".measures.value", ".measures.location")
   names(rnm) <- c(object$values_to, object$location_to)
   new_data %>%

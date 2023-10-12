@@ -74,4 +74,13 @@ test_that("output long format data", {
   expect_equal(sum(complete.cases(bake_3)), 399L)
   expect_true(is.na(bake_3$.measure[1]))
 
+  ## Bad format
+
+  expect_snapshot(
+    recipe(water + fat + protein ~ ., data = meats_train) %>%
+      step_measure_output_long() %>%
+      prep(),
+    error = TRUE
+  )
+
 })

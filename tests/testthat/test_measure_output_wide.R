@@ -65,4 +65,12 @@ test_that("output wide format data", {
   expect_equal(sum(complete.cases(bake_3)), 199L)
   expect_true(is.na(bake_3$measure_1.000000[1]))
 
+  ## Bad format
+
+  expect_snapshot(
+    recipe(water + fat + protein ~ ., data = meats_train) %>%
+      step_measure_output_wide() %>%
+      prep(),
+    error = TRUE
+  )
 })

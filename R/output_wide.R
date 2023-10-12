@@ -75,6 +75,7 @@ step_measure_output_wide_new <-
 
 #' @export
 prep.step_measure_output_wide <- function(x, training, info = NULL, ...) {
+  check_has_measure(training, match.call())
   step_measure_output_wide_new(
     prefix = x$prefix,
     role = x$role,
