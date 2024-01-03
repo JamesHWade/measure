@@ -41,6 +41,7 @@ step_baseline_new <-
     )
   }
 
+#' @export
 prep.step_baseline <- function(x, training, info = NULL, ...) {
   col_names <- recipes::recipes_eval_select(x$terms, training, info)
   recipes::check_type(x, quant = TRUE)
@@ -84,6 +85,7 @@ subtract_rf_baseline <- function(data, yvar, span = 2/3, maxit = c(5, 5)){
     )
 }
 
+#' @export
 bake.step_baseline <- function(object, new_data, ...) {
   cli::cli_alert_danger("Not yet implemented.")
 }
