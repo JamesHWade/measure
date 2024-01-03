@@ -6,7 +6,6 @@
 \usage{
 step_measure_savitzky_golay(
   recipe,
-  ...,
   role = NA,
   trained = FALSE,
   degree = 3,
@@ -20,13 +19,8 @@ step_measure_savitzky_golay(
 \item{recipe}{A recipe object. The step will be added to the
 sequence of operations for this recipe.}
 
-\item{...}{One or more selector functions to choose which
-variables are affected by the step. See \code{\link[=selections]{selections()}}
-for more details. For the \code{tidy} method, these are not
-currently used.}
-
 \item{role}{Not used by this step since no new variables are
-created. \if{html}{\out{<change if role is used>}}}
+created.}
 
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
@@ -53,7 +47,17 @@ sequence of any existing operations.
 }
 \description{
 \code{step_measure_savitzky_golay} creates a \emph{specification} of a recipe
-step that \if{html}{\out{<what it does>}}
+step that smooths and filters the measurement sequence.
+}
+\details{
+No selectors should be supplied to this step function. The data should be in
+a special internal format produced by \code{\link[=step_measure_input_wide]{step_measure_input_wide()}} or
+\code{\link[=step_measure_input_long]{step_measure_input_long()}}.
+
+Measurements are assumed to be equally spaced.
+
+The step will produce fewer predictor values (i.e., fewer measurements) than
+the input.
 }
 \section{Tidying}{
 When you \code{\link[=tidy.recipe]{tidy()}} this step, a tibble with columns

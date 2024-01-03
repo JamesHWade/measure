@@ -1,16 +1,12 @@
 #' Savitzky-Golay Pre-Processing
 #'
 #' `step_measure_savitzky_golay` creates a *specification* of a recipe
-#'  step that <what it does>
+#'  step that smooths and filters the measurement sequence.
 #'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
-#' @param ... One or more selector functions to choose which
-#'  variables are affected by the step. See [selections()]
-#'  for more details. For the `tidy` method, these are not
-#'  currently used.
 #' @param role Not used by this step since no new variables are
-#'  created. <change if role is used>
+#'  created.
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
 #' @param degree The polynomial degree to use for smoothing.
@@ -29,6 +25,14 @@
 #'
 #' @export
 #' @details
+#' No selectors should be supplied to this step function. The data should be in
+#' a special internal format produced by [step_measure_input_wide()] or
+#' [step_measure_input_long()].
+#'
+#' Measurements are assumed to be equally spaced.
+#'
+#' The step will produce fewer predictor values (i.e., fewer measurements) than
+#' the input.
 #'
 #' # Tidying
 #'
@@ -39,7 +43,6 @@
 
 step_measure_savitzky_golay <-
     function(recipe,
-             ...,
              role = NA,
              trained = FALSE,
              degree = 3,
@@ -50,7 +53,6 @@ step_measure_savitzky_golay <-
       recipes::add_step(
         recipe,
         step_measure_savitzky_golay_new(
-          terms = enquos(...),
           trained = trained,
           role = role,
           degree = degree,
@@ -63,11 +65,10 @@ step_measure_savitzky_golay <-
     }
 
 step_measure_savitzky_golay_new <-
-  function(terms, role, trained, degree, window_size, differentiation_order,
+  function(role, trained, degree, window_size, differentiation_order,
            na_rm, skip, id) {
     recipes::step(
       subclass = "measure_savitzky_golay",
-      terms = terms,
       role = role,
       trained = trained,
       degree = degree,
@@ -80,11 +81,23 @@ step_measure_savitzky_golay_new <-
 
 #' @export
 prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
-  col_names <- recipes::recipes_eval_select(x$terms, training, info)
-  recipes::check_type(training[, col_names])
+  check_for_measure(training)
+  if (!is.numeric(x$degree) | length(x$degree) != 1 | x$degree < 1) {
+    cli::cli_abort("{.arg degree} to {.fn  step_measure_savitzky_golay} should
+                    be a single integer greater than zero.")
+  }
+  if (!is.numeric(x$differentiation_order) | length(x$differentiation_order) != 1
+      | x$differentiation_order < 0) {
+    cli::cli_abort("{.arg differentiation_order} to {.fn  step_measure_savitzky_golay} should
+                    be a single integer greater than -1.")
+  }
+  if (!is.numeric(x$window_size) | length(x$window_size) != 1
+      | x$window_size < 1 | x$window_size %% 2 != 1) {
+    cli::cli_abort("{.arg window_size} to {.fn  step_measure_savitzky_golay} should
+                    be a single odd integer greater than 0.")
+  }
 
   step_measure_savitzky_golay_new(
-    terms = x$terms,
     role = x$role,
     trained = TRUE,
     degree = x$degree,
@@ -105,6 +118,7 @@ bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
       degree = object$degree,
       window = object$window_size
     )
+  # TODO try to approximate the wave numbers that were input.
   new_data$.measures <- res
   tibble::as_tibble(new_data)
 }
@@ -113,7 +127,8 @@ bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
 print.step_measure_savitzky_golay <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "Savitzky-Golay preprocessing "
-    recipes::print_step(names(x$means), x$terms, x$trained, title, width)
+    recipes::print_step("<internal measurements>", "<internal measurements>",
+                        x$trained, title, width)
     invisible(x)
   }
 
@@ -132,6 +147,13 @@ tidy.step_measure_savitzky_golay <- function(x, ...) {
   res
 }
 
+#' @rdname measure-required_pkgs.recipe
+#' @export
+required_pkgs.step_isomap <- function(x, ...) {
+  c("measure", "prospectr")
+}
+
+
 # ------------------------------------------------------------------------------
 
 .comp_savitzky_golay <- function(dat, diffs = 1, degree = 2, window = 3, ...) {
@@ -149,10 +171,14 @@ tidy.step_measure_savitzky_golay <- function(x, ...) {
       w = window,
       ...
     )
-  res <- rlang::eval_tidy(cl)
+  res <- try(rlang::eval_tidy(cl), silent = TRUE)
+  if (inherits(res, "try-error")) {
+    msg <- as.character(res)
+    cli::cli_abort("Savitzky-Golay computations failed with error: {msg}")
+  }
 
   if (ncol(res) != ncol(dat)) {
-    # Prob can do better
+    # TODO Prob can do better; can we appriximate what the wave numbers should be?
     loc <- 1:ncol(res)
   }
 

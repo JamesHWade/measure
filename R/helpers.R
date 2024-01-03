@@ -18,8 +18,6 @@ add_location <- function(.data, loc) {
 
 # Assumes identical locations
 measure_to_matrix <- function(x) {
-  n <- length(x)
-  loc <- x[[1]]$location
   res <- do.call("rbind", purrr::map(x, ~ .x[["value"]]))
   res
 }
@@ -44,7 +42,18 @@ matrix_to_measure <- function(x, loc) {
 
 measure_to_tibble <- function(x) {
   x <-
-    tibble::tibble(x = sg, sample_num = seq_along(x)) %>%
+    tibble::tibble(x = x, sample_num = seq_along(x)) %>%
     tidyr::unnest(cols = x)
   x
+}
+
+# ------------------------------------------------------------------------------
+
+check_for_measure <- function(x) {
+  if (!any(names(x) == ".measures")) {
+    cli::cli_abort("A column called {.code .measures} in the data. See
+                    {.fn step_measure_input_wide} and
+                    {.fn step_measure_input_long}.")
+  }
+  invisible(NULL)
 }
