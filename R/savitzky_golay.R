@@ -107,17 +107,17 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
   if (!is.numeric(x$differentiation_order) | length(x$differentiation_order) != 1
       | x$differentiation_order < 0) {
     cli::cli_abort("{.arg differentiation_order} to
-                    {.fn  step_measure_savitzky_golay} should be a single \\
+                    {.fn  step_measure_savitzky_golay} should be a single
                     integer greater than -1.")
   }
   if (!is.numeric(x$window_size) | length(x$window_size) != 1
       | x$window_size < 1 | x$window_size %% 2 != 1) {
-    cli::cli_abort("{.arg window_size} to {.fn  step_measure_savitzky_golay} should \\
+    cli::cli_abort("{.arg window_size} to {.fn  step_measure_savitzky_golay} should
                     be a single odd integer greater than 0.")
   }
   if (x$window_size <= x$degree) {
-    cli::cli_abort("The {.arg window_size} value of {x$window_size} for \\
-                    {.fn  step_measure_savitzky_golay} should \\
+    cli::cli_abort("The {.arg window_size} value of {x$window_size} for
+                    {.fn  step_measure_savitzky_golay} should
                     be greater or equal to the {.arg degree} value of {x$degree}.")
   }
 

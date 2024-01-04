@@ -172,6 +172,7 @@ wide_to_list <- function(x, ind, selections) {
     ) %>%
     dplyr::select(-temp) %>%
     # TODO convert some of this to use vctrs
+    # https://www.tidyverse.org/blog/2023/04/performant-packages/#nest
     tidyr::nest(.by = c(-value), .key = ".measures") %>%
     dplyr::select(-..row) %>%
     add_location(ind)
