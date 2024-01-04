@@ -15,10 +15,10 @@ add_location <- function(.data, loc) {
 
 # ------------------------------------------------------------------------------
 # Move between lists of tibbles and matrices (and back)
+# Assumes identical locations. We have code to check that the per-sample
+# dimensions are equal but nothing yet for identical locations.
 
-# Assumes identical locations
 measure_to_matrix <- function(x) {
-  # silently recycles :-O
   res <- do.call("rbind", purrr::map(x, ~ .x[["value"]]))
   res
 }
@@ -37,7 +37,7 @@ matrix_to_measure <- function(x, loc) {
   x <- t(x)
   x <-  tibble::as_tibble(x, .name_repair = "minimal")
 
-  res <- purrr::map(x, ~ tibble::new_tibble(list(value = .x, location = loc)))
+  res <- purrr::map(x, ~ tibble::new_tibble(list(location = loc, value = .x)))
   unname(res)
 }
 

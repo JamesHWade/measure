@@ -30,6 +30,13 @@
 #' rows. We advise having a column with 7 unique values indicating which of the
 #' rows correspond to each sample.
 #'
+#' # Missing Data
+#'
+#' Currently, \pkg{measure} assumes that there are equal numbers of values
+#' within a sample. If there are missing values in the measurements, you'll
+#' need to pad them with missing values (as opposed to an absent row in the
+#' long format). If not, an error will occur.
+#'
 #' # Tidying
 #'
 #' When you [`tidy()`][tidy.recipe()] this step, a tibble indicating which of
@@ -130,6 +137,8 @@ print.step_measure_input_long <-
     invisible(x)
   }
 
+#' Tidiers for measure steps
+#' @param x A recipe step.
 #' @rdname tidy.recipe
 #' @export
 tidy.step_measure_input_long <- function(x, ...) {
