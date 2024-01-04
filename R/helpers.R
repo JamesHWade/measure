@@ -51,7 +51,7 @@ measure_to_tibble <- function(x) {
 
 check_for_measure <- function(x) {
   if (!any(names(x) == ".measures")) {
-    cli::cli_abort("A column called {.code .measures} in the data. See
+    cli::cli_abort("A column called {.code .measures} should be in the data. See
                     {.fn step_measure_input_wide} and
                     {.fn step_measure_input_long}.")
   }
