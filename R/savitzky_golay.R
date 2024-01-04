@@ -115,11 +115,6 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
     cli::cli_abort("{.arg window_size} to {.fn  step_measure_savitzky_golay} should
                     be a single odd integer greater than 0.")
   }
-  if (x$window_size <= x$degree) {
-    cli::cli_abort("The {.arg window_size} value of {x$window_size} for
-                    {.fn  step_measure_savitzky_golay} should
-                    be greater or equal to the {.arg degree} value of {x$degree}.")
-  }
 
   step_measure_savitzky_golay_new(
     role = x$role,
@@ -196,13 +191,16 @@ required_pkgs.step_isomap <- function(x, ...) {
       ...
     )
   res <- try(rlang::eval_tidy(cl), silent = TRUE)
+
   if (inherits(res, "try-error")) {
     msg <- as.character(res)
+    msg <- strsplit(msg, " : ")[[1]][2]
+    msg <- gsub("\\n", "", msg)
     cli::cli_abort("Savitzky-Golay computations failed with error: {msg}")
   }
 
   if (ncol(res) != ncol(dat)) {
-    # TODO Prob can do better; can we appriximate what the wave numbers should be?
+    # TODO Prob can do better; can we approximate what the wave numbers should be?
     loc <- 1:ncol(res)
   }
 

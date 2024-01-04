@@ -82,4 +82,5 @@ if (rlang::is_installed("prospectr")) {
     prep()
 }
 }
+\concept{measure-differencing}
 \concept{measure-smoothing}

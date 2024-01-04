@@ -2,7 +2,7 @@
 
     Code
       print(rec_1)
-    Message <cliMessage>
+    Message
       
       -- Recipe ----------------------------------------------------------------------
       
@@ -43,7 +43,7 @@
 
     Code
       print(prep_1)
-    Message <cliMessage>
+    Message
       
       -- Recipe ----------------------------------------------------------------------
       
@@ -56,7 +56,7 @@
       Training data contained 20000 data points and no incomplete rows.
       
       -- Operations 
-      * Collate long analytical measurements: absorp, ind | Trained
+      * Collate long analytical measurements: absorp and ind | Trained
 
 ---
 
@@ -87,7 +87,7 @@
     Code
       recipe(water + fat + protein ~ absorp, data = na_train) %>%
         step_measure_input_long(absorp) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_input_long()`:
       Caused by error in `prep()`:
       ! 'location' is required for long input data
@@ -95,9 +95,19 @@
 ---
 
     Code
+      recipe(water + fat + protein ~ ., data = miss_train) %>%
+        step_measure_input_long(absorp, location = vars(ind)) %>% prep()
+    Condition
+      Error in `step_measure_input_long()`:
+      Caused by error in `check_measure_dims()`:
+      ! The number of rows in each measure should be the same. Most samples have 100 rows and these do not: 1. Please pad the input with missing values.
+
+---
+
+    Code
       recipe(water + fat + protein ~ ., data = na_train) %>% step_measure_input_long(
         dplyr::everything(), location = vars(ind)) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_input_long()`:
       Caused by error in `check_single_selector()`:
       ! The selection for `...` should only select a single column (6 columns were selected).
@@ -107,7 +117,7 @@
     Code
       recipe(water + fat + protein ~ ., data = na_train) %>% step_measure_input_long(
         absorp, location = vars(dplyr::everything())) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_input_long()`:
       Caused by error in `check_single_selector()`:
       ! The selection for `location` should only select a single column (6 columns were selected).

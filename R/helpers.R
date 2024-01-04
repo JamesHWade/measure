@@ -18,6 +18,7 @@ add_location <- function(.data, loc) {
 
 # Assumes identical locations
 measure_to_matrix <- function(x) {
+  # silently recycles :-O
   res <- do.call("rbind", purrr::map(x, ~ .x[["value"]]))
   res
 }
