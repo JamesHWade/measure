@@ -9,8 +9,8 @@
 #'  created.
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
-#' @param degree The polynomial degree to use for smoothing.
-#' @param window_size The window size to use for smoothing.
+#' @param degree An integer for the polynomial degree to use for smoothing.
+#' @param window_size An odd integer for the window size to use for smoothing.
 #' @param differentiation_order An integer for the degree of filtering (zero
 #' indicates no differentiation).
 #' @param skip A logical. Should the step be skipped when the
@@ -24,22 +24,40 @@
 #' sequence of any existing operations.
 #'
 #' @export
+#' @family measure-smoothing
+#' @family measure-differencing
 #' @details
-#' No selectors should be supplied to this step function. The data should be in
+#' This method can both smooth out random noise and reduce between-predictor
+#' correlation. It fits a polynomial to a window of measurements and this results
+#' in fewer measurements than the input. Measurements are assumed to be equally
+#' spaced.
+#'
+#' The polynomial degree should be less than the window size.
+#'
+#' **No selectors should be supplied to this step function**. The data should be in
 #' a special internal format produced by [step_measure_input_wide()] or
 #' [step_measure_input_long()].
 #'
-#' Measurements are assumed to be equally spaced.
-#'
-#' The step will produce fewer predictor values (i.e., fewer measurements) than
-#' the input.
+#' The measurement locations are reset to integer indices starting at one.
 #'
 #' # Tidying
 #'
 #' When you [`tidy()`][tidy.recipe()] this step, a tibble with columns
 #' <describe tidying> is returned.
 #'
-# @examples
+#' @examples
+#' if (rlang::is_installed("prospectr")) {
+#'   rec <-
+#'     recipe(water + fat + protein ~ ., data = meats_long) %>%
+#'     update_role(id, new_role = "id") %>%
+#'     step_measure_input_long(transmittance, location = vars(channel)) %>%
+#'     step_measure_savitzky_golay(
+#'       differentiation_order = 1,
+#'       degree = 3,
+#'       window_size = 5
+#'     ) %>%
+#'     prep()
+#' }
 
 step_measure_savitzky_golay <-
     function(recipe,
@@ -88,13 +106,19 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
   }
   if (!is.numeric(x$differentiation_order) | length(x$differentiation_order) != 1
       | x$differentiation_order < 0) {
-    cli::cli_abort("{.arg differentiation_order} to {.fn  step_measure_savitzky_golay} should
-                    be a single integer greater than -1.")
+    cli::cli_abort("{.arg differentiation_order} to
+                    {.fn  step_measure_savitzky_golay} should be a single \\
+                    integer greater than -1.")
   }
   if (!is.numeric(x$window_size) | length(x$window_size) != 1
       | x$window_size < 1 | x$window_size %% 2 != 1) {
-    cli::cli_abort("{.arg window_size} to {.fn  step_measure_savitzky_golay} should
+    cli::cli_abort("{.arg window_size} to {.fn  step_measure_savitzky_golay} should \\
                     be a single odd integer greater than 0.")
+  }
+  if (x$window_size <= x$degree) {
+    cli::cli_abort("The {.arg window_size} value of {x$window_size} for \\
+                    {.fn  step_measure_savitzky_golay} should \\
+                    be greater or equal to the {.arg degree} value of {x$degree}.")
   }
 
   step_measure_savitzky_golay_new(

@@ -25,9 +25,9 @@ created.}
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
 
-\item{degree}{The polynomial degree to use for smoothing.}
+\item{degree}{An integer for the polynomial degree to use for smoothing.}
 
-\item{window_size}{The window size to use for smoothing.}
+\item{window_size}{An odd integer for the window size to use for smoothing.}
 
 \item{differentiation_order}{An integer for the degree of filtering (zero
 indicates no differentiation).}
@@ -50,17 +50,36 @@ sequence of any existing operations.
 step that smooths and filters the measurement sequence.
 }
 \details{
-No selectors should be supplied to this step function. The data should be in
+This method can both smooth out random noise and reduce between-predictor
+correlation. It fits a polynomial to a window of measurements and this results
+in fewer measurements than the input. Measurements are assumed to be equally
+spaced.
+
+The polynomial degree should be less than the window size.
+
+\strong{No selectors should be supplied to this step function}. The data should be in
 a special internal format produced by \code{\link[=step_measure_input_wide]{step_measure_input_wide()}} or
 \code{\link[=step_measure_input_long]{step_measure_input_long()}}.
 
-Measurements are assumed to be equally spaced.
-
-The step will produce fewer predictor values (i.e., fewer measurements) than
-the input.
+The measurement locations are reset to integer indices starting at one.
 }
 \section{Tidying}{
 When you \code{\link[=tidy.recipe]{tidy()}} this step, a tibble with columns
 \if{html}{\out{<describe tidying>}} is returned.
 }
 
+\examples{
+if (rlang::is_installed("prospectr")) {
+  rec <-
+    recipe(water + fat + protein ~ ., data = meats_long) \%>\%
+    update_role(id, new_role = "id") \%>\%
+    step_measure_input_long(transmittance, location = vars(channel)) \%>\%
+    step_measure_savitzky_golay(
+      differentiation_order = 1,
+      degree = 3,
+      window_size = 5
+    ) \%>\%
+    prep()
+}
+}
+\concept{measure-smoothing}
