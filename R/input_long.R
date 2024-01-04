@@ -117,6 +117,8 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
       tidyr::nest(.by = c(-value), .key = ".measures")
   }
 
+  check_measure_dims(new_data)
+
   new_data
 }
 

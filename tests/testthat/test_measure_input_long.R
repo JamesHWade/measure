@@ -57,10 +57,12 @@ test_that("ingest long format data", {
 
   ### missing rows
 
-  prep_2 <-
+  expect_snapshot(
     recipe(water + fat + protein ~ ., data = miss_train) %>%
-    step_measure_input_long(absorp, location = vars(ind)) %>%
-    prep()
+      step_measure_input_long(absorp, location = vars(ind)) %>%
+      prep(),
+    error = TRUE
+  )
 
   ## missing values
 
