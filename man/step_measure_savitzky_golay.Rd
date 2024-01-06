@@ -55,7 +55,10 @@ correlation. It fits a polynomial to a window of measurements and this results
 in fewer measurements than the input. Measurements are assumed to be equally
 spaced.
 
-The polynomial degree should be less than the window size.
+The polynomial degree should be less than the window size. Also, window
+size must be greater than polynomial degree. If either case is true, the
+original argument values are increased to satisfy these conditions (with a
+warning).
 
 \strong{No selectors should be supplied to this step function}. The data should be in
 a special internal format produced by \code{\link[=step_measure_input_wide]{step_measure_input_wide()}} or

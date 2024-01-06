@@ -32,7 +32,10 @@
 #' in fewer measurements than the input. Measurements are assumed to be equally
 #' spaced.
 #'
-#' The polynomial degree should be less than the window size.
+#' The polynomial degree should be less than the window size. Also, window
+#' size must be greater than polynomial degree. If either case is true, the
+#' original argument values are increased to satisfy these conditions (with a
+#' warning).
 #'
 #' **No selectors should be supplied to this step function**. The data should be in
 #' a special internal format produced by [step_measure_input_wide()] or
@@ -106,14 +109,35 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
   }
   if (!is.numeric(x$differentiation_order) | length(x$differentiation_order) != 1
       | x$differentiation_order < 0) {
-    cli::cli_abort("{.arg differentiation_order} to
+    cli::cli_abort("The {.arg differentiation_order} argument to
                     {.fn  step_measure_savitzky_golay} should be a single
                     integer greater than -1.")
   }
   if (!is.numeric(x$window_size) | length(x$window_size) != 1
       | x$window_size < 1 | x$window_size %% 2 != 1) {
-    cli::cli_abort("{.arg window_size} to {.fn  step_measure_savitzky_golay} should
-                    be a single odd integer greater than 0.")
+    cli::cli_abort("The {.arg window_size} argument to
+                    {.fn  step_measure_savitzky_golay} should be a single odd
+                    integer greater than 0.")
+  }
+
+  # polynomial order p must be geater or equal to differentiation order m
+  if (x$degree <= x$differentiation_order) {
+    x$degree <- x$differentiation_order + 1
+    cli::cli_warn("The {.arg degree} argument to
+                   {.fn step_measure_savitzky_golay} should be greater than or
+                   equal to {.arg differentiation_order}. The polynomial degree
+                   was increased to {x$degree}.")
+  }
+  # filter length w must be greater than polynomial order p
+  if (x$window_size <= x$degree) {
+     x$window_size <- x$degree + 1
+     if (x$window_size %% 2 == 0) {
+       x$window_size <- x$window_size + 1
+     }
+    cli::cli_warn("The {.arg window_size} argument to
+                   {.fn step_measure_savitzky_golay} should be greater than or
+                   equal to {.arg degree}. The polynomial degree was increased
+                   to {x$window_size}.")
   }
 
   step_measure_savitzky_golay_new(

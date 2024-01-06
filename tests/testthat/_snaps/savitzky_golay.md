@@ -1,112 +1,46 @@
 # savitzky-golay inputs
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: polynomial order p must be geater or equal to differentiation order m
+    The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order`. The polynomial degree was increased to 3.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: polynomial order p must be geater or equal to differentiation order m
+    The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order`. The polynomial degree was increased to 4.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: polynomial order p must be geater or equal to differentiation order m
+    The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order`. The polynomial degree was increased to 4.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: filter length w mus be greater than polynomial order p
+    The `window_size` argument to `step_measure_savitzky_golay()` should be greater than or equal to `degree`. The polynomial degree was increased to 7.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: filter length w mus be greater than polynomial order p
+    The `window_size` argument to `step_measure_savitzky_golay()` should be greater than or equal to `degree`. The polynomial degree was increased to 7.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: filter length w mus be greater than polynomial order p
+    The `window_size` argument to `step_measure_savitzky_golay()` should be greater than or equal to `degree`. The polynomial degree was increased to 7.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: filter length w mus be greater than polynomial order p
+    The `window_size` argument to `step_measure_savitzky_golay()` should be greater than or equal to `degree`. The polynomial degree was increased to 7.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: filter length w mus be greater than polynomial order p
+    The `window_size` argument to `step_measure_savitzky_golay()` should be greater than or equal to `degree`. The polynomial degree was increased to 7.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: filter length w mus be greater than polynomial order p
+    The `window_size` argument to `step_measure_savitzky_golay()` should be greater than or equal to `degree`. The polynomial degree was increased to 7.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: filter length w mus be greater than polynomial order p
+    The `window_size` argument to `step_measure_savitzky_golay()` should be greater than or equal to `degree`. The polynomial degree was increased to 7.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: filter length w mus be greater than polynomial order p
+    The `window_size` argument to `step_measure_savitzky_golay()` should be greater than or equal to `degree`. The polynomial degree was increased to 7.
 
 ---
 
@@ -116,7 +50,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -126,7 +60,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -136,7 +70,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -146,7 +80,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -156,7 +90,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -166,7 +100,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -176,7 +110,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -186,7 +120,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -196,7 +130,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -206,7 +140,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -216,7 +150,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -226,7 +160,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -236,7 +170,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -246,7 +180,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -256,7 +190,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -266,7 +200,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -276,7 +210,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -286,7 +220,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -296,7 +230,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -306,7 +240,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -316,7 +250,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -326,7 +260,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -336,7 +270,7 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
@@ -346,35 +280,17 @@
     Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
-      ! `window_size` to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
+      ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: polynomial order p must be geater or equal to differentiation order m
+    The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order`. The polynomial degree was increased to 3.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: polynomial order p must be geater or equal to differentiation order m
+    The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order`. The polynomial degree was increased to 4.
 
 ---
 
-    Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
-      window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Condition
-      Error in `step_measure_savitzky_golay()`:
-      Caused by error in `.comp_savitzky_golay()`:
-      ! Savitzky-Golay computations failed with error: polynomial order p must be geater or equal to differentiation order m
+    The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order`. The polynomial degree was increased to 4.
 

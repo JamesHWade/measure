@@ -90,20 +90,32 @@ test_that("savitzky-golay inputs", {
       3L,   2L,  15
     )
 
-  lst <- NULL
   for (i in 1:nrow(bad_inputs)) {
 
-    expect_snapshot({
-      rec %>%
-        step_measure_savitzky_golay(
-          differentiation_order = bad_inputs$diffs[i],
-          window_size = bad_inputs$wn[i],
-          degree = bad_inputs$deg[i]
-        ) %>%
-        prep()
-    },
-    error = TRUE
-    )
+    if (bad_inputs$wn[i] == 10) {
+      expect_snapshot({
+        rec %>%
+          step_measure_savitzky_golay(
+            differentiation_order = bad_inputs$diffs[i],
+            window_size = bad_inputs$wn[i],
+            degree = bad_inputs$deg[i]
+          ) %>%
+          prep()
+      },
+      error = TRUE)
+
+    } else {
+      expect_snapshot_warning({
+        rec %>%
+          step_measure_savitzky_golay(
+            differentiation_order = bad_inputs$diffs[i],
+            window_size = bad_inputs$wn[i],
+            degree = bad_inputs$deg[i]
+          ) %>%
+          prep()
+      })
+    }
+
   }
 
 })
