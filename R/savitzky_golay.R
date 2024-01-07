@@ -176,6 +176,8 @@ print.step_measure_savitzky_golay <-
   }
 
 #' @rdname tidy.recipe
+#' @param x A step object.
+#' @param ... Not used.
 #' @export
 tidy.step_measure_savitzky_golay <- function(x, ...) {
   if (is_trained(x)) {
@@ -192,6 +194,7 @@ tidy.step_measure_savitzky_golay <- function(x, ...) {
 
 #' Set package dependencies
 #' @param x A step object.
+#' @param ... Not used.
 #' @name required_pkgs.recipe
 #' @export
 required_pkgs.step_isomap <- function(x, ...) {

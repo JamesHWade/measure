@@ -14,7 +14,9 @@
 \method{tidy}{step_measure_savitzky_golay}(x, ...)
 }
 \arguments{
-\item{x}{A recipe step.}
+\item{x}{A step object.}
+
+\item{...}{Not used.}
 }
 \description{
 Tidiers for measure steps

@@ -9,6 +9,8 @@
 }
 \arguments{
 \item{x}{A step object.}
+
+\item{...}{Not used.}
 }
 \description{
 Set package dependencies
