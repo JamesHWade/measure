@@ -49,6 +49,9 @@
     <loc>https://jameshwade.github.io/measure/dev/reference/meats_long.html</loc>
   </url>
   <url>
+    <loc>https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.html</loc>
+  </url>
+  <url>
     <loc>https://jameshwade.github.io/measure/dev/reference/step_baseline.html</loc>
   </url>
   <url>
@@ -64,6 +67,12 @@
     <loc>https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.html</loc>
   </url>
   <url>
+    <loc>https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.html</loc>
+  </url>
+  <url>
     <loc>https://jameshwade.github.io/measure/dev/reference/subtract_rf_baseline.html</loc>
+  </url>
+  <url>
+    <loc>https://jameshwade.github.io/measure/dev/reference/tidy.recipe.html</loc>
   </url>
 </urlset>

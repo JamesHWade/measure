@@ -144,6 +144,13 @@ rows. We advise having a column with 7 unique values indicating which of the
 rows correspond to each sample.</p>
     </div>
     <div class="section level2">
+    <h2 id="missing-data">Missing Data<a class="anchor" aria-label="anchor" href="#missing-data"></a></h2>
+    <p>Currently, <span class="pkg">measure</span> assumes that there are equal numbers of values
+within a sample. If there are missing values in the measurements, you'll
+need to pad them with missing values (as opposed to an absent row in the
+long format). If not, an error will occur.</p>
+    </div>
+    <div class="section level2">
     <h2 id="tidying">Tidying<a class="anchor" aria-label="anchor" href="#tidying"></a></h2>
     <p>When you <code><a href="https://recipes.tidymodels.org/reference/tidy.recipe.html" class="external-link">tidy()</a></code> this step, a tibble indicating which of
 the original columns were used to reformat the data.</p>

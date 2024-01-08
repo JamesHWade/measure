@@ -99,7 +99,10 @@
 <span><span class="co">#&gt; Attaching package: 'recipes'</span></span>
 <span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     step</span></span></code></pre></div>
+<span><span class="co">#&gt;     step</span></span>
+<span><span class="co">#&gt; Registered S3 method overwritten by 'measure':</span></span>
+<span><span class="co">#&gt;   method                    from   </span></span>
+<span><span class="co">#&gt;   required_pkgs.step_isomap recipes</span></span></code></pre></div>
 <p>To understand measure, we need to re-introduce some concepts from <a href="https://recipes.tidymodels.org/articles/recipes.html" class="external-link">recipes</a>,
 namely <strong>variables</strong> and <strong>roles</strong>. Variables
 refer the the data columnn in a data frame or tibble that contain raw
@@ -150,7 +153,7 @@ avoid that terminology.</p>
 </h2>
 <p>There are a number of data sets in <a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a> and
 <a href="https://github.com/l-ramirez-lopez/prospectr" class="external-link">prospectr</a> packages. These include
-<code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code> and <code>prospectr::NIRsoil</code>.</p>
+<code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code> and <code><a href="https://rdrr.io/pkg/prospectr/man/NIRsoil.html" class="external-link">prospectr::NIRsoil</a></code>.</p>
 <p>Mendeley Data offers data inlcuded as part of various publications. A
 few possibilities include:</p>
 <ul>
