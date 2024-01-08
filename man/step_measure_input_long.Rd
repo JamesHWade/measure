@@ -68,6 +68,13 @@ measure and 7 samples, the input data (in long format) should have 1,400
 rows. We advise having a column with 7 unique values indicating which of the
 rows correspond to each sample.
 }
+\section{Missing Data}{
+Currently, \pkg{measure} assumes that there are equal numbers of values
+within a sample. If there are missing values in the measurements, you'll
+need to pad them with missing values (as opposed to an absent row in the
+long format). If not, an error will occur.
+}
+
 \section{Tidying}{
 When you \code{\link[=tidy.recipe]{tidy()}} this step, a tibble indicating which of
 the original columns were used to reformat the data.

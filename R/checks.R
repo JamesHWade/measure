@@ -16,3 +16,18 @@ check_single_selector <- function(res, arg) {
     rlang::abort(msg)
   }
 }
+
+check_measure_dims <- function(x) {
+  num_rows <- purrr::map_int(x$.measures, nrow)
+  num_unique <- sort(table(num_rows), decreasing = TRUE)
+  most_freq <- as.integer(names(num_unique)[1])
+  if (length(num_unique) != 1) {
+    which_rows <- which(num_rows != most_freq)
+    n_bad <- length(which_rows)
+    chr_rows <- paste(which_rows, collapse = ", ")
+    cli::cli_abort("The number of rows in each measure should be the same.
+                   Most samples have {most_freq} rows and these do not:
+                   {chr_rows}. Please pad the input with missing values.")
+  }
+  invisible(NULL)
+}
