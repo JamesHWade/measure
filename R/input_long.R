@@ -4,6 +4,7 @@
 #'  step that converts measures organized in a column for the analytical results
 #'  (and an option column of numeric indices) into an internal format used by
 #'  the package.
+#' @family input/output steps
 #' @inheritParams recipes::step_center
 #' @param ... One or more selector functions to choose which _single_ column
 #' contains the analytical measurements. The selection should be in the order
