@@ -1,4 +1,4 @@
-# ingest long format data
+# output long format data
 
     Code
       print(rec_1)
@@ -13,6 +13,7 @@
       
       -- Operations 
       * Collate long analytical measurements: absorp
+      * Restructure analytical measurements to long format: "<internal data>"
 
 ---
 
@@ -34,10 +35,11 @@
     Code
       print(tidy(rec_1))
     Output
-      # A tibble: 1 x 6
-        number operation type               trained skip  id    
-         <int> <chr>     <chr>              <lgl>   <lgl> <chr> 
-      1      1 step      measure_input_long FALSE   FALSE potato
+      # A tibble: 2 x 6
+        number operation type                trained skip  id    
+         <int> <chr>     <chr>               <lgl>   <lgl> <chr> 
+      1      1 step      measure_input_long  FALSE   FALSE potato
+      2      2 step      measure_output_long FALSE   FALSE turnip
 
 ---
 
@@ -53,62 +55,46 @@
       predictor: 3
       
       -- Training information 
-      Training data contained 20000 data points and no incomplete rows.
+      Training data contained 400 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: absorp, ind | Trained
+      * Restructure analytical measurements to long format: ~"<internal data>" |
+        Trained
 
 ---
 
     Code
       print(summary(prep_1))
     Output
-      # A tibble: 5 x 4
+      # A tibble: 6 x 4
         variable    type      role      source  
         <chr>       <list>    <chr>     <chr>   
       1 .sample_num <chr [2]> predictor original
       2 water       <chr [2]> outcome   original
       3 fat         <chr [2]> outcome   original
       4 protein     <chr [2]> outcome   original
-      5 .measures   <chr [1]> measure   derived 
+      5 .measure    <chr [2]> predictor derived 
+      6 .location   <chr [2]> predictor derived 
 
 ---
 
     Code
       print(tidy(prep_1))
     Output
-      # A tibble: 1 x 6
-        number operation type               trained skip  id    
-         <int> <chr>     <chr>              <lgl>   <lgl> <chr> 
-      1      1 step      measure_input_long TRUE    FALSE potato
+      # A tibble: 2 x 6
+        number operation type                trained skip  id    
+         <int> <chr>     <chr>               <lgl>   <lgl> <chr> 
+      1      1 step      measure_input_long  TRUE    FALSE potato
+      2      2 step      measure_output_long TRUE    FALSE turnip
 
 ---
 
     Code
-      recipe(water + fat + protein ~ absorp, data = na_train) %>%
-        step_measure_input_long(absorp) %>% prep()
+      recipe(water + fat + protein ~ ., data = meats_train) %>%
+        step_measure_output_long() %>% prep()
     Condition
-      Error in `step_measure_input_long()`:
-      Caused by error in `prep()`:
-      ! 'location' is required for long input data
-
----
-
-    Code
-      recipe(water + fat + protein ~ ., data = na_train) %>% step_measure_input_long(
-        dplyr::everything(), location = vars(ind)) %>% prep()
-    Condition
-      Error in `step_measure_input_long()`:
-      Caused by error in `check_single_selector()`:
-      ! The selection for `...` should only select a single column (6 columns were selected).
-
----
-
-    Code
-      recipe(water + fat + protein ~ ., data = na_train) %>% step_measure_input_long(
-        absorp, location = vars(dplyr::everything())) %>% prep()
-    Condition
-      Error in `step_measure_input_long()`:
-      Caused by error in `check_single_selector()`:
-      ! The selection for `location` should only select a single column (6 columns were selected).
+      Error in `step_measure_output_long()`:
+      Caused by error in `check_has_measure()`:
+      ! It appears that the measurements have not been converted for the inernal format. See `step_measure_input_long()` and `step_measure_input_wide()` and use these prior to `step_measure_output_long()`.
 

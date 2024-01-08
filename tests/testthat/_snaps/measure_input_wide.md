@@ -2,7 +2,7 @@
 
     Code
       print(rec_1)
-    Message <cliMessage>
+    Message
       
       -- Recipe ----------------------------------------------------------------------
       
@@ -48,7 +48,7 @@
 
     Code
       print(prep_1)
-    Message <cliMessage>
+    Message
       
       -- Recipe ----------------------------------------------------------------------
       
@@ -92,7 +92,7 @@
     Code
       recipe(water + fat + protein ~ ., data = na_train) %>% step_measure_input_wide(
         x_001:x_100, location_values = 1:2) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_input_wide()`:
       Caused by error in `prep()`:
       ! 100 columns were selected as inputs but `location_values` has 2 values.

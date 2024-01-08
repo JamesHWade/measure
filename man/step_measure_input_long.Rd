@@ -73,3 +73,10 @@ When you \code{\link[=tidy.recipe]{tidy()}} this step, a tibble indicating which
 the original columns were used to reformat the data.
 }
 
+\seealso{
+Other input/output steps: 
+\code{\link{step_measure_input_wide}()},
+\code{\link{step_measure_output_long}()},
+\code{\link{step_measure_output_wide}()}
+}
+\concept{input/output steps}
