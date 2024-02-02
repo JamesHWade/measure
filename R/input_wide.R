@@ -89,7 +89,7 @@ step_measure_input_wide <-
     }
 
 step_measure_input_wide_new <-
-  function(terms, role, trained, columns, location_values, na_rm, skip, id) {
+  function(terms, role, trained, columns, location_values, skip, id) {
     step(
       subclass = "measure_input_wide",
       terms = terms,

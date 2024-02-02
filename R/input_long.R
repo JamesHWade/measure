@@ -71,7 +71,7 @@ step_measure_input_long <-
   }
 
 step_measure_input_long_new <-
-  function(terms, role, trained, columns, location, na_rm, skip, id) {
+  function(terms, role, trained, columns, location, skip, id) {
     step(
       subclass = "measure_input_long",
       terms = terms,
