@@ -5,8 +5,10 @@ data_meat_long <- function() {
   library(tidyr)
   library(dplyr)
 
-  inds <- tibble(temp = grep("^x_", names(meats), value = TRUE),
-                 ind = seq(1, 17, length.out = 100))
+  inds <- tibble(
+    temp = grep("^x_", names(meats), value = TRUE),
+    ind = seq(1, 17, length.out = 100)
+  )
 
   meats_2 <-
     meats %>%
@@ -19,13 +21,15 @@ data_meat_long <- function() {
     full_join(inds, by = "temp") %>%
     select(-temp)
 
-  inds <- tibble(temp = grep("^x_", names(meats), value = TRUE),
-                 ind = seq(1, 17, length.out = 100))
+  inds <- tibble(
+    temp = grep("^x_", names(meats), value = TRUE),
+    ind = seq(1, 17, length.out = 100)
+  )
 
   list(
     train = meats_2 %>% filter(.sample_num <= 200),
-    test  = meats_2 %>% filter(.sample_num >  200)
-    )
+    test  = meats_2 %>% filter(.sample_num > 200)
+  )
 }
 
 data_meat_wide <- function() {
@@ -42,10 +46,7 @@ data_meat_wide <- function() {
 
   list(
     train = meats_2 %>% filter(.sample_num <= 200),
-    test  = meats_2 %>% filter(.sample_num >  200),
+    test = meats_2 %>% filter(.sample_num > 200),
     ind = seq(1, 17, length.out = 100)
   )
 }
-
-
-

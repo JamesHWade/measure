@@ -11,8 +11,10 @@ check_missing_measures <- function(.data, loc) {
 
 check_single_selector <- function(res, arg) {
   if (length(res) != 1) {
-    msg <- paste0("The selection for `", arg, "` should only select a single ",
-                  "column (", length(res), " columns were selected).")
+    msg <- paste0(
+      "The selection for `", arg, "` should only select a single ",
+      "column (", length(res), " columns were selected)."
+    )
     rlang::abort(msg)
   }
 }
@@ -39,14 +41,14 @@ pad_measure_dims <- function(x) {
   most_freq <- as.integer(names(num_unique)[1])
 
   # Pad each measure so they all have 'most_freq' rows
-  x$.measures <- purrr::map(x$.measures, ~{
+  x$.measures <- purrr::map(x$.measures, ~ {
     df <- .x
     if (nrow(df) < most_freq) {
       # Calculate how many rows to add
       rows_to_add <- most_freq - nrow(df)
       # Create a data frame with the required number of missing rows
       missing_rows <-
-        purrr::map_dfc(names(df), ~rep(NA_real_, rows_to_add)) %>%
+        purrr::map_dfc(names(df), ~ rep(NA_real_, rows_to_add)) %>%
         tibble::as_tibble() %>%
         setNames(names(df)) %>%
         suppressMessages() # suppress message about new column names

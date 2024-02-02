@@ -1,7 +1,7 @@
 test_that("output wide format data", {
   meats_data <- data_meat_long()
   meats_train <- meats_data$train %>% filter(ind < 1.2)
-  meats_test  <- meats_data$test  %>% filter(ind < 1.2)
+  meats_test <- meats_data$test %>% filter(ind < 1.2)
 
   na_train <- meats_train
   na_train$absorp[1] <- NA_real_
@@ -9,7 +9,7 @@ test_that("output wide format data", {
   na_test$absorp[1] <- NA_real_
 
   miss_train <- meats_train %>% dplyr::slice(-2)
-  miss_test  <- meats_test  %>% dplyr::slice(-2)
+  miss_test <- meats_test %>% dplyr::slice(-2)
 
   # ----------------------------------------------------------------------------
 
@@ -36,11 +36,11 @@ test_that("output wide format data", {
       measure_1.000000 = numeric(0),
       measure_1.161616 = numeric(0)
     )
-  expect_equal(bake_1[0,], dat_ptype)
+  expect_equal(bake_1[0, ], dat_ptype)
   expect_equal(nrow(bake_1), 200L)
 
   bake_1_te <- bake(prep_1, new_data = meats_test)
-  expect_equal(bake_1_te[0,], dat_ptype)
+  expect_equal(bake_1_te[0, ], dat_ptype)
   expect_equal(nrow(bake_1_te), 15L)
 
   ### missing rows

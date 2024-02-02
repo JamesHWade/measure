@@ -18,11 +18,11 @@
 #' data(glucose_bioreactors)
 #' bioreactors_small$batch_sample <- NULL
 #'
-#' small_tr <- bioreactors_small[  1:200,]
-#' small_te <- bioreactors_small[201:210,]
+#' small_tr <- bioreactors_small[1:200, ]
+#' small_te <- bioreactors_small[201:210, ]
 #'
 #' small_rec <-
-#'   recipe(glucose ~ . , data = small_tr) %>%
+#'   recipe(glucose ~ ., data = small_tr) %>%
 #'   update_role(batch_id, day, new_role = "id columns") %>%
 #'   step_measure_input_wide(`400`:`3050`) %>%
 #'   prep()
@@ -87,7 +87,6 @@ prep.step_measure_output_wide <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_output_wide <- function(object, new_data, ...) {
-
   non_meas <- names(new_data)
   non_meas <- non_meas[non_meas != ".measures"]
 
@@ -117,13 +116,16 @@ print.step_measure_output_wide <-
 #' @export
 tidy.step_measure_output_wide <- function(x, ...) {
   if (is_trained(x)) {
-    res <- tibble(terms = na_chr,
-                  value = na_dbl)
+    res <- tibble(
+      terms = na_chr,
+      value = na_dbl
+    )
   } else {
-    res <- tibble(terms = na_chr,
-                  value = na_dbl)
+    res <- tibble(
+      terms = na_chr,
+      value = na_dbl
+    )
   }
   res$id <- x$id
   res
 }
-

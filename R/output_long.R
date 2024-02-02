@@ -19,11 +19,11 @@
 #' data(glucose_bioreactors)
 #' bioreactors_small$batch_sample <- NULL
 #'
-#' small_tr <- bioreactors_small[  1:200,]
-#' small_te <- bioreactors_small[201:210,]
+#' small_tr <- bioreactors_small[1:200, ]
+#' small_te <- bioreactors_small[201:210, ]
 #'
 #' small_rec <-
-#'   recipe(glucose ~ . , data = small_tr) %>%
+#'   recipe(glucose ~ ., data = small_tr) %>%
 #'   update_role(batch_id, day, new_role = "id columns") %>%
 #'   step_measure_input_wide(`400`:`3050`) %>%
 #'   prep()
@@ -103,8 +103,10 @@ bake.step_measure_output_long <- function(object, new_data, ...) {
 print.step_measure_output_long <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "Restructure analytical measurements to long format"
-    print_step(rlang::quos("<internal data>"), rlang::quos("<internal data>"),
-               x$trained, title, width)
+    print_step(
+      rlang::quos("<internal data>"), rlang::quos("<internal data>"),
+      x$trained, title, width
+    )
     invisible(x)
   }
 
@@ -112,11 +114,15 @@ print.step_measure_output_long <-
 #' @export
 tidy.step_measure_output_long <- function(x, ...) {
   if (is_trained(x)) {
-    res <- tibble(terms = na_chr,
-                  value = na_dbl)
+    res <- tibble(
+      terms = na_chr,
+      value = na_dbl
+    )
   } else {
-    res <- tibble(terms = na_chr,
-                  value = na_dbl)
+    res <- tibble(
+      terms = na_chr,
+      value = na_dbl
+    )
   }
   res$id <- x$id
   res
@@ -127,5 +133,3 @@ value_to_tibble <- function(x, prefix = "measure_") {
   colnames(x) <- recipes::names0(ncol(x), prefix = prefix)
   dplyr::as_tibble(x)
 }
-
-

@@ -7,7 +7,7 @@ test_that("ingest long format data", {
   na_test$absorp[2] <- NA_real_
 
   miss_train <- meats_data$train %>% dplyr::slice(-5)
-  miss_test  <- meats_data$test  %>% dplyr::slice(-5)
+  miss_test <- meats_data$test %>% dplyr::slice(-5)
 
   # ----------------------------------------------------------------------------
 
@@ -32,18 +32,18 @@ test_that("ingest long format data", {
       protein = numeric(0),
       .measures = list()
     )
-  expect_equal(bake_1[0,], dat_ptype)
+  expect_equal(bake_1[0, ], dat_ptype)
   measure_ptype <-
     tibble::tibble(
       value = numeric(0),
       location = numeric(0)
     )
-  expect_equal(bake_1$.measures[[1]][0,], measure_ptype)
+  expect_equal(bake_1$.measures[[1]][0, ], measure_ptype)
   expect_equal(nrow(bake_1), 200L)
   expect_equal(dim(bake_1$.measures[[1]]), c(100L, 2L))
 
   bake_1_te <- bake(prep_1, new_data = meats_data$test)
-  expect_equal(bake_1_te$.measures[[1]][0,], measure_ptype)
+  expect_equal(bake_1_te$.measures[[1]][0, ], measure_ptype)
   expect_equal(nrow(bake_1_te), 15L)
   expect_equal(dim(bake_1_te$.measures[[1]]), c(100L, 2L))
 

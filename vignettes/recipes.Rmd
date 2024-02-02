@@ -58,7 +58,7 @@ The recipe does not yet contain any steps.
 ```{r}
 rec_obj$steps
 
-rec_obj_add_step <- rec_obj %>% 
+rec_obj_add_step <- rec_obj %>%
   step_impute_knn(all_predictors())
 
 rec_obj_add_step$steps

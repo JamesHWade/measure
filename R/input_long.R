@@ -154,12 +154,16 @@ print.step_measure_input_long <-
 #' @export
 tidy.step_measure_input_long <- function(x, ...) {
   if (is_trained(x)) {
-    res <- tibble(terms = x$columns[!is.na(x$columns)],
-                  value = na_dbl)
+    res <- tibble(
+      terms = x$columns[!is.na(x$columns)],
+      value = na_dbl
+    )
   } else {
     term_names <- sel2char(x$terms)
-    res <- tibble(terms = term_names,
-                  value = na_dbl)
+    res <- tibble(
+      terms = term_names,
+      value = na_dbl
+    )
   }
   res$id <- x$id
   res
@@ -173,5 +177,3 @@ rename_long_cols <- function(.data, val_chr, loc_chr) {
   }
   dplyr::rename(.data, dplyr::all_of(res))
 }
-
-
