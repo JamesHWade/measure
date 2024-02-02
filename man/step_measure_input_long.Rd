@@ -8,6 +8,7 @@ step_measure_input_long(
   recipe,
   ...,
   location,
+  pad = FALSE,
   role = "measure",
   trained = FALSE,
   columns = NULL,
@@ -25,6 +26,10 @@ of the measurement's profile.}
 
 \item{location}{One or more selector functions to choose which \emph{single}
 column has the locations of the analytical values.}
+
+\item{pad}{Whether to pad the measurements to ensure that they all have the
+same number of values. This is useful when there are missing values in the
+measurements.}
 
 \item{role}{Not used by this step since no new variables are
 created.}
@@ -50,8 +55,8 @@ step that converts measures organized in a column for the analytical results
 the package.
 }
 \details{
-This step is designed for data in a format where there is a column for the
-analytical measurement (e.g., absorption, etc.) and another with the
+This step is designed for data in a format where there is a column
+for the analytical measurement (e.g., absorption, etc.) and another with the
 location of the value (e.g., wave number, etc.).
 
 \code{step_measure_input_long()} will collect those data and put them into a

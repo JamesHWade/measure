@@ -7,14 +7,16 @@
 #' @family input/output steps
 #' @inheritParams recipes::step_center
 #' @param ... One or more selector functions to choose which _single_ column
-#' contains the analytical measurements. The selection should be in the order
-#' of the measurement's profile.
+#'   contains the analytical measurements. The selection should be in the order
+#'   of the measurement's profile.
 #' @param location One or more selector functions to choose which _single_
-#' column has the locations of the analytical values.
+#'   column has the locations of the analytical values.
+#' @param pad Whether to pad the measurements to ensure that they all have the
+#'   same number of values. This is useful when there are missing values in the
+#'   measurements.
 #' @param columns A character vector of column names determined by the recipe.
-#' @details
-#' This step is designed for data in a format where there is a column for the
-#' analytical measurement (e.g., absorption, etc.) and another with the
+#' @details This step is designed for data in a format where there is a column
+#' for the analytical measurement (e.g., absorption, etc.) and another with the
 #' location of the value (e.g., wave number, etc.).
 #'
 #' `step_measure_input_long()` will collect those data and put them into a
@@ -48,6 +50,7 @@ step_measure_input_long <-
   function(recipe,
            ...,
            location,
+           pad = FALSE,
            role = "measure",
            trained = FALSE,
            columns = NULL,
@@ -64,6 +67,7 @@ step_measure_input_long <-
         role = role,
         columns = columns,
         location = location,
+        pad = pad,
         skip = skip,
         id = id
       )
@@ -71,7 +75,7 @@ step_measure_input_long <-
   }
 
 step_measure_input_long_new <-
-  function(terms, role, trained, columns, location, skip, id) {
+  function(terms, role, trained, columns, location, pad, skip, id) {
     step(
       subclass = "measure_input_long",
       terms = terms,
@@ -79,6 +83,7 @@ step_measure_input_long_new <-
       trained = trained,
       columns = columns,
       location = location,
+      pad = pad,
       skip = skip,
       id = id
     )
@@ -104,6 +109,7 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
     trained = TRUE,
     columns = unname(c(value_name, loc_name)),
     location = x$location,
+    pad = x$pad,
     skip = x$skip,
     id = x$id
   )
@@ -123,6 +129,10 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
     new_data <-
       new_data %>%
       tidyr::nest(.by = c(-value), .key = ".measures")
+  }
+
+  if (rlang::is_true(object$pad)) {
+    new_data <- pad_measure_dims(new_data)
   }
 
   check_measure_dims(new_data)

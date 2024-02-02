@@ -95,6 +95,8 @@ bake.step_measure_output_wide <- function(object, new_data, ...) {
     new_data %>%
     tidyr::unnest(cols = c(.measures)) %>%
     dplyr::mutate(location = gsub(" ", "0", format(location))) %>%
+    # remove NA values that are introduced by padding
+    tidyr::drop_na("value") %>%
     tidyr::pivot_wider(
       id_cols = c(dplyr::all_of(non_meas)),
       names_from = "location",
