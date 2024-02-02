@@ -54,11 +54,11 @@ library(dplyr)
 data(glucose_bioreactors)
 bioreactors_small$batch_sample <- NULL
 
-small_tr <- bioreactors_small[  1:200,]
-small_te <- bioreactors_small[201:210,]
+small_tr <- bioreactors_small[1:200, ]
+small_te <- bioreactors_small[201:210, ]
 
 small_rec <-
-  recipe(glucose ~ . , data = small_tr) \%>\%
+  recipe(glucose ~ ., data = small_tr) \%>\%
   update_role(batch_id, day, new_role = "id columns") \%>\%
   step_measure_input_wide(`400`:`3050`) \%>\%
   prep()
