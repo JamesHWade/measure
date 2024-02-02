@@ -45,12 +45,22 @@ test_that("output long format data", {
 
   ### missing rows
 
-  bake_2 <-
+  expect_snapshot_error(
     recipe(water + fat + protein ~ ., data = miss_train) %>%
-    step_measure_input_long(absorp, location = vars(ind)) %>%
+      step_measure_input_long(absorp, location = vars(ind)) %>%
+      step_measure_output_long("rstudio", "posit", id = "turnip") %>%
+      prep() %>%
+      bake(new_data = NULL)
+  )
+
+  ### missing rows with padding
+
+  bake_2 <- recipe(water + fat + protein ~ ., data = miss_train) %>%
+    step_measure_input_long(absorp, location = vars(ind), pad = TRUE) %>%
     step_measure_output_long("rstudio", "posit", id = "turnip") %>%
     prep() %>%
     bake(new_data = NULL)
+
   dat_ptype <-
     tibble::tibble(
       .sample_num = integer(0),
@@ -61,7 +71,7 @@ test_that("output long format data", {
       posit = numeric(0)
     )
   expect_equal(bake_2[0,], dat_ptype)
-  expect_equal(nrow(bake_2), 399L)
+  expect_equal(nrow(bake_2), 400L)
 
   ## missing values
 

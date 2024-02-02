@@ -88,3 +88,19 @@
       1      1 step      measure_input_long  TRUE    FALSE potato
       2      2 step      measure_output_long TRUE    FALSE turnip
 
+---
+
+    Error in `step_measure_input_long()`:
+    Caused by error in `check_measure_dims()`:
+    ! The number of rows in each measure should be the same. Most samples have 2 rows and these do not: 1. Please pad the input with missing values.
+
+---
+
+    Code
+      recipe(water + fat + protein ~ ., data = meats_train) %>%
+        step_measure_output_long() %>% prep()
+    Condition
+      Error in `step_measure_output_long()`:
+      Caused by error in `check_has_measure()`:
+      ! It appears that the measurements have not been converted for the inernal format. See `step_measure_input_long()` and `step_measure_input_wide()` and use these prior to `step_measure_output_long()`.
+

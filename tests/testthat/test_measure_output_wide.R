@@ -45,12 +45,23 @@ test_that("output wide format data", {
 
   ### missing rows
 
+  expect_snapshot_error(
+    recipe(water + fat + protein ~ ., data = miss_train_padded) %>%
+      step_measure_input_long(absorp, location = vars(ind)) %>%
+      step_measure_output_wide(id = "turnip") %>%
+      prep() %>%
+      bake(new_data = NULL)
+  )
+
+  ### missing rows with padding
+
   bake_2 <-
     recipe(water + fat + protein ~ ., data = miss_train) %>%
-    step_measure_input_long(absorp, location = vars(ind)) %>%
+    step_measure_input_long(absorp, location = vars(ind), pad = TRUE) %>%
     step_measure_output_wide(id = "turnip") %>%
     prep() %>%
     bake(new_data = NULL)
+  # one NA value from padding takes complete cases from 200L -> 199L
   expect_equal(sum(complete.cases(bake_2)), 199L)
   expect_true(is.na(bake_2$measure_1.161616[1]))
 
