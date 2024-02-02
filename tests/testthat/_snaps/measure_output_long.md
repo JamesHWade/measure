@@ -2,7 +2,7 @@
 
     Code
       print(rec_1)
-    Message <cliMessage>
+    Message
       
       -- Recipe ----------------------------------------------------------------------
       
@@ -45,7 +45,7 @@
 
     Code
       print(prep_1)
-    Message <cliMessage>
+    Message
       
       -- Recipe ----------------------------------------------------------------------
       
