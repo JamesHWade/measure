@@ -61,29 +61,28 @@
 #'     ) %>%
 #'     prep()
 #' }
-
 step_measure_savitzky_golay <-
-    function(recipe,
-             role = NA,
-             trained = FALSE,
-             degree = 3,
-             window_size = 11,
-             differentiation_order = 0,
-             skip = FALSE,
-             id = rand_id("measure_savitzky_golay")) {
-      recipes::add_step(
-        recipe,
-        step_measure_savitzky_golay_new(
-          trained = trained,
-          role = role,
-          degree = degree,
-          window_size = window_size,
-          differentiation_order = differentiation_order,
-          skip = FALSE,
-          id = id
-        )
+  function(recipe,
+           role = NA,
+           trained = FALSE,
+           degree = 3,
+           window_size = 11,
+           differentiation_order = 0,
+           skip = FALSE,
+           id = rand_id("measure_savitzky_golay")) {
+    recipes::add_step(
+      recipe,
+      step_measure_savitzky_golay_new(
+        trained = trained,
+        role = role,
+        degree = degree,
+        window_size = window_size,
+        differentiation_order = differentiation_order,
+        skip = FALSE,
+        id = id
       )
-    }
+    )
+  }
 
 step_measure_savitzky_golay_new <-
   function(role, trained, degree, window_size, differentiation_order,
@@ -107,14 +106,14 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
     cli::cli_abort("{.arg degree} to {.fn  step_measure_savitzky_golay} should
                     be a single integer greater than zero.")
   }
-  if (!is.numeric(x$differentiation_order) | length(x$differentiation_order) != 1
-      | x$differentiation_order < 0) {
+  if (!is.numeric(x$differentiation_order) | length(x$differentiation_order) != 1 |
+    x$differentiation_order < 0) {
     cli::cli_abort("The {.arg differentiation_order} argument to
                     {.fn  step_measure_savitzky_golay} should be a single
                     integer greater than -1.")
   }
-  if (!is.numeric(x$window_size) | length(x$window_size) != 1
-      | x$window_size < 1 | x$window_size %% 2 != 1) {
+  if (!is.numeric(x$window_size) | length(x$window_size) != 1 |
+    x$window_size < 1 | x$window_size %% 2 != 1) {
     cli::cli_abort("The {.arg window_size} argument to
                     {.fn  step_measure_savitzky_golay} should be a single odd
                     integer greater than 0.")
@@ -130,10 +129,10 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
   }
   # filter length w must be greater than polynomial order p
   if (x$window_size <= x$degree) {
-     x$window_size <- x$degree + 1
-     if (x$window_size %% 2 == 0) {
-       x$window_size <- x$window_size + 1
-     }
+    x$window_size <- x$degree + 1
+    if (x$window_size %% 2 == 0) {
+      x$window_size <- x$window_size + 1
+    }
     cli::cli_warn("The {.arg window_size} argument to
                    {.fn step_measure_savitzky_golay} should be greater than or
                    equal to {.arg degree}. The polynomial degree was increased
@@ -153,7 +152,6 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
-
   res <-
     .comp_savitzky_golay(
       new_data$.measures,
@@ -170,8 +168,10 @@ bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
 print.step_measure_savitzky_golay <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "Savitzky-Golay preprocessing "
-    recipes::print_step("<internal measurements>", "<internal measurements>",
-                        x$trained, title, width)
+    recipes::print_step(
+      "<internal measurements>", "<internal measurements>",
+      x$trained, title, width
+    )
     invisible(x)
   }
 
@@ -181,12 +181,16 @@ print.step_measure_savitzky_golay <-
 #' @export
 tidy.step_measure_savitzky_golay <- function(x, ...) {
   if (is_trained(x)) {
-    res <- tibble::tibble(terms = ".measure",
-                          value = na_dbl)
+    res <- tibble::tibble(
+      terms = ".measure",
+      value = na_dbl
+    )
   } else {
     term_names <- recipes::sel2char(x$terms)
-    res <- tibble::tibble(terms = term_names,
-                          value = na_dbl)
+    res <- tibble::tibble(
+      terms = term_names,
+      value = na_dbl
+    )
   }
   res$id <- x$id
   res
@@ -235,4 +239,3 @@ required_pkgs.step_isomap <- function(x, ...) {
 
   matrix_to_measure(res, loc)
 }
-

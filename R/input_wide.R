@@ -66,30 +66,30 @@
 #' @export
 
 step_measure_input_wide <-
-    function(recipe,
-             ...,
-             role = "measure",
-             trained = FALSE,
-             columns = NULL,
-             location_values = NULL,
-             skip = FALSE,
-             id = rand_id("measure_input_wide")) {
-      add_step(
-        recipe,
-        step_measure_input_wide_new(
-          terms = enquos(...),
-          trained = trained,
-          role = role,
-          columns = columns,
-          location_values = location_values,
-          skip = skip,
-          id = id
-        )
+  function(recipe,
+           ...,
+           role = "measure",
+           trained = FALSE,
+           columns = NULL,
+           location_values = NULL,
+           skip = FALSE,
+           id = rand_id("measure_input_wide")) {
+    add_step(
+      recipe,
+      step_measure_input_wide_new(
+        terms = enquos(...),
+        trained = trained,
+        role = role,
+        columns = columns,
+        location_values = location_values,
+        skip = skip,
+        id = id
       )
-    }
+    )
+  }
 
 step_measure_input_wide_new <-
-  function(terms, role, trained, columns, location_values, na_rm, skip, id) {
+  function(terms, role, trained, columns, location_values, skip, id) {
     step(
       subclass = "measure_input_wide",
       terms = terms,
@@ -111,8 +111,10 @@ prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
     num_inputs <- length(col_names)
     num_loc <- length(x$location_values)
     if (num_inputs != num_loc) {
-      msg <- paste0(num_inputs, " columns were selected as inputs but ",
-                    "`location_values` has ", num_loc, " values.")
+      msg <- paste0(
+        num_inputs, " columns were selected as inputs but ",
+        "`location_values` has ", num_loc, " values."
+      )
       rlang::abort(msg)
     }
     # if
@@ -133,7 +135,6 @@ prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_input_wide <- function(object, new_data, ...) {
-
   # TODO check to make sure that the nested tibble has the same number of rows
   # in case the nesting was bad
   wide_to_list(new_data, object$location_values, object$terms)
@@ -151,12 +152,16 @@ print.step_measure_input_wide <-
 #' @export
 tidy.step_measure_input_wide <- function(x, ...) {
   if (is_trained(x)) {
-    res <- tibble(terms = x$columns,
-                  value = na_dbl)
+    res <- tibble(
+      terms = x$columns,
+      value = na_dbl
+    )
   } else {
     term_names <- sel2char(x$terms)
-    res <- tibble(terms = term_names,
-                  value = na_dbl)
+    res <- tibble(
+      terms = term_names,
+      value = na_dbl
+    )
   }
   res$id <- x$id
   res

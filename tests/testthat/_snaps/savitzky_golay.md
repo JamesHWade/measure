@@ -47,7 +47,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -57,7 +57,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -67,7 +67,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -77,7 +77,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -87,7 +87,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -97,7 +97,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -107,7 +107,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -117,7 +117,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -127,7 +127,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -137,7 +137,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -147,7 +147,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -157,7 +157,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -167,7 +167,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -177,7 +177,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -187,7 +187,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -197,7 +197,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -207,7 +207,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -217,7 +217,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -227,7 +227,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -237,7 +237,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -247,7 +247,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -257,7 +257,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -267,7 +267,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.
@@ -277,7 +277,7 @@
     Code
       rec %>% step_measure_savitzky_golay(differentiation_order = bad_inputs$diffs[i],
       window_size = bad_inputs$wn[i], degree = bad_inputs$deg[i]) %>% prep()
-    Error <recipes_error_step>
+    Condition
       Error in `step_measure_savitzky_golay()`:
       Caused by error in `prep()`:
       ! The `window_size` argument to `step_measure_savitzky_golay()` should be a single odd integer greater than 0.

@@ -1,7 +1,7 @@
 test_that("output long format data", {
   meats_data <- data_meat_long()
   meats_train <- meats_data$train %>% filter(ind < 1.2)
-  meats_test  <- meats_data$test  %>% filter(ind < 1.2)
+  meats_test <- meats_data$test %>% filter(ind < 1.2)
 
   na_train <- meats_train
   na_train$absorp[1] <- NA_real_
@@ -9,7 +9,7 @@ test_that("output long format data", {
   na_test$absorp[1] <- NA_real_
 
   miss_train <- meats_train %>% dplyr::slice(-2)
-  miss_test  <- meats_test  %>% dplyr::slice(-2)
+  miss_test <- meats_test %>% dplyr::slice(-2)
 
   # ----------------------------------------------------------------------------
 
@@ -36,21 +36,31 @@ test_that("output long format data", {
       .measure = numeric(0),
       .location = numeric(0)
     )
-  expect_equal(bake_1[0,], dat_ptype)
+  expect_equal(bake_1[0, ], dat_ptype)
   expect_equal(nrow(bake_1), 400L)
 
   bake_1_te <- bake(prep_1, new_data = meats_test)
-  expect_equal(bake_1_te[0,], dat_ptype)
+  expect_equal(bake_1_te[0, ], dat_ptype)
   expect_equal(nrow(bake_1_te), 30L)
 
   ### missing rows
 
-  bake_2 <-
+  expect_snapshot_error(
     recipe(water + fat + protein ~ ., data = miss_train) %>%
-    step_measure_input_long(absorp, location = vars(ind)) %>%
+      step_measure_input_long(absorp, location = vars(ind)) %>%
+      step_measure_output_long("rstudio", "posit", id = "turnip") %>%
+      prep() %>%
+      bake(new_data = NULL)
+  )
+
+  ### missing rows with padding
+
+  bake_2 <- recipe(water + fat + protein ~ ., data = miss_train) %>%
+    step_measure_input_long(absorp, location = vars(ind), pad = TRUE) %>%
     step_measure_output_long("rstudio", "posit", id = "turnip") %>%
     prep() %>%
     bake(new_data = NULL)
+
   dat_ptype <-
     tibble::tibble(
       .sample_num = integer(0),
@@ -60,8 +70,8 @@ test_that("output long format data", {
       rstudio = numeric(0),
       posit = numeric(0)
     )
-  expect_equal(bake_2[0,], dat_ptype)
-  expect_equal(nrow(bake_2), 399L)
+  expect_equal(bake_2[0, ], dat_ptype)
+  expect_equal(nrow(bake_2), 400L)
 
   ## missing values
 
@@ -82,5 +92,4 @@ test_that("output long format data", {
       prep(),
     error = TRUE
   )
-
 })

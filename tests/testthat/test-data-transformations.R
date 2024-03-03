@@ -1,5 +1,4 @@
 test_that("transform measure to matrix", {
-
   rec <-
     recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
@@ -18,11 +17,9 @@ test_that("transform measure to matrix", {
       meats_long[meats_long$id == ids[i], "transmittance"][[1]]
     )
   }
-
 })
 
 test_that("transform matrix to measure", {
-
   rec <-
     recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
@@ -41,11 +38,9 @@ test_that("transform matrix to measure", {
       rec$template$.measures[[i]]
     )
   }
-
 })
 
 test_that("transform tidy format", {
-
   rec <-
     recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
@@ -57,5 +52,4 @@ test_that("transform tidy format", {
   names(exp_df) <- c("location", "value", "sample_num")
 
   expect_equal(spect_df, exp_df)
-
 })
