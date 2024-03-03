@@ -63,12 +63,7 @@ check_for_measure <- function(x) {
 # Make sue that data are in the correct format.
 
 check_has_measure <- function(x, cl) {
-  step_fn <- as.character(cl[[1]])
-  step_fn <- gsub("prep\\.", "", step_fn)
-  step_fn <- paste0("`", step_fn, "()`.")
-
-
-  if (!any(names(x) == ".measures")) {
+  if (!any(inherits(x, "measure_obj"))) {
     msg <-
       paste0(
         "It appears that the measurements have not been converted ",
