@@ -10,6 +10,8 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 [![R-CMD-check](https://github.com/JamesHWade/measure/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JamesHWade/measure/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/JamesHWade/measure/branch/main/graph/badge.svg)](https://app.codecov.io/gh/JamesHWade/measure?branch=main)
+[![James’s GitHub
+stats](https://github-readme-stats.vercel.app/api?username=jameshwade)](https://github.com/jameshwade/github-readme-stats)
 <!-- badges: end -->
 
 The goal of measure is to be a recipes-like interface to tidymodels for
