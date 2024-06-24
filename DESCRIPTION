@@ -14,7 +14,9 @@ Depends:
     recipes
 Imports: 
     cli,
+    dials,
     dplyr,
+    generics,
     glue,
     IDPmisc,
     purrr,

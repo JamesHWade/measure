@@ -99,3 +99,18 @@ test_that("savitzky-golay inputs", {
     }
   }
 })
+
+
+test_that("savitzky-golay tuning parameters", {
+  expect_snapshot(window_side())
+  expect_snapshot(window_side(c(2, 10)))
+  expect_snapshot(differentiation_order())
+
+  expect_snapshot(
+    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_savitzky_golay() %>%
+    tunable()
+  )
+})
