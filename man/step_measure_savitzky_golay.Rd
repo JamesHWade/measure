@@ -9,7 +9,7 @@ step_measure_savitzky_golay(
   role = NA,
   trained = FALSE,
   degree = 3,
-  window_size = 11,
+  window_side = 11,
   differentiation_order = 0,
   skip = FALSE,
   id = rand_id("measure_savitzky_golay")
@@ -27,7 +27,9 @@ preprocessing have been estimated.}
 
 \item{degree}{An integer for the polynomial degree to use for smoothing.}
 
-\item{window_size}{An odd integer for the window size to use for smoothing.}
+\item{window_side}{An integer for how many units there are on each side of
+the window. This means that \code{window_side = 1} has a total window width of
+3 (e.g., width is \code{2 * window_side + 1}).}
 
 \item{differentiation_order}{An integer for the degree of filtering (zero
 indicates no differentiation).}
@@ -80,7 +82,7 @@ if (rlang::is_installed("prospectr")) {
     step_measure_savitzky_golay(
       differentiation_order = 1,
       degree = 3,
-      window_size = 5
+      window_side = 5
     ) \%>\%
     prep()
 }

@@ -10,7 +10,9 @@
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
 #' @param degree An integer for the polynomial degree to use for smoothing.
-#' @param window_size An odd integer for the window size to use for smoothing.
+#' @param window_side An integer for how many units there are on each side of
+#' the window. This means that `window_side = 1` has a total window width of
+#' 3 (e.g., width is `2 * window_side + 1`).
 #' @param differentiation_order An integer for the degree of filtering (zero
 #' indicates no differentiation).
 #' @param skip A logical. Should the step be skipped when the
@@ -57,7 +59,7 @@
 #'     step_measure_savitzky_golay(
 #'       differentiation_order = 1,
 #'       degree = 3,
-#'       window_size = 5
+#'       window_side = 5
 #'     ) %>%
 #'     prep()
 #' }
@@ -66,7 +68,7 @@ step_measure_savitzky_golay <-
            role = NA,
            trained = FALSE,
            degree = 3,
-           window_size = 11,
+           window_side = 11,
            differentiation_order = 0,
            skip = FALSE,
            id = rand_id("measure_savitzky_golay")) {
@@ -76,7 +78,7 @@ step_measure_savitzky_golay <-
         trained = trained,
         role = role,
         degree = degree,
-        window_size = window_size,
+        window_side = window_side,
         differentiation_order = differentiation_order,
         skip = FALSE,
         id = id
@@ -85,14 +87,14 @@ step_measure_savitzky_golay <-
   }
 
 step_measure_savitzky_golay_new <-
-  function(role, trained, degree, window_size, differentiation_order,
+  function(role, trained, degree, window_side, differentiation_order,
            na_rm, skip, id) {
     recipes::step(
       subclass = "measure_savitzky_golay",
       role = role,
       trained = trained,
       degree = degree,
-      window_size = window_size,
+      window_side = window_side,
       differentiation_order = differentiation_order,
       skip = skip,
       id = id
@@ -103,47 +105,53 @@ step_measure_savitzky_golay_new <-
 prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
   if (!is.numeric(x$degree) | length(x$degree) != 1 | x$degree < 1) {
-    cli::cli_abort("{.arg degree} to {.fn  step_measure_savitzky_golay} should
-                    be a single integer greater than zero.")
+    cli::cli_abort("The {.arg degree} argument to \\
+                   {.fn  step_measure_savitzky_golay} was {x$degree} and \\
+                   should be a single integer greater than zero.")
   }
   if (!is.numeric(x$differentiation_order) | length(x$differentiation_order) != 1 |
     x$differentiation_order < 0) {
-    cli::cli_abort("The {.arg differentiation_order} argument to
-                    {.fn  step_measure_savitzky_golay} should be a single
+    cli::cli_abort("The {.arg differentiation_order} argument to \\
+                    {.fn  step_measure_savitzky_golay} should be a single \\
                     integer greater than -1.")
   }
-  if (!is.numeric(x$window_size) | length(x$window_size) != 1 |
-    x$window_size < 1 | x$window_size %% 2 != 1) {
-    cli::cli_abort("The {.arg window_size} argument to
-                    {.fn  step_measure_savitzky_golay} should be a single odd
+  if (!is.numeric(x$window_side) | length(x$window_side) != 1 |
+    x$window_side < 1) {
+    cli::cli_abort("The {.arg window_side} argument to \\
+                    {.fn  step_measure_savitzky_golay} should be an \\
                     integer greater than 0.")
   }
+
+  window_size = 2 * x$window_side + 1
 
   # polynomial order p must be geater or equal to differentiation order m
   if (x$degree <= x$differentiation_order) {
     x$degree <- x$differentiation_order + 1
     cli::cli_warn("The {.arg degree} argument to
-                   {.fn step_measure_savitzky_golay} should be greater than or
-                   equal to {.arg differentiation_order}. The polynomial degree
+                   {.fn step_measure_savitzky_golay} should be greater than or \\
+                   equal to {.arg differentiation_order} \\
+                   ({x$differentiation_order}). The polynomial degree \\
                    was increased to {x$degree}.")
   }
   # filter length w must be greater than polynomial order p
-  if (x$window_size <= x$degree) {
-    x$window_size <- x$degree + 1
-    if (x$window_size %% 2 == 0) {
-      x$window_size <- x$window_size + 1
-    }
-    cli::cli_warn("The {.arg window_size} argument to
-                   {.fn step_measure_savitzky_golay} should be greater than or
-                   equal to {.arg degree}. The polynomial degree was increased
-                   to {x$window_size}.")
+  if (window_size <= x$degree) {
+    old_val <- x$window_side
+    old_size <- 2 * old_val + 1
+    x$window_side <- ceiling(x$degree/2)
+    cli::cli_warn("The window size ({old_size}) should be greater than or \\
+                  equal to {.arg degree} ({x$degree}). {.arg window_side} was \\
+                  increased from {old_val} to {x$window_side}.")
   }
+
+# 2*wd + 1 > d
+# 2*wd < d - 1
+# wd > (d-1)/2
 
   step_measure_savitzky_golay_new(
     role = x$role,
     trained = TRUE,
     degree = x$degree,
-    window_size = x$window_size,
+    window_side = x$window_side,
     differentiation_order = x$differentiation_order,
     skip = x$skip,
     id = x$id
@@ -157,7 +165,7 @@ bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
       new_data$.measures,
       diffs = object$differentiation_order,
       degree = object$degree,
-      window = object$window_size
+      window = 2 * object$window_side + 1
     )
   # TODO try to approximate the wave numbers that were input.
   new_data$.measures <- res
