@@ -209,7 +209,7 @@ tidy.step_measure_savitzky_golay <- function(x, ...) {
 #' @param ... Not used.
 #' @name required_pkgs.recipe
 #' @export
-required_pkgs.step_isomap <- function(x, ...) {
+required_pkgs.step_measure_savitzky_golay <- function(x, ...) {
   c("measure", "prospectr")
 }
 
