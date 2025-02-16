@@ -56,7 +56,7 @@
       Training data contained 20000 data points and no incomplete rows.
       
       -- Operations 
-      * Collate long analytical measurements: absorp and ind | Trained
+      * Collate long analytical measurements: absorp ind | Trained
 
 ---
 

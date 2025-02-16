@@ -2,10 +2,10 @@
 % Please edit documentation in R/savitzky_golay.R
 \name{required_pkgs.recipe}
 \alias{required_pkgs.recipe}
-\alias{required_pkgs.step_isomap}
+\alias{required_pkgs.step_measure_savitzky_golay}
 \title{Set package dependencies}
 \usage{
-\method{required_pkgs}{step_isomap}(x, ...)
+\method{required_pkgs}{step_measure_savitzky_golay}(x, ...)
 }
 \arguments{
 \item{x}{A step object.}

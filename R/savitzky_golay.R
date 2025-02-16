@@ -124,28 +124,32 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
 
   window_size = 2 * x$window_side + 1
 
-  # polynomial order p must be geater or equal to differentiation order m
-  if (x$degree <= x$differentiation_order) {
-    x$degree <- x$differentiation_order + 1
-    cli::cli_warn("The {.arg degree} argument to
-                   {.fn step_measure_savitzky_golay} should be greater than or \\
-                   equal to {.arg differentiation_order} \\
-                   ({x$differentiation_order}). The polynomial degree \\
-                   was increased to {x$degree}.")
+  # polynomial order p must be greater or equal to differentiation order m
+  if (x$degree < x$differentiation_order) {
+    old_degree <- x$degree
+    x$degree <- x$differentiation_order
+    cli::cli_warn(
+      "The {.arg degree} argument to {.fn step_measure_savitzky_golay} should be
+      greater than or equal to {.arg differentiation_order}
+      ({x$differentiation_order}). The polynomial degree was increased from
+      {old_degree} to {x$degree}."
+    )
   }
   # filter length w must be greater than polynomial order p
-  if (window_size <= x$degree) {
+  if (x$degree >= window_size) {
     old_val <- x$window_side
     old_size <- 2 * old_val + 1
-    x$window_side <- ceiling(x$degree/2)
-    cli::cli_warn("The window size ({old_size}) should be greater than or \\
-                  equal to {.arg degree} ({x$degree}). {.arg window_side} was \\
-                  increased from {old_val} to {x$window_side}.")
+    new_size <- x$degree + 1
+    if (new_size %% 2 == 0){
+      new_size <- new_size + 1
+    }
+    x$window_side <- (new_size - 1) / 2
+    cli::cli_warn(
+      "The window size ({old_size}) should be greater than {.arg degree}
+      ({x$degree}). {.arg window_side} was increased from {old_val} to
+      {x$window_side}."
+    )
   }
-
-# 2*wd + 1 > d
-# 2*wd < d - 1
-# wd > (d-1)/2
 
   step_measure_savitzky_golay_new(
     role = x$role,
@@ -209,7 +213,7 @@ tidy.step_measure_savitzky_golay <- function(x, ...) {
 #' @param ... Not used.
 #' @name required_pkgs.recipe
 #' @export
-required_pkgs.step_isomap <- function(x, ...) {
+required_pkgs.step_measure_savitzky_golay <- function(x, ...) {
   c("measure", "prospectr")
 }
 
