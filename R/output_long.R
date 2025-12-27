@@ -44,13 +44,15 @@
 #' @export
 
 step_measure_output_long <-
-  function(recipe,
-           values_to = ".measure",
-           location_to = ".location",
-           role = "predictor",
-           trained = FALSE,
-           skip = FALSE,
-           id = rand_id("measure_output_long")) {
+  function(
+    recipe,
+    values_to = ".measure",
+    location_to = ".location",
+    role = "predictor",
+    trained = FALSE,
+    skip = FALSE,
+    id = rand_id("measure_output_long")
+  ) {
     add_step(
       recipe,
       step_measure_output_long_new(
@@ -104,8 +106,11 @@ print.step_measure_output_long <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "Restructure analytical measurements to long format"
     print_step(
-      rlang::quos("<internal data>"), rlang::quos("<internal data>"),
-      x$trained, title, width
+      rlang::quos("<internal data>"),
+      rlang::quos("<internal data>"),
+      x$trained,
+      title,
+      width
     )
     invisible(x)
   }

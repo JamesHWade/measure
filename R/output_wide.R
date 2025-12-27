@@ -43,12 +43,14 @@
 #' @export
 
 step_measure_output_wide <-
-  function(recipe,
-           prefix = "measure_",
-           role = "predictor",
-           trained = FALSE,
-           skip = FALSE,
-           id = rand_id("measure_output_wide")) {
+  function(
+    recipe,
+    prefix = "measure_",
+    role = "predictor",
+    trained = FALSE,
+    skip = FALSE,
+    id = rand_id("measure_output_wide")
+  ) {
     add_step(
       recipe,
       step_measure_output_wide_new(
@@ -108,7 +110,13 @@ bake.step_measure_output_wide <- function(object, new_data, ...) {
 print.step_measure_output_wide <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "Restructure analytical measurements to wide format"
-    print_step(rlang::quos("<internal data>"), rlang::quos("<internal data>"), x$trained, title, width)
+    print_step(
+      rlang::quos("<internal data>"),
+      rlang::quos("<internal data>"),
+      x$trained,
+      title,
+      width
+    )
     invisible(x)
   }
 

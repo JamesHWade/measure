@@ -66,14 +66,16 @@
 #' @export
 
 step_measure_input_wide <-
-  function(recipe,
-           ...,
-           role = "measure",
-           trained = FALSE,
-           columns = NULL,
-           location_values = NULL,
-           skip = FALSE,
-           id = rand_id("measure_input_wide")) {
+  function(
+    recipe,
+    ...,
+    role = "measure",
+    trained = FALSE,
+    columns = NULL,
+    location_values = NULL,
+    skip = FALSE,
+    id = rand_id("measure_input_wide")
+  ) {
     add_step(
       recipe,
       step_measure_input_wide_new(
@@ -112,8 +114,11 @@ prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
     num_loc <- length(x$location_values)
     if (num_inputs != num_loc) {
       msg <- paste0(
-        num_inputs, " columns were selected as inputs but ",
-        "`location_values` has ", num_loc, " values."
+        num_inputs,
+        " columns were selected as inputs but ",
+        "`location_values` has ",
+        num_loc,
+        " values."
       )
       rlang::abort(msg)
     }
@@ -169,7 +174,7 @@ tidy.step_measure_input_wide <- function(x, ...) {
 
 
 wide_to_list <- function(x, ind, selections) {
-  x %>%
+  x <- x %>%
     dplyr::mutate(..row = seq_len(nrow(x))) %>%
     tidyr::pivot_longer(
       cols = c(!!!selections),
@@ -177,9 +182,12 @@ wide_to_list <- function(x, ind, selections) {
       values_to = "value"
     ) %>%
     dplyr::select(-temp) %>%
-    # TODO convert some of this to use vctrs
-    # https://www.tidyverse.org/blog/2023/04/performant-packages/#nest
     tidyr::nest(.by = c(-value), .key = ".measures") %>%
     dplyr::select(-..row) %>%
     add_location(ind)
+
+  # Wrap .measures as measure_list for class-based detection
+  x$.measures <- new_measure_list(x$.measures)
+
+  x
 }

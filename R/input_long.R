@@ -47,15 +47,17 @@
 #'
 #' @export
 step_measure_input_long <-
-  function(recipe,
-           ...,
-           location,
-           pad = FALSE,
-           role = "measure",
-           trained = FALSE,
-           columns = NULL,
-           skip = FALSE,
-           id = rand_id("measure_input_long")) {
+  function(
+    recipe,
+    ...,
+    location,
+    pad = FALSE,
+    role = "measure",
+    trained = FALSE,
+    columns = NULL,
+    skip = FALSE,
+    id = rand_id("measure_input_long")
+  ) {
     if (rlang::is_missing(location)) {
       location <- NULL
     }
@@ -136,6 +138,9 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
   }
 
   check_measure_dims(new_data)
+
+  # Wrap .measures as measure_list for class-based detection
+  new_data$.measures <- new_measure_list(new_data$.measures)
 
   new_data
 }
