@@ -11,6 +11,9 @@ tidy(x, ...)
 # S3 method for class 'step_measure_input_wide'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_map'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_msc'
 tidy(x, ...)
 

@@ -19,6 +19,8 @@ Apply spectral preprocessing transformations
   : Standard Normal Variate (SNV) Transformation
 - [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)
   : Multiplicative Scatter Correction (MSC)
+- [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
+  : Apply a Custom Function to Measurements
 
 ## Output Steps
 
@@ -71,3 +73,14 @@ Helper functions and utilities
   : Check if data frame has measure column(s)
 - [`required_pkgs(`*`<step_measure_savitzky_golay>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   : Set package dependencies
+
+## Exploration & Analysis
+
+Interactive exploration and summary functions for prototyping
+
+- [`measure_map()`](https://jameshwade.github.io/measure/dev/reference/measure_map.md)
+  : Apply a Function to Each Sample's Measurements
+- [`measure_map_safely()`](https://jameshwade.github.io/measure/dev/reference/measure_map_safely.md)
+  : Apply a Function Safely to Each Sample's Measurements
+- [`measure_summarize()`](https://jameshwade.github.io/measure/dev/reference/measure_summarize.md)
+  : Summarize Measurements Across Samples

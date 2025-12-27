@@ -115,6 +115,7 @@ Applied Spectroscopy, 39(3):491-500.
 for a simpler scatter correction method
 
 Other measure-preprocessing:
+[`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md),
 [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)
 
 ## Examples

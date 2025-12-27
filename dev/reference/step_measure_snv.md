@@ -93,6 +93,7 @@ is returned.
 ## See also
 
 Other measure-preprocessing:
+[`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md),
 [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)
 
 ## Examples

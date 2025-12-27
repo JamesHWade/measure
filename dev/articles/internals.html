@@ -271,6 +271,76 @@ have the expected structure</li>
 between measure lists and matrices for bulk operations.</p>
 </div>
 <div class="section level2">
+<h2 id="working-with-measure-data-interactively">Working with Measure Data Interactively<a class="anchor" aria-label="anchor" href="#working-with-measure-data-interactively"></a>
+</h2>
+<p>While recipe steps are the primary interface for production
+pipelines, measure provides utility functions for interactive
+exploration and debugging.</p>
+<div class="section level3">
+<h3 id="measure_map-prototyping-transformations">measure_map(): Prototyping transformations<a class="anchor" aria-label="anchor" href="#measure_map-prototyping-transformations"></a>
+</h3>
+<p>When developing a custom transformation, use
+<code><a href="../reference/measure_map.html">measure_map()</a></code> to test it interactively:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Apply a transformation to each sample's measurements</span></span>
+<span><span class="va">centered</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_map.html">measure_map</a></span><span class="op">(</span><span class="va">result</span>, <span class="op">~</span> <span class="op">{</span></span>
+<span>  <span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">&lt;-</span> <span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">value</span><span class="op">)</span></span>
+<span>  <span class="va">.x</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Check the result</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">centered</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">value</span><span class="op">)</span>  <span class="co"># Should be ~0</span></span>
+<span><span class="co">#&gt; [1] -1.599431e-16</span></span></code></pre></div>
+<p><strong>Important</strong>: <code><a href="../reference/measure_map.html">measure_map()</a></code> is for
+exploration only. Once your transformation works, move it to
+<code><a href="../reference/step_measure_map.html">step_measure_map()</a></code> for reproducible pipelines:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># For production use</span></span>
+<span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_map.html">step_measure_map</a></span><span class="op">(</span><span class="op">~</span> <span class="op">{</span> <span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">&lt;-</span> <span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">value</span><span class="op">)</span>; <span class="va">.x</span> <span class="op">}</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="measure_map_safely-fault-tolerant-exploration">measure_map_safely(): Fault-tolerant exploration<a class="anchor" aria-label="anchor" href="#measure_map_safely-fault-tolerant-exploration"></a>
+</h3>
+<p>When exploring data that might have problematic samples, use the
+safer variant:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_map_safely.html">measure_map_safely</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">risky_function</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Check which samples failed</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">errors</span></span>
+<span></span>
+<span><span class="co"># result$result contains data with successful transforms</span></span>
+<span><span class="co"># (failed samples keep original values)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="measure_summarize-understanding-your-data">measure_summarize(): Understanding your data<a class="anchor" aria-label="anchor" href="#measure_summarize-understanding-your-data"></a>
+</h3>
+<p>Compute summary statistics across all samples at each measurement
+location:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Default: mean and SD at each location</span></span>
+<span><span class="va">stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_summarize.html">measure_summarize</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">stats</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
+<span><span class="co">#&gt;   location  mean    sd</span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        1  2.81 0.411</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>        2  2.81 0.413</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        3  2.81 0.416</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        4  2.82 0.418</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>        5  2.82 0.421</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        6  2.82 0.424</span></span></code></pre></div>
+<p>This is useful for:</p>
+<ul>
+<li>Computing reference spectra (e.g., for MSC-style corrections)</li>
+<li>Identifying high-variability regions</li>
+<li>Quality control and outlier detection</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
 <h2 id="multiple-measure-columns">Multiple Measure Columns<a class="anchor" aria-label="anchor" href="#multiple-measure-columns"></a>
 </h2>
 <p>measure supports multiple measure columns in a single dataset. This
@@ -280,7 +350,7 @@ spectra) that need separate processing.</p>
 <h3 id="creating-multiple-measure-columns">Creating multiple measure columns<a class="anchor" aria-label="anchor" href="#creating-multiple-measure-columns"></a>
 </h3>
 <p>Use the <code>col_name</code> parameter in input steps:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">outcome</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">my_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"uv_"</span><span class="op">)</span>,</span>
@@ -296,12 +366,12 @@ spectra) that need separate processing.</p>
 </h3>
 <p>By default, processing steps operate on <strong>all</strong> measure
 columns:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="va">rec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Applies to both .uv_spectrum and .ms_spectrum</span></span></code></pre></div>
 <p>To process specific columns, use the <code>measures</code>
 parameter:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="va">rec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span>measures <span class="op">=</span> <span class="st">".uv_spectrum"</span><span class="op">)</span>  <span class="co"># Only UV</span></span></code></pre></div>
 </div>
@@ -310,7 +380,7 @@ parameter:</p>
 </h3>
 <p>When multiple measure columns exist, output steps require you to
 specify which column to output:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="va">rec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>measures <span class="op">=</span> <span class="st">".uv_spectrum"</span>, prefix <span class="op">=</span> <span class="st">"uv_"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>measures <span class="op">=</span> <span class="st">".ms_spectrum"</span>, prefix <span class="op">=</span> <span class="st">"ms_"</span><span class="op">)</span></span></code></pre></div>

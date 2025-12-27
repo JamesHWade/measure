@@ -185,6 +185,7 @@ internal `.measures` column:
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
+
   # Savitzky-Golay first derivative for baseline removal
   step_measure_savitzky_golay(
     window_side = 5,
@@ -208,6 +209,17 @@ rec
 #> Savitzky-Golay preprocessing on 
 #> SNV transformation on
 ```
+
+measure provides several built-in preprocessing steps
+([`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md),
+[`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md),
+[`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)),
+plus
+[`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
+for custom transformations when the built-in steps don’t cover your
+needs. See
+[`vignette("preprocessing")`](https://jameshwade.github.io/measure/dev/articles/preprocessing.md)
+for details on all available options.
 
 Let’s see how this transforms our spectra:
 

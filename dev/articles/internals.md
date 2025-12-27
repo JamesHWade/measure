@@ -181,6 +181,84 @@ The helper functions `measure_to_matrix()` and `matrix_to_measure()` in
 `R/helpers.R` convert between measure lists and matrices for bulk
 operations.
 
+## Working with Measure Data Interactively
+
+While recipe steps are the primary interface for production pipelines,
+measure provides utility functions for interactive exploration and
+debugging.
+
+### measure_map(): Prototyping transformations
+
+When developing a custom transformation, use
+[`measure_map()`](https://jameshwade.github.io/measure/dev/reference/measure_map.md)
+to test it interactively:
+
+``` r
+# Apply a transformation to each sample's measurements
+centered <- measure_map(result, ~ {
+  .x$value <- .x$value - mean(.x$value)
+  .x
+})
+
+# Check the result
+mean(centered$.measures[[1]]$value)  # Should be ~0
+#> [1] -1.599431e-16
+```
+
+**Important**:
+[`measure_map()`](https://jameshwade.github.io/measure/dev/reference/measure_map.md)
+is for exploration only. Once your transformation works, move it to
+[`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
+for reproducible pipelines:
+
+``` r
+# For production use
+rec <- recipe(...) |>
+  step_measure_input_long(...) |>
+  step_measure_map(~ { .x$value <- .x$value - mean(.x$value); .x })
+```
+
+### measure_map_safely(): Fault-tolerant exploration
+
+When exploring data that might have problematic samples, use the safer
+variant:
+
+``` r
+result <- measure_map_safely(data, risky_function)
+
+# Check which samples failed
+result$errors
+
+# result$result contains data with successful transforms
+# (failed samples keep original values)
+```
+
+### measure_summarize(): Understanding your data
+
+Compute summary statistics across all samples at each measurement
+location:
+
+``` r
+# Default: mean and SD at each location
+stats <- measure_summarize(result)
+head(stats)
+#> # A tibble: 6 × 3
+#>   location  mean    sd
+#>      <int> <dbl> <dbl>
+#> 1        1  2.81 0.411
+#> 2        2  2.81 0.413
+#> 3        3  2.81 0.416
+#> 4        4  2.82 0.418
+#> 5        5  2.82 0.421
+#> 6        6  2.82 0.424
+```
+
+This is useful for:
+
+- Computing reference spectra (e.g., for MSC-style corrections)
+- Identifying high-variability regions
+- Quality control and outlier detection
+
 ## Multiple Measure Columns
 
 measure supports multiple measure columns in a single dataset. This is

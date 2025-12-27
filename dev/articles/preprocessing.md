@@ -281,6 +281,191 @@ p_snv / p_msc
 Both methods produce similar results for this dataset. In practice, try
 both and compare model performance.
 
+## Custom Transformations
+
+### When built-in steps aren’t enough
+
+The built-in preprocessing steps cover the most common operations, but
+you may need domain-specific transformations:
+
+- Custom baseline correction algorithms
+- Instrument-specific corrections
+- Experimental preprocessing techniques
+- Transformations from specialized packages
+
+[`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
+provides an “escape hatch” for applying any custom function to your
+measurements while staying within the recipes framework.
+
+### Using step_measure_map()
+
+The function you provide must accept a tibble with `location` and
+`value` columns and return a tibble with the same structure:
+
+``` r
+# Example: Shift spectra to start at zero
+zero_baseline <- function(x) {
+
+x$value <- x$value - min(x$value)
+x
+}
+
+rec_custom <- recipe(water ~ ., data = meats) |>
+step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+step_measure_map(zero_baseline) |>
+step_measure_snv()
+
+plot_spectra(get_internal(rec_custom), "Custom Zero-Baseline + SNV")
+```
+
+![](preprocessing_files/figure-html/custom-step-1.png)
+
+### Formula syntax for inline transformations
+
+For simple transformations, use formula syntax instead of defining a
+separate function:
+
+``` r
+rec_inline <- recipe(water ~ ., data = meats) |>
+step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+step_measure_map(~ {
+# Log transform (common for absorbance data)
+.x$value <- log1p(.x$value)
+.x
+})
+```
+
+### Passing additional arguments
+
+You can pass extra arguments to your transformation function:
+
+``` r
+# A function with configurable parameters
+robust_scale <- function(x, center_fn = median, scale_fn = mad) {
+x$value <- (x$value - center_fn(x$value)) / scale_fn(x$value)
+x
+}
+
+# Use with custom parameters
+rec <- recipe(water ~ ., data = meats) |>
+step_measure_input_wide(starts_with("x_")) |>
+step_measure_map(robust_scale, center_fn = mean, scale_fn = sd)
+```
+
+### Prototyping with measure_map()
+
+When developing a custom transformation, it helps to prototype
+interactively before putting it in a recipe. Use
+[`measure_map()`](https://jameshwade.github.io/measure/dev/reference/measure_map.md)
+for exploration:
+
+``` r
+# First, get data in internal format
+rec_internal <- recipe(water ~ ., data = meats) |>
+step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+prep()
+
+baked_data <- bake(rec_internal, new_data = NULL)
+
+# Prototype your transformation
+result <- measure_map(baked_data, ~ {
+# Experiment with different approaches
+.x$value <- .x$value - median(.x$value)
+.x
+})
+
+# Check results
+result$.measures[[1]]
+#> <measure_tbl [100 x 2]>
+#> # A tibble: 100 × 2
+#>    location  value
+#>       <dbl>  <dbl>
+#>  1     850  -0.317
+#>  2     852. -0.316
+#>  3     854. -0.316
+#>  4     856. -0.315
+#>  5     858. -0.314
+#>  6     860. -0.314
+#>  7     862. -0.312
+#>  8     864. -0.311
+#>  9     866. -0.309
+#> 10     868. -0.307
+#> # ℹ 90 more rows
+```
+
+Once your transformation works correctly, move it into
+[`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
+for production use. This ensures the transformation is:
+
+- Applied consistently during
+  [`prep()`](https://recipes.tidymodels.org/reference/prep.html) and
+  [`bake()`](https://recipes.tidymodels.org/reference/bake.html)
+- Included when bundling recipes into workflows
+- Reproducible across sessions
+
+### Handling problematic samples
+
+Use
+[`measure_map_safely()`](https://jameshwade.github.io/measure/dev/reference/measure_map_safely.md)
+when exploring data that might have problematic samples:
+
+``` r
+# A transformation that might fail for some samples
+risky_transform <- function(x) {
+if (any(x$value <= 0)) stop("Non-positive values!")
+x$value <- log(x$value)
+x
+}
+
+# Errors are captured, not thrown
+result <- measure_map_safely(baked_data, risky_transform)
+
+# Check which samples failed
+if (nrow(result$errors) > 0) {
+print(result$errors)
+}
+
+# result$result contains the data with successful transforms
+# (failed samples keep their original values)
+```
+
+### Understanding your data with measure_summarize()
+
+Before preprocessing, it’s often helpful to compute summary statistics
+across samples:
+
+``` r
+# Compute mean and SD at each wavelength
+summary_stats <- measure_summarize(baked_data)
+summary_stats
+#> # A tibble: 100 × 3
+#>    location  mean    sd
+#>       <dbl> <dbl> <dbl>
+#>  1     850   2.81 0.411
+#>  2     852.  2.81 0.413
+#>  3     854.  2.81 0.416
+#>  4     856.  2.82 0.418
+#>  5     858.  2.82 0.421
+#>  6     860.  2.82 0.424
+#>  7     862.  2.83 0.426
+#>  8     864.  2.83 0.429
+#>  9     866.  2.83 0.432
+#> 10     868.  2.84 0.434
+#> # ℹ 90 more rows
+
+# Visualize the mean spectrum with variability
+ggplot(summary_stats, aes(x = location)) +
+geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd), alpha = 0.3) +
+geom_line(aes(y = mean)) +
+labs(x = "Wavelength", y = "Signal", title = "Mean Spectrum ± 1 SD") +
+theme_minimal()
+```
+
+![](preprocessing_files/figure-html/summarize-example-1.png)
+
+This can help identify: - Wavelength regions with high variability -
+Potential outliers - Reference spectra for custom corrections
+
 ## Preprocessing pipelines
 
 ### Common combinations
@@ -328,13 +513,14 @@ The order of preprocessing steps matters. General guidelines:
 
 ## Summary table
 
-| Step                                                                                           | Effect             | Use when             |
-|------------------------------------------------------------------------------------------------|--------------------|----------------------|
-| `step_measure_savitzky_golay(order=0)`                                                         | Smoothing          | High-frequency noise |
-| `step_measure_savitzky_golay(order=1)`                                                         | 1st derivative     | Baseline offsets     |
-| `step_measure_savitzky_golay(order=2)`                                                         | 2nd derivative     | Linear baselines     |
-| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Row normalization  | Scatter, path length |
-| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Align to reference | Scatter (supervised) |
+| Step                                                                                           | Effect                | Use when              |
+|------------------------------------------------------------------------------------------------|-----------------------|-----------------------|
+| `step_measure_savitzky_golay(order=0)`                                                         | Smoothing             | High-frequency noise  |
+| `step_measure_savitzky_golay(order=1)`                                                         | 1st derivative        | Baseline offsets      |
+| `step_measure_savitzky_golay(order=2)`                                                         | 2nd derivative        | Linear baselines      |
+| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Row normalization     | Scatter, path length  |
+| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Align to reference    | Scatter (supervised)  |
+| `step_measure_map(fn)`                                                                         | Custom transformation | Domain-specific needs |
 
 ## Tips for choosing preprocessing
 

@@ -10,6 +10,8 @@ Useful links:
 
 - <https://github.com/jameshwade/measure>
 
+- <https://jameshwade.github.io/measure/>
+
 - Report bugs at <https://github.com/jameshwade/measure/issues>
 
 ## Author

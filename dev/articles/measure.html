@@ -260,6 +260,7 @@ internal <code>.measures</code> column:</p>
 <code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span></span>
 <span>  <span class="co"># Savitzky-Golay first derivative for baseline removal</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span></span>
 <span>    window_side <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -282,6 +283,13 @@ internal <code>.measures</code> column:</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Collate long analytical measurements: <span style="color: #0000BB;">transmittance</span></span></span>
 <span><span class="co">#&gt; Savitzky-Golay preprocessing on </span></span>
 <span><span class="co">#&gt; SNV transformation on</span></span></code></pre></div>
+<p>measure provides several built-in preprocessing steps
+(<code><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code>,
+<code><a href="../reference/step_measure_snv.html">step_measure_snv()</a></code>, <code><a href="../reference/step_measure_msc.html">step_measure_msc()</a></code>), plus
+<code><a href="../reference/step_measure_map.html">step_measure_map()</a></code> for custom transformations when the
+built-in steps don’t cover your needs. See
+<code><a href="../articles/preprocessing.html">vignette("preprocessing")</a></code> for details on all available
+options.</p>
 <p>Let’s see how this transforms our spectra:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
