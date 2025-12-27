@@ -20,3 +20,5 @@ docs
 ^revdep$
 ^cran-comments\.md$
 ^\.claude$
+^[.]?air[.]toml$
+^\.vscode$
