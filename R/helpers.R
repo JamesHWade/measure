@@ -26,18 +26,21 @@ measure_to_matrix <- function(x) {
 matrix_to_measure <- function(x, loc) {
   # x is {num_samples} x {num_features}
   # We need to convert this to a list of length {num_samples}.
-  # Each list element is a tibble that is {num_features} x 2
+  # Each list element is a measure_tbl that is {num_features} x 2
   if (!is.matrix(x)) {
     cli::cli_abort("Input should be a matrix.")
   }
   if (length(loc) != ncol(x)) {
-    cli::cli_abort("# locations should be the same at the number of columns in the source matrix.")
+    cli::cli_abort(
+      "# locations should be the same at the number of columns in the source matrix."
+    )
   }
 
   x <- t(x)
   x <- tibble::as_tibble(x, .name_repair = "minimal")
 
-  res <- purrr::map(x, ~ tibble::new_tibble(list(location = loc, value = .x)))
+  # Create measure_tbl objects for each column
+  res <- purrr::map(x, ~ new_measure_tbl(location = loc, value = .x))
   unname(res)
 }
 
@@ -51,31 +54,44 @@ measure_to_tibble <- function(x) {
 # ------------------------------------------------------------------------------
 
 check_for_measure <- function(x) {
-  if (!any(names(x) == ".measures")) {
-    cli::cli_abort("A column called {.code .measures} should be in the data. See
-                    {.fn step_measure_input_wide} and
-                    {.fn step_measure_input_long}.")
+  # First try class-based detection (preferred)
+  meas_cols <- find_measure_cols(x)
+  if (length(meas_cols) > 0) {
+    return(invisible(meas_cols))
   }
-  invisible(NULL)
+
+  # Fallback to name-based detection for backwards compatibility
+  if (!any(names(x) == ".measures")) {
+    cli::cli_abort(c(
+      "A column called {.code .measures} should be in the data.",
+      "i" = "See {.fn step_measure_input_wide} and {.fn step_measure_input_long}."
+    ))
+  }
+  invisible(".measures")
 }
 
 # ------------------------------------------------------------------------------
-# Make sue that data are in the correct format.
+# Make sure that data are in the correct format.
 
 check_has_measure <- function(x, cl) {
+  # First try class-based detection (preferred)
+  meas_cols <- find_measure_cols(x)
+  if (length(meas_cols) > 0) {
+    return(invisible(meas_cols))
+  }
+
+  # Fallback to name-based detection for backwards compatibility
+  if (".measures" %in% names(x)) {
+    return(invisible(".measures"))
+  }
+
+  # Build informative error message
   step_fn <- as.character(cl[[1]])
   step_fn <- gsub("prep\\.", "", step_fn)
-  step_fn <- paste0("`", step_fn, "()`.")
 
-
-  if (!any(names(x) == ".measures")) {
-    msg <-
-      paste0(
-        "It appears that the measurements have not been converted ",
-        "for the inernal format. See `step_measure_input_long()` ",
-        "and `step_measure_input_wide()` and use these prior to ",
-        step_fn
-      )
-    rlang::abort(msg)
-  }
+  cli::cli_abort(c(
+    "Measurements have not been converted to internal format.",
+    "i" = "Use {.fn step_measure_input_long} or {.fn step_measure_input_wide} \\
+          before {.fn {step_fn}}."
+  ))
 }
