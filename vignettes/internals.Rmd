@@ -1,0 +1,190 @@
+---
+title: "Internal Class System"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Internal Class System}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message = FALSE}
+library(measure)
+library(recipes)
+```
+
+## Overview
+
+This vignette describes measure's internal class system. While most users won't need to interact with these internals directly, understanding them is useful if you're:
+
+- Debugging unexpected behavior
+- Contributing to measure
+- Building extensions that work with measure data
+
+## Motivation
+
+Early versions of measure relied on a column named `.measures` to store spectral data. This worked but had limitations:
+
+- Name clashes if users had their own `.measures` column
+- No way to have multiple measure columns
+- Detection relied on column names, not types
+
+Following [Issue #16](https://github.com/JamesHWade/measure/issues/16), measure now uses custom S3 classes. This enables robust detection via `inherits()` and supports multiple measure columns per dataset (see [Multiple Measure Columns](#multiple-measure-columns) below).
+
+## The two classes
+
+measure uses a two-level class hierarchy:
+
+### `measure_tbl`
+
+A single measurement - a tibble with `location` and `value` columns:
+
+```{r measure-tbl}
+# After preprocessing, each row's .measures element is a measure_tbl
+rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(transmittance, location = vars(channel)) |>
+  prep()
+
+result <- bake(rec, new_data = NULL)
+
+# Extract one measurement
+one_measurement <- result$.measures[[1]]
+one_measurement
+
+# Check the class
+class(one_measurement)
+is_measure_tbl(one_measurement)
+```
+
+### `measure_list`
+
+A list column containing multiple `measure_tbl` objects - one per row in your data:
+
+```{r measure-list}
+# The .measures column itself is a measure_list
+class(result$.measures)
+is_measure_list(result$.measures)
+
+# Nice printing in tibbles
+result
+```
+
+## Detecting measure columns
+
+measure provides helper functions to find and validate measure columns:
+
+### `is_measure_list()` and `is_measure_tbl()`
+
+Test if an object has the appropriate class:
+
+```{r is-functions}
+is_measure_list(result$.measures)
+is_measure_tbl(result$.measures[[1]])
+
+# Regular lists and tibbles return FALSE
+is_measure_list(list())
+is_measure_tbl(tibble::tibble(location = 1:5, value = rnorm(5)))
+```
+
+### `find_measure_cols()`
+
+Find all measure columns in a data frame:
+
+```{r find-cols}
+find_measure_cols(result)
+```
+
+### `has_measure_col()`
+
+Check that a data frame has at least one measure column, erroring if not:
+
+```{r has-col}
+has_measure_col(result)
+```
+
+This is used internally by processing steps to validate input.
+
+## Why this matters
+
+The class-based approach provides several benefits:
+
+1. **Robust detection**: Steps use `inherits(x, "measure_list")` instead of checking column names
+2. **Nice printing**: Tibbles show `<meas [100]>` instead of raw list output
+3. **Multiple columns**: You can have multiple measure columns per dataset (e.g., UV and MS spectra)
+4. **Validation**: The classes enforce that measurements have the expected structure
+
+## For package developers
+
+If you're writing functions that work with measure data:
+
+```{r developer-pattern, eval = FALSE}
+my_function <- function(data) {
+  # Validate input has measure columns
+  has_measure_col(data)
+
+  # Find measure columns
+  meas_cols <- find_measure_cols(data)
+
+  # Work with the measure_list
+  for (col in meas_cols) {
+    measurements <- data[[col]]
+    # Each element is a measure_tbl with $location and $value
+  }
+}
+```
+
+The helper functions `measure_to_matrix()` and `matrix_to_measure()` in `R/helpers.R` convert between measure lists and matrices for bulk operations.
+
+## Multiple Measure Columns
+
+measure supports multiple measure columns in a single dataset. This is useful when you have different types of measurements (e.g., UV and MS spectra) that need separate processing.
+
+### Creating multiple measure columns
+
+Use the `col_name` parameter in input steps:
+```{r multiple-cols, eval = FALSE}
+rec <- recipe(outcome ~ ., data = my_data) |>
+  step_measure_input_wide(
+    starts_with("uv_"),
+    col_name = ".uv_spectrum"
+  ) |>
+  step_measure_input_wide(
+    starts_with("ms_"),
+    col_name = ".ms_spectrum"
+  )
+```
+
+### Processing steps
+
+By default, processing steps operate on **all** measure columns:
+
+```{r process-all, eval = FALSE}
+rec <- rec |>
+  step_measure_snv()  # Applies to both .uv_spectrum and .ms_spectrum
+```
+
+To process specific columns, use the `measures` parameter:
+
+```{r process-specific, eval = FALSE}
+rec <- rec |>
+  step_measure_snv(measures = ".uv_spectrum")  # Only UV
+```
+
+### Output steps
+
+When multiple measure columns exist, output steps require you to specify which column to output:
+
+```{r output-multiple, eval = FALSE}
+rec <- rec |>
+  step_measure_output_wide(measures = ".uv_spectrum", prefix = "uv_") |>
+  step_measure_output_wide(measures = ".ms_spectrum", prefix = "ms_")
+```
+
+If you don't specify and multiple columns exist, you'll get a helpful error message telling you which columns are available.

@@ -1,13 +1,19 @@
 #' Reorganize Measurements to Two Columns
 #'
 #' `step_measure_output_long` creates a *specification* of a recipe
+#'
 #'  step that converts measures to a format with columns for the measurement and
 #'  the corresponding location (i.e., "long" format).
 #'
 #' @family input/output steps
 #' @inheritParams recipes::step_center
+#' @param measures An optional single character string specifying which measure
+#'   column to output. If `NULL` (the default) and only one measure column
+#'   exists, that column will be used. If multiple measure columns exist and
+#'   `measures` is `NULL`, an error will be thrown prompting you to specify
+#'   which column to output.
 #' @param values_to A single character string for the column containing the
-#' analytical maesurement.
+#' analytical measurement.
 #' @param location_to A single character string for the column containing the
 #' location of the measurement (e.g. wavenumber or index).
 #' @details
@@ -48,6 +54,7 @@ step_measure_output_long <-
     recipe,
     values_to = ".measure",
     location_to = ".location",
+    measures = NULL,
     role = "predictor",
     trained = FALSE,
     skip = FALSE,
@@ -56,6 +63,7 @@ step_measure_output_long <-
     add_step(
       recipe,
       step_measure_output_long_new(
+        measures = measures,
         values_to = values_to,
         location_to = location_to,
         trained = trained,
@@ -67,9 +75,10 @@ step_measure_output_long <-
   }
 
 step_measure_output_long_new <-
-  function(values_to, location_to, role, trained, skip, id) {
+  function(measures, values_to, location_to, role, trained, skip, id) {
     step(
       subclass = "measure_output_long",
+      measures = measures,
       values_to = values_to,
       location_to = location_to,
       role = role,
@@ -82,7 +91,29 @@ step_measure_output_long_new <-
 #' @export
 prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
   check_has_measure(training, match.call())
+
+  # Resolve which column to output
+  measure_cols <- find_measure_cols(training)
+
+  if (is.null(x$measures)) {
+    if (length(measure_cols) > 1) {
+      cli::cli_abort(c(
+        "Multiple measure columns found: {.field {measure_cols}}",
+        "i" = "Use {.arg measures} to specify which column to output."
+      ))
+    }
+    col <- measure_cols[1]
+  } else {
+    col <- x$measures
+    if (!col %in% measure_cols) {
+      cli::cli_abort(
+        "Column {.field {col}} is not a measure column. Available: {.field {measure_cols}}"
+      )
+    }
+  }
+
   step_measure_output_long_new(
+    measures = col,
     values_to = x$values_to,
     location_to = x$location_to,
     role = x$role,
@@ -94,10 +125,11 @@ prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_output_long <- function(object, new_data, ...) {
-  rnm <- c(".measures.value", ".measures.location")
+  col <- object$measures
+  rnm <- c(paste0(col, ".value"), paste0(col, ".location"))
   names(rnm) <- c(object$values_to, object$location_to)
   new_data %>%
-    tidyr::unnest(cols = c(.measures), names_sep = ".") %>%
+    tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") %>%
     dplyr::rename(!!rnm)
 }
 

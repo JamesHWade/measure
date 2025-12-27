@@ -4,6 +4,11 @@
 #'  step that converts measures to multiple columns (i.e., "wide" format).
 #' @family input/output steps
 #' @inheritParams recipes::step_center
+#' @param measures An optional single character string specifying which measure
+#'   column to output. If `NULL` (the default) and only one measure column
+#'   exists, that column will be used. If multiple measure columns exist and
+#'   `measures` is `NULL`, an error will be thrown prompting you to specify
+#'   which column to output.
 #' @param prefix A character string used to name the new columns.
 #' @details
 #' This step is designed convert analytical measurements from their internal
@@ -46,6 +51,7 @@ step_measure_output_wide <-
   function(
     recipe,
     prefix = "measure_",
+    measures = NULL,
     role = "predictor",
     trained = FALSE,
     skip = FALSE,
@@ -54,6 +60,7 @@ step_measure_output_wide <-
     add_step(
       recipe,
       step_measure_output_wide_new(
+        measures = measures,
         prefix = prefix,
         trained = trained,
         role = role,
@@ -64,9 +71,10 @@ step_measure_output_wide <-
   }
 
 step_measure_output_wide_new <-
-  function(prefix, role, trained, skip, id) {
+  function(measures, prefix, role, trained, skip, id) {
     step(
       subclass = "measure_output_wide",
+      measures = measures,
       prefix = prefix,
       role = role,
       trained = trained,
@@ -78,7 +86,29 @@ step_measure_output_wide_new <-
 #' @export
 prep.step_measure_output_wide <- function(x, training, info = NULL, ...) {
   check_has_measure(training, match.call())
+
+  # Resolve which column to output
+  measure_cols <- find_measure_cols(training)
+
+  if (is.null(x$measures)) {
+    if (length(measure_cols) > 1) {
+      cli::cli_abort(c(
+        "Multiple measure columns found: {.field {measure_cols}}",
+        "i" = "Use {.arg measures} to specify which column to output."
+      ))
+    }
+    col <- measure_cols[1]
+  } else {
+    col <- x$measures
+    if (!col %in% measure_cols) {
+      cli::cli_abort(
+        "Column {.field {col}} is not a measure column. Available: {.field {measure_cols}}"
+      )
+    }
+  }
+
   step_measure_output_wide_new(
+    measures = col,
     prefix = x$prefix,
     role = x$role,
     trained = TRUE,
@@ -89,12 +119,13 @@ prep.step_measure_output_wide <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_output_wide <- function(object, new_data, ...) {
+  col <- object$measures
   non_meas <- names(new_data)
-  non_meas <- non_meas[non_meas != ".measures"]
+  non_meas <- non_meas[non_meas != col]
 
   res <-
     new_data %>%
-    tidyr::unnest(cols = c(.measures)) %>%
+    tidyr::unnest(cols = dplyr::all_of(col)) %>%
     dplyr::mutate(location = gsub(" ", "0", format(location))) %>%
     # remove NA values that are introduced by padding
     tidyr::drop_na("value") %>%

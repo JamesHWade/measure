@@ -25,8 +25,8 @@ check_single_selector <- function(res, arg) {
   }
 }
 
-check_measure_dims <- function(x) {
-  num_rows <- purrr::map_int(x$.measures, nrow)
+check_measure_dims <- function(x, col = ".measures") {
+  num_rows <- purrr::map_int(x[[col]], nrow)
   num_unique <- sort(table(num_rows), decreasing = TRUE)
   most_freq <- as.integer(names(num_unique)[1])
   if (length(num_unique) != 1) {
@@ -42,15 +42,15 @@ check_measure_dims <- function(x) {
   invisible(NULL)
 }
 
-pad_measure_dims <- function(x) {
+pad_measure_dims <- function(x, col = ".measures") {
   # Determine the most frequent number of rows
-  num_rows <- purrr::map_int(x$.measures, nrow)
+  num_rows <- purrr::map_int(x[[col]], nrow)
   num_unique <- sort(table(num_rows), decreasing = TRUE)
   most_freq <- as.integer(names(num_unique)[1])
 
   # Pad each measure so they all have 'most_freq' rows
-  x$.measures <- purrr::map(
-    x$.measures,
+  x[[col]] <- purrr::map(
+    x[[col]],
     ~ {
       df <- .x
       if (nrow(df) < most_freq) {

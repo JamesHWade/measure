@@ -6,11 +6,9 @@ add_location_col <- function(x, loc) {
   x
 }
 
-add_location <- function(.data, loc) {
-  dplyr::mutate(
-    .data,
-    .measures = purrr::map(.measures, add_location_col, loc = loc)
-  )
+add_location <- function(.data, loc, col = ".measures") {
+  .data[[col]] <- purrr::map(.data[[col]], add_location_col, loc = loc)
+  .data
 }
 
 # ------------------------------------------------------------------------------

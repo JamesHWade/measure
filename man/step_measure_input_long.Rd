@@ -8,6 +8,7 @@ step_measure_input_long(
   recipe,
   ...,
   location,
+  col_name = ".measures",
   pad = FALSE,
   role = "measure",
   trained = FALSE,
@@ -26,6 +27,11 @@ of the measurement's profile.}
 
 \item{location}{One or more selector functions to choose which \emph{single}
 column has the locations of the analytical values.}
+
+\item{col_name}{A single character string specifying the name of the output
+column that will contain the measure data. Defaults to \code{".measures"}. Use
+different names when creating multiple measure columns (e.g., \code{".uv_spectrum"}
+and \code{".ms_spectrum"}).}
 
 \item{pad}{Whether to pad the measurements to ensure that they all have the
 same number of values. This is useful when there are missing values in the
