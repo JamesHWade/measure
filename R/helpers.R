@@ -32,7 +32,7 @@ matrix_to_measure <- function(x, loc) {
   }
   if (length(loc) != ncol(x)) {
     cli::cli_abort(
-      "# locations should be the same at the number of columns in the source matrix."
+      "# locations should be the same as the number of columns in the source matrix."
     )
   }
 

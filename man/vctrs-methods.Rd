@@ -16,17 +16,17 @@
 \usage{
 \method{print}{measure_tbl}(x, ..., n = NULL, width = NULL)
 
-vec_ptype_abbr.measure_tbl(x, ...)
+\method{vec_ptype_abbr}{measure_tbl}(x, ...)
 
 \method{print}{measure_list}(x, ...)
 
-vec_ptype_abbr.measure_list(x, ...)
+\method{vec_ptype_abbr}{measure_list}(x, ...)
 
-vec_ptype_full.measure_list(x, ...)
+\method{vec_ptype_full}{measure_list}(x, ...)
 
 \method{format}{measure_list}(x, ...)
 
-obj_print_data.measure_list(x, ...)
+\method{obj_print_data}{measure_list}(x, ...)
 
 \method{[}{measure_list}(x, i, ...)
 

@@ -112,7 +112,7 @@ print.measure_tbl <- function(x, ..., n = NULL, width = NULL) {
 }
 
 #' @rdname vctrs-methods
-#' @export
+#' @exportS3Method vctrs::vec_ptype_abbr
 vec_ptype_abbr.measure_tbl <- function(x, ...) {
   "msr_tbl"
 }
@@ -239,13 +239,13 @@ print.measure_list <- function(x, ...) {
 NULL
 
 #' @rdname vctrs-methods
-#' @export
+#' @exportS3Method vctrs::vec_ptype_abbr
 vec_ptype_abbr.measure_list <- function(x, ...) {
   "meas"
 }
 
 #' @rdname vctrs-methods
-#' @export
+#' @exportS3Method vctrs::vec_ptype_full
 vec_ptype_full.measure_list <- function(x, ...) {
   "measure_list"
 }
@@ -261,7 +261,7 @@ format.measure_list <- function(x, ...) {
 }
 
 #' @rdname vctrs-methods
-#' @export
+#' @exportS3Method pillar::obj_print_data
 obj_print_data.measure_list <- function(x, ...) {
   if (length(x) == 0) {
     return()

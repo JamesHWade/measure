@@ -95,7 +95,6 @@ step_measure_savitzky_golay_new <-
     degree,
     window_side,
     differentiation_order,
-    na_rm,
     skip,
     id
   ) {
