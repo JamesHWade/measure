@@ -82,7 +82,13 @@ bake(rec, new_data = NULL)
 }
 \seealso{
 Other measure-preprocessing: 
+\code{\link{step_measure_calibrate_x}()},
+\code{\link{step_measure_calibrate_y}()},
 \code{\link{step_measure_map}()},
-\code{\link{step_measure_msc}()}
+\code{\link{step_measure_msc}()},
+\code{\link{step_measure_normalize_istd}()},
+\code{\link{step_measure_ratio_reference}()},
+\code{\link{step_measure_subtract_blank}()},
+\code{\link{step_measure_subtract_reference}()}
 }
 \concept{measure-preprocessing}

@@ -1061,3 +1061,73 @@ required_pkgs.step_measure_normalize_auc <- function(x, ...) {
 required_pkgs.step_measure_normalize_peak <- function(x, ...) {
   c("measure", "purrr")
 }
+
+# ==============================================================================
+# step_measure_normalize_istd - Alias for normalize_peak
+# ==============================================================================
+
+#' Internal Standard Normalization
+#'
+#' `step_measure_normalize_istd()` is an alias for [step_measure_normalize_peak()]
+#' with domain-specific naming for chromatography and mass spectrometry users.
+#' It normalizes spectra by dividing by a value computed from a specific region
+#' (internal standard peak).
+#'
+#' @inheritParams step_measure_normalize_peak
+#'
+#' @return An updated version of `recipe` with the new step added.
+#'
+#' @details
+#' This function is identical to [step_measure_normalize_peak()] but uses
+#' terminology familiar to chromatography and mass spectrometry practitioners.
+#'
+#' Internal standard (ISTD) normalization is commonly used to correct for:
+#' - Injection volume variations
+#' - Ionization efficiency differences
+#' - Matrix effects
+#' - Instrument drift
+#'
+#' The internal standard should be a compound that:
+#' - Is chemically stable
+#' - Does not naturally occur in samples
+#' - Elutes in a distinct region
+#' - Has consistent response
+#'
+#' @family measure-preprocessing
+#' @seealso [step_measure_normalize_peak()] for the underlying implementation
+#' @export
+#'
+#' @examples
+#' library(recipes)
+#'
+#' # Normalize to internal standard peak region (channels 50-60)
+#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+#'   update_role(id, new_role = "id") |>
+#'   step_measure_input_long(transmittance, location = vars(channel)) |>
+#'   step_measure_normalize_istd(
+#'     location_min = 50,
+#'     location_max = 60,
+#'     method = "integral"
+#'   )
+step_measure_normalize_istd <- function(
+    recipe,
+    location_min,
+    location_max,
+    method = "mean",
+    measures = NULL,
+    role = NA,
+    trained = FALSE,
+    skip = FALSE,
+    id = recipes::rand_id("measure_normalize_istd")) {
+  step_measure_normalize_peak(
+    recipe = recipe,
+    location_min = location_min,
+    location_max = location_max,
+    method = method,
+    measures = measures,
+    role = role,
+    trained = trained,
+    skip = skip,
+    id = id
+  )
+}
