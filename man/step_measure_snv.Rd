@@ -82,6 +82,7 @@ bake(rec, new_data = NULL)
 }
 \seealso{
 Other measure-preprocessing: 
+\code{\link{step_measure_map}()},
 \code{\link{step_measure_msc}()}
 }
 \concept{measure-preprocessing}

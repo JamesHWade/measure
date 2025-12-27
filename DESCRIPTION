@@ -11,7 +11,7 @@ BugReports: https://github.com/jameshwade/measure/issues
 Depends: 
     R (>= 3.5.0),
     recipes
-Imports: 
+Imports:
     cli,
     dials,
     dplyr,
@@ -22,6 +22,7 @@ Imports:
     rlang,
     tibble,
     tidyr,
+    tidyselect,
     vctrs
 Suggests:
     covr,
@@ -36,7 +37,8 @@ Suggests:
     testthat (>= 3.0.0),
     tidymodels,
     tidyverse,
-    withr
+    withr,
+    workflows
 VignetteBuilder: 
     knitr
 Config/testthat/edition: 3

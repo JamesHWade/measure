@@ -118,6 +118,7 @@ Now we can add spectral preprocessing steps. These operate on the internal `.mea
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
+
   # Savitzky-Golay first derivative for baseline removal
   step_measure_savitzky_golay(
     window_side = 5,
@@ -128,6 +129,8 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 
 rec
 ```
+
+measure provides several built-in preprocessing steps (`step_measure_savitzky_golay()`, `step_measure_snv()`, `step_measure_msc()`), plus `step_measure_map()` for custom transformations when the built-in steps don't cover your needs. See `vignette("preprocessing")` for details on all available options.
 
 Let's see how this transforms our spectra:
 

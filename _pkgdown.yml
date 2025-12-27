@@ -59,6 +59,7 @@ reference:
   - step_measure_savitzky_golay
   - step_measure_snv
   - step_measure_msc
+  - step_measure_map
 - title: Output Steps
   desc: Convert internal format back to modeling-ready data
   contents:
@@ -87,4 +88,10 @@ reference:
   - find_measure_cols
   - has_measure_col
   - required_pkgs.recipe
+- title: Exploration & Analysis
+  desc: Interactive exploration and summary functions for prototyping
+  contents:
+  - measure_map
+  - measure_map_safely
+  - measure_summarize
 

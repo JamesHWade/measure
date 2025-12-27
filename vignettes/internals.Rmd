@@ -142,6 +142,64 @@ my_function <- function(data) {
 
 The helper functions `measure_to_matrix()` and `matrix_to_measure()` in `R/helpers.R` convert between measure lists and matrices for bulk operations.
 
+## Working with Measure Data Interactively
+
+While recipe steps are the primary interface for production pipelines, measure provides utility functions for interactive exploration and debugging.
+
+### measure_map(): Prototyping transformations
+
+When developing a custom transformation, use `measure_map()` to test it interactively:
+
+```{r measure-map-example}
+# Apply a transformation to each sample's measurements
+centered <- measure_map(result, ~ {
+  .x$value <- .x$value - mean(.x$value)
+  .x
+})
+
+# Check the result
+mean(centered$.measures[[1]]$value)  # Should be ~0
+```
+
+**Important**: `measure_map()` is for exploration only. Once your transformation works, move it to `step_measure_map()` for reproducible pipelines:
+
+```{r step-map-example, eval = FALSE}
+# For production use
+rec <- recipe(...) |>
+  step_measure_input_long(...) |>
+  step_measure_map(~ { .x$value <- .x$value - mean(.x$value); .x })
+```
+
+### measure_map_safely(): Fault-tolerant exploration
+
+When exploring data that might have problematic samples, use the safer variant:
+
+```{r safely-example, eval = FALSE}
+result <- measure_map_safely(data, risky_function)
+
+# Check which samples failed
+result$errors
+
+# result$result contains data with successful transforms
+# (failed samples keep original values)
+```
+
+### measure_summarize(): Understanding your data
+
+Compute summary statistics across all samples at each measurement location:
+
+```{r summarize-example}
+# Default: mean and SD at each location
+stats <- measure_summarize(result)
+head(stats)
+```
+
+This is useful for:
+
+- Computing reference spectra (e.g., for MSC-style corrections)
+- Identifying high-variability regions
+- Quality control and outlier detection
+
 ## Multiple Measure Columns
 
 measure supports multiple measure columns in a single dataset. This is useful when you have different types of measurements (e.g., UV and MS spectra) that need separate processing.
