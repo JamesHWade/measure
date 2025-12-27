@@ -490,11 +490,14 @@ required_pkgs.step_measure_subtract_reference <- function(x, ...) {
 #'
 #' @inheritParams step_measure_subtract_blank
 #' @param reference A required external reference spectrum. Can be:
+#'
 #'   - A `measure_tbl` object with `location` and `value` columns
 #'   - A numeric vector (must match the number of locations in data)
 #'   - A data.frame with `location` and `value` columns (will be interpolated)
 #' @param blank An optional blank spectrum to subtract from both sample and
 #'   reference before computing the ratio. Same format options as `reference`.
+#' @param learned_ref A named list containing the validated reference values for
+#'   each measure column. This is `NULL` until the step is trained.
 #'
 #' @return An updated version of `recipe` with the new step added.
 #'

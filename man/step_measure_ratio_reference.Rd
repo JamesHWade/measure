@@ -40,6 +40,9 @@ process. If \code{NULL} (the default), all measure columns (columns with class
 \item{trained}{A logical to indicate if the quantities for preprocessing
 have been estimated.}
 
+\item{learned_ref}{A named list containing the validated reference values for
+each measure column. This is \code{NULL} until the step is trained.}
+
 \item{learned_blank}{A named list containing the learned blank values for
 each measure column. This is \code{NULL} until the step is trained.}
 
