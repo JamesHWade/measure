@@ -129,15 +129,13 @@ test_that("step_measure_baseline_py handles unknown method gracefully", {
   # Use minimal data to reduce warnings (one per sample)
   minimal_data <- meats_long[meats_long$id == unique(meats_long$id)[1], ]
 
-  rec <- recipe(water + fat + protein ~ ., data = minimal_data) |>
-    update_role(id, new_role = "id") |>
-    step_measure_input_long(transmittance, location = vars(channel)) |>
-    step_measure_baseline_py(method = "nonexistent_method") |>
-    prep()
-
-  # Method validation happens at bake time, errors converted to warnings
+  # Warning fires during prep() because recipes bakes training data internally
   expect_warning(
-    bake(rec, new_data = NULL),
+    recipe(water + fat + protein ~ ., data = minimal_data) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_baseline_py(method = "nonexistent_method") |>
+      prep(),
     "pybaselines.*failed"
   )
 })
