@@ -238,6 +238,12 @@ Parameters for hyperparameter tuning with dials
 - [`window_side()`](https://jameshwade.github.io/measure/dev/reference/window_side.md)
   [`differentiation_order()`](https://jameshwade.github.io/measure/dev/reference/window_side.md)
   : Parameter for measure steps
+- [`baseline_lambda()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
+  [`baseline_asymmetry()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
+  [`baseline_degree()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
+  [`baseline_half_window()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
+  [`baseline_span()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
+  : Parameters for baseline correction steps
 
 ## Data
 
@@ -252,10 +258,22 @@ Included datasets for examples and testing
 
 ## Baseline Correction
 
-Baseline correction utilities
+Baseline correction steps and utilities
 
-- [`step_baseline()`](https://jameshwade.github.io/measure/dev/reference/step_baseline.md)
-  : Fit and subtract a baseline from a measurement signal
+- [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)
+  : Asymmetric Least Squares (ALS) Baseline Correction
+- [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md)
+  : Custom Baseline Correction with User-Provided Function
+- [`step_measure_baseline_gpc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.md)
+  : GPC/SEC Baseline Correction
+- [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)
+  : Polynomial Baseline Correction
+- [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md)
+  : Python-Based Baseline Correction via pybaselines
+- [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)
+  : Robust Fitting Baseline Correction
+- [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)
+  : Remove Trend from Measurements
 - [`subtract_rf_baseline()`](https://jameshwade.github.io/measure/dev/reference/subtract_rf_baseline.md)
   : Subtract baseline using robust fitting method
 

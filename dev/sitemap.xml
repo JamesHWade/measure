@@ -13,6 +13,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/articles/sec-analysis-example.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/authors.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/index.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/baseline_lambda.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/find_measure_cols.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/glucose_bioreactors.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/has_measure_col.html</loc></url>
@@ -26,7 +27,13 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/meats_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/reexports.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.html</loc></url>
-<url><loc>https://jameshwade.github.io/measure/dev/reference/step_baseline.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_map.html</loc></url>

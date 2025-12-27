@@ -8,7 +8,25 @@ characteristics.
 ## Usage
 
 ``` r
+# S3 method for class 'step_measure_baseline_custom'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_baseline_py'
+tunable(x, ...)
+
 # S3 method for class 'step_measure_savitzky_golay'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_baseline_als'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_baseline_poly'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_baseline_rf'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_detrend'
 tunable(x, ...)
 ```
 

@@ -1,6 +1,9 @@
 # Subtract baseline using robust fitting method
 
-Subtract baseline using robust fitting method
+A standalone function for robust fitting baseline subtraction using
+local regression with iterative reweighting. For use within a recipe
+workflow, see
+[`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md).
 
 ## Usage
 
@@ -33,22 +36,31 @@ subtract_rf_baseline(data, yvar, span = 2/3, maxit = c(5, 5))
 
 A dataframe matching column in data plus `raw` and `baseline` columns
 
+## See also
+
+[`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)
+for the recipe step version.
+
 ## Examples
 
 ``` r
-meats_long %>% subtract_rf_baseline(yvar = transmittance)
+library(dplyr)
+meats_long |>
+  group_by(id) |>
+  subtract_rf_baseline(yvar = transmittance)
 #> # A tibble: 21,500 × 8
+#> # Groups:   id [215]
 #>       id water   fat protein channel transmittance   raw baseline
 #>    <int> <dbl> <dbl>   <dbl>   <int>         <dbl> <dbl>    <dbl>
-#>  1     1  60.5  22.5    16.7       1        -0.532  2.62     3.15
-#>  2     1  60.5  22.5    16.7       2        -0.532  2.62     3.15
-#>  3     1  60.5  22.5    16.7       3        -0.531  2.62     3.15
-#>  4     1  60.5  22.5    16.7       4        -0.531  2.62     3.15
-#>  5     1  60.5  22.5    16.7       5        -0.530  2.62     3.15
-#>  6     1  60.5  22.5    16.7       6        -0.529  2.62     3.15
-#>  7     1  60.5  22.5    16.7       7        -0.528  2.62     3.15
-#>  8     1  60.5  22.5    16.7       8        -0.527  2.62     3.15
-#>  9     1  60.5  22.5    16.7       9        -0.525  2.63     3.15
-#> 10     1  60.5  22.5    16.7      10        -0.523  2.63     3.15
+#>  1     1  60.5  22.5    16.7       1       0.0668   2.62     2.55
+#>  2     1  60.5  22.5    16.7       2       0.0598   2.62     2.56
+#>  3     1  60.5  22.5    16.7       3       0.0527   2.62     2.57
+#>  4     1  60.5  22.5    16.7       4       0.0458   2.62     2.57
+#>  5     1  60.5  22.5    16.7       5       0.0389   2.62     2.58
+#>  6     1  60.5  22.5    16.7       6       0.0321   2.62     2.59
+#>  7     1  60.5  22.5    16.7       7       0.0256   2.62     2.60
+#>  8     1  60.5  22.5    16.7       8       0.0193   2.62     2.60
+#>  9     1  60.5  22.5    16.7       9       0.0133   2.63     2.61
+#> 10     1  60.5  22.5    16.7      10       0.00753  2.63     2.62
 #> # ℹ 21,490 more rows
 ```
