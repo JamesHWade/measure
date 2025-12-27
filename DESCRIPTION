@@ -11,7 +11,7 @@ BugReports: https://github.com/jameshwade/measure/issues
 Depends: 
     R (>= 3.5.0),
     recipes
-Imports: 
+Imports:
     cli,
     dials,
     dplyr,
@@ -22,6 +22,7 @@ Imports:
     rlang,
     tibble,
     tidyr,
+    tidyselect,
     vctrs
 Suggests:
     covr,
