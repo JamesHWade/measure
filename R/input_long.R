@@ -42,7 +42,7 @@
 #'
 #' # Tidying
 #'
-#' When you [`tidy()`][tidy.recipe()] this step, a tibble indicating which of
+#' When you [`tidy()`][recipes::tidy.recipe()] this step, a tibble indicating which of
 #' the original columns were used to reformat the data.
 #'
 #' @export

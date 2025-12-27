@@ -19,3 +19,4 @@ docs
 ^man-roxygen$
 ^revdep$
 ^cran-comments\.md$
+^\.claude$

@@ -23,19 +23,18 @@ for this step.}
 
 \item{role}{Assign the role of new variables.}
 
-\item{trained}{A logical to indicate if the quantities for
-preprocessing have been estimated.}
+\item{trained}{A logical to indicate if the quantities for preprocessing have
+been estimated.}
 
-\item{options}{A list of options to the default method for
-\code{\link[stats:prcomp]{stats::prcomp()}}. Argument defaults are set to \code{retx = FALSE}, \code{center = FALSE}, \code{scale. = FALSE}, and \code{tol = NULL}. \strong{Note} that the argument \code{x}
-should not be passed here (or at all).}
+\item{options}{A list of options to the default method for \code{\link[stats:prcomp]{stats::prcomp()}}.
+Argument defaults are set to \code{retx = FALSE}, \code{center = FALSE}, \code{scale. = FALSE}, and \code{tol = NULL}. \strong{Note} that the argument \code{x} should not be
+passed here (or at all).}
 
-\item{skip}{A logical. Should the step be skipped when the
-recipe is baked by \code{\link[recipes:bake]{bake()}}? While all operations are baked
-when \code{\link[recipes:prep]{prep()}} is run, some operations may not be able to be
-conducted on new data (e.g. processing the outcome variable(s)).
-Care should be taken when using \code{skip = TRUE} as it may affect
-the computations for subsequent operations.}
+\item{skip}{A logical. Should the step be skipped when the recipe is baked by
+\code{\link[recipes:bake]{bake()}}? While all operations are baked when \code{\link[recipes:prep]{prep()}} is run, some
+operations may not be able to be conducted on new data (e.g. processing the
+outcome variable(s)). Care should be taken when using \code{skip = TRUE} as it
+may affect the computations for subsequent operations.}
 
 \item{id}{A character string that is unique to this step to identify it.}
 }

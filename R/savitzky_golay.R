@@ -47,7 +47,7 @@
 #'
 #' # Tidying
 #'
-#' When you [`tidy()`][tidy.recipe()] this step, a tibble with columns
+#' When you [`tidy()`][recipes::tidy.recipe()] this step, a tibble with columns
 #' <describe tidying> is returned.
 #'
 #' @examples

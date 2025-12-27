@@ -16,32 +16,30 @@ step_measure_input_wide(
 )
 }
 \arguments{
-\item{recipe}{A recipe object. The step will be added to the
-sequence of operations for this recipe.}
+\item{recipe}{A recipe object. The step will be added to the sequence of
+operations for this recipe.}
 
-\item{...}{One or more selector functions to choose variables
-for this step. See \code{\link[recipes:selections]{selections()}} for more details.}
+\item{...}{One or more selector functions to choose variables for this step.
+See \code{\link[recipes:selections]{selections()}} for more details.}
 
-\item{role}{Not used by this step since no new variables are
-created.}
+\item{role}{Not used by this step since no new variables are created.}
 
-\item{trained}{A logical to indicate if the quantities for
-preprocessing have been estimated.}
+\item{trained}{A logical to indicate if the quantities for preprocessing have
+been estimated.}
 
 \item{columns}{A character string of the selected variable names. This field
-is a placeholder and will be populated once \code{\link[=prep]{prep()}} is used.}
+is a placeholder and will be populated once \code{\link[recipes:prep]{recipes::prep()}} is used.}
 
 \item{location_values}{A numeric vector of values that specify the location
 of the measurements (e.g., wavelength etc.) in the same order as the variables
 selected by \code{...}. If not specified, a sequence of integers (starting at 1L)
 is used.}
 
-\item{skip}{A logical. Should the step be skipped when the
-recipe is baked by \code{\link[recipes:bake]{bake()}}? While all operations are baked
-when \code{\link[recipes:prep]{prep()}} is run, some operations may not be able to be
-conducted on new data (e.g. processing the outcome variable(s)).
-Care should be taken when using \code{skip = TRUE} as it may affect
-the computations for subsequent operations.}
+\item{skip}{A logical. Should the step be skipped when the recipe is baked by
+\code{\link[recipes:bake]{bake()}}? While all operations are baked when \code{\link[recipes:prep]{prep()}} is run, some
+operations may not be able to be conducted on new data (e.g. processing the
+outcome variable(s)). Care should be taken when using \code{skip = TRUE} as it
+may affect the computations for subsequent operations.}
 
 \item{id}{A character string that is unique to this step to identify it.}
 }
@@ -68,7 +66,7 @@ input data set, the columns that are \emph{not} analytically measurements show
 have no duplicate combinations in the 20 rows.
 }
 \section{Tidying}{
-When you \code{\link[=tidy.recipe]{tidy()}} this step, a tibble indicating which of
+When you \code{\link[recipes:tidy.recipe]{tidy()}} this step, a tibble indicating which of
 the original columns were used to reformat the data.
 }
 

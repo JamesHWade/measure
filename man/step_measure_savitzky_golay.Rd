@@ -35,8 +35,8 @@ the window. This means that \code{window_side = 1} has a total window width of
 indicates no differentiation).}
 
 \item{skip}{A logical. Should the step be skipped when the
-recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
-when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
+recipe is baked by \code{\link[recipes:bake]{recipes::bake()}}? While all operations are baked
+when \code{\link[recipes:prep]{recipes::prep()}} is run, some operations may not be able to be
 conducted on new data (e.g. processing the outcome variable(s)).
 Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations}
@@ -69,7 +69,7 @@ a special internal format produced by \code{\link[=step_measure_input_wide]{step
 The measurement locations are reset to integer indices starting at one.
 }
 \section{Tidying}{
-When you \code{\link[=tidy.recipe]{tidy()}} this step, a tibble with columns
+When you \code{\link[recipes:tidy.recipe]{tidy()}} this step, a tibble with columns
 \if{html}{\out{<describe tidying>}} is returned.
 }
 
