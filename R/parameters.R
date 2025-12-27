@@ -46,8 +46,6 @@ differentiation_order <- function(range = c(0L, 4L), trans = NULL) {
 }
 
 
-
-
 # ------------------------------------------------------------------------------
 # Tunable methods
 
