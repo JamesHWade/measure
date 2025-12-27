@@ -21,9 +21,15 @@ step that converts measures to multiple columns (i.e., "wide" format).'><meta na
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/baseline.html">baseline</a></li>
-    <li><a class="dropdown-item" href="../articles/recipes.html">What is a recipe?</a></li>
-    <li><a class="dropdown-item" href="../articles/sec-analysis-example.html">sec-analysis-example</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/measure.html">Getting Started</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
+    <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
+    <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/sec-analysis-example.html">Bioreactor Case Study</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -128,18 +134,18 @@ so on.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">small_rec</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span>new_data <span class="op">=</span> <span class="va">small_te</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 10 × 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    batch_id   day glucose .measures           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> S_15         5    2.04 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> S_15         6    5.56 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> S_15         7    4.65 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> S_15         8    9.91 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> S_15         9    4.96 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> S_15        10    6.78 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> S_15        11    6.72 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> S_15        12    4.69 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> S_15        13    6.30 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> S_15        14    3.10 <span style="color: #949494;">&lt;tibble [2,651 × 2]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    batch_id   day glucose   .measures</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;meas&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> S_15         5    2.04 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> S_15         6    5.56 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> S_15         7    4.65 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> S_15         8    9.91 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> S_15         9    4.96 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> S_15        10    6.78 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> S_15        11    6.72 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> S_15        12    4.69 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> S_15        13    6.30 <span style="color: #949494;">[2,651 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> S_15        14    3.10 <span style="color: #949494;">[2,651 × 2]</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># After reformatting:</span></span></span>
 <span class="r-in"><span></span></span>

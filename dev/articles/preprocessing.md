@@ -1,0 +1,363 @@
+# Preprocessing Techniques
+
+``` r
+library(measure)
+library(recipes)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(modeldata)
+
+# Helper function to process and plot spectra
+plot_spectra <- function(data, title, subtitle = NULL) {
+  ggplot(data, aes(x = location, y = value, group = sample_id, color = factor(sample_id))) +
+    geom_line(alpha = 0.7, linewidth = 0.5) +
+    labs(x = "Wavelength", y = "Signal", title = title, subtitle = subtitle) +
+    theme_minimal() +
+    theme(legend.position = "none")
+}
+
+# Prepare sample data
+data(meats)
+wavelengths <- seq(850, 1050, length.out = 100)
+
+# Get spectra in internal format for demonstrations
+get_internal <- function(rec) {
+  bake(prep(rec), new_data = NULL) |>
+    slice(1:15) |>
+    mutate(sample_id = row_number()) |>
+    unnest(.measures)
+}
+```
+
+## Introduction
+
+Spectral preprocessing is essential for building accurate chemometric
+models. Raw spectra often contain unwanted variation from physical
+effects (scatter, baseline drift) that obscure the chemical information
+we’re trying to model. This vignette covers each preprocessing technique
+available in measure and when to use them.
+
+## Why preprocess spectra?
+
+Before diving into specific techniques, let’s understand what we’re
+dealing with. Here are raw NIR spectra from the meats dataset:
+
+``` r
+rec_raw <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths)
+
+raw_data <- get_internal(rec_raw)
+
+plot_spectra(raw_data, "Raw NIR Spectra", "Note the vertical offset differences between samples")
+```
+
+![](preprocessing_files/figure-html/raw-spectra-1.png)
+
+Notice how spectra are shifted vertically relative to each other? This
+offset isn’t due to chemical differences - it’s caused by physical
+factors like particle size, path length, and light scatter. Our
+preprocessing goal is to remove these unwanted effects while preserving
+the chemical information.
+
+## Savitzky-Golay Filtering
+
+### What it does
+
+The Savitzky-Golay filter performs polynomial smoothing and can compute
+derivatives. It fits a polynomial to a sliding window of points, using
+the polynomial’s value (or derivative) at the center point as the
+output.
+
+### When to use it
+
+- **Smoothing (order = 0)**: Reduce random noise while preserving peak
+  shapes
+- **First derivative (order = 1)**: Remove constant baseline offsets,
+  enhance peak differences
+- **Second derivative (order = 2)**: Remove linear baseline trends,
+  further enhance peak resolution
+
+### Parameters
+
+- `window_side`: Number of points on each side of the center point
+  (total window = 2 \* window_side + 1)
+- `differentiation_order`: 0 for smoothing, 1 for first derivative, 2
+  for second derivative
+- `degree`: Polynomial degree (defaults to differentiation_order + 1)
+
+### Examples
+
+``` r
+# Just smoothing
+rec_smooth <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_savitzky_golay(window_side = 7, differentiation_order = 0)
+
+# First derivative
+rec_d1 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_savitzky_golay(window_side = 5, differentiation_order = 1)
+
+# Second derivative
+rec_d2 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_savitzky_golay(window_side = 7, differentiation_order = 2)
+```
+
+``` r
+library(patchwork)
+
+p1 <- plot_spectra(raw_data, "Raw")
+p2 <- plot_spectra(get_internal(rec_smooth), "Smoothed (window = 15)")
+p3 <- plot_spectra(get_internal(rec_d1), "1st Derivative", "Baseline offset removed")
+p4 <- plot_spectra(get_internal(rec_d2), "2nd Derivative", "Linear baseline removed")
+
+(p1 + p2) / (p3 + p4)
+```
+
+![](preprocessing_files/figure-html/sg-plots-1.png)
+
+### Choosing window size
+
+The window size is a bias-variance trade-off: - **Smaller window**: Less
+smoothing, preserves sharp features, more noise - **Larger window**:
+More smoothing, may blur sharp peaks, less noise
+
+A good starting point is a window that spans the narrowest feature you
+want to preserve.
+
+``` r
+windows <- c(3, 7, 15)
+
+window_data <- lapply(windows, function(w) {
+  rec <- recipe(water ~ ., data = meats) |>
+    step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+    step_measure_savitzky_golay(window_side = w, differentiation_order = 1)
+
+  get_internal(rec) |>
+    filter(sample_id == 1) |>
+    mutate(window = paste0("window_side = ", w))
+}) |>
+  bind_rows()
+
+ggplot(window_data, aes(x = location, y = value, color = window)) +
+  geom_line() +
+  labs(
+    x = "Wavelength",
+    y = "Signal",
+    title = "Effect of Window Size on First Derivative",
+    color = NULL
+  ) +
+  theme_minimal()
+```
+
+![](preprocessing_files/figure-html/window-comparison-1.png)
+
+### Tuning with dials
+
+The Savitzky-Golay step is tunable! This means you can use
+[`tune()`](https://hardhat.tidymodels.org/reference/tune.html) to find
+optimal parameters:
+
+``` r
+library(tune)
+library(workflows)
+
+rec_tunable <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_savitzky_golay(
+    window_side = tune(),
+    differentiation_order = tune()
+  ) |>
+  step_measure_output_wide()
+
+# The tunable parameters are:
+tunable(rec_tunable)
+```
+
+## Standard Normal Variate (SNV)
+
+### What it does
+
+SNV normalizes each spectrum independently by centering and scaling:
+
+$$SNV(x) = \frac{x - \bar{x}}{s_{x}}$$
+
+where $\bar{x}$ is the spectrum’s mean and $s_{x}$ is its standard
+deviation.
+
+### When to use it
+
+- Remove multiplicative scatter effects
+- Correct for path length variations
+- Normalize spectra to similar magnitude
+
+SNV is particularly effective for diffuse reflectance spectra where
+particle size causes scatter variations.
+
+### Example
+
+``` r
+rec_snv <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_snv()
+
+snv_data <- get_internal(rec_snv)
+plot_spectra(snv_data, "After SNV Normalization", "Each spectrum has mean = 0 and sd = 1")
+```
+
+![](preprocessing_files/figure-html/snv-example-1.png)
+
+### Combining with derivatives
+
+SNV is often combined with Savitzky-Golay derivatives. The order
+matters:
+
+``` r
+# Derivative then SNV (more common)
+rec_d1_snv <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_savitzky_golay(window_side = 5, differentiation_order = 1) |>
+  step_measure_snv()
+
+plot_spectra(get_internal(rec_d1_snv), "1st Derivative + SNV",
+             "Combined baseline removal and scatter correction")
+```
+
+![](preprocessing_files/figure-html/snv-combination-1.png)
+
+## Multiplicative Scatter Correction (MSC)
+
+### What it does
+
+MSC aligns each spectrum to a reference spectrum (typically the mean of
+all training spectra) by correcting for additive and multiplicative
+effects:
+
+1.  Fit each spectrum $x_{i}$ to the reference $x_{r}$:
+    $x_{i} = m_{i} \cdot x_{r} + a_{i}$
+2.  Correct: $MSC\left( x_{i} \right) = \frac{x_{i} - a_{i}}{m_{i}}$
+
+### When to use it
+
+- Similar applications to SNV
+- When you have a good reference spectrum
+- Often slightly better than SNV for scatter correction
+
+### How it differs from SNV
+
+- **SNV**: Each spectrum normalized independently (no reference needed)
+- **MSC**: All spectra aligned to a common reference (learns reference
+  during prep)
+
+This means MSC is a *trained* step - it learns the reference spectrum
+from training data and applies the same reference to new data.
+
+### Example
+
+``` r
+rec_msc <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_msc()
+
+msc_data <- get_internal(rec_msc)
+plot_spectra(msc_data, "After MSC", "Spectra aligned to mean reference")
+```
+
+![](preprocessing_files/figure-html/msc-example-1.png)
+
+### Comparing SNV and MSC
+
+``` r
+p_snv <- plot_spectra(get_internal(rec_snv), "SNV")
+p_msc <- plot_spectra(get_internal(rec_msc), "MSC")
+
+p_snv / p_msc
+```
+
+![](preprocessing_files/figure-html/snv-vs-msc-1.png)
+
+Both methods produce similar results for this dataset. In practice, try
+both and compare model performance.
+
+## Preprocessing pipelines
+
+### Common combinations
+
+Here are some commonly used preprocessing pipelines:
+
+``` r
+# Pipeline 1: Basic scatter correction
+pipe1 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_snv() |>
+  step_measure_output_wide()
+
+# Pipeline 2: Derivative + normalization
+pipe2 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_savitzky_golay(window_side = 5, differentiation_order = 1) |>
+  step_measure_snv() |>
+  step_measure_output_wide()
+
+# Pipeline 3: Second derivative (often enough on its own)
+pipe3 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_savitzky_golay(window_side = 7, differentiation_order = 2) |>
+  step_measure_output_wide()
+
+# Pipeline 4: MSC + smoothing
+pipe4 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_msc() |>
+  step_measure_savitzky_golay(window_side = 5, differentiation_order = 0) |>
+  step_measure_output_wide()
+```
+
+### Order of operations
+
+The order of preprocessing steps matters. General guidelines:
+
+1.  **Derivatives before normalization**: Apply Savitzky-Golay
+    derivatives first, then SNV/MSC
+2.  **Smoothing after scatter correction**: If using smoothing (not
+    derivatives), apply after MSC/SNV
+3.  **Keep it simple**: Often, a single well-chosen step outperforms
+    complex pipelines
+
+## Summary table
+
+| Step                                                                                           | Effect             | Use when             |
+|------------------------------------------------------------------------------------------------|--------------------|----------------------|
+| `step_measure_savitzky_golay(order=0)`                                                         | Smoothing          | High-frequency noise |
+| `step_measure_savitzky_golay(order=1)`                                                         | 1st derivative     | Baseline offsets     |
+| `step_measure_savitzky_golay(order=2)`                                                         | 2nd derivative     | Linear baselines     |
+| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Row normalization  | Scatter, path length |
+| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Align to reference | Scatter (supervised) |
+
+## Tips for choosing preprocessing
+
+1.  **Start simple**: Try SNV or first derivative alone before complex
+    pipelines
+2.  **Visualize**: Always plot preprocessed spectra to check for
+    artifacts
+3.  **Validate**: Use cross-validation to compare preprocessing
+    strategies
+4.  **Domain knowledge**: Consider the physics of your measurement
+    system
+5.  **Tune**: Use
+    [`tune()`](https://hardhat.tidymodels.org/reference/tune.html) to
+    optimize Savitzky-Golay parameters
+
+## References
+
+- Savitzky, A., and Golay, M. J. E. (1964). Smoothing and
+  Differentiation of Data by Simplified Least Squares Procedures.
+  *Analytical Chemistry*, 36(8), 1627-1639.
+- Barnes, R. J., Dhanoa, M. S., and Lister, S. J. (1989). Standard
+  Normal Variate Transformation and De-Trending of Near-Infrared Diffuse
+  Reflectance Spectra. *Applied Spectroscopy*, 43(5), 772-777.
+- Geladi, P., MacDougall, D., and Martens, H. (1985). Linearization and
+  Scatter-Correction for Near-Infrared Reflectance Spectra of Meat.
+  *Applied Spectroscopy*, 39(3), 491-500.

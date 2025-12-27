@@ -37,9 +37,15 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/baseline.html">baseline</a></li>
-    <li><a class="dropdown-item" href="articles/recipes.html">What is a recipe?</a></li>
-    <li><a class="dropdown-item" href="articles/sec-analysis-example.html">sec-analysis-example</a></li>
+<li><a class="dropdown-item" href="articles/measure.html">Getting Started</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
+    <li><a class="dropdown-item" href="articles/preprocessing.html">Preprocessing Techniques</a></li>
+    <li><a class="dropdown-item" href="articles/recipes.html">Integrating with tidymodels</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
+    <li><a class="dropdown-item" href="articles/baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="articles/sec-analysis-example.html">Bioreactor Case Study</a></li>
   </ul>
 </li>
       </ul>
@@ -60,21 +66,248 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of measure is to be a recipes-like interface to tidymodels for analytical characterization data.</p>
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p>measure extends <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a> with preprocessing steps for analytical measurement data such as spectroscopy, chromatography, and other instrument-generated signals. It provides a <a href="https://recipes.tidymodels.org/" class="external-link">recipes</a>-style interface for common spectral preprocessing techniques.</p>
+<p>measure helps you:</p>
+<ul>
+<li>
+<strong>Convert</strong> measurement data from wide or long formats into an internal representation</li>
+<li>
+<strong>Preprocess</strong> spectra using techniques like smoothing, derivatives, and normalization</li>
+<li>
+<strong>Transform</strong> data back to wide or long format for modeling or visualization</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of measure like so:</p>
+<p>You can install the development version of measure from <a href="https://github.com/" class="external-link">GitHub</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"jameshwade/measure"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"JamesHWade/measure"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
+<p>The measure workflow follows the familiar recipes pattern: define a recipe, add steps, prep, and bake.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jameshwade.github.io/measure">measure</a></span><span class="op">)</span></span>
-<span><span class="co">## basic example code</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># NIR spectroscopy data for predicting meat composition</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 6</span></span>
+<span><span class="co">#&gt;      id water   fat protein channel transmittance</span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;int&gt;         &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1     1  60.5  22.5    16.7       1          2.62</span></span>
+<span><span class="co">#&gt; 2     1  60.5  22.5    16.7       2          2.62</span></span>
+<span><span class="co">#&gt; 3     1  60.5  22.5    16.7       3          2.62</span></span>
+<span><span class="co">#&gt; 4     1  60.5  22.5    16.7       4          2.62</span></span>
+<span><span class="co">#&gt; 5     1  60.5  22.5    16.7       5          2.62</span></span>
+<span><span class="co">#&gt; 6     1  60.5  22.5    16.7       6          2.62</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="building-a-preprocessing-recipe">Building a preprocessing recipe<a class="anchor" aria-label="anchor" href="#building-a-preprocessing-recipe"></a>
+</h3>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Assign sample ID role (not used as predictor)</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Convert long-format measurements to internal representation</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Apply Savitzky-Golay smoothing with first derivative</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span>window_side <span class="op">=</span> <span class="fl">5</span>, differentiation_order <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Standard Normal Variate normalization</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Convert back to wide format for modeling</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="preparing-and-applying-the-recipe">Preparing and applying the recipe<a class="anchor" aria-label="anchor" href="#preparing-and-applying-the-recipe"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Prep learns any parameters from training data</span></span>
+<span><span class="va">prepped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Bake applies the transformations</span></span>
+<span><span class="va">processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">prepped</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Result is ready for modeling</span></span>
+<span><span class="va">processed</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span>
+<span><span class="co">#&gt; # A tibble: 5 × 8</span></span>
+<span><span class="co">#&gt;      id water   fat protein  nir_01  nir_02  nir_03  nir_04</span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1     1  60.5  22.5    16.7 -0.126  -0.110  -0.0928 -0.0745</span></span>
+<span><span class="co">#&gt; 2     2  46    40.1    13.5  0.0184  0.0381  0.0601  0.0841</span></span>
+<span><span class="co">#&gt; 3     3  71     8.4    20.5  0.105   0.114   0.125   0.136 </span></span>
+<span><span class="co">#&gt; 4     4  72.8   5.9    20.7  0.0716  0.0786  0.0871  0.0974</span></span>
+<span><span class="co">#&gt; 5     5  58.3  25.5    15.5 -0.132  -0.118  -0.101  -0.0817</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="visualizing-the-preprocessing">Visualizing the preprocessing<a class="anchor" aria-label="anchor" href="#visualizing-the-preprocessing"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Get data at intermediate step (before output conversion)</span></span>
+<span><span class="va">rec_for_viz</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span>window_side <span class="op">=</span> <span class="fl">5</span>, differentiation_order <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">processed_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_for_viz</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Extract and plot a few spectra</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="va">processed_long</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.measures</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">location</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">sample_id</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sample_id</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Channel"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Preprocessed Signal"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"NIR Spectra After Preprocessing"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"Savitzky-Golay first derivative + SNV normalization"</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Sample"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-visualization-1.png" alt="" width="100%"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="available-steps">Available Steps<a class="anchor" aria-label="anchor" href="#available-steps"></a>
+</h2>
+<div class="section level3">
+<h3 id="input-steps">Input Steps<a class="anchor" aria-label="anchor" href="#input-steps"></a>
+</h3>
+<p>Convert your data to measure’s internal format:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_input_wide.html">step_measure_input_wide()</a></code></td>
+<td>For data with measurements in columns (e.g., wavelengths as column names)</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_input_long.html">step_measure_input_long()</a></code></td>
+<td>For data with measurements in rows (long format)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="processing-steps">Processing Steps<a class="anchor" aria-label="anchor" href="#processing-steps"></a>
+</h3>
+<p>Apply spectral preprocessing:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code></td>
+<td>Smoothing and/or differentiation using Savitzky-Golay filter</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_snv.html">step_measure_snv()</a></code></td>
+<td>Standard Normal Variate normalization</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_msc.html">step_measure_msc()</a></code></td>
+<td>Multiplicative Scatter Correction</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="output-steps">Output Steps<a class="anchor" aria-label="anchor" href="#output-steps"></a>
+</h3>
+<p>Convert back to modeling-ready format:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_output_wide.html">step_measure_output_wide()</a></code></td>
+<td>Convert to wide format (one column per measurement point)</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_output_long.html">step_measure_output_long()</a></code></td>
+<td>Convert to long format</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section level2">
+<h2 id="learning-more">Learning more<a class="anchor" aria-label="anchor" href="#learning-more"></a>
+</h2>
+<ul>
+<li>
+<a href="https://jameshwade.github.io/measure/articles/measure.html">Getting Started</a> - A comprehensive introduction to measure</li>
+<li>
+<a href="https://jameshwade.github.io/measure/articles/preprocessing.html">Preprocessing Techniques</a> - Deep dive into available preprocessing methods</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
+</h2>
+<p>measure builds on the <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a> ecosystem:</p>
+<ul>
+<li>
+<a href="https://recipes.tidymodels.org/" class="external-link">recipes</a> - The foundation for preprocessing pipelines</li>
+<li>
+<a href="https://parsnip.tidymodels.org/" class="external-link">parsnip</a> - Unified modeling interface</li>
+<li>
+<a href="https://workflows.tidymodels.org/" class="external-link">workflows</a> - Bundle preprocessing and modeling</li>
+<li>
+<a href="https://tune.tidymodels.org/" class="external-link">tune</a> - Hyperparameter tuning (works with measure’s tunable steps!)</li>
+</ul>
+<p>For spectral analysis in R, you might also find these packages useful:</p>
+<ul>
+<li>
+<a href="https://github.com/l-ramirez-lopez/prospectr" class="external-link">prospectr</a> - Spectral preprocessing functions</li>
+<li>
+<a href="https://bryanhanson.github.io/ChemoSpec/" class="external-link">ChemoSpec</a> - Exploratory chemometrics</li>
+<li>
+<a href="https://mdatools.com/" class="external-link">mdatools</a> - Multivariate data analysis</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>This package is under active development. Contributions are welcome! Please see the <a href="https://jameshwade.github.io/measure/CONTRIBUTING.html">contributing guidelines</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
+</h2>
+<p>Please note that the measure project is released with a <a href="https://jameshwade.github.io/measure/CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

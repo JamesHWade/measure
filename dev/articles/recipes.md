@@ -1,107 +1,317 @@
-# What is a recipe?
+# Integrating with tidymodels
 
 ``` r
-library(tidymodels)
-#> ── Attaching packages ────────────────────────────────────── tidymodels 1.4.1 ──
-#> ✔ broom        1.0.11     ✔ recipes      1.3.1 
-#> ✔ dials        1.4.2      ✔ rsample      1.3.1 
-#> ✔ dplyr        1.1.4      ✔ tailor       0.1.0 
-#> ✔ ggplot2      4.0.1      ✔ tidyr        1.3.2 
-#> ✔ infer        1.1.0      ✔ tune         2.0.1 
-#> ✔ modeldata    1.5.1      ✔ workflows    1.3.0 
-#> ✔ parsnip      1.4.0      ✔ workflowsets 1.1.1 
-#> ✔ purrr        1.2.0      ✔ yardstick    1.3.2
-#> ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
-#> ✖ purrr::discard() masks scales::discard()
-#> ✖ dplyr::filter()  masks stats::filter()
-#> ✖ dplyr::lag()     masks stats::lag()
-#> ✖ recipes::step()  masks stats::step()
 library(measure)
+library(tidymodels)
+library(modeldata)
+
+tidymodels_prefer()
+set.seed(42)
 ```
 
+## Introduction
+
+One of measure’s key design goals is seamless integration with the
+tidymodels ecosystem. This vignette shows how to use measure
+preprocessing within complete modeling workflows, including:
+
+- Bundling preprocessing with models using workflows
+- Cross-validation with measure recipes
+- Hyperparameter tuning for preprocessing steps
+- Comparing preprocessing strategies
+
+## Setup: The meats dataset
+
+We’ll use the NIR spectroscopy dataset from modeldata to predict water
+content in meat samples. We’ll focus on just predicting `water` to keep
+the example simple.
+
 ``` r
-data("credit_data")
+data(meats)
 
-set.seed(55)
-train_test_split <- initial_split(credit_data)
+# Keep only water as outcome and spectral columns
+meats_water <- meats |>
+  select(water, starts_with("x_"))
 
-credit_train <- training(train_test_split)
-credit_test <- testing(train_test_split)
+# Create train/test split
+split <- initial_split(meats_water, prop = 0.75)
+train <- training(split)
+test <- testing(split)
+
+cat("Training samples:", nrow(train), "\n")
+#> Training samples: 161
+cat("Test samples:", nrow(test), "\n")
+#> Test samples: 54
 ```
 
-### Creating a Recipe
+## Basic workflow
 
-We specify a recipe providing formula and data arguments. Check out
-[*Tidy Modeling with R*](https://www.tmwr.org/base-r.html) to learn more
-about specifying formulas in R.
-
-``` r
-rec_obj <- recipe(Status ~ ., data = credit_train)
-```
-
-The `recipe` funtion returns a recipe object. The formula argument
-determines the roles of each variables. `Status` is assigned the role of
-`outcome`, and the 13 other variables are assigned to role of
-`predictor`.
+The simplest way to use measure with tidymodels is through a workflow
+that bundles preprocessing and modeling:
 
 ``` r
-rec_obj
+# Define preprocessing recipe
+rec <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_savitzky_golay(window_side = 5, differentiation_order = 1) |>
+  step_measure_snv() |>
+  step_measure_output_wide()
+
+# Define model - simple linear regression
+# (For real applications, use regularization like glmnet or PLS)
+lm_spec <- linear_reg() |>
+  set_engine("lm")
+
+# Create workflow
+wf <- workflow() |>
+  add_recipe(rec) |>
+  add_model(lm_spec)
+
+wf
+#> ══ Workflow ════════════════════════════════════════════════════════════════════
+#> Preprocessor: Recipe
+#> Model: linear_reg()
 #> 
-#> ── Recipe ──────────────────────────────────────────────────────────────────────
+#> ── Preprocessor ────────────────────────────────────────────────────────────────
+#> 4 Recipe Steps
 #> 
-#> ── Inputs
-#> Number of variables by role
-#> outcome:    1
-#> predictor: 13
+#> • step_measure_input_wide()
+#> • step_measure_savitzky_golay()
+#> • step_measure_snv()
+#> • step_measure_output_wide()
+#> 
+#> ── Model ───────────────────────────────────────────────────────────────────────
+#> Linear Regression Model Specification (regression)
+#> 
+#> Computational engine: lm
 ```
 
-Diving a bit deeper, the recipe object is a list with 7 elements. Within
-these elements, we can see more details are saved about our variables.
-This includes the `type` and `source` stored in `rec_obj$var_info`.
+### Fit and evaluate
 
 ``` r
-cat(names(rec_obj), sep = "\n")
-#> var_info
-#> term_info
-#> steps
-#> template
-#> levels
-#> retained
-#> requirements
-#> ptype
-#> strings_as_factors
-rec_obj$var_info
-#> # A tibble: 14 × 4
-#>    variable  type      role      source  
-#>    <chr>     <list>    <chr>     <chr>   
-#>  1 Seniority <chr [2]> predictor original
-#>  2 Home      <chr [3]> predictor original
-#>  3 Time      <chr [2]> predictor original
-#>  4 Age       <chr [2]> predictor original
-#>  5 Marital   <chr [3]> predictor original
-#>  6 Records   <chr [3]> predictor original
-#>  7 Job       <chr [3]> predictor original
-#>  8 Expenses  <chr [2]> predictor original
-#>  9 Income    <chr [2]> predictor original
-#> 10 Assets    <chr [2]> predictor original
-#> 11 Debt      <chr [2]> predictor original
-#> 12 Amount    <chr [2]> predictor original
-#> 13 Price     <chr [2]> predictor original
-#> 14 Status    <chr [3]> outcome   original
+# Fit the workflow
+wf_fit <- fit(wf, data = train)
+
+# Predict on test data
+predictions <- predict(wf_fit, test) |>
+  bind_cols(test |> select(water))
+
+# Evaluate
+metrics(predictions, truth = water, estimate = .pred)
 ```
 
-### Adding a Step
+## Cross-validation
 
-The recipe does not yet contain any steps.
+Cross-validation is straightforward with workflows:
 
 ``` r
-rec_obj$steps
-#> NULL
+# Create folds
+folds <- vfold_cv(train, v = 5)
 
-rec_obj_add_step <- rec_obj %>%
-  step_impute_knn(all_predictors())
+# Fit resamples
+cv_results <- fit_resamples(wf, resamples = folds)
 
-rec_obj_add_step$steps
-#> [[1]]
-#> • K-nearest neighbor imputation for: all_predictors()
+# Collect metrics
+collect_metrics(cv_results)
 ```
+
+## Tuning preprocessing parameters
+
+measure’s Savitzky-Golay step has tunable parameters. Let’s find the
+optimal window size and differentiation order:
+
+``` r
+# Create a tunable recipe
+rec_tune <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_savitzky_golay(
+    window_side = tune(),
+    differentiation_order = tune()
+  ) |>
+  step_measure_snv() |>
+  step_measure_output_wide()
+
+# Create tunable workflow
+wf_tune <- workflow() |>
+  add_recipe(rec_tune) |>
+  add_model(lm_spec)
+```
+
+### Define the parameter grid
+
+``` r
+# Create a grid
+grid <- grid_regular(
+  window_side(range = c(3L, 11L)),
+  differentiation_order(range = c(0L, 2L)),
+  levels = c(5, 3)
+)
+
+grid
+```
+
+### Run the tuning
+
+``` r
+tune_results <- tune_grid(
+  wf_tune,
+  resamples = folds,
+  grid = grid
+)
+
+# Show best results
+show_best(tune_results, metric = "rmse", n = 5)
+```
+
+### Visualize tuning results
+
+``` r
+autoplot(tune_results)
+```
+
+### Finalize the workflow
+
+``` r
+# Select best parameters
+best_params <- select_best(tune_results, metric = "rmse")
+best_params
+
+# Finalize workflow
+final_wf <- finalize_workflow(wf_tune, best_params)
+
+# Fit on full training data and evaluate on test
+final_fit <- last_fit(final_wf, split)
+
+collect_metrics(final_fit)
+```
+
+## Comparing preprocessing strategies
+
+A common workflow is comparing different preprocessing approaches.
+Here’s how to set up a fair comparison:
+
+``` r
+# Strategy 1: SNV only
+rec_snv <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_snv() |>
+  step_measure_output_wide()
+
+# Strategy 2: First derivative + SNV
+rec_d1_snv <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_savitzky_golay(window_side = 7, differentiation_order = 1) |>
+  step_measure_snv() |>
+  step_measure_output_wide()
+
+# Strategy 3: MSC
+rec_msc <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_msc() |>
+  step_measure_output_wide()
+
+# Strategy 4: Second derivative only
+rec_d2 <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_savitzky_golay(window_side = 7, differentiation_order = 2) |>
+  step_measure_output_wide()
+
+# Create workflow set
+wf_set <- workflow_set(
+  preproc = list(
+    snv = rec_snv,
+    d1_snv = rec_d1_snv,
+    msc = rec_msc,
+    d2 = rec_d2
+  ),
+  models = list(lm = lm_spec)
+)
+
+wf_set
+```
+
+### Evaluate all strategies
+
+``` r
+# Fit all workflows with cross-validation
+comparison <- workflow_map(
+  wf_set,
+  fn = "fit_resamples",
+  resamples = folds
+)
+
+# Rank by performance
+rank_results(comparison, rank_metric = "rmse")
+```
+
+### Visualize comparison
+
+``` r
+autoplot(comparison) +
+  labs(title = "Preprocessing Strategy Comparison")
+```
+
+## Working with workflows and new data
+
+Once you’ve selected your final workflow, here’s how to use it for
+predictions on new data:
+
+``` r
+# Use the finalized workflow from tuning
+final_trained <- fit(final_wf, train)
+
+# Predict on new data
+new_predictions <- predict(final_trained, test)
+
+# Or use augment for predictions with original data
+augment(final_trained, test) |>
+  select(water, .pred) |>
+  head()
+```
+
+## Tips for spectral modeling
+
+### High-dimensional data
+
+Spectral data is typically high-dimensional (many features, fewer
+samples). Consider:
+
+1.  **Regularization**: Use ridge or elastic net regression
+    (`linear_reg(penalty = tune(), mixture = tune())`)
+2.  **PLS regression**: Use `pls()` from parsnip with the mixOmics
+    engine
+3.  **Feature selection**: Consider variable importance after initial
+    modeling
+
+### Memory considerations
+
+For very large spectral datasets:
+
+- The internal `.measures` format is memory-efficient
+- Consider processing in batches if memory is limited
+- Use
+  [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)
+  only when needed for modeling
+
+### Reproducibility
+
+Always set a seed before cross-validation or tuning:
+
+``` r
+set.seed(123)
+folds <- vfold_cv(train, v = 10)
+```
+
+## Summary
+
+measure integrates naturally with tidymodels: - Use
+[`workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
+to bundle preprocessing and modeling - Cross-validate with
+[`fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
+or `vfold_cv()` - Tune Savitzky-Golay parameters with
+[`tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html) -
+Compare strategies with `workflow_set()`
+
+The recipes paradigm means your preprocessing is applied consistently to
+training data, cross-validation folds, and new predictions - eliminating
+a common source of data leakage in chemometric modeling.

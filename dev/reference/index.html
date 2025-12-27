@@ -19,9 +19,15 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/baseline.html">baseline</a></li>
-    <li><a class="dropdown-item" href="../articles/recipes.html">What is a recipe?</a></li>
-    <li><a class="dropdown-item" href="../articles/sec-analysis-example.html">sec-analysis-example</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/measure.html">Getting Started</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
+    <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
+    <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/sec-analysis-example.html">Bioreactor Case Study</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -38,9 +44,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="input-steps">Input Steps<a class="anchor" aria-label="anchor" href="#input-steps"></a></h2>
 
-
+      <div class="section-desc"><p>Convert raw data to measure’s internal format</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -49,41 +55,6 @@
 
       <dl><dt>
 
-          <code><a href="glucose_bioreactors.html">glucose_bioreactors</a></code> <code><a href="glucose_bioreactors.html">bioreactors_large</a></code> <code><a href="glucose_bioreactors.html">bioreactors_small</a></code>
-
-        </dt>
-        <dd>Raman Spectra Bioreactor Data</dd>
-
-        <dt>
-
-          <code><a href="meats_long.html">meats_long</a></code>
-
-        </dt>
-        <dd>Fat, water and protein content of meat samples</dd>
-
-        <dt>
-
-          <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_savitzky_golay&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Set package dependencies</dd>
-
-        <dt>
-
-          <code><a href="step_baseline.html">step_baseline()</a></code>
-
-        </dt>
-        <dd>Fit and subtract a baseline from a measurement signal</dd>
-
-        <dt>
-
-          <code><a href="step_measure_input_long.html">step_measure_input_long()</a></code>
-
-        </dt>
-        <dd>Ingest Measurements from a Single Column</dd>
-
-        <dt>
-
           <code><a href="step_measure_input_wide.html">step_measure_input_wide()</a></code>
 
         </dt>
@@ -91,26 +62,21 @@
 
         <dt>
 
-          <code><a href="step_measure_msc.html">step_measure_msc()</a></code>
+          <code><a href="step_measure_input_long.html">step_measure_input_long()</a></code>
 
         </dt>
-        <dd>Multiplicative Scatter Correction (MSC)</dd>
+        <dd>Ingest Measurements from a Single Column</dd>
+      </dl></div><div class="section level2">
+      <h2 id="processing-steps">Processing Steps<a class="anchor" aria-label="anchor" href="#processing-steps"></a></h2>
 
-        <dt>
+      <div class="section-desc"><p>Apply spectral preprocessing transformations</p></div>
 
-          <code><a href="step_measure_output_long.html">step_measure_output_long()</a></code>
+      <dl></dl></div><div class="section level2">
 
-        </dt>
-        <dd>Reorganize Measurements to Two Columns</dd>
 
-        <dt>
 
-          <code><a href="step_measure_output_wide.html">step_measure_output_wide()</a></code>
 
-        </dt>
-        <dd>Reorganize Measurements to Separate Columns</dd>
-
-        <dt>
+      <dl><dt>
 
           <code><a href="step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code>
 
@@ -126,19 +92,142 @@
 
         <dt>
 
-          <code><a href="subtract_rf_baseline.html">subtract_rf_baseline()</a></code>
+          <code><a href="step_measure_msc.html">step_measure_msc()</a></code>
 
         </dt>
-        <dd>Subtract baseline using robust fitting method</dd>
+        <dd>Multiplicative Scatter Correction (MSC)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="output-steps">Output Steps<a class="anchor" aria-label="anchor" href="#output-steps"></a></h2>
+
+      <div class="section-desc"><p>Convert internal format back to modeling-ready data</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_output_wide.html">step_measure_output_wide()</a></code>
+
+        </dt>
+        <dd>Reorganize Measurements to Separate Columns</dd>
 
         <dt>
+
+          <code><a href="step_measure_output_long.html">step_measure_output_long()</a></code>
+
+        </dt>
+        <dd>Reorganize Measurements to Two Columns</dd>
+      </dl></div><div class="section level2">
+      <h2 id="tunable-parameters">Tunable Parameters<a class="anchor" aria-label="anchor" href="#tunable-parameters"></a></h2>
+
+      <div class="section-desc"><p>Parameters for hyperparameter tuning with dials</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
 
           <code><a href="window_side.html">window_side()</a></code> <code><a href="window_side.html">differentiation_order()</a></code>
 
         </dt>
         <dd>Parameter for measure steps</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
+
+      <div class="section-desc"><p>Included datasets for examples and testing</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="meats_long.html">meats_long</a></code>
+
+        </dt>
+        <dd>Fat, water and protein content of meat samples</dd>
+
+        <dt>
+
+          <code><a href="glucose_bioreactors.html">glucose_bioreactors</a></code> <code><a href="glucose_bioreactors.html">bioreactors_large</a></code> <code><a href="glucose_bioreactors.html">bioreactors_small</a></code>
+
+        </dt>
+        <dd>Raman Spectra Bioreactor Data</dd>
+      </dl></div><div class="section level2">
+      <h2 id="baseline-correction">Baseline Correction<a class="anchor" aria-label="anchor" href="#baseline-correction"></a></h2>
+
+      <div class="section-desc"><p>Baseline correction utilities</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_baseline.html">step_baseline()</a></code>
+
+        </dt>
+        <dd>Fit and subtract a baseline from a measurement signal</dd>
+
+        <dt>
+
+          <code><a href="subtract_rf_baseline.html">subtract_rf_baseline()</a></code>
+
+        </dt>
+        <dd>Subtract baseline using robust fitting method</dd>
+      </dl></div><div class="section level2">
+      <h2 id="utilities">Utilities<a class="anchor" aria-label="anchor" href="#utilities"></a></h2>
+
+      <div class="section-desc"><p>Helper functions and utilities</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="is_measure_tbl.html">is_measure_tbl()</a></code>
+
+        </dt>
+        <dd>Test if object is a measure tibble</dd>
+
+        <dt>
+
+          <code><a href="is_measure_list.html">is_measure_list()</a></code>
+
+        </dt>
+        <dd>Test if object is a measure list</dd>
+
+        <dt>
+
+          <code><a href="find_measure_cols.html">find_measure_cols()</a></code>
+
+        </dt>
+        <dd>Find measure columns in a data frame</dd>
+
+        <dt>
+
+          <code><a href="has_measure_col.html">has_measure_col()</a></code>
+
+        </dt>
+        <dd>Check if data frame has measure column(s)</dd>
+
+        <dt>
+
+          <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_savitzky_golay&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Set package dependencies</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

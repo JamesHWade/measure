@@ -7,12 +7,17 @@
 <url><loc>https://jameshwade.github.io/measure/dev/articles/baseline.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/index.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/measure.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/articles/preprocessing.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/recipes.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/sec-analysis-example.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/authors.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/index.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/find_measure_cols.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/glucose_bioreactors.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/has_measure_col.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/index.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_list.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_tbl.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure-package.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/meats_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/reexports.html</loc></url>
@@ -28,6 +33,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/subtract_rf_baseline.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/tidy.recipe.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/tunable_measure.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/vctrs-methods.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/window_side.html</loc></url>
 </urlset>
 

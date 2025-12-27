@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>measure • measure</title>
+<title>Getting Started with measure • measure</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="measure">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started with measure">
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -35,9 +35,15 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/baseline.html">baseline</a></li>
-    <li><a class="dropdown-item" href="../articles/recipes.html">What is a recipe?</a></li>
-    <li><a class="dropdown-item" href="../articles/sec-analysis-example.html">sec-analysis-example</a></li>
+<li><a class="dropdown-item" href="../articles/measure.html">Getting Started</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
+    <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
+    <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
+    <li><a class="dropdown-item" href="../articles/baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/sec-analysis-example.html">Bioreactor Case Study</a></li>
   </ul>
 </li>
       </ul>
@@ -59,7 +65,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>measure</h1>
+      <h1>Getting Started with measure</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/jameshwade/measure/blob/main/vignettes/measure.Rmd" class="external-link"><code>vignettes/measure.Rmd</code></a></small>
@@ -70,91 +76,376 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jameshwade.github.io/measure">measure</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: recipes</span></span>
-<span><span class="co">#&gt; Loading required package: dplyr</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'recipes'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     step</span></span></code></pre></div>
-<p>To understand measure, we need to re-introduce some concepts from <a href="https://recipes.tidymodels.org/articles/recipes.html" class="external-link">recipes</a>,
-namely <strong>variables</strong> and <strong>roles</strong>. Variables
-refer the the data columnn in a data frame or tibble that contain raw
-data. Roles define how we will use these variables in our model. For
-analytical measurements, we need more than the roles that recipes
-provides. Recipes was designed to be extensible in exactly this way.</p>
-<p>Starting from Max Kuhn’s <a href="https://community.rstudio.com/t/a-recipes-extension-for-spectrometry-spectroscopy-chromatographic-or-similar-data/143714/2" class="external-link">suggestions</a>,
-additional roles to be included in this package are:</p>
-<ul>
-<li>
-<strong>measurment variables</strong>: raw data from an instrument
-(e.g., time, absorbance, millivolts, volume, etc.)</li>
-<li>
-<strong>sample identifies</strong>: define the subset of the data
-that we are interested in (e.g., sample, condition, replicate, day,
-etc.)</li>
-<li>
-<strong>experimental conditions</strong>: define the conditions
-under which the measurement was made (e.g., temperature, pH, reagents,
-column type, flow rate, etc.)</li>
-</ul>
-<p>Our challenge is to strike the right balance between a flexibile
-package and a useful one.</p>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="scope-of-data-sources">Scope of Data Sources<a class="anchor" aria-label="anchor" href="#scope-of-data-sources"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Analytical measurement systems are as varied as the applications they
-are used in. The field is necessarily broad and growing. The American
-Chemical Society <a href="https://www.acs.org/content/acs/en/careers/chemical-sciences/areas/analytical-chemistry.html" class="external-link">defines
-the field</a> as:</p>
-<blockquote>
-<p>the science of obtaining, processing, and communicating information
-about the composition and structure of matter. In other words, it is the
-art and science of determining what matter is and how much of it
-exists.</p>
-</blockquote>
-<p>Common analytical techniques include chromatography, optical
-spectroscopy, mass spectrometry, microscopy, and many others. The
-initial scope of <a href="https://jameshwade.github.io/measure">measure</a> is on common techniques that can
-represent data in a tibble or series of tibbles.</p>
-<p>Researchers who are experts in performing these types of measurements
-refer their equipment as instruments. However, instrumental variables
-already have a meaning in the statistics literature, and so we will
-avoid that terminology.</p>
+<p>The measure package extends <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a> with preprocessing
+steps designed specifically for analytical measurement data. If you work
+with spectroscopy, chromatography, or other instrument-generated
+signals, measure provides familiar recipes-style preprocessing that
+integrates seamlessly with the tidymodels ecosystem.</p>
+<div class="section level3">
+<h3 id="why-measure">Why measure?<a class="anchor" aria-label="anchor" href="#why-measure"></a>
+</h3>
+<p>Analytical data has unique preprocessing requirements:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Multi-dimensional signals</strong>: Each sample produces
+many measurements (e.g., absorbance at hundreds of wavelengths)</li>
+<li>
+<strong>Specialized transformations</strong>: Techniques like
+Savitzky-Golay derivatives and scatter correction are standard
+practice</li>
+<li>
+<strong>Format flexibility</strong>: Data may arrive in wide format
+(one column per wavelength) or long format (one row per
+measurement)</li>
+</ol>
+<p>measure handles all of this while keeping the intuitive recipes
+interface you already know. ## The measure workflow</p>
+<p>The typical measure workflow has three phases:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Input step</strong>: Convert your data to measure’s internal
+format</li>
+<li>
+<strong>Processing steps</strong>: Apply spectral preprocessing
+(smoothing, derivatives, normalization)</li>
+<li>
+<strong>Output step</strong>: Convert back to a format suitable for
+modeling</li>
+</ol>
+<p>Let’s see this in action with real data.</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="data-sources">Data Sources<a class="anchor" aria-label="anchor" href="#data-sources"></a>
+<h2 id="example-nir-spectroscopy-of-meat-samples">Example: NIR spectroscopy of meat samples<a class="anchor" aria-label="anchor" href="#example-nir-spectroscopy-of-meat-samples"></a>
 </h2>
-<p>There are a number of data sets in <a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a> and
-<a href="https://github.com/l-ramirez-lopez/prospectr" class="external-link">prospectr</a> packages. These include
-<code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code> and <code><a href="https://rdrr.io/pkg/prospectr/man/NIRsoil.html" class="external-link">prospectr::NIRsoil</a></code>.</p>
-<p>Mendeley Data offers data inlcuded as part of various publications. A
-few possibilities include:</p>
+<p>We’ll use the <code>meats_long</code> dataset included in measure.
+This contains NIR (Near-Infrared) transmittance spectra of meat samples,
+with the goal of predicting water, fat, and protein content.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Each sample has 100 spectral channels</span></span>
+<span><span class="va">meats_long</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21,500 × 6</span></span></span>
+<span><span class="co">#&gt;       id water   fat protein channel transmittance</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1  60.5  22.5    16.7       1          2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1  60.5  22.5    16.7       2          2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1  60.5  22.5    16.7       3          2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1  60.5  22.5    16.7       4          2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1  60.5  22.5    16.7       5          2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1  60.5  22.5    16.7       6          2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1  60.5  22.5    16.7       7          2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     1  60.5  22.5    16.7       8          2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     1  60.5  22.5    16.7       9          2.63</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     1  60.5  22.5    16.7      10          2.63</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 21,490 more rows</span></span></span></code></pre></div>
+<p>The data is in “long” format where each row represents one
+measurement at one channel for one sample. Let’s visualize a few
+spectra:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">meats_long</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op">&lt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">channel</span>, y <span class="op">=</span> <span class="va">transmittance</span>, group <span class="op">=</span> <span class="va">id</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Channel"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Transmittance"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Raw NIR Spectra"</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Sample ID"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="measure_files/figure-html/raw-spectra-1.png" class="r-plt" alt="" width="672"></p>
+<div class="section level3">
+<h3 id="creating-a-recipe">Creating a recipe<a class="anchor" aria-label="anchor" href="#creating-a-recipe"></a>
+</h3>
+<p>We start by creating a recipe that specifies the outcome variables
+and predictors:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Mark 'id' as an identifier, not a predictor</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Inputs</span></span>
+<span><span class="co">#&gt; Number of variables by role</span></span>
+<span><span class="co">#&gt; outcome:   3</span></span>
+<span><span class="co">#&gt; predictor: 2</span></span>
+<span><span class="co">#&gt; id:        1</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-1-input-the-measurements">Step 1: Input the measurements<a class="anchor" aria-label="anchor" href="#step-1-input-the-measurements"></a>
+</h3>
+<p>Since our data is in long format, we use
+<code><a href="../reference/step_measure_input_long.html">step_measure_input_long()</a></code>. This converts the
+<code>transmittance</code> values (indexed by <code>channel</code>) into
+measure’s internal format:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="va">rec</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Inputs</span></span>
+<span><span class="co">#&gt; Number of variables by role</span></span>
+<span><span class="co">#&gt; outcome:   3</span></span>
+<span><span class="co">#&gt; predictor: 2</span></span>
+<span><span class="co">#&gt; id:        1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Operations</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Collate long analytical measurements: <span style="color: #0000BB;">transmittance</span></span></span></code></pre></div>
+<p>After prepping and baking, you’ll see that the original
+<code>transmittance</code> and <code>channel</code> columns are replaced
+by a <code>.measures</code> column containing nested tibbles:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec_prepped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span><span class="op">)</span></span>
+<span><span class="va">internal_format</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec_prepped</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># The data now has a .measures list-column</span></span>
+<span><span class="va">internal_format</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 215 × 5</span></span></span>
+<span><span class="co">#&gt;       id water   fat protein .measures</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;meas&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1  60.5  22.5    16.7 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2  46    40.1    13.5 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3  71     8.4    20.5 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4  72.8   5.9    20.7 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5  58.3  25.5    15.5 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6  44    42.7    13.7 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7  44    42.7    13.7 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8  69.3  10.6    19.3 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9  61.4  19.9    17.7 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10  61.4  19.9    17.7 <span style="color: #949494;">[100 × 2]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 205 more rows</span></span></span>
+<span></span>
+<span><span class="co"># Each element contains location and value</span></span>
+<span><span class="va">internal_format</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; &lt;measure_tbl [100 x 2]&gt;</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 100 × 2</span></span></span>
+<span><span class="co">#&gt;    location value</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        1  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        2  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        3  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>        4  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>        5  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>        6  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        7  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        8  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>        9  2.63</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       10  2.63</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 90 more rows</span></span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-2-apply-preprocessing">Step 2: Apply preprocessing<a class="anchor" aria-label="anchor" href="#step-2-apply-preprocessing"></a>
+</h3>
+<p>Now we can add spectral preprocessing steps. These operate on the
+internal <code>.measures</code> column:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Savitzky-Golay first derivative for baseline removal</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span></span>
+<span>    window_side <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    differentiation_order <span class="op">=</span> <span class="fl">1</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Standard Normal Variate for scatter correction</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Inputs</span></span>
+<span><span class="co">#&gt; Number of variables by role</span></span>
+<span><span class="co">#&gt; outcome:   3</span></span>
+<span><span class="co">#&gt; predictor: 2</span></span>
+<span><span class="co">#&gt; id:        1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Operations</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Collate long analytical measurements: <span style="color: #0000BB;">transmittance</span></span></span>
+<span><span class="co">#&gt; Savitzky-Golay preprocessing on </span></span>
+<span><span class="co">#&gt; SNV transformation on</span></span></code></pre></div>
+<p>Let’s see how this transforms our spectra:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Unnest for plotting</span></span>
+<span><span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="va">processed</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.measures</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">location</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">sample_id</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sample_id</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Channel"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Preprocessed Signal"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"After Savitzky-Golay + SNV"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"First derivative removes baseline; SNV normalizes scatter"</span>,</span>
+<span>    color <span class="op">=</span> <span class="st">"Sample"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="measure_files/figure-html/processed-spectra-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level3">
+<h3 id="step-3-output-for-modeling">Step 3: Output for modeling<a class="anchor" aria-label="anchor" href="#step-3-output-for-modeling"></a>
+</h3>
+<p>For most modeling workflows, you’ll want data in wide format (one
+column per spectral feature):</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span>window_side <span class="op">=</span> <span class="fl">5</span>, differentiation_order <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">modeling_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_full</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Ready for modeling!</span></span>
+<span><span class="va">modeling_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 10</span></span></span>
+<span><span class="co">#&gt;      id water   fat protein  nir_01  nir_02  nir_03  nir_04  nir_05  nir_06</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1  60.5  22.5    16.7 -<span style="color: #BB0000;">0.126</span>  -<span style="color: #BB0000;">0.110</span>  -<span style="color: #BB0000;">0.092</span><span style="color: #BB0000; text-decoration: underline;">8</span> -<span style="color: #BB0000;">0.074</span><span style="color: #BB0000; text-decoration: underline;">5</span> -<span style="color: #BB0000;">0.055</span><span style="color: #BB0000; text-decoration: underline;">3</span> -<span style="color: #BB0000;">0.034</span><span style="color: #BB0000; text-decoration: underline;">6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2  46    40.1    13.5  0.018<span style="text-decoration: underline;">4</span>  0.038<span style="text-decoration: underline;">1</span>  0.060<span style="text-decoration: underline;">1</span>  0.084<span style="text-decoration: underline;">1</span>  0.110   0.137 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3  71     8.4    20.5  0.105   0.114   0.125   0.136   0.148   0.159 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4  72.8   5.9    20.7  0.071<span style="text-decoration: underline;">6</span>  0.078<span style="text-decoration: underline;">6</span>  0.087<span style="text-decoration: underline;">1</span>  0.097<span style="text-decoration: underline;">4</span>  0.108   0.119 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5  58.3  25.5    15.5 -<span style="color: #BB0000;">0.132</span>  -<span style="color: #BB0000;">0.118</span>  -<span style="color: #BB0000;">0.101</span>  -<span style="color: #BB0000;">0.081</span><span style="color: #BB0000; text-decoration: underline;">7</span> -<span style="color: #BB0000;">0.060</span><span style="color: #BB0000; text-decoration: underline;">8</span> -<span style="color: #BB0000;">0.038</span><span style="color: #BB0000; text-decoration: underline;">5</span></span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="working-with-wide-format-data">Working with wide-format data<a class="anchor" aria-label="anchor" href="#working-with-wide-format-data"></a>
+</h2>
+<p>If your data starts in wide format (measurements as columns), use
+<code><a href="../reference/step_measure_input_wide.html">step_measure_input_wide()</a></code> instead. Here’s an example using
+data from modeldata:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># This data has x_001, x_002, ... columns for spectral channels</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">meats</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
+<span><span class="co">#&gt;   x_001 x_002 x_003 x_004 x_005 x_006 x_007 x_008</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  2.62  2.62  2.62  2.62  2.62  2.62  2.62  2.62</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  2.83  2.84  2.84  2.85  2.85  2.86  2.86  2.87</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  2.58  2.58  2.59  2.59  2.59  2.59  2.59  2.60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>  2.82  2.82  2.83  2.83  2.83  2.83  2.83  2.84</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  2.79  2.79  2.79  2.79  2.80  2.80  2.80  2.80</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  3.01  3.02  3.02  3.03  3.03  3.04  3.04  3.05</span></span>
+<span></span>
+<span><span class="co"># Create location values (optional - defaults to 1, 2, 3, ...)</span></span>
+<span><span class="va">wavelengths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">850</span>, <span class="fl">1050</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec_wide</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>,</span>
+<span>    location_values <span class="op">=</span> <span class="va">wavelengths</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"spec_"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_wide</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span>
+<span><span class="co">#&gt; Warning: Values from `value` are not uniquely identified; output will contain list-cols.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use `values_fn = list` to suppress this warning.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use `values_fn = {summary_fun}` to summarise duplicates.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use the following dplyr code to identify duplicates.</span></span>
+<span><span class="co">#&gt;   {data} |&gt;</span></span>
+<span><span class="co">#&gt;   dplyr::summarise(n = dplyr::n(), .by = c(water, fat, protein, location)) |&gt;</span></span>
+<span><span class="co">#&gt;   dplyr::filter(n &gt; 1L)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 8</span></span></span>
+<span><span class="co">#&gt;   water   fat protein spec_0850.0000 spec_0852.0202 spec_0854.0404</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  60.5  22.5    16.7 <span style="color: #949494;">&lt;dbl [1]&gt;</span>      <span style="color: #949494;">&lt;dbl [1]&gt;</span>      <span style="color: #949494;">&lt;dbl [1]&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  46    40.1    13.5 <span style="color: #949494;">&lt;dbl [1]&gt;</span>      <span style="color: #949494;">&lt;dbl [1]&gt;</span>      <span style="color: #949494;">&lt;dbl [1]&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  71     8.4    20.5 <span style="color: #949494;">&lt;dbl [1]&gt;</span>      <span style="color: #949494;">&lt;dbl [1]&gt;</span>      <span style="color: #949494;">&lt;dbl [1]&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>  72.8   5.9    20.7 <span style="color: #949494;">&lt;dbl [2]&gt;</span>      <span style="color: #949494;">&lt;dbl [2]&gt;</span>      <span style="color: #949494;">&lt;dbl [2]&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  58.3  25.5    15.5 <span style="color: #949494;">&lt;dbl [2]&gt;</span>      <span style="color: #949494;">&lt;dbl [2]&gt;</span>      <span style="color: #949494;">&lt;dbl [2]&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: spec_0856.0606 &lt;list&gt;, spec_0858.0808 &lt;list&gt;</span></span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="applying-recipes-to-new-data">Applying recipes to new data<a class="anchor" aria-label="anchor" href="#applying-recipes-to-new-data"></a>
+</h2>
+<p>Like any recipe, you prep once on training data, then bake on new
+data:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Split the data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">meats</span><span class="op">)</span>, <span class="fl">180</span><span class="op">)</span></span>
+<span><span class="va">train_data</span> <span class="op">&lt;-</span> <span class="va">meats</span><span class="op">[</span><span class="va">train_idx</span>, <span class="op">]</span></span>
+<span><span class="va">test_data</span> <span class="op">&lt;-</span> <span class="va">meats</span><span class="op">[</span><span class="op">-</span><span class="va">train_idx</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Prep on training data</span></span>
+<span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span>window_side <span class="op">=</span> <span class="fl">7</span>, differentiation_order <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec_prepped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span>, training <span class="op">=</span> <span class="va">train_data</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Values from `value` are not uniquely identified; output will contain list-cols.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use `values_fn = list` to suppress this warning.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use `values_fn = {summary_fun}` to summarise duplicates.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use the following dplyr code to identify duplicates.</span></span>
+<span><span class="co">#&gt;   {data} |&gt;</span></span>
+<span><span class="co">#&gt;   dplyr::summarise(n = dplyr::n(), .by = c(water, fat, protein, location)) |&gt;</span></span>
+<span><span class="co">#&gt;   dplyr::filter(n &gt; 1L)</span></span>
+<span></span>
+<span><span class="co"># Bake on both</span></span>
+<span><span class="va">train_processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec_prepped</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="va">test_processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec_prepped</span>, new_data <span class="op">=</span> <span class="va">test_data</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Values from `value` are not uniquely identified; output will contain list-cols.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use `values_fn = list` to suppress this warning.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use `values_fn = {summary_fun}` to summarise duplicates.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Use the following dplyr code to identify duplicates.</span></span>
+<span><span class="co">#&gt;   {data} |&gt;</span></span>
+<span><span class="co">#&gt;   dplyr::summarise(n = dplyr::n(), .by = c(water, fat, protein, location)) |&gt;</span></span>
+<span><span class="co">#&gt;   dplyr::filter(n &gt; 1L)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Training samples:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">train_processed</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Training samples: 153</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Test samples:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">test_processed</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Test samples: 32</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="integration-with-tidymodels">Integration with tidymodels<a class="anchor" aria-label="anchor" href="#integration-with-tidymodels"></a>
+</h2>
+<p>measure recipes work seamlessly with the broader tidymodels
+ecosystem. See <code><a href="../articles/recipes.html">vignette("recipes")</a></code> for complete examples
+including:</p>
 <ul>
-<li><a href="https://data.mendeley.com/datasets/2rcc8488hx" class="external-link">Machine
-Learning of MS dataset</a></li>
-<li><a href="https://data.mendeley.com/datasets/msy7k3myrx" class="external-link">Data for: A
-Sensitive Quantitative Analysis of Abiotically Synthesized Short
-Homopeptides using Ultraperformance Liquid Chromatography and
-Time-of-Flight Mass Spectrometry</a></li>
+<li>Bundling preprocessing with models using workflows</li>
+<li>Cross-validation with measure recipes</li>
+<li>Hyperparameter tuning for preprocessing steps</li>
+<li>Comparing preprocessing strategies</li>
 </ul>
-<p>There are also some repositories that might be of use:</p>
+</div>
+<div class="section level2">
+<h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+</h2>
 <ul>
-<li><a href="https://www.crystallography.net/cod/" class="external-link">Crystallography Open
-Database</a></li>
-<li><a href="https://nmrshiftdb.nmr.uni-koeln.de/nmrshiftdb/media-type/html/user/anon/page/default.psml/js_pane/P-Help;jsessionid=8DC5FC88F23A161E2276E00C85C184CA" class="external-link">NMRShiftDB</a></li>
-<li><a href="https://sdbs.db.aist.go.jp/sdbs/cgi-bin/cre_index.cgi?lang=eng" class="external-link">Spectral
-Database for Organic Compounds, SDBS</a></li>
-<li><a href="https://webbook.nist.gov/chemistry/#Search" class="external-link">NIST Chemistry
-WebBook</a></li>
+<li>See <code><a href="../articles/preprocessing.html">vignette("preprocessing")</a></code> for a detailed guide to
+each preprocessing technique</li>
+<li>Explore hyperparameter tuning with <code>tune</code> - measure’s
+Savitzky-Golay step is tunable!</li>
+<li>Check out the <a href="https://jameshwade.github.io/measure/reference/">function
+reference</a> for all available steps</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
