@@ -5,7 +5,7 @@ test_that("transform measure to matrix", {
     step_measure_input_long(transmittance, location = vars(channel)) %>%
     prep()
 
-  spect_mat <- measure:::measure_to_matrix(rec$template$.measures)
+  spect_mat <- measure_to_matrix(rec$template$.measures)
 
   expect_equal(nrow(spect_mat), length(unique(meats_long$id)))
   expect_equal(ncol(spect_mat), length(unique(meats_long$channel)))
@@ -26,11 +26,11 @@ test_that("transform matrix to measure", {
     step_measure_input_long(transmittance, location = vars(channel)) %>%
     prep()
 
-  spect_mat <- measure:::measure_to_matrix(rec$template$.measures)
+  spect_mat <- measure_to_matrix(rec$template$.measures)
 
   locs <- unique(meats_long$channel)
 
-  spect_list <- measure:::matrix_to_measure(spect_mat, locs)
+  spect_list <- matrix_to_measure(spect_mat, locs)
 
   for (i in seq_along(spect_list)) {
     expect_equal(
@@ -47,7 +47,7 @@ test_that("transform tidy format", {
     step_measure_input_long(transmittance, location = vars(channel)) %>%
     prep()
 
-  spect_df <- measure:::measure_to_tibble(rec$template$.measures)
+  spect_df <- measure_to_tibble(rec$template$.measures)
   exp_df <- meats_long[, c("channel", "transmittance", "id")]
   names(exp_df) <- c("location", "value", "sample_num")
 

@@ -11,7 +11,7 @@ test_that("SNV transformation computes correctly", {
 
   # Test the internal function
   test_tibble <- tibble::tibble(location = 1:5, value = test_values)
-  result <- measure:::.snv_single(test_tibble)
+  result <- .snv_single(test_tibble)
 
   expect_equal(result$value, expected_snv)
   expect_equal(result$location, 1:5)

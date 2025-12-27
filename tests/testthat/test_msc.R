@@ -6,7 +6,7 @@ test_that("MSC reference spectrum is computed correctly", {
     tibble::tibble(location = 1:5, value = c(3, 6, 9, 12, 15))
   )
 
-  ref <- measure:::.compute_reference_spectrum(test_spectra)
+  ref <- .compute_reference_spectrum(test_spectra)
 
   # Mean of each position: (1+2+3)/3, (2+4+6)/3, etc.
   expected_ref <- c(2, 4, 6, 8, 10)
@@ -23,7 +23,7 @@ test_that("MSC single spectrum correction works", {
     value = 2 * ref_spectrum + 1 # c(3, 5, 7, 9, 11)
   )
 
-  result <- measure:::.msc_single(test_tibble, ref_spectrum)
+  result <- .msc_single(test_tibble, ref_spectrum)
 
   # MSC should recover: (values - intercept) / slope = (values - 1) / 2
   # Which should equal the reference spectrum
@@ -191,7 +191,7 @@ test_that("MSC produces expected results compared to prospectr", {
   result <- bake(rec, new_data = NULL)
 
   # Convert measure result to matrix for comparison
-  measure_msc <- measure:::measure_to_matrix(result$.measures)
+  measure_msc <- measure_to_matrix(result$.measures)
 
   # Compare results (should be equal within tolerance)
   expect_equal(
