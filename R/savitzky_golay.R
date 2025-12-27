@@ -64,14 +64,16 @@
 #'     prep()
 #' }
 step_measure_savitzky_golay <-
-  function(recipe,
-           role = NA,
-           trained = FALSE,
-           degree = 3,
-           window_side = 11,
-           differentiation_order = 0,
-           skip = FALSE,
-           id = rand_id("measure_savitzky_golay")) {
+  function(
+    recipe,
+    role = NA,
+    trained = FALSE,
+    degree = 3,
+    window_side = 11,
+    differentiation_order = 0,
+    skip = FALSE,
+    id = rand_id("measure_savitzky_golay")
+  ) {
     recipes::add_step(
       recipe,
       step_measure_savitzky_golay_new(
@@ -87,8 +89,15 @@ step_measure_savitzky_golay <-
   }
 
 step_measure_savitzky_golay_new <-
-  function(role, trained, degree, window_side, differentiation_order,
-           na_rm, skip, id) {
+  function(
+    role,
+    trained,
+    degree,
+    window_side,
+    differentiation_order,
+    skip,
+    id
+  ) {
     recipes::step(
       subclass = "measure_savitzky_golay",
       role = role,
@@ -105,21 +114,31 @@ step_measure_savitzky_golay_new <-
 prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
   if (!is.numeric(x$degree) | length(x$degree) != 1 | x$degree < 1) {
-    cli::cli_abort("The {.arg degree} argument to \\
+    cli::cli_abort(
+      "The {.arg degree} argument to \\
                    {.fn  step_measure_savitzky_golay} was {x$degree} and \\
-                   should be a single integer greater than zero.")
+                   should be a single integer greater than zero."
+    )
   }
-  if (!is.numeric(x$differentiation_order) | length(x$differentiation_order) != 1 |
-    x$differentiation_order < 0) {
-    cli::cli_abort("The {.arg differentiation_order} argument to \\
+  if (
+    !is.numeric(x$differentiation_order) |
+      length(x$differentiation_order) != 1 |
+      x$differentiation_order < 0
+  ) {
+    cli::cli_abort(
+      "The {.arg differentiation_order} argument to \\
                     {.fn  step_measure_savitzky_golay} should be a single \\
-                    integer greater than -1.")
+                    integer greater than -1."
+    )
   }
-  if (!is.numeric(x$window_side) | length(x$window_side) != 1 |
-    x$window_side < 1) {
-    cli::cli_abort("The {.arg window_side} argument to \\
+  if (
+    !is.numeric(x$window_side) | length(x$window_side) != 1 | x$window_side < 1
+  ) {
+    cli::cli_abort(
+      "The {.arg window_side} argument to \\
                     {.fn  step_measure_savitzky_golay} should be an \\
-                    integer greater than 0.")
+                    integer greater than 0."
+    )
   }
 
   window_size = 2 * x$window_side + 1
@@ -140,7 +159,7 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
     old_val <- x$window_side
     old_size <- 2 * old_val + 1
     new_size <- x$degree + 1
-    if (new_size %% 2 == 0){
+    if (new_size %% 2 == 0) {
       new_size <- new_size + 1
     }
     x$window_side <- (new_size - 1) / 2
@@ -172,18 +191,23 @@ bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
       window = 2 * object$window_side + 1
     )
   # TODO try to approximate the wave numbers that were input.
-  new_data$.measures <- res
+  # Preserve measure_list class
+  new_data$.measures <- new_measure_list(res)
   tibble::as_tibble(new_data)
 }
 
 #' @export
 print.step_measure_savitzky_golay <-
   function(x, width = max(20, options()$width - 30), ...) {
-    title <- "Savitzky-Golay preprocessing "
-    recipes::print_step(
-      "<internal measurements>", "<internal measurements>",
-      x$trained, title, width
-    )
+    title <- "Savitzky-Golay preprocessing on "
+
+    if (x$trained) {
+      cat(title, "<internal measurements>", sep = "")
+    } else {
+      cat(title)
+    }
+    cat("\n")
+
     invisible(x)
   }
 

@@ -100,5 +100,6 @@
     Condition
       Error in `step_measure_output_wide()`:
       Caused by error in `check_has_measure()`:
-      ! It appears that the measurements have not been converted for the inernal format. See `step_measure_input_long()` and `step_measure_input_wide()` and use these prior to `step_measure_output_wide()`.
+      ! Measurements have not been converted to internal format.
+      i Use `step_measure_input_long()` or `step_measure_input_wide()` before `step_measure_output_wide()`.
 

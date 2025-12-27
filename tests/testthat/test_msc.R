@@ -20,7 +20,7 @@ test_that("MSC single spectrum correction works", {
   # Create a spectrum that is 2x the reference + 1 (slope=2, intercept=1)
   test_tibble <- tibble::tibble(
     location = 1:5,
-    value = 2 * ref_spectrum + 1  # c(3, 5, 7, 9, 11)
+    value = 2 * ref_spectrum + 1 # c(3, 5, 7, 9, 11)
   )
 
   result <- measure:::.msc_single(test_tibble, ref_spectrum)
@@ -48,7 +48,7 @@ test_that("MSC works with recipe workflow (long format)", {
   msc_step <- rec$steps[[2]]
   expect_true(!is.null(msc_step$ref_spectrum))
   expect_true(is.numeric(msc_step$ref_spectrum))
-  expect_equal(length(msc_step$ref_spectrum), 100)  # meats has 100 channels
+  expect_equal(length(msc_step$ref_spectrum), 100) # meats has 100 channels
 })
 
 test_that("MSC works with recipe workflow (wide format)", {
@@ -193,7 +193,12 @@ test_that("MSC produces expected results compared to prospectr", {
   measure_msc <- measure:::measure_to_matrix(result$.measures)
 
   # Compare results (should be equal within tolerance)
-  expect_equal(measure_msc, prospectr_msc, tolerance = 1e-10, ignore_attr = TRUE)
+  expect_equal(
+    measure_msc,
+    prospectr_msc,
+    tolerance = 1e-10,
+    ignore_attr = TRUE
+  )
 })
 
 test_that("MSC reference spectrum matches mean of training spectra", {

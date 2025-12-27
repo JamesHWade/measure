@@ -21,7 +21,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -46,7 +47,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -71,7 +73,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -96,7 +99,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -123,7 +127,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -148,7 +153,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -173,7 +179,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -198,7 +205,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -223,7 +231,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -248,7 +257,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -273,7 +283,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 ---
 
@@ -298,7 +309,8 @@
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
-      * Savitzky-Golay preprocessing: <internal measurements> | Trained
+    Output
+      Savitzky-Golay preprocessing on <internal measurements>
 
 # savitzky-golay tuning parameters
 

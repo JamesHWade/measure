@@ -70,13 +70,15 @@
 #'   prep()
 #'
 #' bake(rec, new_data = NULL)
-step_measure_msc <- function(recipe,
-                             role = NA,
-                             trained = FALSE,
-                             ref_spectrum = NULL,
-                             skip = FALSE,
-                             id = recipes::rand_id("measure_msc")) {
- recipes::add_step(
+step_measure_msc <- function(
+  recipe,
+  role = NA,
+  trained = FALSE,
+  ref_spectrum = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_msc")
+) {
+  recipes::add_step(
     recipe,
     step_measure_msc_new(
       role = role,
@@ -103,7 +105,7 @@ step_measure_msc_new <- function(role, trained, ref_spectrum, skip, id) {
 prep.step_measure_msc <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
- # Compute reference spectrum as mean of all training spectra
+  # Compute reference spectrum as mean of all training spectra
   ref_spectrum <- .compute_reference_spectrum(training$.measures)
 
   step_measure_msc_new(
@@ -117,12 +119,18 @@ prep.step_measure_msc <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_msc <- function(object, new_data, ...) {
-  new_data$.measures <- .compute_msc(new_data$.measures, object$ref_spectrum)
+  result <- .compute_msc(new_data$.measures, object$ref_spectrum)
+  # Preserve measure_list class
+  new_data$.measures <- new_measure_list(result)
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_msc <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_msc <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "MSC transformation on "
 
   if (x$trained) {
@@ -154,7 +162,7 @@ tidy.step_measure_msc <- function(x, ...) {
 #' @return A numeric vector of the mean spectrum.
 #' @noRd
 .compute_reference_spectrum <- function(dat) {
- # Convert to matrix and compute column means
+  # Convert to matrix and compute column means
   mat <- measure_to_matrix(dat)
   colMeans(mat, na.rm = TRUE)
 }

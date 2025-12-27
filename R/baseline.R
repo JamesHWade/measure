@@ -7,13 +7,15 @@
 #'  for this step.
 #' @param role Assign the role of new variables.
 #'
-step_baseline <- function(recipe,
-                          ...,
-                          role = NA,
-                          trained = FALSE,
-                          options = NULL,
-                          skip = FALSE,
-                          id = recipes::rand_id("measure")) {
+step_baseline <- function(
+  recipe,
+  ...,
+  role = NA,
+  trained = FALSE,
+  options = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure")
+) {
   terms <- recipes::ellipse_check(...)
   add_step(
     recipe,

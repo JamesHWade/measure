@@ -33,8 +33,8 @@ test_that("output long format data", {
       water = numeric(0),
       fat = numeric(0),
       protein = numeric(0),
-      .measure = numeric(0),
-      .location = numeric(0)
+      .location = numeric(0),
+      .measure = numeric(0)
     )
   expect_equal(bake_1[0, ], dat_ptype)
   expect_equal(nrow(bake_1), 400L)
@@ -67,8 +67,8 @@ test_that("output long format data", {
       water = numeric(0),
       fat = numeric(0),
       protein = numeric(0),
-      rstudio = numeric(0),
-      posit = numeric(0)
+      posit = numeric(0),
+      rstudio = numeric(0)
     )
   expect_equal(bake_2[0, ], dat_ptype)
   expect_equal(nrow(bake_2), 400L)

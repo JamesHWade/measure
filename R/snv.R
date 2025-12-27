@@ -57,11 +57,13 @@
 #'   prep()
 #'
 #' bake(rec, new_data = NULL)
-step_measure_snv <- function(recipe,
-                             role = NA,
-                             trained = FALSE,
-                             skip = FALSE,
-                             id = recipes::rand_id("measure_snv")) {
+step_measure_snv <- function(
+  recipe,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_snv")
+) {
   recipes::add_step(
     recipe,
     step_measure_snv_new(
@@ -97,12 +99,18 @@ prep.step_measure_snv <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_snv <- function(object, new_data, ...) {
-  new_data$.measures <- .compute_snv(new_data$.measures)
+  result <- .compute_snv(new_data$.measures)
+  # Preserve measure_list class
+  new_data$.measures <- new_measure_list(result)
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_snv <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_snv <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "SNV transformation on "
 
   if (x$trained) {
@@ -119,7 +127,7 @@ print.step_measure_snv <- function(x, width = max(20, options()$width - 30), ...
 #' @export
 #' @keywords internal
 tidy.step_measure_snv <- function(x, ...) {
- tibble::tibble(
+  tibble::tibble(
     terms = ".measures",
     id = x$id
   )

@@ -12,7 +12,14 @@
 NULL
 
 
-
 utils::globalVariables(
-  names = c("baseline", ".index", ".measures", "value", "location", "..row", "temp")
+  names = c(
+    "baseline",
+    ".index",
+    ".measures",
+    "value",
+    "location",
+    "..row",
+    "temp"
+  )
 )
