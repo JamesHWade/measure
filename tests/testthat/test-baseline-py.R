@@ -126,13 +126,19 @@ test_that("step_measure_baseline_py validates subtract argument", {
 test_that("step_measure_baseline_py handles unknown method gracefully", {
   skip_if_no_pybaselines()
 
-  expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
-      update_role(id, new_role = "id") |>
-      step_measure_input_long(transmittance, location = vars(channel)) |>
-      step_measure_baseline_py(method = "nonexistent_method") |>
-      prep(),
-    "Unknown pybaselines method"
+  # Use minimal data to reduce warnings (one per sample)
+  minimal_data <- meats_long[meats_long$id == unique(meats_long$id)[1], ]
+
+  rec <- recipe(water + fat + protein ~ ., data = minimal_data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_py(method = "nonexistent_method") |>
+    prep()
+
+  # Method validation happens at bake time, errors converted to warnings
+  expect_warning(
+    bake(rec, new_data = NULL),
+    "pybaselines.*failed"
   )
 })
 

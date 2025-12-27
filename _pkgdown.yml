@@ -69,6 +69,7 @@ reference:
   desc: Parameters for hyperparameter tuning with dials
   contents:
   - window_side
+  - baseline_lambda
   - starts_with("tunable")
 - title: Data
   desc: Included datasets for examples and testing
@@ -76,9 +77,10 @@ reference:
   - meats_long
   - glucose_bioreactors
 - title: Baseline Correction
-  desc: Baseline correction utilities
+  desc: Baseline correction steps and utilities
   contents:
-  - step_baseline
+  - starts_with("step_measure_baseline")
+  - step_measure_detrend
   - subtract_rf_baseline
 - title: Utilities
   desc: Helper functions and utilities
