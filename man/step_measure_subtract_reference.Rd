@@ -11,7 +11,7 @@ step_measure_subtract_reference(
   measures = NULL,
   role = NA,
   trained = FALSE,
-  learned_blank = NULL,
+  learned_ref = NULL,
   skip = FALSE,
   id = recipes::rand_id("measure_subtract_reference")
 )
@@ -42,7 +42,7 @@ process. If \code{NULL} (the default), all measure columns (columns with class
 \item{trained}{A logical to indicate if the quantities for preprocessing
 have been estimated.}
 
-\item{learned_blank}{A named list containing the learned blank values for
+\item{learned_ref}{A named list containing the validated reference values for
 each measure column. This is \code{NULL} until the step is trained.}
 
 \item{skip}{A logical. Should the step be skipped when the recipe is baked?}

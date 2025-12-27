@@ -59,7 +59,6 @@
 #'
 #' 2. **Learned blank**: You specify which samples are blanks in your training
 #'    data using `blank_col` and `blank_value`. During `prep()`, the mean of
-
 #'    all blank samples is computed and stored. This approach is useful for
 #'    batch-specific blank correction.
 #'
@@ -316,6 +315,8 @@ required_pkgs.step_measure_subtract_blank <- function(x, ...) {
 #'   - A `measure_tbl` object with `location` and `value` columns
 #'   - A numeric vector (must match the number of locations in data)
 #'   - A data.frame with `location` and `value` columns (will be interpolated)
+#' @param learned_ref A named list containing the validated reference values for
+#'   each measure column. This is `NULL` until the step is trained.
 #'
 #' @return An updated version of `recipe` with the new step added.
 #'
@@ -350,7 +351,7 @@ step_measure_subtract_reference <- function(
     measures = NULL,
     role = NA,
     trained = FALSE,
-    learned_blank = NULL,
+    learned_ref = NULL,
     skip = FALSE,
     id = recipes::rand_id("measure_subtract_reference")) {
   if (missing(reference)) {
@@ -365,7 +366,7 @@ step_measure_subtract_reference <- function(
       measures = measures,
       role = role,
       trained = trained,
-      learned_blank = learned_blank,
+      learned_ref = learned_ref,
       skip = skip,
       id = id
     )
@@ -378,7 +379,7 @@ step_measure_subtract_reference_new <- function(
     measures,
     role,
     trained,
-    learned_blank,
+    learned_ref,
     skip,
     id) {
   recipes::step(
@@ -388,7 +389,7 @@ step_measure_subtract_reference_new <- function(
     measures = measures,
     role = role,
     trained = trained,
-    learned_blank = learned_blank,
+    learned_ref = learned_ref,
     skip = skip,
     id = id
   )
@@ -413,7 +414,7 @@ prep.step_measure_subtract_reference <- function(x, training, info = NULL, ...) 
   }
 
   # Validate and convert reference
-  learned_blank <- .validate_external_reference(
+  learned_ref <- .validate_external_reference(
     x$reference, training, measure_cols, "reference"
   )
 
@@ -423,7 +424,7 @@ prep.step_measure_subtract_reference <- function(x, training, info = NULL, ...) 
     measures = measure_cols,
     role = x$role,
     trained = TRUE,
-    learned_blank = learned_blank,
+    learned_ref = learned_ref,
     skip = x$skip,
     id = x$id
   )
@@ -432,7 +433,7 @@ prep.step_measure_subtract_reference <- function(x, training, info = NULL, ...) 
 #' @export
 bake.step_measure_subtract_reference <- function(object, new_data, ...) {
   for (col in object$measures) {
-    ref <- object$learned_blank[[col]]
+    ref <- object$learned_ref[[col]]
     result <- .apply_reference_correction(new_data[[col]], ref, object$method)
     new_data[[col]] <- new_measure_list(result)
   }
@@ -761,16 +762,17 @@ required_pkgs.step_measure_ratio_reference <- function(x, ...) {
 #' @return Corrected measure_list
 #' @noRd
 .apply_reference_correction <- function(dat, ref, method) {
+  # Check for division by zero once, before processing all spectra
+  if (method == "divide" && any(abs(ref) < .Machine$double.eps, na.rm = TRUE)) {
+    cli::cli_warn(
+      "Reference contains values near zero; division may produce Inf/NaN."
+    )
+  }
+
   purrr::map(dat, function(x) {
     if (method == "subtract") {
       x$value <- x$value - ref
     } else if (method == "divide") {
-      # Handle division by zero
-      if (any(abs(ref) < .Machine$double.eps, na.rm = TRUE)) {
-        cli::cli_warn(
-          "Reference contains values near zero; division may produce Inf/NaN."
-        )
-      }
       x$value <- x$value / ref
     }
     x
@@ -785,22 +787,21 @@ required_pkgs.step_measure_ratio_reference <- function(x, ...) {
 #' @return Processed measure_list
 #' @noRd
 .compute_ratio_reference <- function(dat, ref, blank) {
+  # Compute adjusted reference once (for warning check)
+  ref_val <- if (!is.null(blank)) ref - blank else ref
+
+  # Check for division by zero once, before processing all spectra
+  if (any(abs(ref_val) < .Machine$double.eps, na.rm = TRUE)) {
+    cli::cli_warn(
+      "Reference (minus blank) contains values near zero; ratio may produce Inf/NaN."
+    )
+  }
+
   purrr::map(dat, function(x) {
     sample_val <- x$value
-    ref_val <- ref
-
     if (!is.null(blank)) {
       sample_val <- sample_val - blank
-      ref_val <- ref_val - blank
     }
-
-    # Handle division by zero
-    if (any(abs(ref_val) < .Machine$double.eps, na.rm = TRUE)) {
-      cli::cli_warn(
-        "Reference (minus blank) contains values near zero; ratio may produce Inf/NaN."
-      )
-    }
-
     x$value <- sample_val / ref_val
     x
   })
