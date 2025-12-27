@@ -1,37 +1,40 @@
 # ==============================================================================
 # Sample-wise mapping infrastructure for measure columns
 #
-# This file provides utilities for applying transformations to each sample's
-# measurements in a data frame with measure_list columns.
+# This file provides the infrastructure for custom sample-wise transformations
+# on measurement data. It follows the recipes design philosophy:
+#
+# - step_measure_map() is the PRIMARY interface (recipe step)
+# - measure_map() is for EXPLORATION only (outside recipes)
+# - measure_summarize() is for ANALYSIS (not transformation)
+#
+# Design Principle: Use recipe steps for reproducible pipelines.
+# The standalone functions exist for debugging and prototyping, not production.
 #
 # See GitHub Issue #9 for context.
-#
-# Components:
-# 1. step_measure_map() - Recipe step for custom transformations (pipeline)
-# 2. measure_map() - Standalone function for exploratory use
-# 3. measure_transform() - Simple value-only transformation helper
-# 4. Convenience functions - Common operations (center, scale, etc.)
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-# Recipe Step: step_measure_map
+# Recipe Step: step_measure_map (PRIMARY INTERFACE)
 # ------------------------------------------------------------------------------
 
 #' Apply a Custom Function to Measurements
 #'
 #' `step_measure_map()` creates a *specification* of a recipe step that applies
-#' a custom function to each sample's measurements. This allows arbitrary
-#' sample-wise transformations to be included in a reproducible recipe pipeline.
+#' a custom function to each sample's measurements. Use this when the built-in
+#' preprocessing steps (SNV, MSC, Savitzky-Golay) don't cover your needs.
 #'
 #' @param recipe A recipe object. The step will be added to the sequence of
 #'   operations for this recipe.
 #' @param fn A function to apply to each sample's measurement tibble. The
-
+#'
 #'   function should accept a tibble with `location` and `value` columns and
 #'   return a tibble with the same structure. Can also be a formula (e.g.,
-#'   `~ .x$value * 2`) which will be converted via [rlang::as_function()].
+#'   `~ { .x$value <- log1p(.x$value); .x }`) which will be converted via
+#'   [rlang::as_function()].
 #' @param ... Additional arguments passed to `fn` during baking.
 #' @param measures An optional character vector of measure column names to
+#'
 #'   process. If `NULL` (the default), all measure columns will be processed.
 #' @param role Not used by this step since no new variables are created.
 #' @param trained A logical to indicate if the step has been trained.
@@ -41,32 +44,47 @@
 #' @return An updated version of `recipe` with the new step added.
 #'
 #' @details
-#' This step enables custom sample-wise transformations within the recipes
-#' framework. Unlike using [measure_map()] directly (which operates on baked
-#' data), this step is part of the recipe and will be applied consistently
-#' during both `prep()` and `bake()`.
+#' This step is the "escape hatch" for custom sample-wise transformations that
+#' aren't covered by the built-in steps. It integrates fully with the recipes
+#' framework, meaning your custom transformation will be:
+#'
+#' - Applied consistently during `prep()` and `bake()`
+#' - Included when bundling recipes into workflows
+#' - Reproducible across sessions
 #'
 #' ## Function Requirements
 #'
 #' The function `fn` must:
 #' - Accept a tibble with `location` and `value` columns
 #' - Return a tibble with `location` and `value` columns
-#' - Not change the number of rows
+#' - Not change the number of rows (measurements must remain aligned)
 #'
-#' ## When to Use
+#' ## When to Use This Step
 #'
-#' Use `step_measure_map()` when you want your custom transformation to be:
-#' - Part of a reproducible recipe
-#' - Applied consistently to training and test data
-#' - Included in a workflow for tuning/resampling
+#' Use `step_measure_map()` for domain-specific transformations not covered
+#' by the built-in steps:
 #'
-#' Use [measure_map()] directly when you want to:
-#' - Quickly explore or prototype transformations
-#' - Apply one-off transformations outside a recipe
+#' - Custom baseline correction algorithms
+#' - Specialized normalization methods
+#' - Instrument-specific corrections
+#' - Experimental preprocessing techniques
+#'
+#' For common operations, prefer the built-in steps:
+#' - Scatter correction → [step_measure_snv()] or [step_measure_msc()]
+#' - Smoothing/derivatives → [step_measure_savitzky_golay()]
+#'
+#' ## Prototyping with measure_map()
+#'
+#' When developing a custom transformation, you may find it helpful to
+#' prototype using [measure_map()] on baked data before wrapping it in
+#' a step. Once your function works correctly, use `step_measure_
+#'
+#' for production pipelines.
 #'
 #' @seealso
-#' - [measure_map()] for standalone (non-recipe) usage
-#' - [measure_transform()] for simple value-only transformations
+#' - [step_measure_snv()], [step_measure_msc()], [step_measure_savitzky_golay()]
+#'   for built-in preprocessing steps
+#' - [measure_map()] for prototyping custom transformations
 #'
 #' @family measure-preprocessing
 #' @export
@@ -74,13 +92,12 @@
 #' @examples
 #' library(recipes)
 #'
-#' # Define a custom transformation function
+#' # Example 1: Custom log transformation
 #' log_transform <- function(x) {
 #'   x$value <- log1p(x$value)
 #'   x
 #' }
 #'
-#' # Use in a recipe pipeline
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -90,12 +107,26 @@
 #'
 #' bake(rec, new_data = NULL)
 #'
-#' # Using formula syntax
+#' # Example 2: Using formula syntax for inline transformations
 #' rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
-#'   step_measure_map(~ { .x$value <- .x$value^2; .x }) |>
+#'   step_measure_map(~ {
+#'     # Subtract minimum to remove offset
+#'     .x$value <- .x$value - min(.x$value)
+#'     .x
+#'   }) |>
 #'   prep()
+#'
+#' # Example 3: Using external package functions
+#' # (e.g., custom baseline from a spectroscopy package)
+#' \dontrun{
+#' rec3 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+#'   update_role(id, new_role = "id") |>
+#'   step_measure_input_long(transmittance, location = vars(channel)) |>
+#'   step_measure_map(my_baseline_correction, method = "als") |>
+#'   step_measure_output_wide()
+#' }
 step_measure_map <- function(
     recipe,
     fn,
@@ -105,8 +136,11 @@ step_measure_map <- function(
     trained = FALSE,
     skip = FALSE,
     id = recipes::rand_id("measure_map")) {
-  # Capture the function and additional arguments
-  fn <- rlang::enquo(fn)
+  # Evaluate and convert the function immediately
+
+  # This avoids issues with recipes' internal get_needs_tuning check
+
+  fn <- rlang::as_function(fn)
   dots <- rlang::enquos(...)
 
   recipes::add_step(
@@ -160,9 +194,8 @@ prep.step_measure_map <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_map <- function(object, new_data, ...) {
-  # Evaluate the function
-  fn <- rlang::eval_tidy(object$fn)
-  fn <- rlang::as_function(fn)
+  # fn is already a function (converted in step_measure_map)
+  fn <- object$fn
 
   # Evaluate additional arguments
   fn_args <- lapply(object$fn_args, rlang::eval_tidy)
@@ -209,294 +242,68 @@ tidy.step_measure_map <- function(x, ...) {
 
 
 # ------------------------------------------------------------------------------
-# Simple Value Transformation Helper
+# Exploratory Functions (for prototyping and debugging)
 # ------------------------------------------------------------------------------
 
-#' Transform Measurement Values
+#' Apply a Function to Each Sample's Measurements
 #'
-#' `measure_transform()` provides a simplified interface for transforming
-#' measurement values when you only need to modify the `value` column without
-#' accessing `location`. This is more concise than [measure_map()] for simple
-#' operations.
-#'
-#' @param .data A data frame containing one or more `measure_list` columns.
-#' @param .f A function or formula that transforms a numeric vector. The
-#'   function receives the `value` vector and should return a numeric vector
-#'   of the same length.
-#' @param .cols Columns to transform. Defaults
-#'   to all measure columns.
-#' @param ... Additional arguments passed to `.f`.
-#'
-#' @return A data frame with transformed measure columns.
-#'
-#' @details
-#' This is syntactic sugar for common transformations where you only need
-#' to modify values. Instead of:
-#'
-#' ```
-#' measure_map(data, ~ { .x$value <- log(.x$value); .x })
-#' ```
-#'
-#' You can write:
-#'
-#' ```
-#' measure_transform(data, log)
-#' ```
-#'
-#' @seealso [measure_map()] for full access to both location and value
-#'
-#' @export
-#'
-#' @examples
-#' library(recipes)
-#'
-#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
-#'   update_role(id, new_role = "id") |>
-#'   step_measure_input_long(transmittance, location = vars(channel)) |>
-#'   prep()
-#'
-#' baked <- bake(rec, new_data = NULL)
-#'
-#' # Simple transformations
-#' measure_transform(baked, log1p)
-#' measure_transform(baked, ~ .x * 100)
-#' measure_transform(baked, ~ (.x - min(.x)) / (max(.x) - min(.x)))  # min-max scale
-measure_transform <- function(.data, .f, .cols = NULL, ...) {
-  .f <- rlang::as_function(.f)
-
-  # Wrap the value-only function to work with measure_map
-  wrapper_fn <- function(x, ...) {
-    x$value <- .f(x$value, ...)
-    x
-  }
-
-  measure_map(.data, wrapper_fn, .cols = .cols, ...)
-}
-
-
-# ------------------------------------------------------------------------------
-# Convenience Functions for Common Operations
-# ------------------------------------------------------------------------------
-
-#' Center Measurements
-#'
-#' Subtract the mean from each sample's values, centering each spectrum
-#' around zero.
-#'
-#' @param .data A data frame with measure columns.
-#' @param .cols Columns to center. Defaults to all measure columns.
-#'
-#' @return Data frame with centered measurements.
-#'
-#' @export
-#' @examples
-#' library(recipes)
-#'
-#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
-#'   update_role(id, new_role = "id") |>
-#'   step_measure_input_long(transmittance, location = vars(channel)) |>
-#'   prep()
-#'
-#' baked <- bake(rec, new_data = NULL)
-#'
-#' centered <- measure_center(baked)
-#' # Each sample now has mean = 0
-measure_center <- function(.data, .cols = NULL) {
-  measure_map(.data, function(x) {
-    x$value <- x$value - mean(x$value, na.rm = TRUE)
-    x
-  }, .cols = .cols)
-}
-
-#' Scale Measurements
-#'
-#' Divide each sample's values by their standard deviation.
-#'
-#' @param .data A data frame with measure columns.
-#' @param .cols Columns to scale. Defaults to all measure columns.
-#' @param center Logical. Should values be centered before scaling? Default
-#'   is `FALSE`. Set to `TRUE` for z-score standardization.
-#'
-#' @return Data frame with scaled measurements.
-#'
-#' @export
-#' @examples
-#' library(recipes)
-#'
-#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
-#'   update_role(id, new_role = "id") |>
-#'   step_measure_input_long(transmittance, location = vars(channel)) |>
-#'   prep()
-#'
-#' baked <- bake(rec, new_data = NULL)
-#'
-#' # Scale only
-#' scaled <- measure_scale(baked)
-#'
-#' # Center and scale (equivalent to SNV)
-#' standardized <- measure_scale(baked, center = TRUE)
-measure_scale <- function(.data, .cols = NULL, center = FALSE) {
-  measure_map(.data, function(x) {
-    values <- x$value
-    if (center) {
-      values <- values - mean(values, na.rm = TRUE)
-    }
-    x$value <- values / stats::sd(values, na.rm = TRUE)
-    x
-  }, .cols = .cols)
-}
-
-#' Normalize Measurements to Range
-#'
-#' Scale each sample's values to a specified range (default 0 to 1).
-#'
-#' @param .data A data frame with measure columns.
-#' @param .cols Columns to normalize. Defaults to all measure columns.
-#' @param range A numeric vector of length 2 specifying the target range.
-#'   Default is `c(0, 1)`.
-#'
-#' @return Data frame with range-normalized measurements.
-#'
-#' @export
-#' @examples
-#' library(recipes)
-#'
-#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
-#'   update_role(id, new_role = "id") |>
-#'   step_measure_input_long(transmittance, location = vars(channel)) |>
-#'   prep()
-#'
-#' baked <- bake(rec, new_data = NULL)
-#'
-#' # Normalize to [0, 1]
-#' normalized <- measure_normalize(baked)
-#'
-#' # Normalize to [-1, 1]
-#' normalized2 <- measure_normalize(baked, range = c(-1, 1))
-measure_normalize <- function(.data, .cols = NULL, range = c(0, 1)) {
-  if (length(range) != 2 || range[1] >= range[2]) {
-    cli::cli_abort("{.arg range} must be a numeric vector of length 2 with range[1] < range[2].")
-  }
-
-  measure_map(.data, function(x) {
-    values <- x$value
-    min_val <- min(values, na.rm = TRUE)
-    max_val <- max(values, na.rm = TRUE)
-
-    if (max_val == min_val) {
-      # All values are the same - use midpoint of range
-      x$value <- rep(mean(range), length(values))
-    } else {
-      # Min-max normalization scaled to target range
-      scaled <- (values - min_val) / (max_val - min_val)
-      x$value <- scaled * (range[2] - range[1]) + range[1]
-    }
-    x
-  }, .cols = .cols)
-}
-
-#' Apply Log Transformation to Measurements
-#'
-#' Apply log transformation to measurement values. Uses `log1p()` by default
-#' for numerical stability with values near zero.
-#'
-#' @param .data A data frame with measure columns.
-#' @param .cols Columns to transform. Defaults to all measure columns.
-#' @param base The base of the logarithm. Default is `exp(1)` (natural log).
-#'   Use 10 for log10, 2 for log2.
-#' @param offset Value added before taking log to handle zeros. Default is 1
-#'   (using `log1p()` behavior). Set to 0 for pure log (will produce -Inf for 0).
-#'
-#' @return Data frame with log-transformed measurements.
-#'
-#' @export
-#' @examples
-#' library(recipes)
-#'
-#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
-#'   update_role(id, new_role = "id") |>
-#'   step_measure_input_long(transmittance, location = vars(channel)) |>
-#'   prep()
-#'
-#' baked <- bake(rec, new_data = NULL)
-#'
-#' # Natural log with offset (log1p)
-#' log_data <- measure_log(baked)
-#'
-#' # Log base 10
-#' log10_data <- measure_log(baked, base = 10)
-measure_log <- function(.data, .cols = NULL, base = exp(1), offset = 1) {
-  measure_map(.data, function(x) {
-    x$value <- log(x$value + offset, base = base)
-    x
-  }, .cols = .cols)
-}
-
-
-# ------------------------------------------------------------------------------
-# Standalone Functions (for exploratory use outside recipes)
-# ------------------------------------------------------------------------------
-
-#' Apply a function to each sample's measurements
-#'
-#' `measure_map()` applies a function to each sample's measurement data
-#' (each element of a `measure_list` column). This is the primary interface
-#' for implementing sample-wise operations on spectral or measurement data.
+#' `measure_map()` applies a function to each sample's measurement data.
+#' This function is intended for **exploration and prototyping**, not for
+#' production pipelines. For reproducible preprocessing, use
+#' [step_measure_map()] instead.
 #'
 #' @param .data A data frame containing one or more `measure_list` columns.
 #' @param .f A function or formula to apply to each sample's measurement tibble.
-#'   - If a **function**, it is used as-is. The function should accept a
-#'     `measure_tbl` (a tibble with `location` and `value` columns) and return
-#'     a modified tibble with the same structure.
-#'   - If a **formula** (e.g., `~ my_func(.x, arg = 1)`), it is converted to a
-#'     function using [rlang::as_function()]. Use `.x` to refer to the input
-#'     measurement tibble.
+#'   - If a **function**, it is used as-is.
+#'   - If a **formula** (e.g., `~ { .x$value <- log(.x$value); .x }`), it is
+#'     converted to a function using [rlang::as_function()].
 #' @param .cols <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to apply
-#'   the transformation to. Defaults to all `measure_list` columns. Use this
-#'   to limit processing to specific measure columns.
+#'   the transformation to. Defaults to all `measure_list` columns.
 #' @param ... Additional arguments passed to `.f`.
-#' @param .error_call The execution environment of a currently running function,
-#'   e.
+#' @param .error_call The execution environment for error reporting.
 #'
-#' @return A data frame with the same structure as `.data`, with the specified
-#'   measure columns transformed.
+#' @return A data frame with the specified measure columns transformed.
 #'
 #' @details
+#'
+#' ## Intended Use: Exploration, Not Production
+#'
+#' This function is designed for interactive exploration and debugging:
+#'
+#' ```
+#' # Good: Prototyping a new transformation
+#' baked_data |>
+#'   measure_map(~ { .x$value <- my_experimental_fn(.x$value); .x })
+#'
+#' # Better: Once it works, put it in a recipe step
+#' recipe(...) |>
+#'   step_measure_map(my_experimental_fn) |>
+#'   prep()
+#' ```
+#'
+#' Unlike recipe steps, transformations applied with `measure_map()` are NOT:
+#' - Automatically applied to new data
+#' - Bundled into workflows
+#' - Reproducible across sessions
+#'
 #' ## Function Requirements
 #'
 #' The function `.f` must:
-#' - Accept a tibble with `location` and `value` columns (a `measure_
-#')
+#' - Accept a tibble with `location` and `value` columns
 #' - Return a tibble with `location` and `value` columns
-#' - Not change the number of rows (measurements must remain aligned)
-#'
-#' Common operations that can be applied include:
-#' - Smoothing (LOESS, Savitzky-Golay)
-#' - Baseline correction
-#' - Normalization
-#' - Derivative computation
-#'
-#' ## Error Handling
-#'
-#' If `.f` fails for a particular sample, `measure_map()` will:
-#' - Report which sample (row number) caused the error
-#' - Include the original error message
-#' - Stop execution (fail-fast behavior)
-#'
-#' For more fault-tolerant mapping, use [measure_map_safely()] instead.
+#' - Not change the number of rows
 #'
 #' @seealso
-#' - [measure_map_safely()] for fault-tolerant mapping
-#' - [measure_summarize()] for extracting summary statistics
-#' - [is_measure_list()] for detecting measure columns
+#' - [step_measure_map()] for production use in recipe pipelines
+#' - [measure_map_safely()] for fault-tolerant exploration
+#' - [measure_summarize()] for computing summary statistics
 #'
 #' @export
 #'
 #' @examples
 #' library(recipes)
-#' library(dplyr)
 #'
-#' # Prepare data with measure columns
+#' # First, get data in internal format
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -504,34 +311,21 @@ measure_log <- function(.data, .cols = NULL, base = exp(1), offset = 1) {
 #'
 #' baked_data <- bake(rec, new_data = NULL)
 #'
-#' # Example 1: Apply a custom centering function
-#' center_spectrum <- function(x) {
-#'   x$value <- x$value - mean(x$value)
-#'   x
-#' }
-#'
-#' centered <- measure_map(baked_data, center_spectrum)
-#'
-#' # Example 2: Using formula syntax with arguments
-#' scale_spectrum <- function(x, scale_factor = 1) {
-#'   x$value <- x$value * scale_factor
-#'   x
-#' }
-#'
-#' scaled <- measure_map(baked_data, ~ scale_spectrum(.x, scale_factor = 100))
-#'
-#' # Example 3: Anonymous function with formula
-#' log_transformed <- measure_map(baked_data, ~ {
-#'   .x$value <- log1p(.x$value)
+#' # Explore a custom transformation
+#' result <- measure_map(baked_data, ~ {
+#'   # Subtract the minimum value from each spectrum
+#'   .x$value <- .x$value - min(.x$value)
 #'   .x
 #' })
+#'
+#' # Once you're happy with it, use step_measure_map() in your recipe:
+#' # recipe(...) |>
+#' #   step_measure_map(~ { .x$value <- .x$value - min(.x$value); .x })
 measure_map <- function(.data, .f, .cols = NULL, ...,
                         .error_call = rlang::caller_env()) {
-  # Validate input
-
-if (!is.data.frame(.data)) {
+  if (!is.data.frame(.data)) {
     cli::cli_abort(
-      "{.arg .data} must be a data frame, not {.obj_type_friendly {.data}}.",
+      "{.arg .data} must be a data frame, not {.obj_type_friendly {(.data)}}.",
       call = .error_call
     )
   }
@@ -587,110 +381,28 @@ if (!is.data.frame(.data)) {
   tibble::as_tibble(.data)
 }
 
-#' Internal function to map over a single measure column
-#'
-#' @param x A measure_list column
-#' @param .f The function to apply
-#' @param ... Additional arguments to .f
-#' @param .col_name Name of the column (for error messages)
-#' @param .error_call Calling environment for errors
-#' @return A new measure_list
-#' @noRd
-.map_measure_col <- function(x, .f, ..., .col_name, .error_call) {
-  n_samples <- length(x)
-  result <- vector("list", n_samples)
 
-  for (i in seq_len(n_samples)) {
-    result[[i]] <- tryCatch(
-      {
-        out <- .f(x[[i]], ...)
-        .validate_map_output(out, x[[i]], i, .col_name, .error_call)
-        out
-      },
-      error = function(e) {
-        cli::cli_abort(
-          c(
-            "Error applying function to sample {i} in column {.field {.col_name}}.",
-            "x" = conditionMessage(e)
-          ),
-          call = .error_call
-        )
-      }
-    )
-  }
-
-  new_measure_list(result)
-}
-
-#' Validate the output of a mapping function
-#'
-#' @param out The output from the mapping function
-#' @param original The original input
-#' @param sample_idx The sample index (for error messages)
-#' @param col_name The column name (for error messages)
-#' @param error_call Calling environment for errors
-#' @noRd
-.validate_map_output <- function(out, original, sample_idx, col_name, error_call) {
-  if (!is.data.frame(out)) {
-    cli::cli_abort(
-      c(
-        "Mapping function must return a data frame for sample {sample_idx}
-         in column {.field {col_name}}.",
-        "x" = "Got {.obj_type_friendly {out}} instead."
-      ),
-      call = error_call
-    )
-  }
-
-  required_cols <- c("location", "value")
-  missing_cols <- setdiff(required_cols, names(out))
-  if (length(missing_cols) > 0) {
-    cli::cli_abort(
-      c(
-        "Mapping function output missing required column{?s} for sample
-         {sample_idx} in column {.field {col_name}}.",
-        "x" = "Missing: {.field {missing_cols}}."
-      ),
-      call = error_call
-    )
-  }
-
-  if (nrow(out) != nrow(original)) {
-    cli::cli_abort(
-      c(
-        "Mapping function changed the number of measurements for sample
-         {sample_idx} in column {.field {col_name}}.",
-        "x" = "Input had {nrow(original)} rows, output has {nrow(out)} rows.",
-        "i" = "The number of measurement points must remain constant."
-      ),
-      call = error_call
-    )
-  }
-}
-
-
-#' Apply a function safely to each sample's measurements
+#' Apply a Function Safely to Each Sample's Measurements
 #'
 #' `measure_map_safely()` is a fault-tolerant version of [measure_map()] that
-#' captures errors instead of stopping execution. This is useful for exploratory
-#' analysis or when some samples may have problematic data.
+#' captures errors instead of stopping execution. This is useful when exploring
+#' data that may have problematic samples.
 #'
 #' @inheritParams measure_map
 #' @param .otherwise Value to use when `.f` fails for a sample. Default is
 #'   `NULL`, which keeps the original (untransformed) measurement.
 #'
 #' @return A list with two elements:
-#'   - `result`: A data frame with the same structure as `.data`, with
-#'     transformations applied where successful
+#'   - `result`: A data frame with transformations applied where successful
 #'   - `errors`: A tibble with columns `column`, `sample`, and `error`
-#'     describing any failures
+#'
+#' @seealso [measure_map()] for standard (fail-fast) mapping
 #'
 #' @export
 #'
 #' @examples
 #' library(recipes)
 #'
-#' # Prepare data
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -700,38 +412,30 @@ if (!is.data.frame(.data)) {
 #'
 #' # A function that might fail for some samples
 #' risky_transform <- function(x) {
-#'   if (any(x$value < 0)) {
-#'     stop("Negative values not allowed")
-#'   }
+#'   if (any(x$value < 0)) stop("Negative values not allowed")
 #'   x$value <- log(x$value)
 #'   x
 #' }
 #'
-#' # Apply safely - errors are captured, not thrown
+#' # Errors are captured, not thrown
 #' result <- measure_map_safely(baked_data, risky_transform)
 #'
-#' # Check for errors
+#' # Check which samples failed
 #' if (nrow(result$errors) > 0) {
 #'   print(result$errors)
 #' }
-#'
-#' # Use the (partially) transformed data
-#' transformed_data <- result$result
 measure_map_safely <- function(.data, .f, .cols = NULL, ...,
                                .otherwise = NULL,
                                .error_call = rlang::caller_env()) {
-  # Validate input
   if (!is.data.frame(.data)) {
     cli::cli_abort(
-      "{.arg .data} must be a data frame, not {.obj_type_friendly {.data}}.",
+      "{.arg .data} must be a data frame, not {.obj_type_friendly {(.data)}}.",
       call = .error_call
     )
   }
 
-  # Convert formula to function if needed
   .f <- rlang::as_function(.f)
 
-  # Determine which columns to process
   if (is.null(.cols)) {
     target_cols <- find_measure_cols(.data)
     if (length(target_cols) == 0) {
@@ -763,14 +467,12 @@ measure_map_safely <- function(.data, .f, .cols = NULL, ...,
     }
   }
 
-  # Collect errors
   errors <- tibble::tibble(
     column = character(),
     sample = integer(),
     error = character()
   )
 
-  # Apply transformation to each measure column
   for (col in target_cols) {
     map_result <- .map_measure_col_safely(
       .data[[col]],
@@ -789,90 +491,42 @@ measure_map_safely <- function(.data, .f, .cols = NULL, ...,
   )
 }
 
-#' Internal function to map safely over a single measure column
-#'
-#' @param x A measure_list column
-#' @param .f The function to apply
-#' @param ... Additional arguments to .f
-#' @param .otherwise Value to use on error
-#' @param .col_name Name of the column
-#' @return A list with result and errors
-#' @noRd
-.map_measure_col_safely <- function(x, .f, ..., .otherwise, .col_name) {
-  n_samples <- length(x)
-  result <- vector("list", n_samples)
-  errors <- tibble::tibble(
-    column = character(),
-    sample = integer(),
-    error = character()
-  )
 
-  for (i in seq_len(n_samples)) {
-    tryCatch(
-      {
-        out <- .f(x[[i]], ...)
+# ------------------------------------------------------------------------------
+# Analysis Functions (for understanding data, not transforming)
+# ------------------------------------------------------------------------------
 
-        # Validate output structure
-        if (!is.data.frame(out) ||
-              !all(c("location", "value") %in% names(out)) ||
-              nrow(out) != nrow(x[[i]])) {
-          stop("Invalid output structure")
-        }
-
-        result[[i]] <- out
-      },
-      error = function(e) {
-        errors <<- rbind(
-          errors,
-          tibble::tibble(
-            column = .col_name,
-            sample = i,
-            error = conditionMessage(e)
-          )
-        )
-
-        # Use .otherwise or keep original
-        if (is.null(.otherwise)) {
-          result[[i]] <<- x[[i]]
-        } else {
-          result[[i]] <<- .otherwise
-        }
-      }
-    )
-  }
-
-  list(
-    result = new_measure_list(result),
-    errors = errors
-  )
-}
-
-
-#' Summarize measurements across samples
+#' Summarize Measurements Across Samples
 #'
 #' `measure_summarize()` computes summary statistics for each measurement
-#' location across all samples. This is useful for computing mean spectra,
-#' standard deviations, or other aggregate statistics.
+#' location across all samples. This is useful for understanding your data,
+#' computing reference spectra, or identifying outliers.
 #'
 #' @param .data A data frame containing one or more `measure_list` columns.
 #' @param .cols <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to
 #'   summarize. Defaults to all `measure_list` columns.
-#' @param .fns A list of summary functions to apply. Each function should
-#'   accept a numeric vector and return a single numeric value. Default
-#'   is `list(mean = mean, sd = sd)`.
-#' @param na.rm Logical. Should NA values be removed before computing
-#'   summaries? Default is `TRUE`.
+#' @param .fns A named list of summary functions. Each function should accept
+#'   a numeric vector and return a single value. Default is
+#'   `list(mean = mean, sd = sd)`.
+#' @param na.rm Logical. Should NA values be removed? Default is `TRUE`.
 #'
 #' @return A tibble with one row per measurement location and columns for
-#'   each summary statistic. For multiple measure columns, column names
-#'   are prefixed with the measure column name.
+#'   each summary statistic.
+#'
+#' @details
+#' This function does NOT transform data; it summarizes it. Common uses:
+#'
+#' - **Mean spectrum**: The average spectrum across all samples
+#' - **Reference spectrum**: For MSC-style corrections
+#' - **Variability**: Standard deviation at each wavelength
+#' - **Quality control**: Identify problematic wavelength regions
 #'
 #' @export
 #'
 #' @examples
 #' library(recipes)
+#' library(ggplot2)
 #'
-#' # Prepare data
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -882,6 +536,13 @@ measure_map_safely <- function(.data, .f, .cols = NULL, ...,
 #'
 #' # Compute mean and SD at each wavelength
 #' summary_stats <- measure_summarize(baked_data)
+#' summary_stats
+#'
+#' # Visualize mean spectrum with confidence band
+#' ggplot(summary_stats, aes(x = location)) +
+#'   geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd), alpha = 0.3) +
+#'   geom_line(aes(y = mean)) +
+#'   labs(x = "Channel", y = "Transmittance", title = "Mean Spectrum +/- 1 SD")
 #'
 #' # Custom summary functions
 #' measure_summarize(
@@ -897,11 +558,10 @@ measure_summarize <- function(.data, .cols = NULL,
                               na.rm = TRUE) {
   if (!is.data.frame(.data)) {
     cli::cli_abort(
-      "{.arg .data} must be a data frame, not {.obj_type_friendly {.data}}."
+      "{.arg .data} must be a data frame, not {.obj_type_friendly {(.data)}}."
     )
   }
 
-  # Determine which columns to process
   if (is.null(.cols)) {
     target_cols <- find_measure_cols(.data)
     if (length(target_cols) == 0) {
@@ -921,13 +581,10 @@ measure_summarize <- function(.data, .cols = NULL,
     ))
   }
 
-  # Validate function names
-  if (is.null(names(.fns)) || any(names(.fns) == ""))
- {
+  if (is.null(names(.fns)) || any(names(.fns) == "")) {
     cli::cli_abort("All functions in {.arg .fns} must be named.")
   }
 
-  # Compute summaries for each column
   results <- list()
 
   for (col in target_cols) {
@@ -959,11 +616,131 @@ measure_summarize <- function(.data, .cols = NULL,
     results[[col]] <- col_results
   }
 
-  # Combine results
   if (length(results) == 1) {
     results[[1]]
   } else {
-    # Join by location
     purrr::reduce(results, dplyr::left_join, by = "location")
+  }
+}
+
+
+# ------------------------------------------------------------------------------
+# Internal helper functions
+# ------------------------------------------------------------------------------
+
+#' Map over a single measure column
+#' @noRd
+.map_measure_col <- function(x, .f, ..., .col_name, .error_call) {
+  n_samples <- length(x)
+  result <- vector("list", n_samples)
+
+  for (i in seq_len(n_samples)) {
+    result[[i]] <- tryCatch(
+      {
+        out <- .f(x[[i]], ...)
+        .validate_map_output(out, x[[i]], i, .col_name, .error_call)
+        out
+      },
+      error = function(e) {
+        cli::cli_abort(
+          c(
+            "Error applying function to sample {i} in column {.field {(.col_name)}}.",
+            "x" = conditionMessage(e)
+          ),
+          call = .error_call
+        )
+      }
+    )
+  }
+
+  new_measure_list(result)
+}
+
+#' Map safely over a single measure column
+#' @noRd
+.map_measure_col_safely <- function(x, .f, ..., .otherwise, .col_name) {
+  n_samples <- length(x)
+  result <- vector("list", n_samples)
+  errors <- tibble::tibble(
+    column = character(),
+    sample = integer(),
+    error = character()
+  )
+
+  for (i in seq_len(n_samples)) {
+    tryCatch(
+      {
+        out <- .f(x[[i]], ...)
+
+        if (!is.data.frame(out) ||
+            !all(c("location", "value") %in% names(out)) ||
+            nrow(out) != nrow(x[[i]])) {
+          stop("Invalid output structure")
+        }
+
+        result[[i]] <- out
+      },
+      error = function(e) {
+        errors <<- rbind(
+          errors,
+          tibble::tibble(
+            column = .col_name,
+            sample = i,
+            error = conditionMessage(e)
+          )
+        )
+
+        if (is.null(.otherwise)) {
+          result[[i]] <<- x[[i]]
+        } else {
+          result[[i]] <<- .otherwise
+        }
+      }
+    )
+  }
+
+  list(
+    result = new_measure_list(result),
+    errors = errors
+  )
+}
+
+#' Validate map output structure
+#' @noRd
+.validate_map_output <- function(out, original, sample_idx, col_name, error_call) {
+  if (!is.data.frame(out)) {
+    cli::cli_abort(
+      c(
+        "Mapping function must return a data frame for sample {sample_idx}
+         in column {.field {(col_name)}}.",
+        "x" = "Got {.obj_type_friendly {(out)}} instead."
+      ),
+      call = error_call
+    )
+  }
+
+  required_cols <- c("location", "value")
+  missing_cols <- setdiff(required_cols, names(out))
+  if (length(missing_cols) > 0) {
+    cli::cli_abort(
+      c(
+        "Mapping function output missing required {cli::qty(missing_cols)}
+         column{?s} for sample {sample_idx} in column {.field {(col_name)}}.",
+        "x" = "Missing: {.field {missing_cols}}."
+      ),
+      call = error_call
+    )
+  }
+
+  if (nrow(out) != nrow(original)) {
+    cli::cli_abort(
+      c(
+        "Mapping function changed the number of measurements for sample
+         {sample_idx} in column {.field {(col_name)}}.",
+        "x" = "Input had {nrow(original)} rows, output has {nrow(out)} rows.",
+        "i" = "The number of measurement points must remain constant."
+      ),
+      call = error_call
+    )
   }
 }

@@ -13,6 +13,7 @@ Useful links:
 \itemize{
   \item \url{https://jameshwade.github.io/measure}
   \item \url{https://github.com/jameshwade/measure}
+  \item \url{https://jameshwade.github.io/measure/}
   \item Report bugs at \url{https://github.com/jameshwade/measure/issues}
 }
 

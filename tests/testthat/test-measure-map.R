@@ -1,5 +1,11 @@
 # ==============================================================================
 # Tests for sample-wise mapping infrastructure
+#
+# Tests are organized by function type:
+# 1. step_measure_map() - Recipe step (PRIMARY interface)
+# 2. measure_map() - Exploratory function
+# 3. measure_map_safely() - Fault-tolerant exploration
+# 4. measure_summarize() - Analysis function
 # ==============================================================================
 
 # Helper to create test data
@@ -12,7 +18,7 @@ create_test_data <- function() {
 }
 
 # ==============================================================================
-# step_measure_map() tests (Recipe Step)
+# step_measure_map() tests (Recipe Step - PRIMARY INTERFACE)
 # ==============================================================================
 
 test_that("step_measure_map works with a named function", {
@@ -115,136 +121,38 @@ test_that("step_measure_map tidy method works", {
   expect_equal(tidy_after$id, "map_test")
 })
 
-# ==============================================================================
-# measure_transform() tests
-# ==============================================================================
+test_that("step_measure_map integrates with workflows", {
+  skip_if_not_installed("workflows")
+  skip_if_not_installed("parsnip")
 
-test_that("measure_transform works with simple functions", {
-  test_data <- create_test_data()
-  original_value <- test_data$.measures[[1]]$value[1]
+  library(workflows)
+  library(parsnip)
 
-  result <- measure_transform(test_data, ~ .x * 2)
-
-  expect_equal(result$.measures[[1]]$value[1], original_value * 2)
-})
-
-test_that("measure_transform works with base R functions", {
-  test_data <- create_test_data()
-
-  result <- measure_transform(test_data, log1p)
-
-  expect_equal(
-    result$.measures[[1]]$value,
-    log1p(test_data$.measures[[1]]$value)
-  )
-})
-
-# ==============================================================================
-# Convenience function tests
-# ==============================================================================
-
-test_that("measure_center centers to zero mean", {
-  test_data <- create_test_data()
-
-  result <- measure_center(test_data)
-
-  for (i in seq_len(nrow(result))) {
-    expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
-  }
-})
-
-test_that("measure_scale scales to unit sd", {
-  test_data <- create_test_data()
-
-  result <- measure_scale(test_data)
-
-  for (i in seq_len(nrow(result))) {
-    expect_equal(sd(result$.measures[[i]]$value), 1, tolerance = 1e-10)
-  }
-})
-
-test_that("measure_scale with center=TRUE is equivalent to SNV", {
-  test_data <- create_test_data()
-
-  # Via measure_scale
-  scaled <- measure_scale(test_data, center = TRUE)
-
-  # Via SNV step
-  rec_snv <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+  rec <- recipe(water ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_snv() %>%
-    prep() %>%
-    bake(new_data = NULL)
+    step_measure_map(~ { .x$value <- log1p(.x$value); .x }) %>%
+    step_measure_output_wide()
 
-  for (i in seq_len(nrow(scaled))) {
-    expect_equal(
-      scaled$.measures[[i]]$value,
-      rec_snv$.measures[[i]]$value,
-      tolerance = 1e-10
-    )
-  }
-})
+  spec <- linear_reg() %>%
+    set_engine("lm")
 
-test_that("measure_normalize scales to [0, 1]", {
-  test_data <- create_test_data()
+  wf <- workflow() %>%
+    add_recipe(rec) %>%
+    add_model(spec)
 
-  result <- measure_normalize(test_data)
-
-  for (i in seq_len(nrow(result))) {
-    values <- result$.measures[[i]]$value
-    expect_equal(min(values), 0, tolerance = 1e-10)
-    expect_equal(max(values), 1, tolerance = 1e-10)
-  }
-})
-
-test_that("measure_normalize scales to custom range", {
-  test_data <- create_test_data()
-
-  result <- measure_normalize(test_data, range = c(-1, 1))
-
-  for (i in seq_len(nrow(result))) {
-    values <- result$.measures[[i]]$value
-    expect_equal(min(values), -1, tolerance = 1e-10)
-    expect_equal(max(values), 1, tolerance = 1e-10)
-  }
-})
-
-test_that("measure_normalize errors on invalid range", {
-  test_data <- create_test_data()
-
-  expect_error(
-    measure_normalize(test_data, range = c(1, 0)),
-    "range\\[1\\] < range\\[2\\]"
-  )
-})
-
-test_that("measure_log applies log transformation", {
-  test_data <- create_test_data()
-
-  result <- measure_log(test_data)
-
-  expected <- log1p(test_data$.measures[[1]]$value)
-  expect_equal(result$.measures[[1]]$value, expected, tolerance = 1e-10)
-})
-
-test_that("measure_log supports different bases", {
-  test_data <- create_test_data()
-
-  result <- measure_log(test_data, base = 10, offset = 0)
-
-  expected <- log10(test_data$.measures[[1]]$value)
-  expect_equal(result$.measures[[1]]$value, expected, tolerance = 1e-10)
+  # Should fit without error
+  fitted <- fit(wf, data = meats_long)
+  expect_s3_class(fitted, "workflow")
 })
 
 # ==============================================================================
-# measure_map() tests
+# measure_map() tests (Exploratory Function)
 # ==============================================================================
 
 test_that("measure_map works with a simple function", {
   test_data <- create_test_data()
 
-  # Simple centering function
   center_spectrum <- function(x) {
     x$value <- x$value - mean(x$value)
     x
@@ -252,12 +160,10 @@ test_that("measure_map works with a simple function", {
 
   result <- measure_map(test_data, center_spectrum)
 
-  # Check structure is preserved
   expect_s3_class(result, "tbl_df")
   expect_true(".measures" %in% names(result))
   expect_equal(nrow(result), nrow(test_data))
 
-  # Check that centering worked
   for (i in seq_len(nrow(result))) {
     expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
   }
@@ -266,13 +172,11 @@ test_that("measure_map works with a simple function", {
 test_that("measure_map works with formula syntax", {
   test_data <- create_test_data()
 
-  # Using formula syntax
   result <- measure_map(test_data, ~ {
     .x$value <- .x$value - mean(.x$value)
     .x
   })
 
-  # Check that centering worked
   for (i in seq_len(nrow(result))) {
     expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
   }
@@ -286,30 +190,11 @@ test_that("measure_map passes additional arguments via ...", {
     x
   }
 
-  # Get original values for comparison
   original_value <- test_data$.measures[[1]]$value[1]
-
-  # Scale by 2
   result <- measure_map(test_data, scale_spectrum, scale_factor = 2)
   scaled_value <- result$.measures[[1]]$value[1]
 
   expect_equal(scaled_value, original_value * 2)
-})
-
-test_that("measure_map works with formula and additional arguments", {
-  test_data <- create_test_data()
-
-  scale_fn <- function(x, factor) {
-    x$value <- x$value * factor
-    x
-  }
-
-  original_value <- test_data$.measures[[1]]$value[1]
-
-  result <- measure_map(test_data, ~ scale_fn(.x, factor = 3))
-  scaled_value <- result$.measures[[1]]$value[1]
-
-  expect_equal(scaled_value, original_value * 3)
 })
 
 test_that("measure_map errors on non-data.frame input", {
@@ -361,11 +246,9 @@ test_that("measure_map errors when function changes row count", {
   )
 })
 
-test_that("measure_map error messages include sample number",
-{
+test_that("measure_map error messages include sample number", {
   test_data <- create_test_data()
 
-  # Function that fails on sample 3
   failing_fn <- function(x) {
     if (x$value[1] == test_data$.measures[[3]]$value[1]) {
       stop("intentional error")
@@ -381,8 +264,6 @@ test_that("measure_map error messages include sample number",
 
 test_that("measure_map preserves locations", {
   test_data <- create_test_data()
-
-  # Get original locations
   original_locations <- test_data$.measures[[1]]$location
 
   result <- measure_map(test_data, ~ {
@@ -401,7 +282,6 @@ test_that("measure_map preserves other columns", {
     .x
   })
 
-  # Check that outcome and id columns are preserved
   expect_equal(result$water, test_data$water)
   expect_equal(result$fat, test_data$fat)
   expect_equal(result$protein, test_data$protein)
@@ -412,32 +292,24 @@ test_that("measure_map works with column selection", {
   skip_if_not_installed("modeldata")
   data(meats, package = "modeldata")
 
-  # Create data with two measure columns
   wide_data <- meats[1:10, ]
 
-  # Create two measure columns by using different subsets
   rec1 <- recipe(water + fat + protein ~ ., data = wide_data) %>%
     step_measure_input_wide(
       dplyr::starts_with("x_"),
-      output_col = "spectra1"
+      col_name = "spectra1"
     ) %>%
     prep()
 
   test_data <- bake(rec1, new_data = NULL)
-
-  # Select only one column to transform
   original_spectra1 <- test_data$spectra1[[1]]$value[1]
 
   result <- measure_map(
     test_data,
-    ~ {
-      .x$value <- .x$value * 10
-      .x
-    },
+    ~ { .x$value <- .x$value * 10; .x },
     .cols = "spectra1"
   )
 
-  # The spectra1 column should be transformed
   expect_equal(result$spectra1[[1]]$value[1], original_spectra1 * 10)
 })
 
@@ -468,14 +340,12 @@ test_that("measure_map_safely returns correct structure", {
 test_that("measure_map_safely captures errors", {
   test_data <- create_test_data()
 
-  # Function that always fails
   always_fails <- function(x) {
     stop("I always fail")
   }
 
   result <- measure_map_safely(test_data, always_fails)
 
-  # Should have errors for all samples
   expect_equal(nrow(result$errors), nrow(test_data))
   expect_true(all(grepl("I always fail", result$errors$error)))
 })
@@ -483,12 +353,10 @@ test_that("measure_map_safely captures errors", {
 test_that("measure_map_safely uses .otherwise when provided", {
   test_data <- create_test_data()
 
-  # Function that always fails
   always_fails <- function(x) {
     stop("fail")
   }
 
-  # Use a placeholder measure_tbl
   placeholder <- measure:::new_measure_tbl(
     location = 1:10,
     value = rep(0, 10)
@@ -496,7 +364,6 @@ test_that("measure_map_safely uses .otherwise when provided", {
 
   result <- measure_map_safely(test_data, always_fails, .otherwise = placeholder)
 
-  # All measurements should be the placeholder
   for (i in seq_len(nrow(result$result))) {
     expect_equal(result$result$.measures[[i]], placeholder)
   }
@@ -505,14 +372,12 @@ test_that("measure_map_safely uses .otherwise when provided", {
 test_that("measure_map_safely keeps original on error when .otherwise is NULL", {
   test_data <- create_test_data()
 
-  # Function that always fails
   always_fails <- function(x) {
     stop("fail")
   }
 
   result <- measure_map_safely(test_data, always_fails, .otherwise = NULL)
 
-  # Original measurements should be preserved
   for (i in seq_len(nrow(result$result))) {
     expect_equal(
       result$result$.measures[[i]]$value,
@@ -524,7 +389,6 @@ test_that("measure_map_safely keeps original on error when .otherwise is NULL", 
 test_that("measure_map_safely handles partial failures", {
   test_data <- create_test_data()
 
-  # Function that fails on sample 5
   partial_fail <- function(x) {
     if (x$value[1] == test_data$.measures[[5]]$value[1]) {
       stop("intentional error")
@@ -535,11 +399,9 @@ test_that("measure_map_safely handles partial failures", {
 
   result <- measure_map_safely(test_data, partial_fail)
 
-  # Should have exactly one error (for sample 5)
   expect_equal(nrow(result$errors), 1)
   expect_equal(result$errors$sample, 5)
 
-  # Sample 5 should be unchanged, others should be doubled
   expect_equal(
     result$result$.measures[[5]]$value,
     test_data$.measures[[5]]$value
@@ -576,11 +438,8 @@ test_that("measure_summarize computes mean and sd by default", {
 
   expect_s3_class(result, "tbl_df")
   expect_named(result, c("location", "mean", "sd"))
-
-  # Check that locations are correct
   expect_equal(result$location, test_data$.measures[[1]]$location)
 
-  # Manual calculation for first location
   first_values <- sapply(test_data$.measures, function(x) x$value[1])
   expect_equal(result$mean[1], mean(first_values), tolerance = 1e-10)
   expect_equal(result$sd[1], sd(first_values), tolerance = 1e-10)
@@ -600,7 +459,6 @@ test_that("measure_summarize accepts custom functions", {
 
   expect_named(result, c("location", "median", "min", "max"))
 
-  # Check median calculation
   first_values <- sapply(test_data$.measures, function(x) x$value[1])
   expect_equal(result$median[1], median(first_values))
 })
@@ -630,15 +488,11 @@ test_that("measure_summarize errors when no measure columns found", {
 
 test_that("measure_summarize handles na.rm correctly", {
   test_data <- create_test_data()
-
-  # Introduce an NA
   test_data$.measures[[1]]$value[1] <- NA
 
-  # With na.rm = TRUE (default)
   result_rm <- measure_summarize(test_data, na.rm = TRUE)
   expect_false(is.na(result_rm$mean[1]))
 
-  # With na.rm = FALSE
   result_no_rm <- measure_summarize(test_data, na.rm = FALSE)
   expect_true(is.na(result_no_rm$mean[1]))
 })
@@ -650,13 +504,11 @@ test_that("measure_summarize handles na.rm correctly", {
 test_that("measure_map can replicate SNV transformation", {
   test_data <- create_test_data()
 
-  # Apply SNV via measure_map
   snv_via_map <- measure_map(test_data, ~ {
     .x$value <- (.x$value - mean(.x$value)) / sd(.x$value)
     .x
   })
 
-  # Apply SNV via the step
   snv_via_step <- recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
@@ -664,7 +516,6 @@ test_that("measure_map can replicate SNV transformation", {
     prep() %>%
     bake(new_data = NULL)
 
-  # Compare results
   for (i in seq_len(nrow(snv_via_map))) {
     expect_equal(
       snv_via_map$.measures[[i]]$value,
@@ -688,23 +539,37 @@ test_that("measure_map works in a dplyr pipeline", {
   expect_s3_class(result, "tbl_df")
 })
 
-test_that("chained measure_map calls work correctly", {
+test_that("prototyping with measure_map transfers to step_measure_map", {
+
+  # This test demonstrates the intended workflow:
+  # 1. Prototype with measure_map()
+  # 2. Transfer to step_measure_map() for production
+
   test_data <- create_test_data()
 
-  # Chain two transformations
-  result <- test_data %>%
-    measure_map(~ {
-      .x$value <- .x$value - mean(.x$value)  # center
-      .x
-    }) %>%
-    measure_map(~ {
-      .x$value <- .x$value / sd(.x$value)  # scale
-      .x
-    })
+  # Step 1: Prototype a custom transformation
+  my_transform <- function(x) {
+    x$value <- x$value - min(x$value)  # Shift to zero baseline
+    x
+  }
 
-  # Result should be like SNV
-  for (i in seq_len(nrow(result))) {
-    expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
-    # Note: sd might not be exactly 1 due to centering then scaling separately
+  prototype_result <- measure_map(test_data, my_transform)
+
+  # Step 2: Use the same function in a recipe step
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(my_transform) %>%
+    prep()
+
+  production_result <- bake(rec, new_data = NULL)
+
+  # Results should be identical
+  for (i in seq_len(nrow(prototype_result))) {
+    expect_equal(
+      prototype_result$.measures[[i]]$value,
+      production_result$.measures[[i]]$value,
+      tolerance = 1e-10
+    )
   }
 })
