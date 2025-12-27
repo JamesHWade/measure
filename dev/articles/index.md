@@ -18,3 +18,8 @@
   Correction](https://jameshwade.github.io/measure/dev/articles/baseline.md):
 - [Case Study: Bioreactor Glucose
   Prediction](https://jameshwade.github.io/measure/dev/articles/sec-analysis-example.md):
+
+### Developer
+
+- [Internal Class
+  System](https://jameshwade.github.io/measure/dev/articles/internals.md):

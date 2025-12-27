@@ -12,6 +12,7 @@ step_measure_input_long(
   recipe,
   ...,
   location,
+  col_name = ".measures",
   pad = FALSE,
   role = "measure",
   trained = FALSE,
@@ -38,6 +39,13 @@ step_measure_input_long(
 
   One or more selector functions to choose which *single* column has the
   locations of the analytical values.
+
+- col_name:
+
+  A single character string specifying the name of the output column
+  that will contain the measure data. Defaults to `".measures"`. Use
+  different names when creating multiple measure columns (e.g.,
+  `".uv_spectrum"` and `".ms_spectrum"`).
 
 - pad:
 

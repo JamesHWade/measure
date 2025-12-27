@@ -14,6 +14,7 @@ step_measure_input_wide(
   trained = FALSE,
   columns = NULL,
   location_values = NULL,
+  col_name = ".measures",
   skip = FALSE,
   id = rand_id("measure_input_wide")
 )
@@ -54,6 +55,13 @@ step_measure_input_wide(
   measurements (e.g., wavelength etc.) in the same order as the
   variables selected by `...`. If not specified, a sequence of integers
   (starting at 1L) is used.
+
+- col_name:
+
+  A single character string specifying the name of the output column
+  that will contain the measure data. Defaults to `".measures"`. Use
+  different names when creating multiple measure columns (e.g.,
+  `".uv_spectrum"` and `".ms_spectrum"`).
 
 - skip:
 

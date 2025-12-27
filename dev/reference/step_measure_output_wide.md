@@ -9,6 +9,7 @@ that converts measures to multiple columns (i.e., "wide" format).
 step_measure_output_wide(
   recipe,
   prefix = "measure_",
+  measures = NULL,
   role = "predictor",
   trained = FALSE,
   skip = FALSE,
@@ -26,6 +27,14 @@ step_measure_output_wide(
 - prefix:
 
   A character string used to name the new columns.
+
+- measures:
+
+  An optional single character string specifying which measure column to
+  output. If `NULL` (the default) and only one measure column exists,
+  that column will be used. If multiple measure columns exist and
+  `measures` is `NULL`, an error will be thrown prompting you to specify
+  which column to output.
 
 - role:
 

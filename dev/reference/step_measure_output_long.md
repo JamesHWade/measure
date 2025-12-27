@@ -1,8 +1,6 @@
 # Reorganize Measurements to Two Columns
 
-`step_measure_output_long` creates a *specification* of a recipe step
-that converts measures to a format with columns for the measurement and
-the corresponding location (i.e., "long" format).
+`step_measure_output_long` creates a *specification* of a recipe
 
 ## Usage
 
@@ -11,6 +9,7 @@ step_measure_output_long(
   recipe,
   values_to = ".measure",
   location_to = ".location",
+  measures = NULL,
   role = "predictor",
   trained = FALSE,
   skip = FALSE,
@@ -28,12 +27,20 @@ step_measure_output_long(
 - values_to:
 
   A single character string for the column containing the analytical
-  maesurement.
+  measurement.
 
 - location_to:
 
   A single character string for the column containing the location of
   the measurement (e.g. wavenumber or index).
+
+- measures:
+
+  An optional single character string specifying which measure column to
+  output. If `NULL` (the default) and only one measure column exists,
+  that column will be used. If multiple measure columns exist and
+  `measures` is `NULL`, an error will be thrown prompting you to specify
+  which column to output.
 
 - role:
 
@@ -60,6 +67,9 @@ step_measure_output_long(
   A character string that is unique to this step to identify it.
 
 ## Details
+
+step that converts measures to a format with columns for the measurement
+and the corresponding location (i.e., "long" format).
 
 This step is designed convert analytical measurements from their
 internal data structure to a two column format.

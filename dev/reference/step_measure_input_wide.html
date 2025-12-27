@@ -32,6 +32,9 @@ format used by the package."><meta name="robots" content="noindex"></head><body>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
     <li><a class="dropdown-item" href="../articles/baseline.html">Baseline Correction</a></li>
     <li><a class="dropdown-item" href="../articles/sec-analysis-example.html">Bioreactor Case Study</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Developer</h6></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internal Class System</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -64,6 +67,7 @@ format used by the package.</p>
 <span>  trained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  columns <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  location_values <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  col_name <span class="op">=</span> <span class="st">".measures"</span>,</span>
 <span>  skip <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  id <span class="op">=</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/rand_id.html" class="external-link">rand_id</a></span><span class="op">(</span><span class="st">"measure_input_wide"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -102,6 +106,13 @@ is a placeholder and will be populated once <code><a href="https://recipes.tidym
 of the measurements (e.g., wavelength etc.) in the same order as the variables
 selected by <code>...</code>. If not specified, a sequence of integers (starting at 1L)
 is used.</p></dd>
+
+
+<dt id="arg-col-name">col_name<a class="anchor" aria-label="anchor" href="#arg-col-name"></a></dt>
+<dd><p>A single character string specifying the name of the output
+column that will contain the measure data. Defaults to <code>".measures"</code>. Use
+different names when creating multiple measure columns (e.g., <code>".uv_spectrum"</code>
+and <code>".ms_spectrum"</code>).</p></dd>
 
 
 <dt id="arg-skip">skip<a class="anchor" aria-label="anchor" href="#arg-skip"></a></dt>

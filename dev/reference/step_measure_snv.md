@@ -9,6 +9,7 @@ normalizes each spectrum to have zero mean and unit standard deviation.
 ``` r
 step_measure_snv(
   recipe,
+  measures = NULL,
   role = NA,
   trained = FALSE,
   skip = FALSE,
@@ -22,6 +23,13 @@ step_measure_snv(
 
   A recipe object. The step will be added to the sequence of operations
   for this recipe.
+
+- measures:
+
+  An optional character vector of measure column names to process. If
+  `NULL` (the default), all measure columns (columns with class
+  `measure_list`) will be processed. Use this to limit processing to
+  specific measure columns when working with multiple measurement types.
 
 - role:
 

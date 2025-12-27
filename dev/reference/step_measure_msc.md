@@ -10,9 +10,10 @@ effects.
 ``` r
 step_measure_msc(
   recipe,
+  measures = NULL,
   role = NA,
   trained = FALSE,
-  ref_spectrum = NULL,
+  ref_spectra = NULL,
   skip = FALSE,
   id = recipes::rand_id("measure_msc")
 )
@@ -25,6 +26,13 @@ step_measure_msc(
   A recipe object. The step will be added to the sequence of operations
   for this recipe.
 
+- measures:
+
+  An optional character vector of measure column names to process. If
+  `NULL` (the default), all measure columns (columns with class
+  `measure_list`) will be processed. Use this to limit processing to
+  specific measure columns when working with multiple measurement types.
+
 - role:
 
   Not used by this step since no new variables are created.
@@ -34,10 +42,11 @@ step_measure_msc(
   A logical to indicate if the quantities for preprocessing have been
   estimated.
 
-- ref_spectrum:
+- ref_spectra:
 
-  A numeric vector containing the reference spectrum computed during
-  training. This is `NULL` until the step is trained.
+  A named list of numeric vectors containing the reference spectra
+  computed during training for each measure column. This is `NULL` until
+  the step is trained.
 
 - skip:
 
