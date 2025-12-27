@@ -60,6 +60,15 @@ reference:
   - step_measure_snv
   - step_measure_msc
   - step_measure_map
+- title: Sample-wise Normalization
+  desc: Normalize each spectrum independently
+  contents:
+  - starts_with("step_measure_normalize")
+- title: Variable-wise Scaling
+  desc: Scale across samples at each measurement location
+  contents:
+  - step_measure_center
+  - starts_with("step_measure_scale")
 - title: Output Steps
   desc: Convert internal format back to modeling-ready data
   contents:
@@ -70,6 +79,7 @@ reference:
   contents:
   - window_side
   - baseline_lambda
+  - peak_location_min
   - starts_with("tunable")
 - title: Data
   desc: Included datasets for examples and testing

@@ -124,6 +124,42 @@ baseline_span <- function(range = c(0.1, 0.9), trans = NULL) {
   )
 }
 
+#' Parameters for peak normalization
+#'
+#' `peak_location_min()` and `peak_location_max()` define the bounds for
+#' the reference region in peak normalization. These should be specified
+#' in the same units as the location values in your measurement data.
+#'
+#' @inheritParams window_side
+#'
+#' @return A function with classes `"quant_param"` and `"param"`.
+#' @examples
+#' peak_location_min()
+#' peak_location_max()
+#' @export
+peak_location_min <- function(range = c(0, 100), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(peak_location_min = "Peak Region Lower Bound"),
+    finalize = NULL
+  )
+}
+
+#' @rdname peak_location_min
+#' @export
+peak_location_max <- function(range = c(0, 100), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(peak_location_max = "Peak Region Upper Bound"),
+    finalize = NULL
+  )
+}
 
 # ------------------------------------------------------------------------------
 # Tunable methods
@@ -203,6 +239,7 @@ tunable.step_measure_baseline_rf <- function(x, ...) {
 #' @rdname tunable_measure
 #' @export
 tunable.step_measure_detrend <- function(x, ...) {
+
   tibble::tibble(
     name = "degree",
     call_info = list(
@@ -210,6 +247,21 @@ tunable.step_measure_detrend <- function(x, ...) {
     ),
     source = "recipe",
     component = "step_measure_detrend",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_normalize_peak <- function(x, ...) {
+  tibble::tibble(
+    name = c("location_min", "location_max"),
+    call_info = list(
+      list(pkg = "measure", fun = "peak_location_min"),
+      list(pkg = "measure", fun = "peak_location_max")
+    ),
+    source = "recipe",
+    component = "step_measure_normalize_peak",
     component_id = x$id
   )
 }
