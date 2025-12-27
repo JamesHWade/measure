@@ -9,7 +9,7 @@ test_that("savitzky-golay computations", {
     step_measure_input_long(transmittance, location = vars(channel)) %>%
     prep()
 
-  spect_start <- measure:::measure_to_matrix(rec$template$.measures)
+  spect_start <- measure_to_matrix(rec$template$.measures)
 
   # ------------------------------------------------------------------------------
 
@@ -17,13 +17,13 @@ test_that("savitzky-golay computations", {
 
   for (i in 1:nrow(grid)) {
     meas_res <-
-      measure:::.comp_savitzky_golay(
+      .comp_savitzky_golay(
         rec$template$.measures,
         diffs = grid$diffs[i],
         degree = grid$deg[i],
         window = grid$wn[i]
       ) %>%
-      measure:::measure_to_matrix()
+      measure_to_matrix()
     prosp_res <-
       prospectr::savitzkyGolay(
         spect_start,
@@ -46,7 +46,7 @@ test_that("savitzky-golay inputs", {
     step_measure_input_long(transmittance, location = vars(channel)) %>%
     prep()
 
-  spect_start <- measure:::measure_to_matrix(rec$template$.measures)
+  spect_start <- measure_to_matrix(rec$template$.measures)
 
   # ------------------------------------------------------------------------------
 

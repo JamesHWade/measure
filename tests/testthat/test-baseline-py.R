@@ -1,7 +1,7 @@
 # Skip all tests if pybaselines is not available
 skip_if_no_pybaselines <- function() {
   skip_if_not(
-    measure:::.pybaselines_available(),
+    .pybaselines_available(),
     "pybaselines Python package not available"
   )
 }

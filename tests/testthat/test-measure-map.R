@@ -357,7 +357,7 @@ test_that("measure_map_safely uses .otherwise when provided", {
     stop("fail")
   }
 
-  placeholder <- measure:::new_measure_tbl(
+  placeholder <- new_measure_tbl(
     location = 1:10,
     value = rep(0, 10)
   )

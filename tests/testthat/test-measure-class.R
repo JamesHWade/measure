@@ -5,7 +5,7 @@
 # ==============================================================================
 
 test_that("new_measure_tbl creates proper structure", {
-  mt <- measure:::new_measure_tbl(location = 1:5, value = rnorm(5))
+  mt <- new_measure_tbl(location = 1:5, value = rnorm(5))
 
   expect_s3_class(mt, "measure_tbl")
   expect_s3_class(mt, "tbl_df")
@@ -18,19 +18,19 @@ test_that("new_measure_tbl creates proper structure", {
 test_that("new_measure_tbl validates inputs", {
   # Non-numeric location
  expect_error(
-    measure:::new_measure_tbl(location = letters[1:5], value = rnorm(5)),
+    new_measure_tbl(location = letters[1:5], value = rnorm(5)),
     "must be numeric"
   )
 
   # Non-numeric value
   expect_error(
-    measure:::new_measure_tbl(location = 1:5, value = letters[1:5]),
+    new_measure_tbl(location = 1:5, value = letters[1:5]),
     "must be numeric"
   )
 
   # Mismatched lengths
   expect_error(
-    measure:::new_measure_tbl(location = 1:5, value = rnorm(3)),
+    new_measure_tbl(location = 1:5, value = rnorm(3)),
     "same length"
   )
 })
@@ -41,7 +41,7 @@ test_that("as_measure_tbl coerces tibbles", {
   expect_false(is_measure_tbl(tbl))
 
   # Coerce it
-  mt <- measure:::as_measure_tbl(tbl)
+  mt <- as_measure_tbl(tbl)
   expect_true(is_measure_tbl(mt))
   expect_s3_class(mt, "tbl_df")
 })
@@ -49,31 +49,31 @@ test_that("as_measure_tbl coerces tibbles", {
 test_that("as_measure_tbl validates structure", {
   # Missing location column
   expect_error(
-    measure:::as_measure_tbl(tibble::tibble(value = 1:5)),
+    as_measure_tbl(tibble::tibble(value = 1:5)),
     "location"
   )
 
   # Missing value column
   expect_error(
-    measure:::as_measure_tbl(tibble::tibble(location = 1:5)),
+    as_measure_tbl(tibble::tibble(location = 1:5)),
     "value"
   )
 
   # Not a data frame
   expect_error(
-    measure:::as_measure_tbl(1:5),
+    as_measure_tbl(1:5),
     "data frame"
   )
 })
 
 test_that("as_measure_tbl is idempotent", {
-  mt <- measure:::new_measure_tbl(location = 1:5, value = rnorm(5))
-  mt2 <- measure:::as_measure_tbl(mt)
+  mt <- new_measure_tbl(location = 1:5, value = rnorm(5))
+  mt2 <- as_measure_tbl(mt)
   expect_identical(mt, mt2)
 })
 
 test_that("is_measure_tbl works correctly", {
-  mt <- measure:::new_measure_tbl(location = 1:5, value = rnorm(5))
+  mt <- new_measure_tbl(location = 1:5, value = rnorm(5))
   tbl <- tibble::tibble(location = 1:5, value = rnorm(5))
 
   expect_true(is_measure_tbl(mt))
@@ -94,7 +94,7 @@ test_that("new_measure_list creates proper structure", {
     tibble::tibble(location = 1:5, value = rnorm(5))
   )
 
-  ml <- measure:::new_measure_list(tibbles)
+  ml <- new_measure_list(tibbles)
 
   expect_s3_class(ml, "measure_list")
   expect_true(is_measure_list(ml))
@@ -109,13 +109,13 @@ test_that("new_measure_list creates proper structure", {
 test_that("new_measure_list validates inputs", {
   # Not a list
   expect_error(
-    measure:::new_measure_list(1:5),
+    new_measure_list(1:5),
     "must be a list"
   )
 
   # Element not a data frame
   expect_error(
-    measure:::new_measure_list(list(1:5)),
+    new_measure_list(list(1:5)),
     "data frame"
   )
 })
@@ -126,7 +126,7 @@ test_that("as_measure_list coerces lists", {
     tibble::tibble(location = 1:5, value = rnorm(5))
   )
 
-  ml <- measure:::as_measure_list(tibbles)
+  ml <- as_measure_list(tibbles)
   expect_true(is_measure_list(ml))
 })
 
@@ -134,13 +134,13 @@ test_that("as_measure_list is idempotent", {
   tibbles <- list(
     tibble::tibble(location = 1:5, value = rnorm(5))
   )
-  ml <- measure:::new_measure_list(tibbles)
-  ml2 <- measure:::as_measure_list(ml)
+  ml <- new_measure_list(tibbles)
+  ml2 <- as_measure_list(ml)
   expect_identical(ml, ml2)
 })
 
 test_that("is_measure_list works correctly", {
-  ml <- measure:::new_measure_list(list(
+  ml <- new_measure_list(list(
     tibble::tibble(location = 1:5, value = rnorm(5))
   ))
   plain_list <- list(tibble::tibble(location = 1:5, value = rnorm(5)))
@@ -157,7 +157,7 @@ test_that("measure_list subsetting preserves class", {
     tibble::tibble(location = 1:5, value = 6:10),
     tibble::tibble(location = 1:5, value = 11:15)
   )
-  ml <- measure:::new_measure_list(tibbles)
+  ml <- new_measure_list(tibbles)
 
   # Single bracket subsetting should preserve class
   subset <- ml[1:2]
@@ -170,10 +170,10 @@ test_that("measure_list subsetting preserves class", {
 })
 
 test_that("measure_list concatenation preserves class", {
-  ml1 <- measure:::new_measure_list(list(
+  ml1 <- new_measure_list(list(
     tibble::tibble(location = 1:5, value = 1:5)
   ))
-  ml2 <- measure:::new_measure_list(list(
+  ml2 <- new_measure_list(list(
     tibble::tibble(location = 1:5, value = 6:10)
   ))
 
@@ -192,7 +192,7 @@ test_that("find_measure_cols finds measure columns", {
     tibble::tibble(location = 1:5, value = rnorm(5)),
     tibble::tibble(location = 1:5, value = rnorm(5))
   )
-  ml <- measure:::new_measure_list(tibbles)
+  ml <- new_measure_list(tibbles)
 
   data <- tibble::tibble(
     id = 1:2,
@@ -217,7 +217,7 @@ test_that("find_measure_cols returns empty for no measure columns", {
 test_that("has_measure_col detects measure columns", {
   # With measure_list class
   tibbles <- list(tibble::tibble(location = 1:5, value = rnorm(5)))
-  ml <- measure:::new_measure_list(tibbles)
+  ml <- new_measure_list(tibbles)
   data <- tibble::tibble(id = 1, .measures = ml)
 
   result <- has_measure_col(data)
@@ -317,7 +317,7 @@ test_that("measure_list formats correctly", {
     tibble::tibble(location = 1:10, value = rnorm(10)),
     tibble::tibble(location = 1:10, value = rnorm(10))
   )
-  ml <- measure:::new_measure_list(tibbles)
+  ml <- new_measure_list(tibbles)
 
   formatted <- format(ml)
   expect_length(formatted, 2)
@@ -328,7 +328,7 @@ test_that("measure_list has vctrs abbreviation", {
   tibbles <- list(
     tibble::tibble(location = 1:5, value = rnorm(5))
   )
-  ml <- measure:::new_measure_list(tibbles)
+  ml <- new_measure_list(tibbles)
 
   abbr <- vctrs::vec_ptype_abbr(ml)
   # The abbreviation should contain "meas" or "mesr" (vctrs list_of format)
@@ -345,7 +345,7 @@ test_that("measure_list prints informatively", {
     tibble::tibble(location = 1:15, value = rnorm(15)),
     tibble::tibble(location = 1:10, value = rnorm(10))
   )
-  ml <- measure:::new_measure_list(tibbles)
+  ml <- new_measure_list(tibbles)
 
   output <- capture.output(print(ml))
   expect_true(any(grepl("measure_list", output)))
