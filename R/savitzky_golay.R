@@ -200,14 +200,15 @@ bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
 #' @export
 print.step_measure_savitzky_golay <-
   function(x, width = max(20, options()$width - 30), ...) {
-    title <- "Savitzky-Golay preprocessing "
-    recipes::print_step(
-      "<internal measurements>",
-      "<internal measurements>",
-      x$trained,
-      title,
-      width
-    )
+    title <- "Savitzky-Golay preprocessing on "
+
+    if (x$trained) {
+      cat(title, "<internal measurements>", sep = "")
+    } else {
+      cat(title)
+    }
+    cat("\n")
+
     invisible(x)
   }
 

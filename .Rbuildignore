@@ -22,3 +22,4 @@ docs
 ^\.claude$
 ^[.]?air[.]toml$
 ^\.vscode$
+^CLAUDE\.MD$
