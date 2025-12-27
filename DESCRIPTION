@@ -25,6 +25,7 @@ Imports:
     IDPmisc,
     purrr,
     rlang,
+    scales,
     tibble,
     tidyr,
     tidyselect,
