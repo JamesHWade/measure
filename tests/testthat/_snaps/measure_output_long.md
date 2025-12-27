@@ -74,8 +74,8 @@
       2 water       <chr [2]> outcome   original
       3 fat         <chr [2]> outcome   original
       4 protein     <chr [2]> outcome   original
-      5 .measure    <chr [2]> predictor derived 
-      6 .location   <chr [2]> predictor derived 
+      5 .location   <chr [2]> predictor derived 
+      6 .measure    <chr [2]> predictor derived 
 
 ---
 
@@ -102,5 +102,6 @@
     Condition
       Error in `step_measure_output_long()`:
       Caused by error in `check_has_measure()`:
-      ! It appears that the measurements have not been converted for the inernal format. See `step_measure_input_long()` and `step_measure_input_wide()` and use these prior to `step_measure_output_long()`.
+      ! Measurements have not been converted to internal format.
+      i Use `step_measure_input_long()` or `step_measure_input_wide()` before `step_measure_output_long()`.
 
