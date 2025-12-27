@@ -17,6 +17,18 @@ create_test_data <- function() {
     bake(new_data = NULL)
 }
 
+# Helper to capture output while returning result (avoids implicit assignment)
+capture_with_result <- function(code) {
+  tc <- textConnection("output_text", "w", local = TRUE)
+  sink(tc)
+  on.exit({
+    sink()
+    close(tc)
+  }, add = TRUE)
+  result <- code
+  list(result = result, output = output_text)
+}
+
 # ==============================================================================
 # step_measure_map() tests (Recipe Step - PRIMARY INTERFACE)
 # ==============================================================================
@@ -635,9 +647,9 @@ test_that("step_measure_map verbosity = 0 suppresses output", {
     step_measure_map(noisy_fn, verbosity = 0L)
 
   # Should not produce cat() output when verbosity = 0 (output happens during prep)
-  output <- capture.output(
-    rec_prepped <- prep(rec)
-  )
+  captured <- capture_with_result(prep(rec))
+  rec_prepped <- captured$result
+  output <- captured$output
 
   expect_length(output, 0)
 
@@ -659,9 +671,8 @@ test_that("step_measure_map verbosity = 1 allows output (default)", {
     step_measure_map(noisy_fn, verbosity = 1L)
 
   # Should produce output when verbosity = 1 (output happens during prep)
-  output <- capture.output(
-    rec_prepped <- prep(rec)
-  )
+  captured <- capture_with_result(prep(rec))
+  output <- captured$output
 
   expect_true(length(output) > 0)
   expect_true(any(grepl("Processing sample", output)))
@@ -676,9 +687,9 @@ test_that("measure_map verbosity = 0 suppresses output", {
   }
 
   # Should not produce output when verbosity = 0
-  output <- capture.output(
-    result <- measure_map(test_data, noisy_fn, verbosity = 0L)
-  )
+  captured <- capture_with_result(measure_map(test_data, noisy_fn, verbosity = 0L))
+  result <- captured$result
+  output <- captured$output
 
   expect_s3_class(result, "tbl_df")
   expect_length(output, 0)
@@ -693,9 +704,8 @@ test_that("measure_map verbosity = 1 allows output (default)", {
   }
 
   # Should produce output when verbosity = 1
-  output <- capture.output(
-    result <- measure_map(test_data, noisy_fn, verbosity = 1L)
-  )
+  captured <- capture_with_result(measure_map(test_data, noisy_fn, verbosity = 1L))
+  output <- captured$output
 
   expect_true(length(output) > 0)
   expect_true(any(grepl("Processing sample", output)))

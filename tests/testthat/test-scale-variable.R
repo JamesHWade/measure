@@ -88,7 +88,7 @@ test_that("step_measure_center tidy method works", {
   tidy_after <- tidy(rec_prepped, number = 2)
   expect_equal(unique(tidy_after$terms), ".measures")
   expect_equal(nrow(tidy_after), 100) # 100 locations
-  expect_true(!any(is.na(tidy_after$mean)))
+  expect_true(!anyNA(tidy_after$mean))
 })
 
 test_that("step_measure_center print method works", {
