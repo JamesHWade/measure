@@ -12,6 +12,232 @@ create_test_data <- function() {
 }
 
 # ==============================================================================
+# step_measure_map() tests (Recipe Step)
+# ==============================================================================
+
+test_that("step_measure_map works with a named function", {
+  my_center <- function(x) {
+    x$value <- x$value - mean(x$value)
+    x
+  }
+
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(my_center) %>%
+    prep()
+
+  result <- bake(rec, new_data = NULL)
+
+  # Check that centering worked
+  for (i in seq_len(nrow(result))) {
+    expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
+  }
+})
+
+test_that("step_measure_map works with formula syntax", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(~ { .x$value <- .x$value * 2; .x }) %>%
+    prep()
+
+  result <- bake(rec, new_data = NULL)
+  expect_s3_class(result, "tbl_df")
+  expect_true(".measures" %in% names(result))
+})
+
+test_that("step_measure_map can be chained with other steps", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(~ { .x$value <- log1p(.x$value); .x }) %>%
+    step_measure_snv() %>%
+    prep()
+
+  result <- bake(rec, new_data = NULL)
+
+  # After SNV, each sample should have mean 0 and sd 1
+  for (i in seq_len(nrow(result))) {
+    expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
+    expect_equal(sd(result$.measures[[i]]$value), 1, tolerance = 1e-10)
+  }
+})
+
+test_that("step_measure_map works on new data", {
+  train_ids <- unique(meats_long$id)[1:200]
+  test_ids <- unique(meats_long$id)[201:215]
+
+  train_data <- meats_long[meats_long$id %in% train_ids, ]
+  test_data <- meats_long[meats_long$id %in% test_ids, ]
+
+  rec <- recipe(water + fat + protein ~ ., data = train_data) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(~ { .x$value <- .x$value - mean(.x$value); .x }) %>%
+    prep()
+
+  result <- bake(rec, new_data = test_data)
+
+  # Check that centering worked on test data
+  for (i in seq_len(nrow(result))) {
+    expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
+  }
+})
+
+test_that("step_measure_map print method works", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(~ { .x$value <- .x$value * 2; .x })
+
+  expect_snapshot(rec)
+
+  rec_prep <- prep(rec)
+  expect_snapshot(rec_prep)
+})
+
+test_that("step_measure_map tidy method works", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(~ .x, id = "map_test")
+
+  # Before prep
+  tidy_before <- tidy(rec, number = 2)
+  expect_equal(tidy_before$terms, "<all measure columns>")
+  expect_equal(tidy_before$id, "map_test")
+
+  # After prep
+  rec_prep <- prep(rec)
+  tidy_after <- tidy(rec_prep, number = 2)
+  expect_equal(tidy_after$terms, ".measures")
+  expect_equal(tidy_after$id, "map_test")
+})
+
+# ==============================================================================
+# measure_transform() tests
+# ==============================================================================
+
+test_that("measure_transform works with simple functions", {
+  test_data <- create_test_data()
+  original_value <- test_data$.measures[[1]]$value[1]
+
+  result <- measure_transform(test_data, ~ .x * 2)
+
+  expect_equal(result$.measures[[1]]$value[1], original_value * 2)
+})
+
+test_that("measure_transform works with base R functions", {
+  test_data <- create_test_data()
+
+  result <- measure_transform(test_data, log1p)
+
+  expect_equal(
+    result$.measures[[1]]$value,
+    log1p(test_data$.measures[[1]]$value)
+  )
+})
+
+# ==============================================================================
+# Convenience function tests
+# ==============================================================================
+
+test_that("measure_center centers to zero mean", {
+  test_data <- create_test_data()
+
+  result <- measure_center(test_data)
+
+  for (i in seq_len(nrow(result))) {
+    expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
+  }
+})
+
+test_that("measure_scale scales to unit sd", {
+  test_data <- create_test_data()
+
+  result <- measure_scale(test_data)
+
+  for (i in seq_len(nrow(result))) {
+    expect_equal(sd(result$.measures[[i]]$value), 1, tolerance = 1e-10)
+  }
+})
+
+test_that("measure_scale with center=TRUE is equivalent to SNV", {
+  test_data <- create_test_data()
+
+  # Via measure_scale
+  scaled <- measure_scale(test_data, center = TRUE)
+
+  # Via SNV step
+  rec_snv <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_snv() %>%
+    prep() %>%
+    bake(new_data = NULL)
+
+  for (i in seq_len(nrow(scaled))) {
+    expect_equal(
+      scaled$.measures[[i]]$value,
+      rec_snv$.measures[[i]]$value,
+      tolerance = 1e-10
+    )
+  }
+})
+
+test_that("measure_normalize scales to [0, 1]", {
+  test_data <- create_test_data()
+
+  result <- measure_normalize(test_data)
+
+  for (i in seq_len(nrow(result))) {
+    values <- result$.measures[[i]]$value
+    expect_equal(min(values), 0, tolerance = 1e-10)
+    expect_equal(max(values), 1, tolerance = 1e-10)
+  }
+})
+
+test_that("measure_normalize scales to custom range", {
+  test_data <- create_test_data()
+
+  result <- measure_normalize(test_data, range = c(-1, 1))
+
+  for (i in seq_len(nrow(result))) {
+    values <- result$.measures[[i]]$value
+    expect_equal(min(values), -1, tolerance = 1e-10)
+    expect_equal(max(values), 1, tolerance = 1e-10)
+  }
+})
+
+test_that("measure_normalize errors on invalid range", {
+  test_data <- create_test_data()
+
+  expect_error(
+    measure_normalize(test_data, range = c(1, 0)),
+    "range\\[1\\] < range\\[2\\]"
+  )
+})
+
+test_that("measure_log applies log transformation", {
+  test_data <- create_test_data()
+
+  result <- measure_log(test_data)
+
+  expected <- log1p(test_data$.measures[[1]]$value)
+  expect_equal(result$.measures[[1]]$value, expected, tolerance = 1e-10)
+})
+
+test_that("measure_log supports different bases", {
+  test_data <- create_test_data()
+
+  result <- measure_log(test_data, base = 10, offset = 0)
+
+  expected <- log10(test_data$.measures[[1]]$value)
+  expect_equal(result$.measures[[1]]$value, expected, tolerance = 1e-10)
+})
+
+# ==============================================================================
 # measure_map() tests
 # ==============================================================================
 
