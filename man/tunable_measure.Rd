@@ -10,6 +10,7 @@
 \alias{tunable.step_measure_baseline_poly}
 \alias{tunable.step_measure_baseline_rf}
 \alias{tunable.step_measure_detrend}
+\alias{tunable.step_measure_normalize_peak}
 \title{tunable methods for measure}
 \usage{
 \method{tunable}{step_measure_baseline_custom}(x, ...)
@@ -25,6 +26,8 @@
 \method{tunable}{step_measure_baseline_rf}(x, ...)
 
 \method{tunable}{step_measure_detrend}(x, ...)
+
+\method{tunable}{step_measure_normalize_peak}(x, ...)
 }
 \arguments{
 \item{x}{A recipe step object}

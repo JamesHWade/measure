@@ -77,15 +77,16 @@
 #'   step_measure_baseline_poly(degree = 3, max_iter = 5, threshold = 2) |>
 #'   prep()
 step_measure_baseline_poly <- function(
-    recipe,
-    measures = NULL,
-    degree = 2L,
-    max_iter = 0L,
-    threshold = 1.5,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_poly")) {
+  recipe,
+  measures = NULL,
+  degree = 2L,
+  max_iter = 0L,
+  threshold = 1.5,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_poly")
+) {
   recipes::add_step(
     recipe,
     step_measure_baseline_poly_new(
@@ -102,7 +103,15 @@ step_measure_baseline_poly <- function(
 }
 
 step_measure_baseline_poly_new <- function(
-    measures, degree, max_iter, threshold, role, trained, skip, id) {
+  measures,
+  degree,
+  max_iter,
+  threshold,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_poly",
     measures = measures,
@@ -131,7 +140,9 @@ prep.step_measure_baseline_poly <- function(x, training, info = NULL, ...) {
       "{.arg max_iter} must be a non-negative integer, not {.val {x$max_iter}}."
     )
   }
-  if (!is.numeric(x$threshold) || length(x$threshold) != 1 || x$threshold <= 0) {
+  if (
+    !is.numeric(x$threshold) || length(x$threshold) != 1 || x$threshold <= 0
+  ) {
     cli::cli_abort(
       "{.arg threshold} must be a positive number, not {.val {x$threshold}}."
     )
@@ -172,9 +183,10 @@ bake.step_measure_baseline_poly <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_baseline_poly <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Polynomial baseline correction on "
 
   if (x$trained) {
@@ -260,7 +272,9 @@ required_pkgs.step_measure_baseline_poly <- function(x, ...) {
   loc_scaled <- (loc - mean(loc, na.rm = TRUE)) / stats::sd(loc, na.rm = TRUE)
 
   # Handle case where all locations are the same
- if (is.na(stats::sd(loc, na.rm = TRUE)) || stats::sd(loc, na.rm = TRUE) == 0) {
+  if (
+    is.na(stats::sd(loc, na.rm = TRUE)) || stats::sd(loc, na.rm = TRUE) == 0
+  ) {
     loc_scaled <- loc - mean(loc, na.rm = TRUE)
   }
 
@@ -285,19 +299,25 @@ required_pkgs.step_measure_baseline_poly <- function(x, ...) {
     baseline <- stats::predict(fit, newdata = data.frame(x = loc_scaled))
 
     # If no iteration requested, exit after first fit
-    if (max_iter == 0) break
+    if (max_iter == 0) {
+      break
+    }
 
     # Calculate residuals and update inclusion mask
     residuals <- y - baseline
     res_sd <- stats::sd(residuals[include], na.rm = TRUE)
 
-    if (is.na(res_sd) || res_sd == 0) break
+    if (is.na(res_sd) || res_sd == 0) {
+      break
+    }
 
     # Exclude points above threshold
     new_include <- residuals <= threshold * res_sd
 
     # Check convergence
-    if (all(new_include == include)) break
+    if (all(new_include == include)) {
+      break
+    }
 
     include <- new_include
 

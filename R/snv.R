@@ -98,7 +98,7 @@ prep.step_measure_snv <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
   # Resolve which columns to process
- if (is.null(x$measures)) {
+  if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
   } else {
     measure_cols <- x$measures

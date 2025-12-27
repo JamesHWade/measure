@@ -112,18 +112,18 @@
 #'   ) |>
 #'   prep()
 step_measure_baseline_custom <- function(
-    recipe,
-    .fn,
-    ...,
-    subtract = TRUE,
-    measures = NULL,
-    tunable = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_custom")) {
-
-.fn <- rlang::as_function(.fn)
+  recipe,
+  .fn,
+  ...,
+  subtract = TRUE,
+  measures = NULL,
+  tunable = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_custom")
+) {
+  .fn <- rlang::as_function(.fn)
   fn_args <- rlang::enquos(...)
 
   recipes::add_step(
@@ -143,7 +143,16 @@ step_measure_baseline_custom <- function(
 }
 
 step_measure_baseline_custom_new <- function(
-    fn, fn_args, subtract, measures, tunable_params, role, trained, skip, id) {
+  fn,
+  fn_args,
+  subtract,
+  measures,
+  tunable_params,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_custom",
     fn = fn,
@@ -199,7 +208,7 @@ prep.step_measure_baseline_custom <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_baseline_custom <- function(object, new_data, ...) {
   # Evaluate quosures to get actual argument values
-fn_args <- lapply(object$fn_args, rlang::eval_tidy)
+  fn_args <- lapply(object$fn_args, rlang::eval_tidy)
 
   for (col in object$measures) {
     result <- .compute_baseline_custom(
@@ -215,9 +224,10 @@ fn_args <- lapply(object$fn_args, rlang::eval_tidy)
 
 #' @export
 print.step_measure_baseline_custom <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Custom baseline correction on "
 
   if (x$trained) {
@@ -299,7 +309,8 @@ tunable.step_measure_baseline_custom <- function(x, ...) {
 #' @noRd
 .compute_baseline_custom <- function(dat, fn, fn_args, subtract) {
   purrr::map(
-    dat, .custom_baseline_single,
+    dat,
+    .custom_baseline_single,
     fn = fn,
     fn_args = fn_args,
     subtract = subtract

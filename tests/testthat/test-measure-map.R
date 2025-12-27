@@ -17,6 +17,18 @@ create_test_data <- function() {
     bake(new_data = NULL)
 }
 
+# Helper to capture output while returning result (avoids implicit assignment)
+capture_with_result <- function(code) {
+  tc <- textConnection("output_text", "w", local = TRUE)
+  sink(tc)
+  on.exit({
+    sink()
+    close(tc)
+  }, add = TRUE)
+  result <- code
+  list(result = result, output = output_text)
+}
+
 # ==============================================================================
 # step_measure_map() tests (Recipe Step - PRIMARY INTERFACE)
 # ==============================================================================
@@ -45,7 +57,12 @@ test_that("step_measure_map works with formula syntax", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(~ { .x$value <- .x$value * 2; .x }) %>%
+    step_measure_map(
+      ~ {
+        .x$value <- .x$value * 2
+        .x
+      }
+    ) %>%
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -57,7 +74,12 @@ test_that("step_measure_map can be chained with other steps", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(~ { .x$value <- log1p(.x$value); .x }) %>%
+    step_measure_map(
+      ~ {
+        .x$value <- log1p(.x$value)
+        .x
+      }
+    ) %>%
     step_measure_snv() %>%
     prep()
 
@@ -80,7 +102,12 @@ test_that("step_measure_map works on new data", {
   rec <- recipe(water + fat + protein ~ ., data = train_data) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(~ { .x$value <- .x$value - mean(.x$value); .x }) %>%
+    step_measure_map(
+      ~ {
+        .x$value <- .x$value - mean(.x$value)
+        .x
+      }
+    ) %>%
     prep()
 
   result <- bake(rec, new_data = test_data)
@@ -95,7 +122,12 @@ test_that("step_measure_map print method works", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(~ { .x$value <- .x$value * 2; .x })
+    step_measure_map(
+      ~ {
+        .x$value <- .x$value * 2
+        .x
+      }
+    )
 
   expect_snapshot(rec)
 
@@ -107,7 +139,7 @@ test_that("step_measure_map tidy method works", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(~ .x, id = "map_test")
+    step_measure_map(~.x, id = "map_test")
 
   # Before prep
   tidy_before <- tidy(rec, number = 2)
@@ -131,7 +163,12 @@ test_that("step_measure_map integrates with workflows", {
   rec <- recipe(water ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(~ { .x$value <- log1p(.x$value); .x }) %>%
+    step_measure_map(
+      ~ {
+        .x$value <- log1p(.x$value)
+        .x
+      }
+    ) %>%
     step_measure_output_wide()
 
   spec <- linear_reg() %>%
@@ -172,10 +209,13 @@ test_that("measure_map works with a simple function", {
 test_that("measure_map works with formula syntax", {
   test_data <- create_test_data()
 
-  result <- measure_map(test_data, ~ {
-    .x$value <- .x$value - mean(.x$value)
-    .x
-  })
+  result <- measure_map(
+    test_data,
+    ~ {
+      .x$value <- .x$value - mean(.x$value)
+      .x
+    }
+  )
 
   for (i in seq_len(nrow(result))) {
     expect_equal(mean(result$.measures[[i]]$value), 0, tolerance = 1e-10)
@@ -224,7 +264,7 @@ test_that("measure_map errors when function returns missing columns", {
   test_data <- create_test_data()
 
   bad_fn <- function(x) {
-    tibble::tibble(foo = 1:nrow(x))
+    tibble::tibble(foo = seq_len(nrow(x)))
   }
 
   expect_error(
@@ -266,10 +306,13 @@ test_that("measure_map preserves locations", {
   test_data <- create_test_data()
   original_locations <- test_data$.measures[[1]]$location
 
-  result <- measure_map(test_data, ~ {
-    .x$value <- .x$value * 2
-    .x
-  })
+  result <- measure_map(
+    test_data,
+    ~ {
+      .x$value <- .x$value * 2
+      .x
+    }
+  )
 
   expect_equal(result$.measures[[1]]$location, original_locations)
 })
@@ -277,10 +320,13 @@ test_that("measure_map preserves locations", {
 test_that("measure_map preserves other columns", {
   test_data <- create_test_data()
 
-  result <- measure_map(test_data, ~ {
-    .x$value <- .x$value * 2
-    .x
-  })
+  result <- measure_map(
+    test_data,
+    ~ {
+      .x$value <- .x$value * 2
+      .x
+    }
+  )
 
   expect_equal(result$water, test_data$water)
   expect_equal(result$fat, test_data$fat)
@@ -306,7 +352,10 @@ test_that("measure_map works with column selection", {
 
   result <- measure_map(
     test_data,
-    ~ { .x$value <- .x$value * 10; .x },
+    ~ {
+      .x$value <- .x$value * 10
+      .x
+    },
     .cols = "spectra1"
   )
 
@@ -362,7 +411,11 @@ test_that("measure_map_safely uses .otherwise when provided", {
     value = rep(0, 10)
   )
 
-  result <- measure_map_safely(test_data, always_fails, .otherwise = placeholder)
+  result <- measure_map_safely(
+    test_data,
+    always_fails,
+    .otherwise = placeholder
+  )
 
   for (i in seq_len(nrow(result$result))) {
     expect_equal(result$result$.measures[[i]], placeholder)
@@ -504,10 +557,13 @@ test_that("measure_summarize handles na.rm correctly", {
 test_that("measure_map can replicate SNV transformation", {
   test_data <- create_test_data()
 
-  snv_via_map <- measure_map(test_data, ~ {
-    .x$value <- (.x$value - mean(.x$value)) / sd(.x$value)
-    .x
-  })
+  snv_via_map <- measure_map(
+    test_data,
+    ~ {
+      .x$value <- (.x$value - mean(.x$value)) / sd(.x$value)
+      .x
+    }
+  )
 
   snv_via_step <- recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
@@ -530,17 +586,18 @@ test_that("measure_map works in a dplyr pipeline", {
 
   result <- test_data %>%
     dplyr::filter(water > 50) %>%
-    measure_map(~ {
-      .x$value <- .x$value * 2
-      .x
-    })
+    measure_map(
+      ~ {
+        .x$value <- .x$value * 2
+        .x
+      }
+    )
 
   expect_true(all(result$water > 50))
   expect_s3_class(result, "tbl_df")
 })
 
 test_that("prototyping with measure_map transfers to step_measure_map", {
-
   # This test demonstrates the intended workflow:
   # 1. Prototype with measure_map()
   # 2. Transfer to step_measure_map() for production
@@ -549,7 +606,7 @@ test_that("prototyping with measure_map transfers to step_measure_map", {
 
   # Step 1: Prototype a custom transformation
   my_transform <- function(x) {
-    x$value <- x$value - min(x$value)  # Shift to zero baseline
+    x$value <- x$value - min(x$value) # Shift to zero baseline
     x
   }
 
@@ -590,9 +647,9 @@ test_that("step_measure_map verbosity = 0 suppresses output", {
     step_measure_map(noisy_fn, verbosity = 0L)
 
   # Should not produce cat() output when verbosity = 0 (output happens during prep)
-  output <- capture.output(
-    rec_prepped <- prep(rec)
-  )
+  captured <- capture_with_result(prep(rec))
+  rec_prepped <- captured$result
+  output <- captured$output
 
   expect_length(output, 0)
 
@@ -614,9 +671,8 @@ test_that("step_measure_map verbosity = 1 allows output (default)", {
     step_measure_map(noisy_fn, verbosity = 1L)
 
   # Should produce output when verbosity = 1 (output happens during prep)
-  output <- capture.output(
-    rec_prepped <- prep(rec)
-  )
+  captured <- capture_with_result(prep(rec))
+  output <- captured$output
 
   expect_true(length(output) > 0)
   expect_true(any(grepl("Processing sample", output)))
@@ -631,9 +687,9 @@ test_that("measure_map verbosity = 0 suppresses output", {
   }
 
   # Should not produce output when verbosity = 0
-  output <- capture.output(
-    result <- measure_map(test_data, noisy_fn, verbosity = 0L)
-  )
+  captured <- capture_with_result(measure_map(test_data, noisy_fn, verbosity = 0L))
+  result <- captured$result
+  output <- captured$output
 
   expect_s3_class(result, "tbl_df")
   expect_length(output, 0)
@@ -648,9 +704,8 @@ test_that("measure_map verbosity = 1 allows output (default)", {
   }
 
   # Should produce output when verbosity = 1
-  output <- capture.output(
-    result <- measure_map(test_data, noisy_fn, verbosity = 1L)
-  )
+  captured <- capture_with_result(measure_map(test_data, noisy_fn, verbosity = 1L))
+  output <- captured$output
 
   expect_true(length(output) > 0)
   expect_true(any(grepl("Processing sample", output)))
@@ -660,7 +715,7 @@ test_that("step_measure_map verbosity is preserved through prep", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
     update_role(id, new_role = "id") %>%
     step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(~ .x, verbosity = 0L) %>%
+    step_measure_map(~.x, verbosity = 0L) %>%
     prep()
 
   # Check that verbosity is preserved in the prepped step

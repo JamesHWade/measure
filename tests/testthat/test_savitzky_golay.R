@@ -15,7 +15,7 @@ test_that("savitzky-golay computations", {
 
   grid <- expand.grid(diffs = 0:3, deg = 4:6, wn = c(15, 21, 25))
 
-  for (i in 1:nrow(grid)) {
+  for (i in seq_len(nrow(grid))) {
     meas_res <-
       .comp_savitzky_golay(
         rec$template$.measures,
@@ -85,7 +85,7 @@ test_that("savitzky-golay inputs", {
       5L        , 2L     , 4L
     )
 
-  for (i in 1:nrow(arg_inputs)) {
+  for (i in seq_len(nrow(arg_inputs))) {
     window_length <- 2 * arg_inputs$win_side[i] + 1
 
     warn_val <-

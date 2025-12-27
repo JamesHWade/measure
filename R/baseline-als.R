@@ -79,15 +79,16 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_baseline_als <- function(
-    recipe,
-    measures = NULL,
-    lambda = 1e6,
-    p = 0.01,
-    max_iter = 20L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_als")) {
+  recipe,
+  measures = NULL,
+  lambda = 1e6,
+  p = 0.01,
+  max_iter = 20L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_als")
+) {
   recipes::add_step(
     recipe,
     step_measure_baseline_als_new(
@@ -104,7 +105,15 @@ step_measure_baseline_als <- function(
 }
 
 step_measure_baseline_als_new <- function(
-    measures, lambda, p, max_iter, role, trained, skip, id) {
+  measures,
+  lambda,
+  p,
+  max_iter,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_als",
     measures = measures,
@@ -174,9 +183,10 @@ bake.step_measure_baseline_als <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_baseline_als <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "ALS baseline correction on "
 
   if (x$trained) {
@@ -263,7 +273,7 @@ required_pkgs.step_measure_baseline_als <- function(x, ...) {
   # D'D is pentadiagonal with bandwidth 2
   # For efficiency, we solve the system iteratively
 
-  baseline <- y  # Initial baseline estimate
+  baseline <- y # Initial baseline estimate
 
   for (iter in seq_len(max_iter)) {
     # Solve: (W + lambda * D'D) * z = W * y
@@ -361,7 +371,9 @@ required_pkgs.step_measure_baseline_als <- function(x, ...) {
     for (i in 1:50) {
       z_new <- (w * y + lambda * c(0, z[-n]) + lambda * c(z[-1], 0)) /
         (w + 2 * lambda)
-      if (max(abs(z_new - z)) < 1e-6) break
+      if (max(abs(z_new - z)) < 1e-6) {
+        break
+      }
       z <- z_new
     }
     return(z)

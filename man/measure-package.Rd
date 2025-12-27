@@ -6,16 +6,69 @@
 \alias{measure-package}
 \title{measure: A Recipes-Style Interface to Tidymodels for Analytical Measurements}
 \description{
-Provides preprocessing steps for analytical measurement data such as spectroscopy and chromatography within the 'tidymodels' framework. Extends 'recipes' with steps for common spectral preprocessing techniques.
+The measure package provides preprocessing steps for analytical measurement
+data (spectroscopy, chromatography, etc.) within the tidymodels framework.
 }
-\seealso{
-Useful links:
+\section{Input Steps}{
+
+Convert raw data to measure's internal format:
 \itemize{
-  \item \url{https://jameshwade.github.io/measure/}
-  \item \url{https://github.com/JamesHWade/measure}
-  \item Report bugs at \url{https://github.com/JamesHWade/measure/issues}
+\item \code{\link[=step_measure_input_wide]{step_measure_input_wide()}}: For data with measurements in columns
+\item \code{\link[=step_measure_input_long]{step_measure_input_long()}}: For data with measurements in rows
+}
 }
 
+\section{Processing Steps}{
+
+Apply spectral preprocessing transformations:
+\itemize{
+\item \code{\link[=step_measure_savitzky_golay]{step_measure_savitzky_golay()}}: Smoothing and derivatives
+\item \code{\link[=step_measure_snv]{step_measure_snv()}}: Standard Normal Variate normalization
+\item \code{\link[=step_measure_msc]{step_measure_msc()}}: Multiplicative Scatter Correction
+\item \code{\link[=step_measure_map]{step_measure_map()}}: Custom transformations
+}
+}
+
+\section{Sample-wise Normalization}{
+
+Normalize each spectrum independently:
+\itemize{
+\item \code{\link[=step_measure_normalize_sum]{step_measure_normalize_sum()}}: Divide by sum
+\item \code{\link[=step_measure_normalize_max]{step_measure_normalize_max()}}: Divide by maximum
+\item \code{\link[=step_measure_normalize_range]{step_measure_normalize_range()}}: Scale to 0-1 range
+\item \code{\link[=step_measure_normalize_vector]{step_measure_normalize_vector()}}: L2 normalization
+\item \code{\link[=step_measure_normalize_auc]{step_measure_normalize_auc()}}: Divide by area under curve
+\item \code{\link[=step_measure_normalize_peak]{step_measure_normalize_peak()}}: Normalize by region (tunable)
+}
+}
+
+\section{Variable-wise Scaling}{
+
+Scale across samples at each location (learns from training data):
+\itemize{
+\item \code{\link[=step_measure_center]{step_measure_center()}}: Mean centering
+\item \code{\link[=step_measure_scale_auto]{step_measure_scale_auto()}}: Z-score normalization
+\item \code{\link[=step_measure_scale_pareto]{step_measure_scale_pareto()}}: Pareto scaling
+\item \code{\link[=step_measure_scale_range]{step_measure_scale_range()}}: Range scaling
+\item \code{\link[=step_measure_scale_vast]{step_measure_scale_vast()}}: VAST scaling
+}
+}
+
+\section{Output Steps}{
+
+Convert back to modeling-ready format:
+\itemize{
+\item \code{\link[=step_measure_output_wide]{step_measure_output_wide()}}: Back to wide format
+\item \code{\link[=step_measure_output_long]{step_measure_output_long()}}: Back to long format
+}
+}
+
+\seealso{
+\itemize{
+\item \code{vignette("measure")} for getting started
+\item \code{vignette("preprocessing")} for detailed technique descriptions
+\item \code{vignette("recipes")} for tidymodels integration
+}
 }
 \author{
 \strong{Maintainer}: James Wade \email{github@jameshwade.com} (\href{https://orcid.org/0000-0002-9740-1905}{ORCID})

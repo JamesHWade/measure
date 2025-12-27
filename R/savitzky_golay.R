@@ -149,7 +149,7 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
     )
   }
 
-  window_size = 2 * x$window_side + 1
+  window_size <- 2 * x$window_side + 1
 
   # polynomial order p must be greater or equal to differentiation order m
   if (x$degree < x$differentiation_order) {
@@ -282,7 +282,7 @@ required_pkgs.step_measure_savitzky_golay <- function(x, ...) {
 
   if (ncol(res) != ncol(dat)) {
     # TODO Prob can do better; can we approximate what the wave numbers should be?
-    loc <- 1:ncol(res)
+    loc <- seq_len(ncol(res))
   }
 
   matrix_to_measure(res, loc)

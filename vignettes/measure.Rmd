@@ -130,7 +130,15 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 rec
 ```
 
-measure provides several built-in preprocessing steps (`step_measure_savitzky_golay()`, `step_measure_snv()`, `step_measure_msc()`), plus `step_measure_map()` for custom transformations when the built-in steps don't cover your needs. See `vignette("preprocessing")` for details on all available options.
+measure provides many built-in preprocessing steps:
+
+- **Filtering**: `step_measure_savitzky_golay()` for smoothing and derivatives
+- **Scatter correction**: `step_measure_snv()`, `step_measure_msc()`
+- **Sample-wise normalization**: `step_measure_normalize_sum()`, `step_measure_normalize_max()`, `step_measure_normalize_peak()`, and more
+- **Variable-wise scaling**: `step_measure_center()`, `step_measure_scale_auto()`, `step_measure_scale_pareto()`, and more
+- **Custom transformations**: `step_measure_map()` for when built-in steps don't cover your needs
+
+See `vignette("preprocessing")` for details on all available options.
 
 Let's see how this transforms our spectra:
 
@@ -236,6 +244,10 @@ measure recipes work seamlessly with the broader tidymodels ecosystem. See `vign
 
 ## Next steps
 
-- See `vignette("preprocessing")` for a detailed guide to each preprocessing technique
-- Explore hyperparameter tuning with `tune` - measure's Savitzky-Golay step is tunable!
+- See `vignette("preprocessing")` for a detailed guide to each preprocessing technique, including:
+  - Savitzky-Golay smoothing and derivatives
+  - SNV and MSC scatter correction
+  - Sample-wise normalization (sum, max, range, peak region)
+  - Variable-wise scaling (centering, auto-scaling, Pareto scaling)
+- Explore hyperparameter tuning with `tune` - Savitzky-Golay and peak normalization steps are tunable!
 - Check out the [function reference](https://jameshwade.github.io/measure/reference/) for all available steps

@@ -180,7 +180,11 @@ test_that("step_measure_baseline_gpc tidy method works", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
-    step_measure_baseline_gpc(left_frac = 0.1, right_frac = 0.15, method = "median")
+    step_measure_baseline_gpc(
+      left_frac = 0.1,
+      right_frac = 0.15,
+      method = "median"
+    )
 
   # Before prep
   tidy_before <- tidy(rec, number = 2)

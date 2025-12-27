@@ -2,7 +2,8 @@
 % Please edit documentation in R/baseline-als.R, R/baseline-custom.R,
 %   R/baseline-gpc.R, R/baseline-poly.R, R/baseline-py.R, R/baseline-rf.R,
 %   R/detrend.R, R/input_long.R, R/input_wide.R, R/measure-map.R, R/msc.R,
-%   R/output_long.R, R/output_wide.R, R/savitzky_golay.R, R/snv.R
+%   R/normalize-sample.R, R/output_long.R, R/output_wide.R, R/savitzky_golay.R,
+%   R/scale-variable.R, R/snv.R
 \name{tidy.step_measure_baseline_als}
 \alias{tidy.step_measure_baseline_als}
 \alias{tidy.step_measure_baseline_custom}
@@ -15,9 +16,20 @@
 \alias{tidy.step_measure_input_wide}
 \alias{tidy.step_measure_map}
 \alias{tidy.step_measure_msc}
+\alias{tidy.step_measure_normalize_sum}
+\alias{tidy.step_measure_normalize_max}
+\alias{tidy.step_measure_normalize_range}
+\alias{tidy.step_measure_normalize_vector}
+\alias{tidy.step_measure_normalize_auc}
+\alias{tidy.step_measure_normalize_peak}
 \alias{tidy.step_measure_output_long}
 \alias{tidy.step_measure_output_wide}
 \alias{tidy.step_measure_savitzky_golay}
+\alias{tidy.step_measure_center}
+\alias{tidy.step_measure_scale_auto}
+\alias{tidy.step_measure_scale_pareto}
+\alias{tidy.step_measure_scale_range}
+\alias{tidy.step_measure_scale_vast}
 \alias{tidy.step_measure_snv}
 \title{Tidiers for measure steps}
 \usage{
@@ -43,11 +55,33 @@
 
 \method{tidy}{step_measure_msc}(x, ...)
 
+\method{tidy}{step_measure_normalize_sum}(x, ...)
+
+\method{tidy}{step_measure_normalize_max}(x, ...)
+
+\method{tidy}{step_measure_normalize_range}(x, ...)
+
+\method{tidy}{step_measure_normalize_vector}(x, ...)
+
+\method{tidy}{step_measure_normalize_auc}(x, ...)
+
+\method{tidy}{step_measure_normalize_peak}(x, ...)
+
 \method{tidy}{step_measure_output_long}(x, ...)
 
 \method{tidy}{step_measure_output_wide}(x, ...)
 
 \method{tidy}{step_measure_savitzky_golay}(x, ...)
+
+\method{tidy}{step_measure_center}(x, ...)
+
+\method{tidy}{step_measure_scale_auto}(x, ...)
+
+\method{tidy}{step_measure_scale_pareto}(x, ...)
+
+\method{tidy}{step_measure_scale_range}(x, ...)
+
+\method{tidy}{step_measure_scale_vast}(x, ...)
 
 \method{tidy}{step_measure_snv}(x, ...)
 }
