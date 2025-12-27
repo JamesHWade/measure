@@ -33,7 +33,7 @@ navbar:
       - text: Internal Class System
         href: articles/internals.html
 development:
-  mode: auto
+  mode: devel
 articles:
 - title: Getting Started
   contents: measure

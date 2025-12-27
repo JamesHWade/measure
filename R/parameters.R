@@ -45,6 +45,71 @@ differentiation_order <- function(range = c(0L, 4L), trans = NULL) {
   )
 }
 
+#' Parameters for baseline correction steps
+#'
+#' `baseline_lambda()` controls the smoothness penalty in ALS baseline correction.
+#' `baseline_asymmetry()` controls the asymmetry parameter in ALS.
+#' `baseline_degree()` controls the polynomial degree for baseline fitting.
+#'
+#' @inheritParams window_side
+#'
+#' @return A function with classes `"quant_param"` and `"param"`.
+#' @examples
+#' baseline_lambda()
+#' baseline_asymmetry()
+#' baseline_degree()
+#' @export
+baseline_lambda <- function(range = c(2, 9), trans = scales::transform_log10()) {
+
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(baseline_lambda = "Baseline Smoothness (lambda)"),
+    finalize = NULL
+  )
+}
+
+#' @rdname baseline_lambda
+#' @export
+baseline_asymmetry <- function(range = c(0.001, 0.1), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(baseline_asymmetry = "Baseline Asymmetry (p)"),
+    finalize = NULL
+  )
+}
+
+#' @rdname baseline_lambda
+#' @export
+baseline_degree <- function(range = c(1L, 6L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(baseline_degree = "Baseline Polynomial Degree"),
+    finalize = NULL
+  )
+}
+
+#' @rdname baseline_lambda
+#' @export
+baseline_half_window <- function(range = c(5L, 100L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(baseline_half_window = "Baseline Half Window"),
+    finalize = NULL
+  )
+}
+
 
 # ------------------------------------------------------------------------------
 # Tunable methods
@@ -74,6 +139,63 @@ tunable.step_measure_savitzky_golay <- function(x, ...) {
     ),
     source = "recipe",
     component = "step_measure_savitzky_golay",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_baseline_als <- function(x, ...) {
+  tibble::tibble(
+    name = c("lambda", "p"),
+    call_info = list(
+      list(pkg = "measure", fun = "baseline_lambda"),
+      list(pkg = "measure", fun = "baseline_asymmetry")
+    ),
+    source = "recipe",
+    component = "step_measure_baseline_als",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_baseline_poly <- function(x, ...) {
+  tibble::tibble(
+    name = "degree",
+    call_info = list(
+      list(pkg = "measure", fun = "baseline_degree")
+    ),
+    source = "recipe",
+    component = "step_measure_baseline_poly",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_baseline_rf <- function(x, ...) {
+  tibble::tibble(
+    name = "span",
+    call_info = list(
+      list(pkg = "dials", fun = "degree", range = c(0.1, 0.9))
+    ),
+    source = "recipe",
+    component = "step_measure_baseline_rf",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_detrend <- function(x, ...) {
+  tibble::tibble(
+    name = "degree",
+    call_info = list(
+      list(pkg = "dials", fun = "degree_int", range = c(0L, 3L))
+    ),
+    source = "recipe",
+    component = "step_measure_detrend",
     component_id = x$id
   )
 }

@@ -4,22 +4,26 @@
 \name{measure-package}
 \alias{measure}
 \alias{measure-package}
-\title{measure: A Recipes-style Interface to Tidymodels for Analytical Measurements}
+\title{measure: A Recipes-Style Interface to Tidymodels for Analytical Measurements}
 \description{
-Analytical measurements...
+Provides preprocessing steps for analytical measurement data such as spectroscopy and chromatography within the 'tidymodels' framework. Extends 'recipes' with steps for common spectral preprocessing techniques.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://jameshwade.github.io/measure}
-  \item \url{https://github.com/jameshwade/measure}
   \item \url{https://jameshwade.github.io/measure/}
-  \item Report bugs at \url{https://github.com/jameshwade/measure/issues}
+  \item \url{https://github.com/JamesHWade/measure}
+  \item Report bugs at \url{https://github.com/JamesHWade/measure/issues}
 }
 
 }
 \author{
 \strong{Maintainer}: James Wade \email{github@jameshwade.com} (\href{https://orcid.org/0000-0002-9740-1905}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Max Kuhn \email{max@posit.co} (\href{https://orcid.org/0000-0003-2402-136X}{ORCID}) [contributor]
+}
 
 }
 \keyword{internal}

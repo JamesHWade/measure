@@ -22,8 +22,16 @@ function and the second value for symmetric weighting function.}
 A dataframe matching column in data plus \code{raw} and \code{baseline} columns
 }
 \description{
-Subtract baseline using robust fitting method
+A standalone function for robust fitting baseline subtraction using
+local regression with iterative reweighting. For use within a recipe
+workflow, see \code{\link[=step_measure_baseline_rf]{step_measure_baseline_rf()}}.
 }
 \examples{
-meats_long \%>\% subtract_rf_baseline(yvar = transmittance)
+library(dplyr)
+meats_long |>
+  group_by(id) |>
+  subtract_rf_baseline(yvar = transmittance)
+}
+\seealso{
+\code{\link[=step_measure_baseline_rf]{step_measure_baseline_rf()}} for the recipe step version.
 }
