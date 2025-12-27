@@ -5,6 +5,7 @@
 \alias{baseline_asymmetry}
 \alias{baseline_degree}
 \alias{baseline_half_window}
+\alias{baseline_span}
 \title{Parameters for baseline correction steps}
 \usage{
 baseline_lambda(range = c(2, 9), trans = scales::transform_log10())
@@ -14,6 +15,8 @@ baseline_asymmetry(range = c(0.001, 0.1), trans = NULL)
 baseline_degree(range = c(1L, 6L), trans = NULL)
 
 baseline_half_window(range = c(5L, 100L), trans = NULL)
+
+baseline_span(range = c(0.1, 0.9), trans = NULL)
 }
 \arguments{
 \item{range}{A two-element vector holding the \emph{defaults} for the smallest and
@@ -37,4 +40,5 @@ A function with classes \code{"quant_param"} and \code{"param"}.
 baseline_lambda()
 baseline_asymmetry()
 baseline_degree()
+baseline_span()
 }

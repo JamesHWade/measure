@@ -58,6 +58,7 @@ differentiation_order <- function(range = c(0L, 4L), trans = NULL) {
 #' baseline_lambda()
 #' baseline_asymmetry()
 #' baseline_degree()
+#' baseline_span()
 #' @export
 baseline_lambda <- function(range = c(2, 9), trans = scales::transform_log10()) {
 
@@ -106,6 +107,19 @@ baseline_half_window <- function(range = c(5L, 100L), trans = NULL) {
     inclusive = c(TRUE, TRUE),
     trans = trans,
     label = c(baseline_half_window = "Baseline Half Window"),
+    finalize = NULL
+  )
+}
+
+#' @rdname baseline_lambda
+#' @export
+baseline_span <- function(range = c(0.1, 0.9), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(baseline_span = "LOESS Span"),
     finalize = NULL
   )
 }
@@ -178,7 +192,7 @@ tunable.step_measure_baseline_rf <- function(x, ...) {
   tibble::tibble(
     name = "span",
     call_info = list(
-      list(pkg = "dials", fun = "degree", range = c(0.1, 0.9))
+      list(pkg = "measure", fun = "baseline_span")
     ),
     source = "recipe",
     component = "step_measure_baseline_rf",
