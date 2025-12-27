@@ -4,7 +4,14 @@
 \alias{measure_map}
 \title{Apply a Function to Each Sample's Measurements}
 \usage{
-measure_map(.data, .f, .cols = NULL, ..., .error_call = rlang::caller_env())
+measure_map(
+  .data,
+  .f,
+  .cols = NULL,
+  ...,
+  verbosity = 1L,
+  .error_call = rlang::caller_env()
+)
 }
 \arguments{
 \item{.data}{A data frame containing one or more \code{measure_list} columns.}
@@ -20,6 +27,12 @@ converted to a function using \code{\link[rlang:as_function]{rlang::as_function(
 the transformation to. Defaults to all \code{measure_list} columns.}
 
 \item{...}{Additional arguments passed to \code{.f}.}
+
+\item{verbosity}{An integer controlling output verbosity:
+\itemize{
+\item \code{0}: Silent - suppress all messages and output from \code{.f}
+\item \code{1}: Normal (default) - show output from \code{.f}
+}}
 
 \item{.error_call}{The execution environment for error reporting.}
 }

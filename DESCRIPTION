@@ -37,7 +37,8 @@ Suggests:
     testthat (>= 3.0.0),
     tidymodels,
     tidyverse,
-    withr
+    withr,
+    workflows
 VignetteBuilder: 
     knitr
 Config/testthat/edition: 3

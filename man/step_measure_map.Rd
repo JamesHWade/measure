@@ -9,6 +9,7 @@ step_measure_map(
   fn,
   ...,
   measures = NULL,
+  verbosity = 1L,
   role = NA,
   trained = FALSE,
   skip = FALSE,
@@ -31,6 +32,12 @@ return a tibble with the same structure. Can also be a formula (e.g.,
 \item{measures}{An optional character vector of measure column names to
 
 process. If \code{NULL} (the default), all measure columns will be processed.}
+
+\item{verbosity}{An integer controlling output verbosity:
+\itemize{
+\item \code{0}: Silent - suppress all messages and output from \code{fn}
+\item \code{1}: Normal (default) - show output from \code{fn}
+}}
 
 \item{role}{Not used by this step since no new variables are created.}
 

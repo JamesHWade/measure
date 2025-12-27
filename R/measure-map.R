@@ -36,6 +36,9 @@
 #' @param measures An optional character vector of measure column names to
 #'
 #'   process. If `NULL` (the default), all measure columns will be processed.
+#' @param verbosity An integer controlling output verbosity:
+#'   - `0`: Silent - suppress all messages and output from `fn`
+#'   - `1`: Normal (default) - show output from `fn`
 #' @param role Not used by this step since no new variables are created.
 #' @param trained A logical to indicate if the step has been trained.
 #' @param skip A logical. Should the step be skipped when the recipe is baked?
@@ -132,14 +135,13 @@ step_measure_map <- function(
     fn,
     ...,
     measures = NULL,
+    verbosity = 1L,
     role = NA,
     trained = FALSE,
     skip = FALSE,
     id = recipes::rand_id("measure_map")) {
   # Evaluate and convert the function immediately
-
   # This avoids issues with recipes' internal get_needs_tuning check
-
   fn <- rlang::as_function(fn)
   dots <- rlang::enquos(...)
 
@@ -149,6 +151,7 @@ step_measure_map <- function(
       fn = fn,
       fn_args = dots,
       measures = measures,
+      verbosity = verbosity,
       role = role,
       trained = trained,
       skip = skip,
@@ -157,12 +160,14 @@ step_measure_map <- function(
   )
 }
 
-step_measure_map_new <- function(fn, fn_args, measures, role, trained, skip, id) {
+step_measure_map_new <- function(fn, fn_args, measures, verbosity, role,
+                                 trained, skip, id) {
   recipes::step(
     subclass = "measure_map",
     fn = fn,
     fn_args = fn_args,
     measures = measures,
+    verbosity = verbosity,
     role = role,
     trained = trained,
     skip = skip,
@@ -185,6 +190,7 @@ prep.step_measure_map <- function(x, training, info = NULL, ...) {
     fn = x$fn,
     fn_args = x$fn_args,
     measures = measure_cols,
+    verbosity = x$verbosity,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -196,6 +202,7 @@ prep.step_measure_map <- function(x, training, info = NULL, ...) {
 bake.step_measure_map <- function(object, new_data, ...) {
   # fn is already a function (converted in step_measure_map)
   fn <- object$fn
+  capture <- object$verbosity == 0
 
   # Evaluate additional arguments
   fn_args <- lapply(object$fn_args, rlang::eval_tidy)
@@ -203,7 +210,7 @@ bake.step_measure_map <- function(object, new_data, ...) {
   for (col in object$measures) {
     # Apply the function to each sample
     result <- purrr::map(new_data[[col]], function(x) {
-      do.call(fn, c(list(x), fn_args))
+      .eval_transform(fn, x, fn_args, capture = capture)
     })
     new_data[[col]] <- new_measure_list(result)
   }
@@ -260,6 +267,9 @@ tidy.step_measure_map <- function(x, ...) {
 #' @param .cols <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to apply
 #'   the transformation to. Defaults to all `measure_list` columns.
 #' @param ... Additional arguments passed to `.f`.
+#' @param verbosity An integer controlling output verbosity:
+#'   - `0`: Silent - suppress all messages and output from `.f`
+#'   - `1`: Normal (default) - show output from `.f`
 #' @param .error_call The execution environment for error reporting.
 #'
 #' @return A data frame with the specified measure columns transformed.
@@ -322,6 +332,7 @@ tidy.step_measure_map <- function(x, ...) {
 #' # recipe(...) |>
 #' #   step_measure_map(~ { .x$value <- .x$value - min(.x$value); .x })
 measure_map <- function(.data, .f, .cols = NULL, ...,
+                        verbosity = 1L,
                         .error_call = rlang::caller_env()) {
   if (!is.data.frame(.data)) {
     cli::cli_abort(
@@ -368,12 +379,14 @@ measure_map <- function(.data, .f, .cols = NULL, ...,
   }
 
   # Apply transformation to each measure column
+  capture <- verbosity == 0
   for (col in target_cols) {
     .data[[col]] <- .map_measure_col(
       .data[[col]],
       .f = .f,
       ...,
       .col_name = col,
+      .capture = capture,
       .error_call = .error_call
     )
   }
@@ -602,7 +615,8 @@ measure_summarize <- function(.data, .cols = NULL,
     for (fn_name in names(.fns)) {
       fn <- .fns[[fn_name]]
       if (na.rm) {
-        col_results[[fn_name]] <- apply(mat, 2, fn, na.rm = TRUE)
+        # Remove NAs before applying function (works with any function)
+        col_results[[fn_name]] <- apply(mat, 2, function(x) fn(x[!is.na(x)]))
       } else {
         col_results[[fn_name]] <- apply(mat, 2, fn)
       }
@@ -630,14 +644,16 @@ measure_summarize <- function(.data, .cols = NULL,
 
 #' Map over a single measure column
 #' @noRd
-.map_measure_col <- function(x, .f, ..., .col_name, .error_call) {
+.map_measure_col <- function(x, .f, ..., .col_name, .capture = FALSE,
+                             .error_call) {
   n_samples <- length(x)
   result <- vector("list", n_samples)
+  fn_args <- list(...)
 
   for (i in seq_len(n_samples)) {
     result[[i]] <- tryCatch(
       {
-        out <- .f(x[[i]], ...)
+        out <- .eval_transform(.f, x[[i]], fn_args, capture = .capture)
         .validate_map_output(out, x[[i]], i, .col_name, .error_call)
         out
       },
@@ -743,4 +759,27 @@ measure_summarize <- function(.data, .cols = NULL,
       call = error_call
     )
   }
+}
+
+#' Evaluate a transformation function with optional output capture
+#'
+#' Following the parsnip pattern from `eval_mod()`, this function
+#' evaluates the transformation function and optionally captures
+#' console output when verbosity is set to 0.
+#'
+#' @param fn The transformation function
+#' @param x The input data (measure_tbl)
+#' @param fn_args Additional arguments to pass to fn
+#' @param capture Logical. If TRUE, suppress console output.
+#' @return The result of applying fn to x
+#' @noRd
+.eval_transform <- function(fn, x, fn_args, capture = FALSE) {
+  if (capture) {
+    junk <- utils::capture.output(
+      res <- do.call(fn, c(list(x), fn_args))
+    )
+  } else {
+    res <- do.call(fn, c(list(x), fn_args))
+  }
+  res
 }

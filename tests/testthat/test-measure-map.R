@@ -573,3 +573,97 @@ test_that("prototyping with measure_map transfers to step_measure_map", {
     )
   }
 })
+
+# ==============================================================================
+# Verbosity tests
+# ==============================================================================
+
+test_that("step_measure_map verbosity = 0 suppresses output", {
+  noisy_fn <- function(x) {
+    cat("Processing sample...\n")
+    x
+  }
+
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(noisy_fn, verbosity = 0L)
+
+  # Should not produce cat() output when verbosity = 0 (output happens during prep)
+  output <- capture.output(
+    rec_prepped <- prep(rec)
+  )
+
+  expect_length(output, 0)
+
+  # Function should still work correctly
+  result <- bake(rec_prepped, new_data = NULL)
+  expect_s3_class(result, "tbl_df")
+  expect_true(".measures" %in% names(result))
+})
+
+test_that("step_measure_map verbosity = 1 allows output (default)", {
+  noisy_fn <- function(x) {
+    cat("Processing sample...\n")
+    x
+  }
+
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(noisy_fn, verbosity = 1L)
+
+  # Should produce output when verbosity = 1 (output happens during prep)
+  output <- capture.output(
+    rec_prepped <- prep(rec)
+  )
+
+  expect_true(length(output) > 0)
+  expect_true(any(grepl("Processing sample", output)))
+})
+
+test_that("measure_map verbosity = 0 suppresses output", {
+  test_data <- create_test_data()
+
+  noisy_fn <- function(x) {
+    cat("Processing sample...\n")
+    x
+  }
+
+  # Should not produce output when verbosity = 0
+  output <- capture.output(
+    result <- measure_map(test_data, noisy_fn, verbosity = 0L)
+  )
+
+  expect_s3_class(result, "tbl_df")
+  expect_length(output, 0)
+})
+
+test_that("measure_map verbosity = 1 allows output (default)", {
+  test_data <- create_test_data()
+
+  noisy_fn <- function(x) {
+    cat("Processing sample...\n")
+    x
+  }
+
+  # Should produce output when verbosity = 1
+  output <- capture.output(
+    result <- measure_map(test_data, noisy_fn, verbosity = 1L)
+  )
+
+  expect_true(length(output) > 0)
+  expect_true(any(grepl("Processing sample", output)))
+})
+
+test_that("step_measure_map verbosity is preserved through prep", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
+    update_role(id, new_role = "id") %>%
+    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    step_measure_map(~ .x, verbosity = 0L) %>%
+    prep()
+
+  # Check that verbosity is preserved in the prepped step
+  map_step <- rec$steps[[2]]
+  expect_equal(map_step$verbosity, 0L)
+})
