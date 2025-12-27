@@ -107,6 +107,101 @@
         </dt>
         <dd>Apply a Custom Function to Measurements</dd>
       </dl></div><div class="section level2">
+      <h2 id="sample-wise-normalization">Sample-wise Normalization<a class="anchor" aria-label="anchor" href="#sample-wise-normalization"></a></h2>
+
+      <div class="section-desc"><p>Normalize each spectrum independently</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_normalize_auc.html">step_measure_normalize_auc()</a></code>
+
+        </dt>
+        <dd>Normalize by Area Under Curve</dd>
+
+        <dt>
+
+          <code><a href="step_measure_normalize_max.html">step_measure_normalize_max()</a></code>
+
+        </dt>
+        <dd>Normalize by Maximum Value</dd>
+
+        <dt>
+
+          <code><a href="step_measure_normalize_peak.html">step_measure_normalize_peak()</a></code>
+
+        </dt>
+        <dd>Normalize to a Specific Peak Region</dd>
+
+        <dt>
+
+          <code><a href="step_measure_normalize_range.html">step_measure_normalize_range()</a></code>
+
+        </dt>
+        <dd>Normalize to Range 0-1</dd>
+
+        <dt>
+
+          <code><a href="step_measure_normalize_sum.html">step_measure_normalize_sum()</a></code>
+
+        </dt>
+        <dd>Normalize by Sum (Total Intensity)</dd>
+
+        <dt>
+
+          <code><a href="step_measure_normalize_vector.html">step_measure_normalize_vector()</a></code>
+
+        </dt>
+        <dd>Normalize by L2 (Euclidean) Norm</dd>
+      </dl></div><div class="section level2">
+      <h2 id="variable-wise-scaling">Variable-wise Scaling<a class="anchor" aria-label="anchor" href="#variable-wise-scaling"></a></h2>
+
+      <div class="section-desc"><p>Scale across samples at each measurement location</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_center.html">step_measure_center()</a></code>
+
+        </dt>
+        <dd>Mean Centering</dd>
+
+        <dt>
+
+          <code><a href="step_measure_scale_auto.html">step_measure_scale_auto()</a></code>
+
+        </dt>
+        <dd>Auto-Scaling (Z-Score Normalization)</dd>
+
+        <dt>
+
+          <code><a href="step_measure_scale_pareto.html">step_measure_scale_pareto()</a></code>
+
+        </dt>
+        <dd>Pareto Scaling</dd>
+
+        <dt>
+
+          <code><a href="step_measure_scale_range.html">step_measure_scale_range()</a></code>
+
+        </dt>
+        <dd>Range Scaling</dd>
+
+        <dt>
+
+          <code><a href="step_measure_scale_vast.html">step_measure_scale_vast()</a></code>
+
+        </dt>
+        <dd>VAST Scaling (Variable Stability Scaling)</dd>
+      </dl></div><div class="section level2">
       <h2 id="output-steps">Output Steps<a class="anchor" aria-label="anchor" href="#output-steps"></a></h2>
 
       <div class="section-desc"><p>Convert internal format back to modeling-ready data</p></div>
@@ -152,6 +247,13 @@
 
         </dt>
         <dd>Parameters for baseline correction steps</dd>
+
+        <dt>
+
+          <code><a href="peak_location_min.html">peak_location_min()</a></code> <code><a href="peak_location_min.html">peak_location_max()</a></code>
+
+        </dt>
+        <dd>Parameters for peak normalization</dd>
       </dl></div><div class="section level2">
       <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 

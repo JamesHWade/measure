@@ -38,6 +38,24 @@ tidy(x, ...)
 # S3 method for class 'step_measure_msc'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_normalize_sum'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_normalize_max'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_normalize_range'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_normalize_vector'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_normalize_auc'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_normalize_peak'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_output_long'
 tidy(x, ...)
 
@@ -45,6 +63,21 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_savitzky_golay'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_center'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_scale_auto'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_scale_pareto'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_scale_range'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_scale_vast'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_snv'

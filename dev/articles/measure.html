@@ -283,13 +283,33 @@ internal <code>.measures</code> column:</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Collate long analytical measurements: <span style="color: #0000BB;">transmittance</span></span></span>
 <span><span class="co">#&gt; Savitzky-Golay preprocessing on </span></span>
 <span><span class="co">#&gt; SNV transformation on</span></span></code></pre></div>
-<p>measure provides several built-in preprocessing steps
-(<code><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code>,
-<code><a href="../reference/step_measure_snv.html">step_measure_snv()</a></code>, <code><a href="../reference/step_measure_msc.html">step_measure_msc()</a></code>), plus
-<code><a href="../reference/step_measure_map.html">step_measure_map()</a></code> for custom transformations when the
-built-in steps don’t cover your needs. See
-<code><a href="../articles/preprocessing.html">vignette("preprocessing")</a></code> for details on all available
-options.</p>
+<p>measure provides many built-in preprocessing steps:</p>
+<ul>
+<li>
+<strong>Filtering</strong>:
+<code><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code> for smoothing and
+derivatives</li>
+<li>
+<strong>Scatter correction</strong>:
+<code><a href="../reference/step_measure_snv.html">step_measure_snv()</a></code>, <code><a href="../reference/step_measure_msc.html">step_measure_msc()</a></code>
+</li>
+<li>
+<strong>Sample-wise normalization</strong>:
+<code><a href="../reference/step_measure_normalize_sum.html">step_measure_normalize_sum()</a></code>,
+<code><a href="../reference/step_measure_normalize_max.html">step_measure_normalize_max()</a></code>,
+<code><a href="../reference/step_measure_normalize_peak.html">step_measure_normalize_peak()</a></code>, and more</li>
+<li>
+<strong>Variable-wise scaling</strong>:
+<code><a href="../reference/step_measure_center.html">step_measure_center()</a></code>,
+<code><a href="../reference/step_measure_scale_auto.html">step_measure_scale_auto()</a></code>,
+<code><a href="../reference/step_measure_scale_pareto.html">step_measure_scale_pareto()</a></code>, and more</li>
+<li>
+<strong>Custom transformations</strong>:
+<code><a href="../reference/step_measure_map.html">step_measure_map()</a></code> for when built-in steps don’t cover your
+needs</li>
+</ul>
+<p>See <code><a href="../articles/preprocessing.html">vignette("preprocessing")</a></code> for details on all
+available options.</p>
 <p>Let’s see how this transforms our spectra:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
@@ -452,9 +472,16 @@ including:</p>
 </h2>
 <ul>
 <li>See <code><a href="../articles/preprocessing.html">vignette("preprocessing")</a></code> for a detailed guide to
-each preprocessing technique</li>
-<li>Explore hyperparameter tuning with <code>tune</code> - measure’s
-Savitzky-Golay step is tunable!</li>
+each preprocessing technique, including:
+<ul>
+<li>Savitzky-Golay smoothing and derivatives</li>
+<li>SNV and MSC scatter correction</li>
+<li>Sample-wise normalization (sum, max, range, peak region)</li>
+<li>Variable-wise scaling (centering, auto-scaling, Pareto scaling)</li>
+</ul>
+</li>
+<li>Explore hyperparameter tuning with <code>tune</code> -
+Savitzky-Golay and peak normalization steps are tunable!</li>
 <li>Check out the <a href="https://jameshwade.github.io/measure/reference/">function
 reference</a> for all available steps</li>
 </ul>

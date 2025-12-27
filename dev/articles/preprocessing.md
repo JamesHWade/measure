@@ -281,6 +281,202 @@ p_snv / p_msc
 Both methods produce similar results for this dataset. In practice, try
 both and compare model performance.
 
+## Sample-wise Normalization
+
+The measure package provides several sample-wise normalization methods
+that normalize each spectrum independently. Unlike SNV/MSC which address
+scatter, these methods adjust for differences in total signal intensity.
+
+### Available methods
+
+| Step                                                                                                                     | Formula                                              | Use case                          |
+|--------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------|-----------------------------------|
+| [`step_measure_normalize_sum()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.md)       | $x/\sum x$                                           | Total intensity normalization     |
+| [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md)       | $x/\max(x)$                                          | Peak-focused analysis             |
+| [`step_measure_normalize_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.md)   | $\left( x - \min \right)/\left( \max - \min \right)$ | Scale to 0-1 range                |
+| [`step_measure_normalize_vector()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.md) | $x/ \parallel x \parallel_{2}$                       | L2/Euclidean normalization        |
+| [`step_measure_normalize_auc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.md)       | $x/AUC$                                              | Chromatography (area under curve) |
+| [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md)     | $x/f\left( \text{region} \right)$                    | Internal standard normalization   |
+
+### Sum normalization
+
+Divides each spectrum by its total intensity. After transformation, all
+spectra sum to 1:
+
+``` r
+rec_norm_sum <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_normalize_sum()
+
+plot_spectra(get_internal(rec_norm_sum), "Sum Normalized",
+             "Each spectrum sums to 1")
+```
+
+![](preprocessing_files/figure-html/normalize-sum-1.png)
+
+### Max normalization
+
+Divides each spectrum by its maximum value, useful for peak-focused
+analysis:
+
+``` r
+rec_norm_max <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_normalize_max()
+
+plot_spectra(get_internal(rec_norm_max), "Max Normalized",
+             "Each spectrum has maximum = 1")
+```
+
+![](preprocessing_files/figure-html/normalize-max-1.png)
+
+### Peak region normalization (tunable)
+
+When you have an internal standard at a known location, use
+[`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md)
+to normalize by a specific region:
+
+``` r
+rec_norm_peak <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_normalize_peak(
+    location_min = 900,
+    location_max = 950,
+    method = "mean"  # or "max" or "integral"
+  )
+
+plot_spectra(get_internal(rec_norm_peak), "Peak Region Normalized",
+             "Normalized by mean of region 900-950")
+```
+
+![](preprocessing_files/figure-html/normalize-peak-1.png)
+
+The `location_min` and `location_max` parameters are tunable:
+
+``` r
+rec_tunable_peak <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_normalize_peak(
+    location_min = tune(),
+    location_max = tune(),
+    method = "mean"
+  ) |>
+  step_measure_output_wide()
+```
+
+## Variable-wise Scaling
+
+While sample-wise methods normalize each spectrum independently,
+variable-wise scaling operates across samples at each measurement
+location. These methods **learn statistics from training data** and
+apply them consistently to new data.
+
+### When to use variable-wise scaling
+
+- **Before PCA/PLS**: Centering is essential; scaling equalizes variable
+  importance
+- **When variables have different scales**: Auto-scaling gives equal
+  weight to all locations
+- **For metabolomics data**: Pareto scaling is common practice
+
+### Mean centering
+
+[`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md)
+subtracts the column mean at each location:
+
+``` r
+rec_center <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_center()
+
+center_data <- get_internal(rec_center)
+plot_spectra(center_data, "Mean Centered",
+             "Column means are zero")
+```
+
+![](preprocessing_files/figure-html/center-1.png)
+
+### Auto-scaling (z-score)
+
+[`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md)
+centers and scales to unit variance at each location:
+
+``` r
+rec_auto <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_scale_auto()
+
+auto_data <- get_internal(rec_auto)
+plot_spectra(auto_data, "Auto-Scaled (Z-Score)",
+             "Column means = 0, SDs = 1")
+```
+
+![](preprocessing_files/figure-html/scale-auto-1.png)
+
+### Pareto scaling
+
+[`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md)
+divides by the square root of the standard deviation - a compromise
+between no scaling and auto-scaling:
+
+``` r
+rec_pareto <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_scale_pareto()
+
+pareto_data <- get_internal(rec_pareto)
+plot_spectra(pareto_data, "Pareto Scaled",
+             "Reduces influence of large values while preserving fold changes")
+```
+
+![](preprocessing_files/figure-html/scale-pareto-1.png)
+
+### Comparing scaling methods
+
+``` r
+p_raw <- plot_spectra(raw_data, "Raw")
+p_center <- plot_spectra(center_data, "Centered")
+p_auto <- plot_spectra(auto_data, "Auto-Scaled")
+p_pareto <- plot_spectra(pareto_data, "Pareto Scaled")
+
+(p_raw + p_center) / (p_auto + p_pareto)
+```
+
+![](preprocessing_files/figure-html/scale-comparison-1.png)
+
+### Learned parameters
+
+Variable-wise scaling steps store learned parameters that can be
+examined after training:
+
+``` r
+rec_prepped <- prep(rec_auto)
+
+# View learned parameters
+tidy_params <- tidy(rec_prepped, number = 2)
+head(tidy_params)
+#> # A tibble: 6 × 5
+#>   terms     location  mean    sd id                      
+#>   <chr>        <dbl> <dbl> <dbl> <chr>                   
+#> 1 .measures     850   2.81 0.411 measure_scale_auto_ZQdHO
+#> 2 .measures     852.  2.81 0.413 measure_scale_auto_ZQdHO
+#> 3 .measures     854.  2.81 0.416 measure_scale_auto_ZQdHO
+#> 4 .measures     856.  2.82 0.418 measure_scale_auto_ZQdHO
+#> 5 .measures     858.  2.82 0.421 measure_scale_auto_ZQdHO
+#> 6 .measures     860.  2.82 0.424 measure_scale_auto_ZQdHO
+
+# Plot the learned means and SDs
+ggplot(tidy_params, aes(x = location)) +
+  geom_line(aes(y = mean), color = "blue") +
+  geom_ribbon(aes(ymin = mean - sd, ymax = mean + sd), alpha = 0.3, fill = "blue") +
+  labs(x = "Wavelength", y = "Value",
+       title = "Learned Parameters from Auto-Scaling",
+       subtitle = "Mean ± 1 SD at each wavelength") +
+  theme_minimal()
+```
+
+![](preprocessing_files/figure-html/tidy-scaling-1.png)
+
 ## Custom Transformations
 
 ### When built-in steps aren’t enough
@@ -498,29 +694,77 @@ pipe4 <- recipe(water ~ ., data = meats) |>
   step_measure_msc() |>
   step_measure_savitzky_golay(window_side = 5, differentiation_order = 0) |>
   step_measure_output_wide()
+
+# Pipeline 5: For PCA/PLS - SNV + centering
+pipe5 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_snv() |>
+  step_measure_center() |>
+  step_measure_output_wide()
+
+# Pipeline 6: Metabolomics-style with Pareto scaling
+pipe6 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_normalize_sum() |>
+  step_measure_scale_pareto() |>
+  step_measure_output_wide()
 ```
 
 ### Order of operations
 
 The order of preprocessing steps matters. General guidelines:
 
-1.  **Derivatives before normalization**: Apply Savitzky-Golay
-    derivatives first, then SNV/MSC
-2.  **Smoothing after scatter correction**: If using smoothing (not
-    derivatives), apply after MSC/SNV
-3.  **Keep it simple**: Often, a single well-chosen step outperforms
+1.  **Derivatives first**: Apply Savitzky-Golay derivatives before other
+    transformations
+2.  **Sample-wise normalization before variable-wise scaling**:
+    Normalize spectra (SNV, MSC, normalize\_\*) before centering/scaling
+3.  **Center/scale last**: Variable-wise scaling should typically be the
+    final step before modeling
+4.  **Keep it simple**: Often, a single well-chosen step outperforms
     complex pipelines
+
+A typical order might be:
+
+    Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto-scale)
 
 ## Summary table
 
-| Step                                                                                           | Effect                | Use when              |
-|------------------------------------------------------------------------------------------------|-----------------------|-----------------------|
-| `step_measure_savitzky_golay(order=0)`                                                         | Smoothing             | High-frequency noise  |
-| `step_measure_savitzky_golay(order=1)`                                                         | 1st derivative        | Baseline offsets      |
-| `step_measure_savitzky_golay(order=2)`                                                         | 2nd derivative        | Linear baselines      |
-| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Row normalization     | Scatter, path length  |
-| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Align to reference    | Scatter (supervised)  |
-| `step_measure_map(fn)`                                                                         | Custom transformation | Domain-specific needs |
+### Filtering and Scatter Correction
+
+| Step                                                                                           | Effect             | Use when             |
+|------------------------------------------------------------------------------------------------|--------------------|----------------------|
+| `step_measure_savitzky_golay(order=0)`                                                         | Smoothing          | High-frequency noise |
+| `step_measure_savitzky_golay(order=1)`                                                         | 1st derivative     | Baseline offsets     |
+| `step_measure_savitzky_golay(order=2)`                                                         | 2nd derivative     | Linear baselines     |
+| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Row normalization  | Scatter, path length |
+| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Align to reference | Scatter (supervised) |
+
+### Sample-wise Normalization
+
+| Step                                                                                                                     | Effect           | Use when                       |
+|--------------------------------------------------------------------------------------------------------------------------|------------------|--------------------------------|
+| [`step_measure_normalize_sum()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.md)       | Divide by sum    | Total intensity differences    |
+| [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md)       | Divide by max    | Peak-focused analysis          |
+| [`step_measure_normalize_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.md)   | Scale to 0-1     | Neural networks, visualization |
+| [`step_measure_normalize_vector()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.md) | L2 normalization | Euclidean distance methods     |
+| [`step_measure_normalize_auc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.md)       | Divide by AUC    | Chromatography                 |
+| [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md)     | Divide by region | Internal standard              |
+
+### Variable-wise Scaling
+
+| Step                                                                                                             | Effect         | Use when                   |
+|------------------------------------------------------------------------------------------------------------------|----------------|----------------------------|
+| [`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md)             | Subtract mean  | Before PCA/PLS (essential) |
+| [`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md)     | Z-score        | Equal variable importance  |
+| [`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md) | Pareto scaling | Metabolomics               |
+| [`step_measure_scale_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_range.md)   | Range scaling  | Bounded scaling            |
+| [`step_measure_scale_vast()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.md)     | VAST scaling   | Variable stability focus   |
+
+### Custom
+
+| Step                   | Effect                | Use when              |
+|------------------------|-----------------------|-----------------------|
+| `step_measure_map(fn)` | Custom transformation | Domain-specific needs |
 
 ## Tips for choosing preprocessing
 

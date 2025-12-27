@@ -192,8 +192,21 @@ that bundles preprocessing and modeling:</p>
 <div class="section level2">
 <h2 id="tuning-preprocessing-parameters">Tuning preprocessing parameters<a class="anchor" aria-label="anchor" href="#tuning-preprocessing-parameters"></a>
 </h2>
-<p>measure’s Savitzky-Golay step has tunable parameters. Let’s find the
-optimal window size and differentiation order:</p>
+<p>Several measure steps have tunable parameters:</p>
+<ul>
+<li>
+<code><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code>:
+<code>window_side</code>, <code>differentiation_order</code>,
+<code>degree</code>
+</li>
+<li>
+<code><a href="../reference/step_measure_normalize_peak.html">step_measure_normalize_peak()</a></code>:
+<code>location_min</code>, <code>location_max</code>
+</li>
+<li>Baseline correction steps: <code>lambda</code>, <code>p</code>,
+<code>degree</code>, etc.</li>
+</ul>
+<p>Let’s find the optimal Savitzky-Golay parameters:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a tunable recipe</span></span>
 <span><span class="va">rec_tune</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -289,13 +302,29 @@ Here’s how to set up a fair comparison:</p>
 <span>  <span class="fu"><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span>window_side <span class="op">=</span> <span class="fl">7</span>, differentiation_order <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Strategy 5: SNV + centering (good for PLS)</span></span>
+<span><span class="va">rec_snv_center</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_center.html">step_measure_center</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Strategy 6: Sum normalization + auto-scaling</span></span>
+<span><span class="va">rec_norm_scale</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_normalize_sum.html">step_measure_normalize_sum</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_scale_auto.html">step_measure_scale_auto</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Create workflow set</span></span>
 <span><span class="va">wf_set</span> <span class="op">&lt;-</span> <span class="fu">workflow_set</span><span class="op">(</span></span>
 <span>  preproc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    snv <span class="op">=</span> <span class="va">rec_snv</span>,</span>
 <span>    d1_snv <span class="op">=</span> <span class="va">rec_d1_snv</span>,</span>
 <span>    msc <span class="op">=</span> <span class="va">rec_msc</span>,</span>
-<span>    d2 <span class="op">=</span> <span class="va">rec_d2</span></span>
+<span>    d2 <span class="op">=</span> <span class="va">rec_d2</span>,</span>
+<span>    snv_center <span class="op">=</span> <span class="va">rec_snv_center</span>,</span>
+<span>    norm_scale <span class="op">=</span> <span class="va">rec_norm_scale</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  models <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lm <span class="op">=</span> <span class="va">lm_spec</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -361,6 +390,21 @@ after initial modeling</li>
 </ol>
 </div>
 <div class="section level3">
+<h3 id="preprocessing-for-pcapls">Preprocessing for PCA/PLS<a class="anchor" aria-label="anchor" href="#preprocessing-for-pcapls"></a>
+</h3>
+<p>For multivariate methods like PCA and PLS, centering is
+essential:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec_for_pls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_center.html">step_measure_center</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span>  <span class="co"># Essential for PCA/PLS</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Use <code><a href="../reference/step_measure_scale_auto.html">step_measure_scale_auto()</a></code> if you want to give equal
+weight to all wavelengths, or <code><a href="../reference/step_measure_scale_pareto.html">step_measure_scale_pareto()</a></code>
+for a compromise that preserves some magnitude information.</p>
+</div>
+<div class="section level3">
 <h3 id="memory-considerations">Memory considerations<a class="anchor" aria-label="anchor" href="#memory-considerations"></a>
 </h3>
 <p>For very large spectral datasets:</p>
@@ -375,7 +419,7 @@ modeling</li>
 <h3 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a>
 </h3>
 <p>Always set a seed before cross-validation or tuning:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="va">train</span>, v <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -383,12 +427,22 @@ modeling</li>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<p>measure integrates naturally with tidymodels: - Use
-<code><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflow()</a></code> to bundle preprocessing and modeling -
-Cross-validate with <code><a href="https://tune.tidymodels.org/reference/fit_resamples.html" class="external-link">fit_resamples()</a></code> or
-<code>vfold_cv()</code> - Tune Savitzky-Golay parameters with
-<code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune_grid()</a></code> - Compare strategies with
-<code>workflow_set()</code></p>
+<p>measure integrates naturally with tidymodels:</p>
+<ul>
+<li>Use <code><a href="https://workflows.tidymodels.org/reference/workflow.html" class="external-link">workflow()</a></code> to bundle preprocessing and
+modeling</li>
+<li>Cross-validate with <code><a href="https://tune.tidymodels.org/reference/fit_resamples.html" class="external-link">fit_resamples()</a></code> or
+<code>vfold_cv()</code>
+</li>
+<li>Tune preprocessing parameters (Savitzky-Golay, peak normalization,
+baseline) with <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune_grid()</a></code>
+</li>
+<li>Compare strategies with <code>workflow_set()</code>
+</li>
+<li>Variable-wise scaling steps (<code><a href="../reference/step_measure_center.html">step_measure_center()</a></code>,
+<code>step_measure_scale_*()</code>) learn from training data and apply
+consistently to new data</li>
+</ul>
 <p>The recipes paradigm means your preprocessing is applied consistently
 to training data, cross-validation folds, and new predictions -
 eliminating a common source of data leakage in chemometric modeling.</p>

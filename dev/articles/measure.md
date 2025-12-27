@@ -210,14 +210,29 @@ rec
 #> SNV transformation on
 ```
 
-measure provides several built-in preprocessing steps
-([`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md),
-[`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md),
-[`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)),
-plus
-[`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
-for custom transformations when the built-in steps don’t cover your
-needs. See
+measure provides many built-in preprocessing steps:
+
+- **Filtering**:
+  [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md)
+  for smoothing and derivatives
+- **Scatter correction**:
+  [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md),
+  [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)
+- **Sample-wise normalization**:
+  [`step_measure_normalize_sum()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.md),
+  [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md),
+  [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md),
+  and more
+- **Variable-wise scaling**:
+  [`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md),
+  [`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md),
+  [`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md),
+  and more
+- **Custom transformations**:
+  [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
+  for when built-in steps don’t cover your needs
+
+See
 [`vignette("preprocessing")`](https://jameshwade.github.io/measure/dev/articles/preprocessing.md)
 for details on all available options.
 
@@ -385,9 +400,13 @@ for complete examples including:
 
 - See
   [`vignette("preprocessing")`](https://jameshwade.github.io/measure/dev/articles/preprocessing.md)
-  for a detailed guide to each preprocessing technique
-- Explore hyperparameter tuning with `tune` - measure’s Savitzky-Golay
-  step is tunable!
+  for a detailed guide to each preprocessing technique, including:
+  - Savitzky-Golay smoothing and derivatives
+  - SNV and MSC scatter correction
+  - Sample-wise normalization (sum, max, range, peak region)
+  - Variable-wise scaling (centering, auto-scaling, Pareto scaling)
+- Explore hyperparameter tuning with `tune` - Savitzky-Golay and peak
+  normalization steps are tunable!
 - Check out the [function
   reference](https://jameshwade.github.io/measure/reference/) for all
   available steps

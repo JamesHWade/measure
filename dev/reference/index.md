@@ -22,6 +22,38 @@ Apply spectral preprocessing transformations
 - [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
   : Apply a Custom Function to Measurements
 
+## Sample-wise Normalization
+
+Normalize each spectrum independently
+
+- [`step_measure_normalize_auc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.md)
+  : Normalize by Area Under Curve
+- [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md)
+  : Normalize by Maximum Value
+- [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md)
+  : Normalize to a Specific Peak Region
+- [`step_measure_normalize_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.md)
+  : Normalize to Range 0-1
+- [`step_measure_normalize_sum()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.md)
+  : Normalize by Sum (Total Intensity)
+- [`step_measure_normalize_vector()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.md)
+  : Normalize by L2 (Euclidean) Norm
+
+## Variable-wise Scaling
+
+Scale across samples at each measurement location
+
+- [`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md)
+  : Mean Centering
+- [`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md)
+  : Auto-Scaling (Z-Score Normalization)
+- [`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md)
+  : Pareto Scaling
+- [`step_measure_scale_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_range.md)
+  : Range Scaling
+- [`step_measure_scale_vast()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.md)
+  : VAST Scaling (Variable Stability Scaling)
+
 ## Output Steps
 
 Convert internal format back to modeling-ready data
@@ -44,6 +76,9 @@ Parameters for hyperparameter tuning with dials
   [`baseline_half_window()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
   [`baseline_span()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
   : Parameters for baseline correction steps
+- [`peak_location_min()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
+  [`peak_location_max()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
+  : Parameters for peak normalization
 
 ## Data
 

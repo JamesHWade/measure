@@ -117,8 +117,15 @@ collect_metrics(cv_results)
 
 ## Tuning preprocessing parameters
 
-measure’s Savitzky-Golay step has tunable parameters. Let’s find the
-optimal window size and differentiation order:
+Several measure steps have tunable parameters:
+
+- [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md):
+  `window_side`, `differentiation_order`, `degree`
+- [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md):
+  `location_min`, `location_max`
+- Baseline correction steps: `lambda`, `p`, `degree`, etc.
+
+Let’s find the optimal Savitzky-Golay parameters:
 
 ``` r
 # Create a tunable recipe
@@ -216,13 +223,29 @@ rec_d2 <- recipe(water ~ ., data = train) |>
   step_measure_savitzky_golay(window_side = 7, differentiation_order = 2) |>
   step_measure_output_wide()
 
+# Strategy 5: SNV + centering (good for PLS)
+rec_snv_center <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_snv() |>
+  step_measure_center() |>
+  step_measure_output_wide()
+
+# Strategy 6: Sum normalization + auto-scaling
+rec_norm_scale <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_normalize_sum() |>
+  step_measure_scale_auto() |>
+  step_measure_output_wide()
+
 # Create workflow set
 wf_set <- workflow_set(
   preproc = list(
     snv = rec_snv,
     d1_snv = rec_d1_snv,
     msc = rec_msc,
-    d2 = rec_d2
+    d2 = rec_d2,
+    snv_center = rec_snv_center,
+    norm_scale = rec_norm_scale
   ),
   models = list(lm = lm_spec)
 )
@@ -283,6 +306,24 @@ samples). Consider:
 3.  **Feature selection**: Consider variable importance after initial
     modeling
 
+### Preprocessing for PCA/PLS
+
+For multivariate methods like PCA and PLS, centering is essential:
+
+``` r
+rec_for_pls <- recipe(water ~ ., data = train) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_snv() |>
+  step_measure_center() |>  # Essential for PCA/PLS
+  step_measure_output_wide()
+```
+
+Use
+[`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md)
+if you want to give equal weight to all wavelengths, or
+[`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md)
+for a compromise that preserves some magnitude information.
+
 ### Memory considerations
 
 For very large spectral datasets:
@@ -304,13 +345,22 @@ folds <- vfold_cv(train, v = 10)
 
 ## Summary
 
-measure integrates naturally with tidymodels: - Use
-[`workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
-to bundle preprocessing and modeling - Cross-validate with
-[`fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
-or `vfold_cv()` - Tune Savitzky-Golay parameters with
-[`tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html) -
-Compare strategies with `workflow_set()`
+measure integrates naturally with tidymodels:
+
+- Use
+  [`workflow()`](https://workflows.tidymodels.org/reference/workflow.html)
+  to bundle preprocessing and modeling
+- Cross-validate with
+  [`fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
+  or `vfold_cv()`
+- Tune preprocessing parameters (Savitzky-Golay, peak normalization,
+  baseline) with
+  [`tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
+- Compare strategies with `workflow_set()`
+- Variable-wise scaling steps
+  ([`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md),
+  `step_measure_scale_*()`) learn from training data and apply
+  consistently to new data
 
 The recipes paradigm means your preprocessing is applied consistently to
 training data, cross-validation folds, and new predictions - eliminating

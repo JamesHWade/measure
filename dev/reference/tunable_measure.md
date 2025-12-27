@@ -28,6 +28,9 @@ tunable(x, ...)
 
 # S3 method for class 'step_measure_detrend'
 tunable(x, ...)
+
+# S3 method for class 'step_measure_normalize_peak'
+tunable(x, ...)
 ```
 
 ## Arguments
