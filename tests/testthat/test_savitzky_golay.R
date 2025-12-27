@@ -25,10 +25,11 @@ test_that("savitzky-golay computations", {
       ) %>%
       measure:::measure_to_matrix()
     prosp_res <-
-      prospectr::savitzkyGolay(spect_start,
-                               m = grid$diffs[i],
-                               p = grid$deg[i],
-                               w = grid$wn[i]
+      prospectr::savitzkyGolay(
+        spect_start,
+        m = grid$diffs[i],
+        p = grid$deg[i],
+        w = grid$wn[i]
       )
     expect_equal(meas_res, prosp_res)
   }
@@ -51,45 +52,44 @@ test_that("savitzky-golay inputs", {
 
   arg_inputs <-
     tibble::tribble(
-      ~win_side,          ~order, ~degree,
-      1L,                     1L,      4L,
-      1L,                     3L,      3L,
-      1L,                     1L,      2L,
-      1L,                     3L,      5L,
-      1L,                     2L,      1L,
-      1L,                     4L,      2L,
-      2L,                     4L,      4L,
-      2L,                     0L,      4L,
-      2L,                     1L,      5L,
-      2L,                     1L,      3L,
-      2L,                     0L,      2L,
-      2L,                     1L,      1L,
-      3L,                     3L,      5L,
-      3L,                     3L,      1L,
-      3L,                     3L,      3L,
-      3L,                     4L,      2L,
-      3L,                     0L,      5L,
-      3L,                     2L,      2L,
-      4L,                     2L,      4L,
-      4L,                     0L,      3L,
-      4L,                     0L,      1L,
-      4L,                     2L,      5L,
-      4L,                     4L,      5L,
-      4L,                     4L,      1L,
-      5L,                     4L,      3L,
-      5L,                     2L,      1L,
-      5L,                     0L,      4L,
-      5L,                     1L,      3L,
-      5L,                     3L,      2L,
-      5L,                     2L,      4L
+      ~win_side , ~order , ~degree ,
+      1L        , 1L     , 4L      ,
+      1L        , 3L     , 3L      ,
+      1L        , 1L     , 2L      ,
+      1L        , 3L     , 5L      ,
+      1L        , 2L     , 1L      ,
+      1L        , 4L     , 2L      ,
+      2L        , 4L     , 4L      ,
+      2L        , 0L     , 4L      ,
+      2L        , 1L     , 5L      ,
+      2L        , 1L     , 3L      ,
+      2L        , 0L     , 2L      ,
+      2L        , 1L     , 1L      ,
+      3L        , 3L     , 5L      ,
+      3L        , 3L     , 1L      ,
+      3L        , 3L     , 3L      ,
+      3L        , 4L     , 2L      ,
+      3L        , 0L     , 5L      ,
+      3L        , 2L     , 2L      ,
+      4L        , 2L     , 4L      ,
+      4L        , 0L     , 3L      ,
+      4L        , 0L     , 1L      ,
+      4L        , 2L     , 5L      ,
+      4L        , 4L     , 5L      ,
+      4L        , 4L     , 1L      ,
+      5L        , 4L     , 3L      ,
+      5L        , 2L     , 1L      ,
+      5L        , 0L     , 4L      ,
+      5L        , 1L     , 3L      ,
+      5L        , 3L     , 2L      ,
+      5L        , 2L     , 4L
     )
 
   for (i in 1:nrow(arg_inputs)) {
-
     window_length <- 2 * arg_inputs$win_side[i] + 1
 
     warn_val <-
-      arg_inputs$degree[i] <  arg_inputs$order[i] |
+      arg_inputs$degree[i] < arg_inputs$order[i] |
       arg_inputs$degree[i] >= window_length
 
     if (warn_val) {

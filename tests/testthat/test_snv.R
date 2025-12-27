@@ -1,5 +1,5 @@
 test_that("SNV transformation computes correctly", {
- # Create a simple test case with known values
+  # Create a simple test case with known values
   test_values <- c(1, 2, 3, 4, 5)
   expected_mean <- mean(test_values)
   expected_sd <- sd(test_values)
@@ -184,7 +184,8 @@ test_that("SNV produces expected results compared to manual calculation", {
   original_spectrum <- as.numeric(meats[1, grep("^x_", names(meats))])
 
   # Manual SNV calculation
-  manual_snv <- (original_spectrum - mean(original_spectrum)) / sd(original_spectrum)
+  manual_snv <- (original_spectrum - mean(original_spectrum)) /
+    sd(original_spectrum)
 
   # Recipe-based SNV
   rec <-

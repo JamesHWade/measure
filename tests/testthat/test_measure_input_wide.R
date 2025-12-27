@@ -27,20 +27,19 @@ test_that("ingest wide format data", {
       water = numeric(0),
       fat = numeric(0),
       protein = numeric(0),
-      .measures = list()
+      .measures = new_measure_list(list())
     )
   expect_equal(bake_1[0, ], dat_ptype)
-  measure_ptype <-
-    tibble::tibble(
-      value = numeric(0),
-      location = numeric(0)
-    )
+  measure_ptype <- new_measure_tbl(location = numeric(0), value = numeric(0))
   expect_equal(bake_1$.measures[[1]][0, ], measure_ptype)
   expect_equal(nrow(bake_1), 200L)
   expect_equal(dim(bake_1$.measures[[1]]), c(100L, 2L))
 
   bake_1_te <- bake(prep_1, new_data = meats_data$test)
-  expect_equal(bake_1_te$.measures[[1]][0, ], measure_ptype)
+  expect_equal(
+    bake_1_te$.measures[[1]][0, ],
+    new_measure_tbl(location = numeric(0), value = numeric(0))
+  )
   expect_equal(nrow(bake_1_te), 15L)
   expect_equal(dim(bake_1_te$.measures[[1]]), c(100L, 2L))
 
