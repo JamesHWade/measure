@@ -44,11 +44,12 @@ test_that("MSC works with recipe workflow (long format)", {
   # Check that .measures column exists
   expect_true(".measures" %in% names(result))
 
-  # Check that the step stored a reference spectrum
+  # Check that the step stored reference spectra
   msc_step <- rec$steps[[2]]
-  expect_true(!is.null(msc_step$ref_spectrum))
-  expect_true(is.numeric(msc_step$ref_spectrum))
-  expect_equal(length(msc_step$ref_spectrum), 100) # meats has 100 channels
+  expect_true(!is.null(msc_step$ref_spectra))
+  expect_true(is.list(msc_step$ref_spectra))
+  expect_true(is.numeric(msc_step$ref_spectra[[".measures"]]))
+  expect_equal(length(msc_step$ref_spectra[[".measures"]]), 100) # meats has 100 channels
 })
 
 test_that("MSC works with recipe workflow (wide format)", {
@@ -66,9 +67,9 @@ test_that("MSC works with recipe workflow (wide format)", {
   # Check that .measures column exists
   expect_true(".measures" %in% names(result))
 
-  # Check reference spectrum is stored
+  # Check reference spectra is stored
   msc_step <- rec$steps[[2]]
-  expect_true(!is.null(msc_step$ref_spectrum))
+  expect_true(!is.null(msc_step$ref_spectra))
 })
 
 test_that("MSC preserves location values", {
@@ -158,7 +159,7 @@ test_that("MSC tidy method works", {
 
   # Before prep
   tidy_before <- tidy(rec, number = 2)
-  expect_equal(tidy_before$terms, ".measures")
+  expect_equal(tidy_before$terms, "<all measure columns>")
   expect_equal(tidy_before$id, "msc_test")
 
   # After prep
@@ -212,7 +213,7 @@ test_that("MSC reference spectrum matches mean of training spectra", {
     prep()
 
   # Get the stored reference spectrum
-  stored_ref <- rec$steps[[2]]$ref_spectrum
+  stored_ref <- rec$steps[[2]]$ref_spectra[[".measures"]]
 
   # Compute expected reference (column means of spectra)
   spectra_cols <- grep("^x_", names(meats))

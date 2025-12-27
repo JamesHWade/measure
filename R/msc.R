@@ -6,11 +6,16 @@
 #'
 #' @param recipe A recipe object. The step will be added to the sequence of
 #'   operations for this recipe.
+#' @param measures An optional character vector of measure column names to
+#'   process. If `NULL` (the default), all measure columns (columns with class
+#'   `measure_list`) will be processed. Use this to limit processing to specific
+#'   measure columns when working with multiple measurement types.
 #' @param role Not used by this step since no new variables are created.
 #' @param trained A logical to indicate if the quantities for preprocessing
 #'   have been estimated.
-#' @param ref_spectrum A numeric vector containing the reference spectrum
-#'   computed during training. This is `NULL` until the step is trained.
+#' @param ref_spectra A named list of numeric vectors containing the reference
+#'   spectra computed during training for each measure column. This is `NULL`
+#'   until the step is trained.
 #' @param skip A logical. Should the step be skipped when the recipe is baked
 #'   by [bake()]? While all operations are baked when [prep()] is run, some
 #'   operations may not be able to be conducted on new data (e.g. processing
@@ -72,30 +77,33 @@
 #' bake(rec, new_data = NULL)
 step_measure_msc <- function(
   recipe,
+  measures = NULL,
   role = NA,
   trained = FALSE,
-  ref_spectrum = NULL,
+  ref_spectra = NULL,
   skip = FALSE,
   id = recipes::rand_id("measure_msc")
 ) {
   recipes::add_step(
     recipe,
     step_measure_msc_new(
+      measures = measures,
       role = role,
       trained = trained,
-      ref_spectrum = ref_spectrum,
+      ref_spectra = ref_spectra,
       skip = skip,
       id = id
     )
   )
 }
 
-step_measure_msc_new <- function(role, trained, ref_spectrum, skip, id) {
+step_measure_msc_new <- function(measures, role, trained, ref_spectra, skip, id) {
   recipes::step(
     subclass = "measure_msc",
+    measures = measures,
     role = role,
     trained = trained,
-    ref_spectrum = ref_spectrum,
+    ref_spectra = ref_spectra,
     skip = skip,
     id = id
   )
@@ -105,13 +113,24 @@ step_measure_msc_new <- function(role, trained, ref_spectrum, skip, id) {
 prep.step_measure_msc <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
-  # Compute reference spectrum as mean of all training spectra
-  ref_spectrum <- .compute_reference_spectrum(training$.measures)
+  # Resolve which columns to process
+  if (is.null(x$measures)) {
+    measure_cols <- find_measure_cols(training)
+  } else {
+    measure_cols <- x$measures
+  }
+
+  # Compute reference spectrum for each column
+  ref_spectra <- list()
+  for (col in measure_cols) {
+    ref_spectra[[col]] <- .compute_reference_spectrum(training[[col]])
+  }
 
   step_measure_msc_new(
+    measures = measure_cols,
     role = x$role,
     trained = TRUE,
-    ref_spectrum = ref_spectrum,
+    ref_spectra = ref_spectra,
     skip = x$skip,
     id = x$id
   )
@@ -119,9 +138,10 @@ prep.step_measure_msc <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_msc <- function(object, new_data, ...) {
-  result <- .compute_msc(new_data$.measures, object$ref_spectrum)
-  # Preserve measure_list class
-  new_data$.measures <- new_measure_list(result)
+  for (col in object$measures) {
+    result <- .compute_msc(new_data[[col]], object$ref_spectra[[col]])
+    new_data[[col]] <- new_measure_list(result)
+  }
   tibble::as_tibble(new_data)
 }
 
@@ -147,8 +167,13 @@ print.step_measure_msc <- function(
 #' @export
 #' @keywords internal
 tidy.step_measure_msc <- function(x, ...) {
+  if (is_trained(x)) {
+    terms <- x$measures
+  } else {
+    terms <- "<all measure columns>"
+  }
   tibble::tibble(
-    terms = ".measures",
+    terms = terms,
     id = x$id
   )
 }

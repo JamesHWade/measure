@@ -140,7 +140,7 @@ test_that("SNV tidy method works", {
 
   # Before prep
   tidy_before <- tidy(rec, number = 2)
-  expect_equal(tidy_before$terms, ".measures")
+  expect_equal(tidy_before$terms, "<all measure columns>")
   expect_equal(tidy_before$id, "snv_test")
 
   # After prep

@@ -12,6 +12,10 @@
 #' of the measurements (e.g., wavelength etc.) in the same order as the variables
 #' selected by `...`. If not specified, a sequence of integers (starting at 1L)
 #' is used.
+#' @param col_name A single character string specifying the name of the output
+#'   column that will contain the measure data. Defaults to `".measures"`. Use
+#'   different names when creating multiple measure columns (e.g., `".uv_spectrum"`
+#'   and `".ms_spectrum"`).
 #' @details
 #' This step is designed for data in a format where the analytical measurements
 #' are in separate columns.
@@ -73,6 +77,7 @@ step_measure_input_wide <-
     trained = FALSE,
     columns = NULL,
     location_values = NULL,
+    col_name = ".measures",
     skip = FALSE,
     id = rand_id("measure_input_wide")
   ) {
@@ -84,6 +89,7 @@ step_measure_input_wide <-
         role = role,
         columns = columns,
         location_values = location_values,
+        col_name = col_name,
         skip = skip,
         id = id
       )
@@ -91,7 +97,7 @@ step_measure_input_wide <-
   }
 
 step_measure_input_wide_new <-
-  function(terms, role, trained, columns, location_values, skip, id) {
+  function(terms, role, trained, columns, location_values, col_name, skip, id) {
     step(
       subclass = "measure_input_wide",
       terms = terms,
@@ -99,6 +105,7 @@ step_measure_input_wide_new <-
       trained = trained,
       columns = columns,
       location_values = location_values,
+      col_name = col_name,
       skip = skip,
       id = id
     )
@@ -133,6 +140,7 @@ prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
     trained = TRUE,
     columns = col_names,
     location_values = x$location_values,
+    col_name = x$col_name,
     skip = x$skip,
     id = x$id
   )
@@ -142,7 +150,7 @@ prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
 bake.step_measure_input_wide <- function(object, new_data, ...) {
   # TODO check to make sure that the nested tibble has the same number of rows
   # in case the nesting was bad
-  wide_to_list(new_data, object$location_values, object$terms)
+  wide_to_list(new_data, object$location_values, object$terms, object$col_name)
 }
 
 #' @export
@@ -173,7 +181,7 @@ tidy.step_measure_input_wide <- function(x, ...) {
 }
 
 
-wide_to_list <- function(x, ind, selections) {
+wide_to_list <- function(x, ind, selections, col_name = ".measures") {
   x <- x %>%
     dplyr::mutate(..row = seq_len(nrow(x))) %>%
     tidyr::pivot_longer(
@@ -182,12 +190,18 @@ wide_to_list <- function(x, ind, selections) {
       values_to = "value"
     ) %>%
     dplyr::select(-temp) %>%
-    tidyr::nest(.by = c(-value), .key = ".measures") %>%
-    dplyr::select(-..row) %>%
-    add_location(ind)
+    tidyr::nest(.by = c(-value), .key = ".measures_temp") %>%
+    dplyr::select(-..row)
 
-  # Wrap .measures as measure_list for class-based detection
-  x$.measures <- new_measure_list(x$.measures)
+  # Rename to the user-specified column name
+  if (col_name != ".measures_temp") {
+    names(x)[names(x) == ".measures_temp"] <- col_name
+  }
+
+  x <- add_location(x, ind, col = col_name)
+
+  # Wrap as measure_list for class-based detection
+  x[[col_name]] <- new_measure_list(x[[col_name]])
 
   x
 }

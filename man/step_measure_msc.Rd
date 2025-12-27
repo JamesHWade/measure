@@ -6,9 +6,10 @@
 \usage{
 step_measure_msc(
   recipe,
+  measures = NULL,
   role = NA,
   trained = FALSE,
-  ref_spectrum = NULL,
+  ref_spectra = NULL,
   skip = FALSE,
   id = recipes::rand_id("measure_msc")
 )
@@ -17,13 +18,19 @@ step_measure_msc(
 \item{recipe}{A recipe object. The step will be added to the sequence of
 operations for this recipe.}
 
+\item{measures}{An optional character vector of measure column names to
+process. If \code{NULL} (the default), all measure columns (columns with class
+\code{measure_list}) will be processed. Use this to limit processing to specific
+measure columns when working with multiple measurement types.}
+
 \item{role}{Not used by this step since no new variables are created.}
 
 \item{trained}{A logical to indicate if the quantities for preprocessing
 have been estimated.}
 
-\item{ref_spectrum}{A numeric vector containing the reference spectrum
-computed during training. This is \code{NULL} until the step is trained.}
+\item{ref_spectra}{A named list of numeric vectors containing the reference
+spectra computed during training for each measure column. This is \code{NULL}
+until the step is trained.}
 
 \item{skip}{A logical. Should the step be skipped when the recipe is baked
 by \code{\link[recipes:bake]{recipes::bake()}}? While all operations are baked when \code{\link[recipes:prep]{recipes::prep()}} is run, some

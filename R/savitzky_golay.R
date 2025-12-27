@@ -5,6 +5,10 @@
 #'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
+#' @param measures An optional character vector of measure column names to
+#'   process. If `NULL` (the default), all measure columns (columns with class
+#'   `measure_list`) will be processed. Use this to limit processing to specific
+#'   measure columns when working with multiple measurement types.
 #' @param role Not used by this step since no new variables are
 #'  created.
 #' @param trained A logical to indicate if the quantities for
@@ -66,6 +70,7 @@
 step_measure_savitzky_golay <-
   function(
     recipe,
+    measures = NULL,
     role = NA,
     trained = FALSE,
     degree = 3,
@@ -77,6 +82,7 @@ step_measure_savitzky_golay <-
     recipes::add_step(
       recipe,
       step_measure_savitzky_golay_new(
+        measures = measures,
         trained = trained,
         role = role,
         degree = degree,
@@ -90,6 +96,7 @@ step_measure_savitzky_golay <-
 
 step_measure_savitzky_golay_new <-
   function(
+    measures,
     role,
     trained,
     degree,
@@ -100,6 +107,7 @@ step_measure_savitzky_golay_new <-
   ) {
     recipes::step(
       subclass = "measure_savitzky_golay",
+      measures = measures,
       role = role,
       trained = trained,
       degree = degree,
@@ -170,7 +178,15 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
     )
   }
 
+  # Resolve which columns to process
+  if (is.null(x$measures)) {
+    measure_cols <- find_measure_cols(training)
+  } else {
+    measure_cols <- x$measures
+  }
+
   step_measure_savitzky_golay_new(
+    measures = measure_cols,
     role = x$role,
     trained = TRUE,
     degree = x$degree,
@@ -183,16 +199,17 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
-  res <-
-    .comp_savitzky_golay(
-      new_data$.measures,
-      diffs = object$differentiation_order,
-      degree = object$degree,
-      window = 2 * object$window_side + 1
-    )
-  # TODO try to approximate the wave numbers that were input.
-  # Preserve measure_list class
-  new_data$.measures <- new_measure_list(res)
+  for (col in object$measures) {
+    res <-
+      .comp_savitzky_golay(
+        new_data[[col]],
+        diffs = object$differentiation_order,
+        degree = object$degree,
+        window = 2 * object$window_side + 1
+      )
+    # TODO try to approximate the wave numbers that were input.
+    new_data[[col]] <- new_measure_list(res)
+  }
   tibble::as_tibble(new_data)
 }
 
@@ -217,19 +234,14 @@ print.step_measure_savitzky_golay <-
 #' @export
 tidy.step_measure_savitzky_golay <- function(x, ...) {
   if (is_trained(x)) {
-    res <- tibble::tibble(
-      terms = ".measure",
-      value = na_dbl
-    )
+    terms <- x$measures
   } else {
-    term_names <- recipes::sel2char(x$terms)
-    res <- tibble::tibble(
-      terms = term_names,
-      value = na_dbl
-    )
+    terms <- "<all measure columns>"
   }
-  res$id <- x$id
-  res
+  tibble::tibble(
+    terms = terms,
+    id = x$id
+  )
 }
 
 #' Set package dependencies

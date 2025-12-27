@@ -11,6 +11,10 @@
 #'   of the measurement's profile.
 #' @param location One or more selector functions to choose which _single_
 #'   column has the locations of the analytical values.
+#' @param col_name A single character string specifying the name of the output
+#'   column that will contain the measure data. Defaults to `".measures"`. Use
+#'   different names when creating multiple measure columns (e.g., `".uv_spectrum"`
+#'   and `".ms_spectrum"`).
 #' @param pad Whether to pad the measurements to ensure that they all have the
 #'   same number of values. This is useful when there are missing values in the
 #'   measurements.
@@ -51,6 +55,7 @@ step_measure_input_long <-
     recipe,
     ...,
     location,
+    col_name = ".measures",
     pad = FALSE,
     role = "measure",
     trained = FALSE,
@@ -69,6 +74,7 @@ step_measure_input_long <-
         role = role,
         columns = columns,
         location = location,
+        col_name = col_name,
         pad = pad,
         skip = skip,
         id = id
@@ -77,7 +83,7 @@ step_measure_input_long <-
   }
 
 step_measure_input_long_new <-
-  function(terms, role, trained, columns, location, pad, skip, id) {
+  function(terms, role, trained, columns, location, col_name, pad, skip, id) {
     step(
       subclass = "measure_input_long",
       terms = terms,
@@ -85,6 +91,7 @@ step_measure_input_long_new <-
       trained = trained,
       columns = columns,
       location = location,
+      col_name = col_name,
       pad = pad,
       skip = skip,
       id = id
@@ -111,6 +118,7 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
     trained = TRUE,
     columns = unname(c(value_name, loc_name)),
     location = x$location,
+    col_name = x$col_name,
     pad = x$pad,
     skip = x$skip,
     id = x$id
@@ -119,6 +127,8 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_input_long <- function(object, new_data, ...) {
+  col_name <- object$col_name
+
   new_data <-
     new_data %>%
     rename_long_cols(object$columns[1], object$columns[2])
@@ -126,21 +136,26 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
   if (!is.na(object$columns[2])) {
     new_data <-
       new_data %>%
-      tidyr::nest(.by = c(-value, -location), .key = ".measures")
+      tidyr::nest(.by = c(-value, -location), .key = ".measures_temp")
   } else {
     new_data <-
       new_data %>%
-      tidyr::nest(.by = c(-value), .key = ".measures")
+      tidyr::nest(.by = c(-value), .key = ".measures_temp")
+  }
+
+  # Rename to the user-specified column name
+  if (col_name != ".measures_temp") {
+    names(new_data)[names(new_data) == ".measures_temp"] <- col_name
   }
 
   if (rlang::is_true(object$pad)) {
-    new_data <- pad_measure_dims(new_data)
+    new_data <- pad_measure_dims(new_data, col = col_name)
   }
 
-  check_measure_dims(new_data)
+  check_measure_dims(new_data, col = col_name)
 
-  # Wrap .measures as measure_list for class-based detection
-  new_data$.measures <- new_measure_list(new_data$.measures)
+  # Wrap as measure_list for class-based detection
+  new_data[[col_name]] <- new_measure_list(new_data[[col_name]])
 
   new_data
 }

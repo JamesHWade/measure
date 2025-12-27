@@ -6,6 +6,10 @@
 #'
 #' @param recipe A recipe object. The step will be added to the sequence of
 #'   operations for this recipe.
+#' @param measures An optional character vector of measure column names to
+#'   process. If `NULL` (the default), all measure columns (columns with class
+#'   `measure_list`) will be processed. Use this to limit processing to specific
+#'   measure columns when working with multiple measurement types.
 #' @param role Not used by this step since no new variables are created.
 #' @param trained A logical to indicate if the quantities for preprocessing
 #'   have been estimated.
@@ -59,14 +63,17 @@
 #' bake(rec, new_data = NULL)
 step_measure_snv <- function(
   recipe,
+  measures = NULL,
   role = NA,
   trained = FALSE,
+
   skip = FALSE,
   id = recipes::rand_id("measure_snv")
 ) {
   recipes::add_step(
     recipe,
     step_measure_snv_new(
+      measures = measures,
       role = role,
       trained = trained,
       skip = skip,
@@ -75,9 +82,10 @@ step_measure_snv <- function(
   )
 }
 
-step_measure_snv_new <- function(role, trained, skip, id) {
+step_measure_snv_new <- function(measures, role, trained, skip, id) {
   recipes::step(
     subclass = "measure_snv",
+    measures = measures,
     role = role,
     trained = trained,
     skip = skip,
@@ -89,7 +97,15 @@ step_measure_snv_new <- function(role, trained, skip, id) {
 prep.step_measure_snv <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
+  # Resolve which columns to process
+ if (is.null(x$measures)) {
+    measure_cols <- find_measure_cols(training)
+  } else {
+    measure_cols <- x$measures
+  }
+
   step_measure_snv_new(
+    measures = measure_cols,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -99,9 +115,10 @@ prep.step_measure_snv <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_snv <- function(object, new_data, ...) {
-  result <- .compute_snv(new_data$.measures)
-  # Preserve measure_list class
-  new_data$.measures <- new_measure_list(result)
+  for (col in object$measures) {
+    result <- .compute_snv(new_data[[col]])
+    new_data[[col]] <- new_measure_list(result)
+  }
   tibble::as_tibble(new_data)
 }
 
@@ -127,8 +144,13 @@ print.step_measure_snv <- function(
 #' @export
 #' @keywords internal
 tidy.step_measure_snv <- function(x, ...) {
+  if (is_trained(x)) {
+    terms <- x$measures
+  } else {
+    terms <- "<all measure columns>"
+  }
   tibble::tibble(
-    terms = ".measures",
+    terms = terms,
     id = x$id
   )
 }

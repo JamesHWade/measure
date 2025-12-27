@@ -11,6 +11,7 @@ step_measure_input_wide(
   trained = FALSE,
   columns = NULL,
   location_values = NULL,
+  col_name = ".measures",
   skip = FALSE,
   id = rand_id("measure_input_wide")
 )
@@ -34,6 +35,11 @@ is a placeholder and will be populated once \code{\link[recipes:prep]{recipes::p
 of the measurements (e.g., wavelength etc.) in the same order as the variables
 selected by \code{...}. If not specified, a sequence of integers (starting at 1L)
 is used.}
+
+\item{col_name}{A single character string specifying the name of the output
+column that will contain the measure data. Defaults to \code{".measures"}. Use
+different names when creating multiple measure columns (e.g., \code{".uv_spectrum"}
+and \code{".ms_spectrum"}).}
 
 \item{skip}{A logical. Should the step be skipped when the recipe is baked by
 \code{\link[recipes:bake]{bake()}}? While all operations are baked when \code{\link[recipes:prep]{prep()}} is run, some

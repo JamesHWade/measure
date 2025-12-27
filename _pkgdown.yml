@@ -25,6 +25,10 @@ navbar:
           href: articles/baseline.html
         - text: "Bioreactor Case Study"
           href: articles/sec-analysis-example.html
+        - text: "---"
+        - text: "Developer"
+        - text: Internal Class System
+          href: articles/internals.html
 
 development:
   mode: auto
@@ -41,6 +45,9 @@ articles:
     contents:
       - baseline
       - sec-analysis-example
+  - title: Developer
+    contents:
+      - internals
 
 reference:
   - title: Input Steps

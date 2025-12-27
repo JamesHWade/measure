@@ -7,6 +7,7 @@
 step_measure_output_wide(
   recipe,
   prefix = "measure_",
+  measures = NULL,
   role = "predictor",
   trained = FALSE,
   skip = FALSE,
@@ -18,6 +19,12 @@ step_measure_output_wide(
 operations for this recipe.}
 
 \item{prefix}{A character string used to name the new columns.}
+
+\item{measures}{An optional single character string specifying which measure
+column to output. If \code{NULL} (the default) and only one measure column
+exists, that column will be used. If multiple measure columns exist and
+\code{measures} is \code{NULL}, an error will be thrown prompting you to specify
+which column to output.}
 
 \item{role}{Not used by this step since no new variables are created.}
 
