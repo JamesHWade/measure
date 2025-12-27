@@ -17,7 +17,7 @@ test_that("new_measure_tbl creates proper structure", {
 
 test_that("new_measure_tbl validates inputs", {
   # Non-numeric location
- expect_error(
+  expect_error(
     new_measure_tbl(location = letters[1:5], value = rnorm(5)),
     "must be numeric"
   )
@@ -349,5 +349,5 @@ test_that("measure_list prints informatively", {
 
   output <- capture.output(print(ml))
   expect_true(any(grepl("measure_list", output)))
-  expect_true(any(grepl("3", output)))  # 3 measurements
+  expect_true(any(grepl("3", output))) # 3 measurements
 })

@@ -197,7 +197,7 @@ test_that("step_measure_baseline_py tunable returns empty for unknown method par
   rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
-    step_measure_baseline_py(method = "loess")  # No tunable params defined
+    step_measure_baseline_py(method = "loess") # No tunable params defined
 
   tunable_params <- tunable(rec$steps[[2]])
   expect_equal(nrow(tunable_params), 0)

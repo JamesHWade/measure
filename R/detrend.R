@@ -70,13 +70,14 @@
 #'   step_measure_detrend(degree = 0) |>
 #'   prep()
 step_measure_detrend <- function(
-    recipe,
-    measures = NULL,
-    degree = 1L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_detrend")) {
+  recipe,
+  measures = NULL,
+  degree = 1L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_detrend")
+) {
   recipes::add_step(
     recipe,
     step_measure_detrend_new(
@@ -91,7 +92,13 @@ step_measure_detrend <- function(
 }
 
 step_measure_detrend_new <- function(
-    measures, degree, role, trained, skip, id) {
+  measures,
+  degree,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_detrend",
     measures = measures,
@@ -142,9 +149,10 @@ bake.step_measure_detrend <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_detrend <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   if (x$degree == 0) {
     title <- "Mean centering on "
   } else if (x$degree == 1) {

@@ -48,7 +48,7 @@ test_that("step_measure_detrend degree 0 centers data", {
   # Create synthetic data
   n_points <- 50
   location <- seq(1, 50)
-  value <- rep(10, n_points)  # Constant offset
+  value <- rep(10, n_points) # Constant offset
 
   synthetic_data <- tibble::tibble(
     id = rep(1, n_points),
@@ -74,7 +74,7 @@ test_that("step_measure_detrend removes linear trend", {
   # Create synthetic data with linear trend
   n_points <- 100
   location <- seq(1, 100)
-  trend <- 2 * location + 5  # Linear trend: y = 2x + 5
+  trend <- 2 * location + 5 # Linear trend: y = 2x + 5
   signal <- rep(0, n_points)
   value <- signal + trend
 

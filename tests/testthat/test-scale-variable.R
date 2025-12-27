@@ -87,8 +87,8 @@ test_that("step_measure_center tidy method works", {
   rec_prepped <- prep(rec)
   tidy_after <- tidy(rec_prepped, number = 2)
   expect_equal(unique(tidy_after$terms), ".measures")
-  expect_equal(nrow(tidy_after), 100)  # 100 locations
-  expect_true(all(!is.na(tidy_after$mean)))
+  expect_equal(nrow(tidy_after), 100) # 100 locations
+  expect_true(!any(is.na(tidy_after$mean)))
 })
 
 test_that("step_measure_center print method works", {
@@ -454,7 +454,9 @@ test_that("different scaling methods produce different results", {
   result_pareto <- bake(rec_pareto, new_data = NULL)
 
   # Values should be different
-  expect_false(all(result_auto$.measures[[1]]$value == result_pareto$.measures[[1]]$value))
+  expect_false(all(
+    result_auto$.measures[[1]]$value == result_pareto$.measures[[1]]$value
+  ))
 })
 
 test_that("centering is different from auto-scaling", {

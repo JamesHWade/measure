@@ -131,15 +131,16 @@
 #'   step_measure_output_wide()
 #' }
 step_measure_map <- function(
-    recipe,
-    fn,
-    ...,
-    measures = NULL,
-    verbosity = 1L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_map")) {
+  recipe,
+  fn,
+  ...,
+  measures = NULL,
+  verbosity = 1L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_map")
+) {
   # Evaluate and convert the function immediately
   # This avoids issues with recipes' internal get_needs_tuning check
   fn <- rlang::as_function(fn)
@@ -160,8 +161,16 @@ step_measure_map <- function(
   )
 }
 
-step_measure_map_new <- function(fn, fn_args, measures, verbosity, role,
-                                 trained, skip, id) {
+step_measure_map_new <- function(
+  fn,
+  fn_args,
+  measures,
+  verbosity,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_map",
     fn = fn,
@@ -219,7 +228,11 @@ bake.step_measure_map <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_map <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_map <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Custom transformation on "
 
   if (x$trained) {
@@ -331,9 +344,14 @@ tidy.step_measure_map <- function(x, ...) {
 #' # Once you're happy with it, use step_measure_map() in your recipe:
 #' # recipe(...) |>
 #' #   step_measure_map(~ { .x$value <- .x$value - min(.x$value); .x })
-measure_map <- function(.data, .f, .cols = NULL, ...,
-                        verbosity = 1L,
-                        .error_call = rlang::caller_env()) {
+measure_map <- function(
+  .data,
+  .f,
+  .cols = NULL,
+  ...,
+  verbosity = 1L,
+  .error_call = rlang::caller_env()
+) {
   if (!is.data.frame(.data)) {
     cli::cli_abort(
       "{.arg .data} must be a data frame, not {.obj_type_friendly {(.data)}}.",
@@ -437,9 +455,14 @@ measure_map <- function(.data, .f, .cols = NULL, ...,
 #' if (nrow(result$errors) > 0) {
 #'   print(result$errors)
 #' }
-measure_map_safely <- function(.data, .f, .cols = NULL, ...,
-                               .otherwise = NULL,
-                               .error_call = rlang::caller_env()) {
+measure_map_safely <- function(
+  .data,
+  .f,
+  .cols = NULL,
+  ...,
+  .otherwise = NULL,
+  .error_call = rlang::caller_env()
+) {
   if (!is.data.frame(.data)) {
     cli::cli_abort(
       "{.arg .data} must be a data frame, not {.obj_type_friendly {(.data)}}.",
@@ -566,9 +589,12 @@ measure_map_safely <- function(.data, .f, .cols = NULL, ...,
 #'     q75 = function(x) quantile(x, 0.75)
 #'   )
 #' )
-measure_summarize <- function(.data, .cols = NULL,
-                              .fns = list(mean = mean, sd = stats::sd),
-                              na.rm = TRUE) {
+measure_summarize <- function(
+  .data,
+  .cols = NULL,
+  .fns = list(mean = mean, sd = stats::sd),
+  na.rm = TRUE
+) {
   if (!is.data.frame(.data)) {
     cli::cli_abort(
       "{.arg .data} must be a data frame, not {.obj_type_friendly {(.data)}}."
@@ -644,8 +670,14 @@ measure_summarize <- function(.data, .cols = NULL,
 
 #' Map over a single measure column
 #' @noRd
-.map_measure_col <- function(x, .f, ..., .col_name, .capture = FALSE,
-                             .error_call) {
+.map_measure_col <- function(
+  x,
+  .f,
+  ...,
+  .col_name,
+  .capture = FALSE,
+  .error_call
+) {
   n_samples <- length(x)
   result <- vector("list", n_samples)
   fn_args <- list(...)
@@ -688,9 +720,11 @@ measure_summarize <- function(.data, .cols = NULL,
       {
         out <- .f(x[[i]], ...)
 
-        if (!is.data.frame(out) ||
+        if (
+          !is.data.frame(out) ||
             !all(c("location", "value") %in% names(out)) ||
-            nrow(out) != nrow(x[[i]])) {
+            nrow(out) != nrow(x[[i]])
+        ) {
           stop("Invalid output structure")
         }
 
@@ -723,7 +757,13 @@ measure_summarize <- function(.data, .cols = NULL,
 
 #' Validate map output structure
 #' @noRd
-.validate_map_output <- function(out, original, sample_idx, col_name, error_call) {
+.validate_map_output <- function(
+  out,
+  original,
+  sample_idx,
+  col_name,
+  error_call
+) {
   if (!is.data.frame(out)) {
     cli::cli_abort(
       c(

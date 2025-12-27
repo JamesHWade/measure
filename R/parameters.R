@@ -60,8 +60,10 @@ differentiation_order <- function(range = c(0L, 4L), trans = NULL) {
 #' baseline_degree()
 #' baseline_span()
 #' @export
-baseline_lambda <- function(range = c(2, 9), trans = scales::transform_log10()) {
-
+baseline_lambda <- function(
+  range = c(2, 9),
+  trans = scales::transform_log10()
+) {
   dials::new_quant_param(
     type = "double",
     range = range,
@@ -239,7 +241,6 @@ tunable.step_measure_baseline_rf <- function(x, ...) {
 #' @rdname tunable_measure
 #' @export
 tunable.step_measure_detrend <- function(x, ...) {
-
   tibble::tibble(
     name = "degree",
     call_info = list(

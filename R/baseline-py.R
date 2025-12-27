@@ -106,15 +106,16 @@
 #'   step_measure_baseline_py(method = "snip", max_half_window = 40) |>
 #'   prep()
 step_measure_baseline_py <- function(
-    recipe,
-    method = "asls",
-    ...,
-    subtract = TRUE,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_py")) {
+  recipe,
+  method = "asls",
+  ...,
+  subtract = TRUE,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_py")
+) {
   # Capture additional arguments as quosures
   method_args <- rlang::enquos(...)
 
@@ -134,7 +135,15 @@ step_measure_baseline_py <- function(
 }
 
 step_measure_baseline_py_new <- function(
-    method, method_args, subtract, measures, role, trained, skip, id) {
+  method,
+  method_args,
+  subtract,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_py",
     method = method,
@@ -206,9 +215,10 @@ bake.step_measure_baseline_py <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_baseline_py <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Python pybaselines (", x$method, ") on ")
 
   if (x$trained) {
@@ -336,7 +346,8 @@ tunable.step_measure_baseline_py <- function(x, ...) {
 #' @noRd
 .compute_baseline_py <- function(dat, method, method_args, subtract) {
   purrr::map(
-    dat, .py_baseline_single,
+    dat,
+    .py_baseline_single,
     method = method,
     method_args = method_args,
     subtract = subtract

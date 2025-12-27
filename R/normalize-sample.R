@@ -46,12 +46,12 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_normalize_sum <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_normalize_sum")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_normalize_sum")
 ) {
   recipes::add_step(
     recipe,
@@ -105,7 +105,11 @@ bake.step_measure_normalize_sum <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_normalize_sum <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_normalize_sum <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Sum normalization on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -136,7 +140,9 @@ tidy.step_measure_normalize_sum <- function(x, ...) {
 .normalize_sum_single <- function(x) {
   total <- sum(x$value, na.rm = TRUE)
   if (is.na(total) || abs(total) < .Machine$double.eps) {
-    cli::cli_warn("Sum is zero or NA for a spectrum; returning original values.")
+    cli::cli_warn(
+      "Sum is zero or NA for a spectrum; returning original values."
+    )
     return(x)
   }
   x$value <- x$value / total
@@ -188,12 +194,12 @@ tidy.step_measure_normalize_sum <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_normalize_max <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_normalize_max")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_normalize_max")
 ) {
   recipes::add_step(
     recipe,
@@ -247,7 +253,11 @@ bake.step_measure_normalize_max <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_normalize_max <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_normalize_max <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Max normalization on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -277,7 +287,9 @@ tidy.step_measure_normalize_max <- function(x, ...) {
 .normalize_max_single <- function(x) {
   max_val <- max(x$value, na.rm = TRUE)
   if (is.na(max_val) || abs(max_val) < .Machine$double.eps) {
-    cli::cli_warn("Maximum is zero or NA for a spectrum; returning original values.")
+    cli::cli_warn(
+      "Maximum is zero or NA for a spectrum; returning original values."
+    )
     return(x)
   }
   x$value <- x$value / max_val
@@ -329,12 +341,12 @@ tidy.step_measure_normalize_max <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_normalize_range <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_normalize_range")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_normalize_range")
 ) {
   recipes::add_step(
     recipe,
@@ -348,7 +360,13 @@ step_measure_normalize_range <- function(
   )
 }
 
-step_measure_normalize_range_new <- function(measures, role, trained, skip, id) {
+step_measure_normalize_range_new <- function(
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_normalize_range",
     measures = measures,
@@ -388,7 +406,11 @@ bake.step_measure_normalize_range <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_normalize_range <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_normalize_range <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Range [0,1] normalization on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -416,13 +438,14 @@ tidy.step_measure_normalize_range <- function(x, ...) {
 }
 
 .normalize_range_single <- function(x) {
-
   min_val <- min(x$value, na.rm = TRUE)
   max_val <- max(x$value, na.rm = TRUE)
   range_val <- max_val - min_val
 
   if (is.na(range_val) || abs(range_val) < .Machine$double.eps) {
-    cli::cli_warn("Range is zero or NA for a spectrum; returning centered values.")
+    cli::cli_warn(
+      "Range is zero or NA for a spectrum; returning centered values."
+    )
     x$value <- x$value - min_val
     return(x)
   }
@@ -475,12 +498,12 @@ tidy.step_measure_normalize_range <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_normalize_vector <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_normalize_vector")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_normalize_vector")
 ) {
   recipes::add_step(
     recipe,
@@ -494,7 +517,13 @@ step_measure_normalize_vector <- function(
   )
 }
 
-step_measure_normalize_vector_new <- function(measures, role, trained, skip, id) {
+step_measure_normalize_vector_new <- function(
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_normalize_vector",
     measures = measures,
@@ -534,7 +563,11 @@ bake.step_measure_normalize_vector <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_normalize_vector <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_normalize_vector <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "L2 (vector) normalization on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -564,7 +597,9 @@ tidy.step_measure_normalize_vector <- function(x, ...) {
 .normalize_vector_single <- function(x) {
   l2_norm <- sqrt(sum(x$value^2, na.rm = TRUE))
   if (is.na(l2_norm) || abs(l2_norm) < .Machine$double.eps) {
-    cli::cli_warn("L2 norm is zero or NA for a spectrum; returning original values.")
+    cli::cli_warn(
+      "L2 norm is zero or NA for a spectrum; returning original values."
+    )
     return(x)
   }
   x$value <- x$value / l2_norm
@@ -618,12 +653,12 @@ tidy.step_measure_normalize_vector <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_normalize_auc <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_normalize_auc")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_normalize_auc")
 ) {
   recipes::add_step(
     recipe,
@@ -677,7 +712,11 @@ bake.step_measure_normalize_auc <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_normalize_auc <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_normalize_auc <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "AUC normalization on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -717,7 +756,9 @@ tidy.step_measure_normalize_auc <- function(x, ...) {
   auc <- sum(dx * y_avg, na.rm = TRUE)
 
   if (is.na(auc) || abs(auc) < .Machine$double.eps) {
-    cli::cli_warn("AUC is zero or NA for a spectrum; returning original values.")
+    cli::cli_warn(
+      "AUC is zero or NA for a spectrum; returning original values."
+    )
     return(x)
   }
   x$value <- x$value / auc
@@ -784,15 +825,15 @@ tidy.step_measure_normalize_auc <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_normalize_peak <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    location_min = NULL,
-    location_max = NULL,
-    method = "mean",
-    skip = FALSE,
-    id = recipes::rand_id("measure_normalize_peak")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  location_min = NULL,
+  location_max = NULL,
+  method = "mean",
+  skip = FALSE,
+  id = recipes::rand_id("measure_normalize_peak")
 ) {
   method <- rlang::arg_match(method, c("mean", "max", "integral"))
 
@@ -812,9 +853,14 @@ step_measure_normalize_peak <- function(
 }
 
 step_measure_normalize_peak_new <- function(
-    measures, role, trained,
-    location_min, location_max, method,
-    skip, id
+  measures,
+  role,
+  trained,
+  location_min,
+  location_max,
+  method,
+  skip,
+  id
 ) {
   recipes::step(
     subclass = "measure_normalize_peak",
@@ -895,13 +941,19 @@ bake.step_measure_normalize_peak <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_normalize_peak <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_normalize_peak <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Peak region normalization on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
     cat(sprintf(
       " (region: [%s, %s], method: %s)",
-      x$location_min, x$location_max, x$method
+      x$location_min,
+      x$location_max,
+      x$method
     ))
   } else {
     cat(title)

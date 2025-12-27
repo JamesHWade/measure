@@ -126,7 +126,7 @@ test_that("step_measure_baseline_custom handles function errors gracefully", {
 
 test_that("step_measure_baseline_custom validates return length", {
   wrong_length_fn <- function(x) {
-    rep(0, 5)  # Always returns 5 values
+    rep(0, 5) # Always returns 5 values
   }
 
   # Use minimal data (1 sample) to avoid multiple warnings
@@ -169,8 +169,8 @@ test_that("step_measure_baseline_custom removes known baseline correctly", {
   set.seed(123)
   n_points <- 100
   location <- seq(1, 100)
-  true_baseline <- 0.05 * location + 2  # Linear baseline
-  noise <- rnorm(n_points, sd = 0.01)  # Small noise
+  true_baseline <- 0.05 * location + 2 # Linear baseline
+  noise <- rnorm(n_points, sd = 0.01) # Small noise
   observed <- true_baseline + noise
 
   synthetic_data <- tibble::tibble(

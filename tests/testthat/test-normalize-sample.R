@@ -294,7 +294,9 @@ test_that("step_measure_normalize_auc modifies values", {
   original <- bake(rec_original, new_data = NULL)
   normalized <- bake(rec_auc, new_data = NULL)
 
-  expect_false(all(original$.measures[[1]]$value == normalized$.measures[[1]]$value))
+  expect_false(all(
+    original$.measures[[1]]$value == normalized$.measures[[1]]$value
+  ))
 })
 
 test_that("step_measure_normalize_auc tidy method works", {
@@ -378,7 +380,9 @@ test_that("step_measure_normalize_peak works with different methods", {
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_normalize_peak(
-        location_min = 40, location_max = 60, method = m
+        location_min = 40,
+        location_max = 60,
+        method = m
       ) |>
       prep()
 
@@ -391,7 +395,11 @@ test_that("step_measure_normalize_peak tidy method works", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
-    step_measure_normalize_peak(location_min = 40, location_max = 60, method = "max")
+    step_measure_normalize_peak(
+      location_min = 40,
+      location_max = 60,
+      method = "max"
+    )
 
   tidy_before <- tidy(rec, number = 2)
   expect_equal(tidy_before$terms, "<all measure columns>")
@@ -451,7 +459,7 @@ test_that("all normalization steps preserve locations", {
 
     # Check locations are preserved
     locs <- result$.measures[[1]]$location
-    expect_equal(length(locs), 100)  # meats has 100 channels
+    expect_equal(length(locs), 100) # meats has 100 channels
     expect_equal(locs, 1:100)
   }
 })

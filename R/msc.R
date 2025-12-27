@@ -97,7 +97,14 @@ step_measure_msc <- function(
   )
 }
 
-step_measure_msc_new <- function(measures, role, trained, ref_spectra, skip, id) {
+step_measure_msc_new <- function(
+  measures,
+  role,
+  trained,
+  ref_spectra,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_msc",
     measures = measures,

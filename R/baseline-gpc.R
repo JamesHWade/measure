@@ -75,15 +75,16 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_baseline_gpc <- function(
-    recipe,
-    measures = NULL,
-    left_frac = 0.05,
-    right_frac = 0.05,
-    method = "linear",
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_gpc")) {
+  recipe,
+  measures = NULL,
+  left_frac = 0.05,
+  right_frac = 0.05,
+  method = "linear",
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_gpc")
+) {
   recipes::add_step(
     recipe,
     step_measure_baseline_gpc_new(
@@ -100,7 +101,15 @@ step_measure_baseline_gpc <- function(
 }
 
 step_measure_baseline_gpc_new <- function(
-    measures, left_frac, right_frac, method, role, trained, skip, id) {
+  measures,
+  left_frac,
+  right_frac,
+  method,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_gpc",
     measures = measures,
@@ -119,15 +128,23 @@ prep.step_measure_baseline_gpc <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
   # Validate parameters
-  if (!is.numeric(x$left_frac) || length(x$left_frac) != 1 ||
-      x$left_frac <= 0 || x$left_frac >= 0.5) {
+  if (
+    !is.numeric(x$left_frac) ||
+      length(x$left_frac) != 1 ||
+      x$left_frac <= 0 ||
+      x$left_frac >= 0.5
+  ) {
     cli::cli_abort(
       "{.arg left_frac} must be a number between 0 and 0.5, not {.val {x$left_frac}}."
     )
   }
 
-  if (!is.numeric(x$right_frac) || length(x$right_frac) != 1 ||
-      x$right_frac <= 0 || x$right_frac >= 0.5) {
+  if (
+    !is.numeric(x$right_frac) ||
+      length(x$right_frac) != 1 ||
+      x$right_frac <= 0 ||
+      x$right_frac >= 0.5
+  ) {
     cli::cli_abort(
       "{.arg right_frac} must be a number between 0 and 0.5, not {.val {x$right_frac}}."
     )
@@ -181,9 +198,10 @@ bake.step_measure_baseline_gpc <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_baseline_gpc <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "GPC/SEC baseline correction on "
 
   if (x$trained) {
@@ -232,7 +250,8 @@ required_pkgs.step_measure_baseline_gpc <- function(x, ...) {
 #' @noRd
 .compute_baseline_gpc <- function(dat, left_frac, right_frac, method) {
   purrr::map(
-    dat, .gpc_baseline_single,
+    dat,
+    .gpc_baseline_single,
     left_frac = left_frac,
     right_frac = right_frac,
     method = method
@@ -288,7 +307,6 @@ required_pkgs.step_measure_baseline_gpc <- function(x, ...) {
     intercept <- left_mean - slope * left_center
 
     baseline <- intercept + slope * seq_len(n)
-
   } else if (method == "median") {
     # Use medians for robustness
     left_med <- stats::median(left_values, na.rm = TRUE)
@@ -301,7 +319,6 @@ required_pkgs.step_measure_baseline_gpc <- function(x, ...) {
     intercept <- left_med - slope * left_center
 
     baseline <- intercept + slope * seq_len(n)
-
   } else if (method == "spline") {
     # Smooth spline through baseline regions
     baseline_idx <- c(left_idx, right_idx)
@@ -326,7 +343,7 @@ required_pkgs.step_measure_baseline_gpc <- function(x, ...) {
         stats::smooth.spline(
           x = baseline_idx[valid],
           y = baseline_y[valid],
-          spar = 0.8  # Strong smoothing
+          spar = 0.8 # Strong smoothing
         ),
         error = function(e) {
           cli::cli_warn(

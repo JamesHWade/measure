@@ -54,6 +54,9 @@
     )
   }
 
-  .measure_py$pybaselines <- reticulate::import("pybaselines", delay_load = TRUE)
+  .measure_py$pybaselines <- reticulate::import(
+    "pybaselines",
+    delay_load = TRUE
+  )
   .measure_py$pybaselines
 }

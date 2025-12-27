@@ -66,14 +66,15 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_baseline_rf <- function(
-    recipe,
-    measures = NULL,
-    span = 2 / 3,
-    maxit = c(5L, 5L),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_rf")) {
+  recipe,
+  measures = NULL,
+  span = 2 / 3,
+  maxit = c(5L, 5L),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_rf")
+) {
   recipes::add_step(
     recipe,
     step_measure_baseline_rf_new(
@@ -89,7 +90,14 @@ step_measure_baseline_rf <- function(
 }
 
 step_measure_baseline_rf_new <- function(
-    measures, span, maxit, role, trained, skip, id) {
+  measures,
+  span,
+  maxit,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_rf",
     measures = measures,
@@ -107,14 +115,12 @@ prep.step_measure_baseline_rf <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
   # Validate parameters
-  if (!is.numeric(x$span) || length(x$span) != 1 ||
-      x$span <= 0 || x$span > 1) {
+  if (!is.numeric(x$span) || length(x$span) != 1 || x$span <= 0 || x$span > 1) {
     cli::cli_abort(
       "{.arg span} must be a number between 0 and 1, not {.val {x$span}}."
     )
   }
-  if (!is.numeric(x$maxit) || length(x$maxit) != 2 ||
-      any(x$maxit < 1)) {
+  if (!is.numeric(x$maxit) || length(x$maxit) != 2 || any(x$maxit < 1)) {
     cli::cli_abort(
       "{.arg maxit} must be a length-2 vector of positive integers."
     )
@@ -153,9 +159,10 @@ bake.step_measure_baseline_rf <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_baseline_rf <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Robust fitting baseline correction on "
 
   if (x$trained) {

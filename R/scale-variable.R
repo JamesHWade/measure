@@ -60,13 +60,13 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_center <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    learned_params = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_center")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  learned_params = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_center")
 ) {
   recipes::add_step(
     recipe,
@@ -82,7 +82,12 @@ step_measure_center <- function(
 }
 
 step_measure_center_new <- function(
-    measures, role, trained, learned_params, skip, id
+  measures,
+  role,
+  trained,
+  learned_params,
+  skip,
+  id
 ) {
   recipes::step(
     subclass = "measure_center",
@@ -132,13 +137,20 @@ bake.step_measure_center <- function(object, new_data, ...) {
 
     mat <- sweep(mat, 2, params$means, "-")
 
-    new_data[[col]] <- new_measure_list(matrix_to_measure(mat, params$locations))
+    new_data[[col]] <- new_measure_list(matrix_to_measure(
+      mat,
+      params$locations
+    ))
   }
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_center <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_center <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Mean centering on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -233,13 +245,13 @@ required_pkgs.step_measure_center <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_scale_auto <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    learned_params = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_scale_auto")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  learned_params = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_scale_auto")
 ) {
   recipes::add_step(
     recipe,
@@ -255,7 +267,12 @@ step_measure_scale_auto <- function(
 }
 
 step_measure_scale_auto_new <- function(
-    measures, role, trained, learned_params, skip, id
+  measures,
+  role,
+  trained,
+  learned_params,
+  skip,
+  id
 ) {
   recipes::step(
     subclass = "measure_scale_auto",
@@ -312,13 +329,20 @@ bake.step_measure_scale_auto <- function(object, new_data, ...) {
     safe_sds[is.na(safe_sds) | safe_sds < .Machine$double.eps] <- 1
     mat <- sweep(mat, 2, safe_sds, "/")
 
-    new_data[[col]] <- new_measure_list(matrix_to_measure(mat, params$locations))
+    new_data[[col]] <- new_measure_list(matrix_to_measure(
+      mat,
+      params$locations
+    ))
   }
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_scale_auto <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_scale_auto <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Auto-scaling (z-score) on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -421,13 +445,13 @@ required_pkgs.step_measure_scale_auto <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_scale_pareto <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    learned_params = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_scale_pareto")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  learned_params = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_scale_pareto")
 ) {
   recipes::add_step(
     recipe,
@@ -443,7 +467,12 @@ step_measure_scale_pareto <- function(
 }
 
 step_measure_scale_pareto_new <- function(
-    measures, role, trained, learned_params, skip, id
+  measures,
+  role,
+  trained,
+  learned_params,
+  skip,
+  id
 ) {
   recipes::step(
     subclass = "measure_scale_pareto",
@@ -501,13 +530,20 @@ bake.step_measure_scale_pareto <- function(object, new_data, ...) {
     sqrt_sds <- sqrt(safe_sds)
     mat <- sweep(mat, 2, sqrt_sds, "/")
 
-    new_data[[col]] <- new_measure_list(matrix_to_measure(mat, params$locations))
+    new_data[[col]] <- new_measure_list(matrix_to_measure(
+      mat,
+      params$locations
+    ))
   }
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_scale_pareto <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_scale_pareto <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Pareto scaling on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -602,13 +638,13 @@ required_pkgs.step_measure_scale_pareto <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_scale_range <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    learned_params = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_scale_range")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  learned_params = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_scale_range")
 ) {
   recipes::add_step(
     recipe,
@@ -624,7 +660,12 @@ step_measure_scale_range <- function(
 }
 
 step_measure_scale_range_new <- function(
-    measures, role, trained, learned_params, skip, id
+  measures,
+  role,
+  trained,
+  learned_params,
+  skip,
+  id
 ) {
   recipes::step(
     subclass = "measure_scale_range",
@@ -681,13 +722,20 @@ bake.step_measure_scale_range <- function(object, new_data, ...) {
     safe_ranges[is.na(safe_ranges) | safe_ranges < .Machine$double.eps] <- 1
     mat <- sweep(mat, 2, safe_ranges, "/")
 
-    new_data[[col]] <- new_measure_list(matrix_to_measure(mat, params$locations))
+    new_data[[col]] <- new_measure_list(matrix_to_measure(
+      mat,
+      params$locations
+    ))
   }
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_scale_range <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_scale_range <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Range scaling on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -789,13 +837,13 @@ required_pkgs.step_measure_scale_range <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_scale_vast <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    learned_params = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_scale_vast")
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  learned_params = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_scale_vast")
 ) {
   recipes::add_step(
     recipe,
@@ -811,7 +859,12 @@ step_measure_scale_vast <- function(
 }
 
 step_measure_scale_vast_new <- function(
-    measures, role, trained, learned_params, skip, id
+  measures,
+  role,
+  trained,
+  learned_params,
+  skip,
+  id
 ) {
   recipes::step(
     subclass = "measure_scale_vast",
@@ -878,13 +931,20 @@ bake.step_measure_scale_vast <- function(object, new_data, ...) {
     safe_divisor[is.na(safe_divisor) | safe_divisor < .Machine$double.eps] <- 1
     mat <- sweep(mat, 2, safe_divisor, "/")
 
-    new_data[[col]] <- new_measure_list(matrix_to_measure(mat, params$locations))
+    new_data[[col]] <- new_measure_list(matrix_to_measure(
+      mat,
+      params$locations
+    ))
   }
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_scale_vast <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_scale_vast <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "VAST scaling on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")

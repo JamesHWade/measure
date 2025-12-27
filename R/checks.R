@@ -2,7 +2,7 @@ check_missing_measures <- function(.data, loc) {
   if (!is.na(loc)) {
     return(invisible(NULL))
   }
-  has_na <- any(!vctrs::vec_detect_complete(.data))
+  has_na <- !all(vctrs::vec_detect_complete(.data))
   if (has_na) {
     rlang::abort(
       "Missing data are only allowed when the wave number is supplied."
