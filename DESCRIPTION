@@ -24,10 +24,13 @@ Imports:
     tibble,
     tidyr,
     vctrs
-Suggests: 
+Suggests:
     covr,
+    ggplot2,
     knitr,
     modeldata,
+    parsnip,
+    patchwork,
     prospectr,
     rmarkdown,
     roxygen2,
