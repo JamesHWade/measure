@@ -16,6 +16,8 @@
   : Ingest Measurements from a Single Column
 - [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)
   : Ingest Measurements in Separate Columns
+- [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)
+  : Multiplicative Scatter Correction (MSC)
 - [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md)
   : Reorganize Measurements to Two Columns
 - [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)

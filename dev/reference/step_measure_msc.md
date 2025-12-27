@@ -1,18 +1,20 @@
-# Standard Normal Variate (SNV) Transformation
+# Multiplicative Scatter Correction (MSC)
 
-`step_measure_snv()` creates a *specification* of a recipe step that
-applies Standard Normal Variate transformation to spectral data. SNV
-normalizes each spectrum to have zero mean and unit standard deviation.
+`step_measure_msc()` creates a *specification* of a recipe step that
+applies Multiplicative Scatter Correction to spectral data. MSC removes
+physical light scatter by accounting for additive and multiplicative
+effects.
 
 ## Usage
 
 ``` r
-step_measure_snv(
+step_measure_msc(
   recipe,
   role = NA,
   trained = FALSE,
+  ref_spectrum = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_snv")
+  id = recipes::rand_id("measure_msc")
 )
 ```
 
@@ -31,6 +33,11 @@ step_measure_snv(
 
   A logical to indicate if the quantities for preprocessing have been
   estimated.
+
+- ref_spectrum:
+
+  A numeric vector containing the reference spectrum computed during
+  training. This is `NULL` until the step is trained.
 
 - skip:
 
@@ -54,18 +61,23 @@ of any existing operations.
 
 ## Details
 
-Standard Normal Variate (SNV) is a row-wise transformation that
-normalizes each spectrum independently. For a spectrum \\x\\, the
-transformation is:
+Multiplicative Scatter Correction (MSC) is a normalization method that
+attempts to account for additive and multiplicative effects by aligning
+each spectrum to a reference spectrum. For a spectrum \\x_i\\ and
+reference \\x_r\\, the transformation is:
 
-\$\$SNV(x) = \frac{x - \bar{x}}{s_x}\$\$
+\$\$x_i = m_i \cdot x_r + a_i\$\$ \$\$MSC(x_i) = \frac{x_i -
+a_i}{m_i}\$\$
 
-where \\\bar{x}\\ is the mean and \\s_x\\ is the standard deviation of
-the spectrum values.
+where \\a_i\\ and \\m_i\\ are the additive (intercept) and
+multiplicative (slope) terms from regressing \\x_i\\ on \\x_r\\.
 
-SNV is commonly used to remove multiplicative effects of scatter and
-particle size in NIR spectroscopy. After SNV transformation, each
-spectrum will have a mean of zero and a standard deviation of one.
+The reference spectrum is computed as the mean of all training spectra
+during [`prep()`](https://recipes.tidymodels.org/reference/prep.html)
+and stored for use when applying the transformation to new data.
+
+MSC is commonly used to remove physical light scatter effects in NIR
+spectroscopy caused by differences in particle size or path length.
 
 **No selectors should be supplied to this step function**. The data
 should be in the internal format produced by
@@ -79,13 +91,22 @@ The measurement locations are preserved unchanged.
 
 When you
 [`tidy()`](https://recipes.tidymodels.org/reference/tidy.recipe.html)
-this step, a tibble with column `terms` (set to `".measures"`) and `id`
+this step, a tibble with columns `terms` (set to `".measures"`) and `id`
 is returned.
+
+## References
+
+Geladi, P., MacDougall, D., and Martens, H. 1985. Linearization and
+Scatter-Correction for Near-Infrared Reflectance Spectra of Meat.
+Applied Spectroscopy, 39(3):491-500.
 
 ## See also
 
+[`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)
+for a simpler scatter correction method
+
 Other measure-preprocessing:
-[`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)
+[`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)
 
 ## Examples
 
@@ -96,7 +117,7 @@ rec <-
   recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
-  step_measure_snv() |>
+  step_measure_msc() |>
   prep()
 
 bake(rec, new_data = NULL)
