@@ -111,6 +111,30 @@ reference:
   - step_measure_peaks_to_table
   - is_peaks_list
   - find_peaks_cols
+- title: Smoothing & Noise Reduction
+  desc: Noise reduction and spike removal steps
+  contents:
+  - step_measure_smooth_ma
+  - step_measure_smooth_median
+  - step_measure_smooth_gaussian
+  - step_measure_smooth_wavelet
+  - step_measure_filter_fourier
+  - step_measure_despike
+- title: Alignment & Registration
+  desc: Spectral alignment and shift correction
+  contents:
+  - step_measure_align_shift
+  - step_measure_align_reference
+  - step_measure_align_dtw
+  - step_measure_align_ptw
+  - step_measure_align_cow
+- title: Quality Control
+  desc: Quality metrics and data cleaning
+  contents:
+  - step_measure_qc_snr
+  - step_measure_qc_saturated
+  - step_measure_qc_outlier
+  - step_measure_impute
 - title: Tunable Parameters
   desc: Parameters for hyperparameter tuning with dials
   contents:
@@ -118,6 +142,13 @@ reference:
   - baseline_lambda
   - peak_location_min
   - derivative_order
+  - smooth_window
+  - smooth_sigma
+  - fourier_cutoff
+  - despike_threshold
+  - align_max_shift
+  - align_segment_length
+  - outlier_threshold
   - starts_with("tunable")
 - title: Data
   desc: Included datasets for examples and testing

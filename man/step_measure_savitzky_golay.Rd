@@ -93,5 +93,14 @@ if (rlang::is_installed("prospectr")) {
     prep()
 }
 }
+\seealso{
+Other measure-smoothing: 
+\code{\link{step_measure_despike}()},
+\code{\link{step_measure_filter_fourier}()},
+\code{\link{step_measure_smooth_gaussian}()},
+\code{\link{step_measure_smooth_ma}()},
+\code{\link{step_measure_smooth_median}()},
+\code{\link{step_measure_smooth_wavelet}()}
+}
 \concept{measure-differencing}
 \concept{measure-smoothing}

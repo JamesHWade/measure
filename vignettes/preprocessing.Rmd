@@ -926,6 +926,36 @@ Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto
 | `step_measure_exclude()` | Remove x-ranges | Remove solvent peaks, artifacts |
 | `step_measure_resample()` | Interpolate to grid | Align instruments, reduce density |
 
+### Smoothing & Noise Reduction
+
+| Step | Effect | Use when |
+|------|--------|----------|
+| `step_measure_smooth_ma()` | Moving average | Simple noise reduction |
+| `step_measure_smooth_median()` | Median filter | Spike removal, robust smoothing |
+| `step_measure_smooth_gaussian()` | Gaussian kernel | Preserve peak shapes |
+| `step_measure_smooth_wavelet()` | Wavelet denoising | Complex noise patterns |
+| `step_measure_filter_fourier()` | Frequency filtering | Periodic noise removal |
+| `step_measure_despike()` | Spike removal | Cosmic rays, detector glitches |
+
+### Alignment & Registration
+
+| Step | Effect | Use when |
+|------|--------|----------|
+| `step_measure_align_shift()` | Cross-correlation alignment | Simple linear shifts |
+| `step_measure_align_reference()` | Align to reference | External calibration standard |
+| `step_measure_align_dtw()` | Dynamic time warping | Non-linear distortions |
+| `step_measure_align_ptw()` | Parametric time warping | Polynomial warping functions |
+| `step_measure_align_cow()` | Correlation optimized warping | Piecewise segment alignment |
+
+### Quality Control
+
+| Step | Effect | Use when |
+|------|--------|----------|
+| `step_measure_qc_snr()` | Calculate SNR | Quality filtering |
+| `step_measure_qc_saturated()` | Detect saturation | Identify clipped data |
+| `step_measure_qc_outlier()` | Detect outliers | Sample screening |
+| `step_measure_impute()` | Fill missing values | Gap interpolation |
+
 ### Baseline Correction
 
 | Step | Effect | Use when |

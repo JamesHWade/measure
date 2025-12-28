@@ -347,3 +347,269 @@ tunable.step_measure_derivative_gap <- function(x, ...) {
     component_id = x$id
   )
 }
+
+# ==============================================================================
+# Parameters for smoothing steps
+# ==============================================================================
+
+#' Parameters for smoothing steps
+#'
+#' `smooth_window()` controls the window size for moving average and median
+#' smoothing. `smooth_sigma()` controls the standard deviation for Gaussian
+#' smoothing. `fourier_cutoff()` controls the frequency cutoff for Fourier
+#' filtering.
+#'
+#' @inheritParams window_side
+#'
+#' @return A function with classes `"quant_param"` and `"param"`.
+#' @examples
+#' smooth_window()
+#' smooth_sigma()
+#' fourier_cutoff()
+#' @export
+smooth_window <- function(range = c(3L, 21L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(smooth_window = "Smoothing Window Size"),
+    finalize = NULL
+  )
+}
+
+#' @rdname smooth_window
+#' @export
+smooth_sigma <- function(range = c(0.5, 5), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(smooth_sigma = "Gaussian Sigma"),
+    finalize = NULL
+  )
+}
+
+#' @rdname smooth_window
+#' @export
+fourier_cutoff <- function(range = c(0.01, 0.5), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(fourier_cutoff = "Fourier Cutoff Frequency"),
+    finalize = NULL
+  )
+}
+
+#' @rdname smooth_window
+#' @export
+despike_threshold <- function(range = c(2, 10), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(despike_threshold = "Despike Threshold (MAD units)"),
+    finalize = NULL
+  )
+}
+
+# ==============================================================================
+# Parameters for alignment steps
+# ==============================================================================
+
+#' Parameters for alignment steps
+#'
+#' `align_max_shift()` controls the maximum shift allowed in alignment.
+#' `align_segment_length()` controls segment size for COW alignment.
+#'
+#' @inheritParams window_side
+#'
+#' @return A function with classes `"quant_param"` and `"param"`.
+#' @examples
+#' align_max_shift()
+#' align_segment_length()
+#' @export
+align_max_shift <- function(range = c(1L, 50L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(align_max_shift = "Maximum Alignment Shift"),
+    finalize = NULL
+  )
+}
+
+#' @rdname align_max_shift
+#' @export
+align_segment_length <- function(range = c(10L, 100L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(align_segment_length = "Alignment Segment Length"),
+    finalize = NULL
+  )
+}
+
+# ==============================================================================
+# Parameters for quality control steps
+# ==============================================================================
+
+#' Parameters for quality control steps
+#'
+#' `outlier_threshold()` controls the threshold for outlier detection
+#' (in standard deviation or Mahalanobis distance units).
+#'
+#' @inheritParams window_side
+#'
+#' @return A function with classes `"quant_param"` and `"param"`.
+#' @examples
+#' outlier_threshold()
+#' @export
+outlier_threshold <- function(range = c(2, 5), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(outlier_threshold = "Outlier Threshold"),
+    finalize = NULL
+  )
+}
+
+# ==============================================================================
+# Tunable methods for new steps
+# ==============================================================================
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_baseline_airpls <- function(x, ...) {
+  tibble::tibble(
+    name = "lambda",
+    call_info = list(
+      list(pkg = "measure", fun = "baseline_lambda")
+    ),
+    source = "recipe",
+    component = "step_measure_baseline_airpls",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_baseline_arpls <- function(x, ...) {
+  tibble::tibble(
+    name = "lambda",
+    call_info = list(
+      list(pkg = "measure", fun = "baseline_lambda")
+    ),
+    source = "recipe",
+    component = "step_measure_baseline_arpls",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_smooth_ma <- function(x, ...) {
+  tibble::tibble(
+    name = "window",
+    call_info = list(
+      list(pkg = "measure", fun = "smooth_window")
+    ),
+    source = "recipe",
+    component = "step_measure_smooth_ma",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_smooth_median <- function(x, ...) {
+  tibble::tibble(
+    name = "window",
+    call_info = list(
+      list(pkg = "measure", fun = "smooth_window")
+    ),
+    source = "recipe",
+    component = "step_measure_smooth_median",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_smooth_gaussian <- function(x, ...) {
+  tibble::tibble(
+    name = "sigma",
+    call_info = list(
+      list(pkg = "measure", fun = "smooth_sigma")
+    ),
+    source = "recipe",
+    component = "step_measure_smooth_gaussian",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_filter_fourier <- function(x, ...) {
+  tibble::tibble(
+    name = "cutoff",
+    call_info = list(
+      list(pkg = "measure", fun = "fourier_cutoff")
+    ),
+    source = "recipe",
+    component = "step_measure_filter_fourier",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_despike <- function(x, ...) {
+  tibble::tibble(
+    name = c("threshold", "window"),
+    call_info = list(
+      list(pkg = "measure", fun = "despike_threshold"),
+      list(pkg = "measure", fun = "smooth_window")
+    ),
+    source = "recipe",
+    component = "step_measure_despike",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_align_shift <- function(x, ...) {
+  tibble::tibble(
+    name = "max_shift",
+    call_info = list(
+      list(pkg = "measure", fun = "align_max_shift")
+    ),
+    source = "recipe",
+    component = "step_measure_align_shift",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_qc_outlier <- function(x, ...) {
+  tibble::tibble(
+    name = "threshold",
+    call_info = list(
+      list(pkg = "measure", fun = "outlier_threshold")
+    ),
+    source = "recipe",
+    component = "step_measure_qc_outlier",
+    component_id = x$id
+  )
+}
