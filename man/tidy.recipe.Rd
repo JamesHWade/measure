@@ -3,7 +3,8 @@
 %   R/baseline-gpc.R, R/baseline-poly.R, R/baseline-py.R, R/baseline-rf.R,
 %   R/calibrate.R, R/detrend.R, R/input_long.R, R/input_wide.R, R/measure-map.R,
 %   R/msc.R, R/normalize-sample.R, R/output_long.R, R/output_wide.R,
-%   R/reference-subtract.R, R/savitzky_golay.R, R/scale-variable.R, R/snv.R
+%   R/reference-subtract.R, R/savitzky_golay.R, R/scale-variable.R, R/snv.R,
+%   R/spectral-math.R
 \name{tidy.step_measure_baseline_als}
 \alias{tidy.step_measure_baseline_als}
 \alias{tidy.step_measure_baseline_custom}
@@ -36,6 +37,12 @@
 \alias{tidy.step_measure_scale_range}
 \alias{tidy.step_measure_scale_vast}
 \alias{tidy.step_measure_snv}
+\alias{tidy.step_measure_absorbance}
+\alias{tidy.step_measure_transmittance}
+\alias{tidy.step_measure_log}
+\alias{tidy.step_measure_kubelka_munk}
+\alias{tidy.step_measure_derivative}
+\alias{tidy.step_measure_derivative_gap}
 \title{Tidiers for measure steps}
 \usage{
 \method{tidy}{step_measure_baseline_als}(x, ...)
@@ -99,6 +106,18 @@
 \method{tidy}{step_measure_scale_vast}(x, ...)
 
 \method{tidy}{step_measure_snv}(x, ...)
+
+\method{tidy}{step_measure_absorbance}(x, ...)
+
+\method{tidy}{step_measure_transmittance}(x, ...)
+
+\method{tidy}{step_measure_log}(x, ...)
+
+\method{tidy}{step_measure_kubelka_munk}(x, ...)
+
+\method{tidy}{step_measure_derivative}(x, ...)
+
+\method{tidy}{step_measure_derivative_gap}(x, ...)
 }
 \arguments{
 \item{x}{A step object.}

@@ -90,13 +90,19 @@ rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
 \code{\link[=step_measure_calibrate_x]{step_measure_calibrate_x()}} for x-axis calibration
 
 Other measure-preprocessing: 
+\code{\link{step_measure_absorbance}()},
 \code{\link{step_measure_calibrate_x}()},
+\code{\link{step_measure_derivative}()},
+\code{\link{step_measure_derivative_gap}()},
+\code{\link{step_measure_kubelka_munk}()},
+\code{\link{step_measure_log}()},
 \code{\link{step_measure_map}()},
 \code{\link{step_measure_msc}()},
 \code{\link{step_measure_normalize_istd}()},
 \code{\link{step_measure_ratio_reference}()},
 \code{\link{step_measure_snv}()},
 \code{\link{step_measure_subtract_blank}()},
-\code{\link{step_measure_subtract_reference}()}
+\code{\link{step_measure_subtract_reference}()},
+\code{\link{step_measure_transmittance}()}
 }
 \concept{measure-preprocessing}

@@ -60,6 +60,15 @@ reference:
   - step_measure_snv
   - step_measure_msc
   - step_measure_map
+- title: Spectral Math
+  desc: Mathematical transformations for spectral data
+  contents:
+  - step_measure_absorbance
+  - step_measure_transmittance
+  - step_measure_log
+  - step_measure_kubelka_munk
+  - step_measure_derivative
+  - step_measure_derivative_gap
 - title: Sample-wise Normalization
   desc: Normalize each spectrum independently
   contents:
@@ -91,6 +100,7 @@ reference:
   - window_side
   - baseline_lambda
   - peak_location_min
+  - derivative_order
   - starts_with("tunable")
 - title: Data
   desc: Included datasets for examples and testing
