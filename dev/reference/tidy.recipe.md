@@ -11,6 +11,30 @@ tidy(x, ...)
 # S3 method for class 'step_measure_baseline_custom'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_baseline_rolling'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_airpls'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_snip'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_arpls'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_tophat'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_morph'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_minima'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_auto'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_baseline_gpc'
 tidy(x, ...)
 
@@ -44,6 +68,15 @@ tidy(x, ...)
 # S3 method for class 'step_measure_msc'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_mw_averages'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_mw_fractions'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_mw_distribution'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_normalize_sum'
 tidy(x, ...)
 
@@ -68,6 +101,21 @@ tidy(x, ...)
 # S3 method for class 'step_measure_output_wide'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_peaks_detect'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_peaks_integrate'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_peaks_filter'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_peaks_to_table'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_peaks_deconvolve'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_subtract_blank'
 tidy(x, ...)
 
@@ -75,6 +123,18 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_ratio_reference'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_trim'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_exclude'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_resample'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_interpolate'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_savitzky_golay'

@@ -39,6 +39,19 @@ Mathematical transformations for spectral data
 - [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md)
   : Gap (Norris-Williams) Derivatives
 
+## Region Operations
+
+Trim, exclude, and resample measurement regions
+
+- [`step_measure_trim()`](https://jameshwade.github.io/measure/dev/reference/step_measure_trim.md)
+  : Trim Measurements to Specified Range
+- [`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md)
+  : Exclude Measurement Ranges
+- [`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md)
+  : Resample Measurements to New Grid
+- [`step_measure_interpolate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_interpolate.md)
+  : Interpolate Gaps in Measurement Data
+
 ## Sample-wise Normalization
 
 Normalize each spectrum independently
@@ -102,6 +115,25 @@ Convert internal format back to modeling-ready data
 - [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md)
   : Reorganize Measurements to Two Columns
 
+## Peak Operations
+
+Peak detection, integration, and analysis for chromatography
+
+- [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md)
+  : Detect Peaks in Measurements
+- [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md)
+  : Integrate Peak Areas
+- [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md)
+  : Filter Peaks by Criteria
+- [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md)
+  : Deconvolve Overlapping Peaks
+- [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md)
+  : Convert Peaks to Tidy Table
+- [`is_peaks_list()`](https://jameshwade.github.io/measure/dev/reference/is_peaks_list.md)
+  : Test if object is a peaks list
+- [`find_peaks_cols()`](https://jameshwade.github.io/measure/dev/reference/find_peaks_cols.md)
+  : Find peaks columns in a data frame
+
 ## Tunable Parameters
 
 Parameters for hyperparameter tuning with dials
@@ -138,22 +170,50 @@ Included datasets for examples and testing
 
 Baseline correction steps and utilities
 
+- [`step_measure_baseline_airpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_airpls.md)
+  : Adaptive Iteratively Reweighted Penalized Least Squares Baseline
 - [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)
   : Asymmetric Least Squares (ALS) Baseline Correction
+- [`step_measure_baseline_arpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_arpls.md)
+  : Asymmetrically Reweighted Penalized Least Squares Baseline
+  Correction
+- [`step_measure_baseline_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_auto.md)
+  : Automatic Baseline Correction Method Selection
 - [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md)
   : Custom Baseline Correction with User-Provided Function
 - [`step_measure_baseline_gpc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.md)
   : GPC/SEC Baseline Correction
+- [`step_measure_baseline_minima()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_minima.md)
+  : Local Minima Interpolation Baseline Correction
+- [`step_measure_baseline_morph()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morph.md)
+  : Iterative Morphological Baseline Correction
 - [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)
   : Polynomial Baseline Correction
 - [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md)
   : Python-Based Baseline Correction via pybaselines
 - [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)
   : Robust Fitting Baseline Correction
+- [`step_measure_baseline_rolling()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rolling.md)
+  : Rolling Ball Baseline Correction
+- [`step_measure_baseline_snip()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_snip.md)
+  : SNIP Baseline Correction
+- [`step_measure_baseline_tophat()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_tophat.md)
+  : Top-Hat Morphological Baseline Correction
 - [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)
   : Remove Trend from Measurements
 - [`subtract_rf_baseline()`](https://jameshwade.github.io/measure/dev/reference/subtract_rf_baseline.md)
   : Subtract baseline using robust fitting method
+
+## SEC/GPC Analysis
+
+Molecular weight calculations for size exclusion chromatography
+
+- [`step_measure_mw_averages()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.md)
+  : Calculate Molecular Weight Averages for SEC/GPC
+- [`step_measure_mw_distribution()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_distribution.md)
+  : Generate Molecular Weight Distribution Curve
+- [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md)
+  : Calculate Molecular Weight Fractions for SEC/GPC
 
 ## Utilities
 
@@ -167,7 +227,11 @@ Helper functions and utilities
   : Find measure columns in a data frame
 - [`has_measure_col()`](https://jameshwade.github.io/measure/dev/reference/has_measure_col.md)
   : Check if data frame has measure column(s)
-- [`required_pkgs(`*`<step_measure_savitzky_golay>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+- [`required_pkgs(`*`<step_measure_mw_averages>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_mw_fractions>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_mw_distribution>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_resample>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_savitzky_golay>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   : Set package dependencies
 
 ## Exploration & Analysis

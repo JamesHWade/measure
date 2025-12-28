@@ -364,6 +364,10 @@
 <h3 id="baseline-correction">Baseline Correction<a class="anchor" aria-label="anchor" href="#baseline-correction"></a>
 </h3>
 <table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
 <thead><tr class="header">
 <th>Step</th>
 <th>Description</th>
@@ -380,6 +384,38 @@
 <tr class="odd">
 <td><code><a href="reference/step_measure_baseline_rf.html">step_measure_baseline_rf()</a></code></td>
 <td>Rolling ball/LOESS baseline</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_baseline_rolling.html">step_measure_baseline_rolling()</a></code></td>
+<td>Rolling ball algorithm</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_baseline_airpls.html">step_measure_baseline_airpls()</a></code></td>
+<td>Adaptive Iteratively Reweighted PLS</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_baseline_arpls.html">step_measure_baseline_arpls()</a></code></td>
+<td>Asymmetrically Reweighted PLS</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_baseline_snip.html">step_measure_baseline_snip()</a></code></td>
+<td>SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping)</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_baseline_tophat.html">step_measure_baseline_tophat()</a></code></td>
+<td>Top-hat morphological filter</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_baseline_morph.html">step_measure_baseline_morph()</a></code></td>
+<td>Iterative morphological correction</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_baseline_minima.html">step_measure_baseline_minima()</a></code></td>
+<td>Local minima interpolation</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_baseline_auto.html">step_measure_baseline_auto()</a></code></td>
+<td>Automatic method selection</td>
 </tr>
 <tr class="even">
 <td><code><a href="reference/step_measure_detrend.html">step_measure_detrend()</a></code></td>
@@ -412,6 +448,98 @@
 <tr class="odd">
 <td><code><a href="reference/step_measure_ratio_reference.html">step_measure_ratio_reference()</a></code></td>
 <td>Reference ratio with optional blank</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="region-operations">Region Operations<a class="anchor" aria-label="anchor" href="#region-operations"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="36%">
+<col width="63%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_trim.html">step_measure_trim()</a></code></td>
+<td>Keep measurements within specified x-range</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_exclude.html">step_measure_exclude()</a></code></td>
+<td>Remove measurements within specified range(s)</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_resample.html">step_measure_resample()</a></code></td>
+<td>Interpolate to new regular grid</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="peak-operations">Peak Operations<a class="anchor" aria-label="anchor" href="#peak-operations"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_peaks_detect.html">step_measure_peaks_detect()</a></code></td>
+<td>Detect peaks using prominence or derivative methods</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_peaks_integrate.html">step_measure_peaks_integrate()</a></code></td>
+<td>Calculate peak areas</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_peaks_filter.html">step_measure_peaks_filter()</a></code></td>
+<td>Filter peaks by height, area, or count</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_peaks_deconvolve.html">step_measure_peaks_deconvolve()</a></code></td>
+<td>Deconvolve overlapping peaks</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_peaks_to_table.html">step_measure_peaks_to_table()</a></code></td>
+<td>Convert peaks to wide format for modeling</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="secgpc-analysis">SEC/GPC Analysis<a class="anchor" aria-label="anchor" href="#secgpc-analysis"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_mw_averages.html">step_measure_mw_averages()</a></code></td>
+<td>Calculate Mn, Mw, Mz, Mp, and dispersity</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_mw_distribution.html">step_measure_mw_distribution()</a></code></td>
+<td>Generate molecular weight distribution curve</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_mw_fractions.html">step_measure_mw_fractions()</a></code></td>
+<td>Calculate molecular weight fractions</td>
 </tr>
 </tbody>
 </table>

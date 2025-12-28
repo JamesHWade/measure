@@ -295,6 +295,188 @@ Both `gap` and `segment` parameters are tunable with dials.
 | [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md)         | No                 | Very fast | Clean data, unsmoothed derivative  |
 | [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md) | Optional (segment) | Fast      | NIR chemometrics, configurable gap |
 
+## Region Operations
+
+Region operations allow you to select, exclude, or resample specific
+portions of your measurements. These are essential for chromatographic
+workflows and useful for focusing analysis on regions of interest.
+
+### Trimming to a range
+
+[`step_measure_trim()`](https://jameshwade.github.io/measure/dev/reference/step_measure_trim.md)
+keeps only measurements within a specified x-axis range:
+
+``` r
+# Keep only wavelengths 880-1020
+rec_trim <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_trim(range = c(880, 1020))
+
+trim_data <- get_internal(rec_trim)
+plot_spectra(trim_data, "Trimmed to 880-1020 nm",
+             "Removed noisy edge regions")
+```
+
+![](preprocessing_files/figure-html/trim-example-1.png)
+
+Common use cases: - Remove noisy regions at measurement edges - Focus on
+spectral region of interest - Define integration windows for
+chromatography
+
+### Excluding ranges
+
+[`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md)
+removes measurements within one or more specified ranges:
+
+``` r
+# Exclude water absorption bands
+rec_exclude <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_exclude(ranges = list(c(920, 940), c(980, 1000)))
+
+exclude_data <- get_internal(rec_exclude)
+plot_spectra(exclude_data, "Excluded Regions",
+             "Removed wavelength ranges 920-940 and 980-1000")
+```
+
+![](preprocessing_files/figure-html/exclude-example-1.png)
+
+Common use cases: - Remove solvent peaks in chromatography - Exclude
+detector saturation regions - Remove known interference regions
+
+### Resampling to a new grid
+
+[`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md)
+interpolates measurements to a new regular grid:
+
+``` r
+# Resample to 50 evenly spaced points
+rec_resample <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_resample(n = 50, method = "spline")
+
+resample_data <- get_internal(rec_resample)
+plot_spectra(resample_data, "Resampled to 50 Points",
+             "Spline interpolation to regular grid")
+```
+
+![](preprocessing_files/figure-html/resample-example-1.png)
+
+You can also specify the spacing between points:
+
+``` r
+# Resample with 5 nm spacing
+rec_resample_spacing <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_resample(spacing = 5, method = "linear")
+```
+
+Common use cases: - Align data from different instruments with different
+sampling rates - Reduce data density for faster processing - Ensure
+uniform spacing for methods that require it
+
+### Combining region operations
+
+Region operations are often used together at the start of a
+preprocessing pipeline:
+
+``` r
+rec_regions <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  # First trim to region of interest
+  step_measure_trim(range = c(860, 1040)) |>
+  # Then resample to regular grid
+  step_measure_resample(n = 50, method = "spline") |>
+  # Now apply spectral preprocessing
+  step_measure_savitzky_golay(window_side = 3, differentiation_order = 1) |>
+  step_measure_snv()
+
+region_pipeline_data <- get_internal(rec_regions)
+plot_spectra(region_pipeline_data, "Region Selection + Preprocessing",
+             "Trim → Resample → SG derivative → SNV")
+```
+
+![](preprocessing_files/figure-html/region-pipeline-1.png)
+
+## Baseline Correction
+
+Baseline correction is critical for removing unwanted background signals
+from spectral data. The measure package provides several algorithms
+suited for different situations.
+
+### Available methods
+
+| Step                                                                                                                     | Algorithm                           | Best for                          |
+|--------------------------------------------------------------------------------------------------------------------------|-------------------------------------|-----------------------------------|
+| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)         | Asymmetric Least Squares            | General purpose, smooth baselines |
+| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)       | Polynomial fitting                  | Simple, predictable baselines     |
+| [`step_measure_baseline_rolling()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rolling.md) | Rolling ball                        | Wide peaks, chromatography        |
+| [`step_measure_baseline_airpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_airpls.md)   | Adaptive Iteratively Reweighted PLS | Complex baselines                 |
+| [`step_measure_baseline_snip()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_snip.md)       | SNIP algorithm                      | Spectroscopy with sharp peaks     |
+| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)                   | Polynomial detrending               | Linear/quadratic drift            |
+
+### Rolling ball baseline
+
+The rolling ball algorithm “rolls” a ball of specified radius under the
+spectrum to estimate the baseline:
+
+``` r
+rec_rolling <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_baseline_rolling(window_size = 50)
+
+rolling_data <- get_internal(rec_rolling)
+plot_spectra(rolling_data, "Rolling Ball Baseline Correction",
+             "Window size = 50")
+```
+
+![](preprocessing_files/figure-html/rolling-baseline-1.png)
+
+Key parameters: - `window_size`: Diameter of the rolling ball (larger =
+smoother baseline) - `smoothing`: Amount of smoothing applied to the
+estimated baseline
+
+### airPLS baseline
+
+Adaptive Iteratively Reweighted Penalized Least Squares adapts to
+complex, varying baselines:
+
+``` r
+rec_airpls <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_baseline_airpls(lambda = 1e5, max_iter = 20)
+
+airpls_data <- get_internal(rec_airpls)
+plot_spectra(airpls_data, "airPLS Baseline Correction",
+             "lambda = 1e5")
+```
+
+![](preprocessing_files/figure-html/airpls-baseline-1.png)
+
+The `lambda` parameter controls smoothness (larger = smoother baseline)
+and is tunable with dials.
+
+### SNIP baseline
+
+Statistics-sensitive Non-linear Iterative Peak-clipping (SNIP) is
+well-suited for spectroscopy with sharp peaks:
+
+``` r
+rec_snip <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_baseline_snip(iterations = 30)
+
+snip_data <- get_internal(rec_snip)
+plot_spectra(snip_data, "SNIP Baseline Correction",
+             "30 iterations, decreasing window")
+```
+
+![](preprocessing_files/figure-html/snip-baseline-1.png)
+
+Key parameters: - `iterations`: Number of clipping iterations (more =
+more aggressive baseline removal) - `decreasing`: Whether to decrease
+window size with iterations (recommended for peaks)
+
 ## Standard Normal Variate (SNV)
 
 ### What it does
@@ -577,12 +759,12 @@ head(tidy_params)
 #> # A tibble: 6 × 5
 #>   terms     location  mean    sd id                      
 #>   <chr>        <dbl> <dbl> <dbl> <chr>                   
-#> 1 .measures     850   2.81 0.411 measure_scale_auto_jisyY
-#> 2 .measures     852.  2.81 0.413 measure_scale_auto_jisyY
-#> 3 .measures     854.  2.81 0.416 measure_scale_auto_jisyY
-#> 4 .measures     856.  2.82 0.418 measure_scale_auto_jisyY
-#> 5 .measures     858.  2.82 0.421 measure_scale_auto_jisyY
-#> 6 .measures     860.  2.82 0.424 measure_scale_auto_jisyY
+#> 1 .measures     850   2.81 0.411 measure_scale_auto_hncrU
+#> 2 .measures     852.  2.81 0.413 measure_scale_auto_hncrU
+#> 3 .measures     854.  2.81 0.416 measure_scale_auto_hncrU
+#> 4 .measures     856.  2.82 0.418 measure_scale_auto_hncrU
+#> 5 .measures     858.  2.82 0.421 measure_scale_auto_hncrU
+#> 6 .measures     860.  2.82 0.424 measure_scale_auto_hncrU
 
 # Plot the learned means and SDs
 ggplot(tidy_params, aes(x = location)) +
@@ -889,6 +1071,48 @@ A typical order might be:
 | [`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md) | Pareto scaling | Metabolomics               |
 | [`step_measure_scale_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_range.md)   | Range scaling  | Bounded scaling            |
 | [`step_measure_scale_vast()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.md)     | VAST scaling   | Variable stability focus   |
+
+### Region Operations
+
+| Step                                                                                                     | Effect              | Use when                          |
+|----------------------------------------------------------------------------------------------------------|---------------------|-----------------------------------|
+| [`step_measure_trim()`](https://jameshwade.github.io/measure/dev/reference/step_measure_trim.md)         | Keep x-range        | Focus on region of interest       |
+| [`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md)   | Remove x-ranges     | Remove solvent peaks, artifacts   |
+| [`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md) | Interpolate to grid | Align instruments, reduce density |
+
+### Baseline Correction
+
+| Step                                                                                                                     | Effect                     | Use when                          |
+|--------------------------------------------------------------------------------------------------------------------------|----------------------------|-----------------------------------|
+| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)         | Asymmetric LS              | Smooth baselines, general purpose |
+| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)       | Polynomial fit             | Simple, predictable baselines     |
+| [`step_measure_baseline_rolling()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rolling.md) | Rolling ball               | Wide peaks, chromatography        |
+| [`step_measure_baseline_airpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_airpls.md)   | Adaptive weights           | Complex, varying baselines        |
+| [`step_measure_baseline_arpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_arpls.md)     | Asymmetric reweighted PLS  | Robust to outliers                |
+| [`step_measure_baseline_snip()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_snip.md)       | Iterative clipping         | Sharp peaks, spectroscopy         |
+| [`step_measure_baseline_tophat()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_tophat.md)   | Top-hat filter             | Morphological baseline            |
+| [`step_measure_baseline_morph()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morph.md)     | Iterative morphological    | Gradual baselines                 |
+| [`step_measure_baseline_minima()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_minima.md)   | Local minima interpolation | Simple chromatography             |
+| [`step_measure_baseline_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_auto.md)       | Automatic selection        | Unknown baseline type             |
+| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)                   | Polynomial detrend         | Linear/quadratic drift            |
+
+### Peak Operations
+
+| Step                                                                                                                     | Effect                     | Use when                           |
+|--------------------------------------------------------------------------------------------------------------------------|----------------------------|------------------------------------|
+| [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md)         | Find peaks                 | Chromatography, feature extraction |
+| [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md)   | Calculate areas            | Quantitative analysis              |
+| [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md)         | Remove small peaks         | Focus on major peaks               |
+| [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md) | Separate overlapping peaks | Resolve co-eluting peaks           |
+| [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md)     | Wide format output         | Modeling with peak features        |
+
+### SEC/GPC Analysis
+
+| Step                                                                                                                   | Effect                         | Use when                 |
+|------------------------------------------------------------------------------------------------------------------------|--------------------------------|--------------------------|
+| [`step_measure_mw_averages()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.md)         | Calculate Mn, Mw, Mz, Mp, Đ    | Polymer characterization |
+| [`step_measure_mw_distribution()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_distribution.md) | Generate MW distribution curve | Distribution analysis    |
+| [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md)       | Calculate MW fractions         | Size-based fractionation |
 
 ### Custom
 

@@ -177,12 +177,20 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 
 ### Baseline Correction
 
-| Step                                                                                                               | Description                 |
-|--------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)   | Asymmetric least squares    |
-| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md) | Polynomial baseline fitting |
-| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)     | Rolling ball/LOESS baseline |
-| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)             | Polynomial detrending       |
+| Step                                                                                                                     | Description                                                    |
+|--------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
+| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)         | Asymmetric least squares                                       |
+| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)       | Polynomial baseline fitting                                    |
+| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)           | Rolling ball/LOESS baseline                                    |
+| [`step_measure_baseline_rolling()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rolling.md) | Rolling ball algorithm                                         |
+| [`step_measure_baseline_airpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_airpls.md)   | Adaptive Iteratively Reweighted PLS                            |
+| [`step_measure_baseline_arpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_arpls.md)     | Asymmetrically Reweighted PLS                                  |
+| [`step_measure_baseline_snip()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_snip.md)       | SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping) |
+| [`step_measure_baseline_tophat()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_tophat.md)   | Top-hat morphological filter                                   |
+| [`step_measure_baseline_morph()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morph.md)     | Iterative morphological correction                             |
+| [`step_measure_baseline_minima()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_minima.md)   | Local minima interpolation                                     |
+| [`step_measure_baseline_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_auto.md)       | Automatic method selection                                     |
+| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)                   | Polynomial detrending                                          |
 
 ### Reference Corrections
 
@@ -191,6 +199,32 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | [`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md)         | Blank/background subtraction        |
 | [`step_measure_subtract_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.md) | Reference spectrum subtraction      |
 | [`step_measure_ratio_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.md)       | Reference ratio with optional blank |
+
+### Region Operations
+
+| Step                                                                                                     | Description                                   |
+|----------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| [`step_measure_trim()`](https://jameshwade.github.io/measure/dev/reference/step_measure_trim.md)         | Keep measurements within specified x-range    |
+| [`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md)   | Remove measurements within specified range(s) |
+| [`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md) | Interpolate to new regular grid               |
+
+### Peak Operations
+
+| Step                                                                                                                     | Description                                         |
+|--------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
+| [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md)         | Detect peaks using prominence or derivative methods |
+| [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md)   | Calculate peak areas                                |
+| [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md)         | Filter peaks by height, area, or count              |
+| [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md) | Deconvolve overlapping peaks                        |
+| [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md)     | Convert peaks to wide format for modeling           |
+
+### SEC/GPC Analysis
+
+| Step                                                                                                                   | Description                                  |
+|------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| [`step_measure_mw_averages()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.md)         | Calculate Mn, Mw, Mz, Mp, and dispersity     |
+| [`step_measure_mw_distribution()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_distribution.md) | Generate molecular weight distribution curve |
+| [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md)       | Calculate molecular weight fractions         |
 
 ## Learning more
 
