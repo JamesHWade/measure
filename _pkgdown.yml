@@ -69,6 +69,17 @@ reference:
   contents:
   - step_measure_center
   - starts_with("step_measure_scale")
+- title: Reference-Based Corrections
+  desc: Blank subtraction and reference corrections
+  contents:
+  - step_measure_subtract_blank
+  - step_measure_subtract_reference
+  - step_measure_ratio_reference
+- title: Calibration
+  desc: X-axis and Y-axis calibration steps
+  contents:
+  - step_measure_calibrate_x
+  - step_measure_calibrate_y
 - title: Output Steps
   desc: Convert internal format back to modeling-ready data
   contents:

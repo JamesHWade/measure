@@ -99,7 +99,13 @@ Applied Spectroscopy, 39(3):491-500.
 \code{\link[=step_measure_snv]{step_measure_snv()}} for a simpler scatter correction method
 
 Other measure-preprocessing: 
+\code{\link{step_measure_calibrate_x}()},
+\code{\link{step_measure_calibrate_y}()},
 \code{\link{step_measure_map}()},
-\code{\link{step_measure_snv}()}
+\code{\link{step_measure_normalize_istd}()},
+\code{\link{step_measure_ratio_reference}()},
+\code{\link{step_measure_snv}()},
+\code{\link{step_measure_subtract_blank}()},
+\code{\link{step_measure_subtract_reference}()}
 }
 \concept{measure-preprocessing}
