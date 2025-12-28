@@ -3,8 +3,8 @@
 %   R/baseline-gpc.R, R/baseline-poly.R, R/baseline-py.R, R/baseline-rf.R,
 %   R/calibrate.R, R/detrend.R, R/input_long.R, R/input_wide.R, R/measure-map.R,
 %   R/msc.R, R/normalize-sample.R, R/output_long.R, R/output_wide.R,
-%   R/reference-subtract.R, R/savitzky_golay.R, R/scale-variable.R, R/snv.R,
-%   R/spectral-math.R
+%   R/reference-subtract.R, R/region-operations.R, R/savitzky_golay.R,
+%   R/scale-variable.R, R/snv.R, R/spectral-math.R
 \name{tidy.step_measure_baseline_als}
 \alias{tidy.step_measure_baseline_als}
 \alias{tidy.step_measure_baseline_custom}
@@ -30,6 +30,9 @@
 \alias{tidy.step_measure_subtract_blank}
 \alias{tidy.step_measure_subtract_reference}
 \alias{tidy.step_measure_ratio_reference}
+\alias{tidy.step_measure_trim}
+\alias{tidy.step_measure_exclude}
+\alias{tidy.step_measure_resample}
 \alias{tidy.step_measure_savitzky_golay}
 \alias{tidy.step_measure_center}
 \alias{tidy.step_measure_scale_auto}
@@ -92,6 +95,12 @@
 \method{tidy}{step_measure_subtract_reference}(x, ...)
 
 \method{tidy}{step_measure_ratio_reference}(x, ...)
+
+\method{tidy}{step_measure_trim}(x, ...)
+
+\method{tidy}{step_measure_exclude}(x, ...)
+
+\method{tidy}{step_measure_resample}(x, ...)
 
 \method{tidy}{step_measure_savitzky_golay}(x, ...)
 

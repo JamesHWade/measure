@@ -69,6 +69,12 @@ reference:
   - step_measure_kubelka_munk
   - step_measure_derivative
   - step_measure_derivative_gap
+- title: Region Operations
+  desc: Trim, exclude, and resample measurement regions
+  contents:
+  - step_measure_trim
+  - step_measure_exclude
+  - step_measure_resample
 - title: Sample-wise Normalization
   desc: Normalize each spectrum independently
   contents:
