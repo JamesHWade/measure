@@ -31,10 +31,20 @@ get_original_values <- function() {
 
 # Get locations from test data
 get_locations <- function() {
-
   test_data <- create_test_data()
   test_data$.measures[[1]]$location
 }
+
+# Create synthetic reflectance data with values in (0, 1) for Kubelka-Munk tests
+local({
+  set.seed(123)
+  reflectance_data <<- tibble::tibble(
+    sample_id = rep(1:5, each = 100),
+    wavelength = rep(seq(400, 700, length.out = 100), 5),
+    reflectance = runif(500, min = 0.1, max = 0.9),
+    outcome = rep(rnorm(5), each = 100)
+  )
+})
 
 # ==============================================================================
 # step_measure_absorbance tests
@@ -256,15 +266,19 @@ test_that("step_measure_log tidy method works", {
 # ==============================================================================
 
 test_that("step_measure_kubelka_munk computes K-M transformation", {
-  # Create data with reflectance-like values (between 0 and 1)
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  # Use reflectance data with values in (0, 1)
+  input_rec <- recipe(outcome ~ ., data = reflectance_data) %>%
+    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
+    prep()
+  input_data <- bake(input_rec, new_data = NULL)
+  original <- input_data$.measures[[1]]$value
+
+  rec <- recipe(outcome ~ ., data = reflectance_data) %>%
+    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
     step_measure_kubelka_munk() %>%
     prep()
 
   result <- bake(rec, new_data = NULL)
-  original <- get_original_values()
   converted <- result$.measures[[1]]$value
 
   # K-M: f(R) = (1-R)^2 / (2R)
@@ -273,25 +287,26 @@ test_that("step_measure_kubelka_munk computes K-M transformation", {
 })
 
 test_that("step_measure_kubelka_munk preserves locations", {
-  test_data <- create_test_data()
+  input_rec <- recipe(outcome ~ ., data = reflectance_data) %>%
+    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
+    prep()
+  input_data <- bake(input_rec, new_data = NULL)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(outcome ~ ., data = reflectance_data) %>%
+    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
     step_measure_kubelka_munk() %>%
     prep()
 
   result <- bake(rec, new_data = NULL)
 
-  original_locs <- test_data$.measures[[1]]$location
+  original_locs <- input_data$.measures[[1]]$location
   result_locs <- result$.measures[[1]]$location
   expect_equal(result_locs, original_locs)
 })
 
 test_that("step_measure_kubelka_munk print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(outcome ~ ., data = reflectance_data) %>%
+    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
     step_measure_kubelka_munk()
 
   expect_output(print(rec$steps[[2]]), "Kubelka-Munk")
@@ -301,9 +316,8 @@ test_that("step_measure_kubelka_munk print method works", {
 })
 
 test_that("step_measure_kubelka_munk tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(outcome ~ ., data = reflectance_data) %>%
+    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
     step_measure_kubelka_munk() %>%
     prep()
 

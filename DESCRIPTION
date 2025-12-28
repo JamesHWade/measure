@@ -33,18 +33,21 @@ Imports:
     vctrs
 Suggests:
     covr,
+    dtw,
     ggplot2,
     knitr,
     modeldata,
     parsnip,
     patchwork,
     prospectr,
+    ptw,
     reticulate,
     rmarkdown,
     roxygen2,
     testthat (>= 3.0.0),
     tidymodels,
     tidyverse,
+    wavethresh,
     withr,
     workflows
 Config/reticulate:

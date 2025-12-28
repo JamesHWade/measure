@@ -145,6 +145,17 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | `step_measure_snv()` | Standard Normal Variate normalization |
 | `step_measure_msc()` | Multiplicative Scatter Correction |
 
+### Smoothing & Noise Reduction
+
+| Step | Description |
+|------|-------------|
+| `step_measure_smooth_ma()` | Moving average smoothing |
+| `step_measure_smooth_median()` | Median filter (robust to spikes) |
+| `step_measure_smooth_gaussian()` | Gaussian kernel smoothing |
+| `step_measure_smooth_wavelet()` | Wavelet denoising |
+| `step_measure_filter_fourier()` | Fourier low-pass/high-pass filtering |
+| `step_measure_despike()` | Spike/outlier detection and removal |
+
 ### Sample-wise Normalization
 
 | Step | Description |
@@ -198,6 +209,25 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | `step_measure_trim()` | Keep measurements within specified x-range |
 | `step_measure_exclude()` | Remove measurements within specified range(s) |
 | `step_measure_resample()` | Interpolate to new regular grid |
+
+### Alignment & Registration
+
+| Step | Description |
+|------|-------------|
+| `step_measure_align_shift()` | Cross-correlation shift alignment |
+| `step_measure_align_reference()` | Align to external reference spectrum |
+| `step_measure_align_dtw()` | Dynamic Time Warping alignment |
+| `step_measure_align_ptw()` | Parametric Time Warping |
+| `step_measure_align_cow()` | Correlation Optimized Warping (tunable) |
+
+### Quality Control
+
+| Step | Description |
+|------|-------------|
+| `step_measure_qc_snr()` | Calculate signal-to-noise ratio |
+| `step_measure_qc_saturated()` | Detect saturated measurements |
+| `step_measure_qc_outlier()` | Detect outlier samples |
+| `step_measure_impute()` | Interpolate missing values |
 
 ### Peak Operations
 
