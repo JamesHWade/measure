@@ -413,7 +413,7 @@ tidy.step_measure_baseline_airpls <- function(x, ...) {
   )
 }
 
-#' @rdname tunable
+#' @rdname tunable_measure
 #' @export
 tunable.step_measure_baseline_airpls <- function(x, ...) {
   tibble::tibble(
