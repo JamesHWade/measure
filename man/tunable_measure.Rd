@@ -11,6 +11,8 @@
 \alias{tunable.step_measure_baseline_rf}
 \alias{tunable.step_measure_detrend}
 \alias{tunable.step_measure_normalize_peak}
+\alias{tunable.step_measure_derivative}
+\alias{tunable.step_measure_derivative_gap}
 \title{tunable methods for measure}
 \usage{
 \method{tunable}{step_measure_baseline_custom}(x, ...)
@@ -28,6 +30,10 @@
 \method{tunable}{step_measure_detrend}(x, ...)
 
 \method{tunable}{step_measure_normalize_peak}(x, ...)
+
+\method{tunable}{step_measure_derivative}(x, ...)
+
+\method{tunable}{step_measure_derivative_gap}(x, ...)
 }
 \arguments{
 \item{x}{A recipe step object}

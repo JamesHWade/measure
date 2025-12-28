@@ -163,6 +163,58 @@ peak_location_max <- function(range = c(0, 100), trans = NULL) {
   )
 }
 
+#' Parameters for derivative steps
+#'
+#' `derivative_order()` controls the order of differentiation in
+#' `step_measure_derivative()` (1 = first derivative, 2 = second derivative).
+#' `derivative_gap()` and `derivative_segment()` control the gap derivative
+#' (Norris-Williams) parameters in `step_measure_derivative_gap()`.
+#'
+#' @inheritParams window_side
+#'
+#' @return A function with classes `"quant_param"` and `"param"`.
+#' @examples
+#' derivative_order()
+#' derivative_gap()
+#' derivative_segment()
+#' @export
+derivative_order <- function(range = c(1L, 2L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(derivative_order = "Derivative Order"),
+    finalize = NULL
+  )
+}
+
+#' @rdname derivative_order
+#' @export
+derivative_gap <- function(range = c(1L, 10L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(derivative_gap = "Derivative Gap"),
+    finalize = NULL
+  )
+}
+
+#' @rdname derivative_order
+#' @export
+derivative_segment <- function(range = c(1L, 5L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(derivative_segment = "Derivative Segment"),
+    finalize = NULL
+  )
+}
+
 # ------------------------------------------------------------------------------
 # Tunable methods
 
@@ -263,6 +315,35 @@ tunable.step_measure_normalize_peak <- function(x, ...) {
     ),
     source = "recipe",
     component = "step_measure_normalize_peak",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_derivative <- function(x, ...) {
+  tibble::tibble(
+    name = "order",
+    call_info = list(
+      list(pkg = "measure", fun = "derivative_order")
+    ),
+    source = "recipe",
+    component = "step_measure_derivative",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_derivative_gap <- function(x, ...) {
+  tibble::tibble(
+    name = c("gap", "segment"),
+    call_info = list(
+      list(pkg = "measure", fun = "derivative_gap"),
+      list(pkg = "measure", fun = "derivative_segment")
+    ),
+    source = "recipe",
+    component = "step_measure_derivative_gap",
     component_id = x$id
   )
 }
