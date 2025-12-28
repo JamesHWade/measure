@@ -934,7 +934,12 @@ Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto
 | `step_measure_baseline_poly()` | Polynomial fit | Simple, predictable baselines |
 | `step_measure_baseline_rolling()` | Rolling ball | Wide peaks, chromatography |
 | `step_measure_baseline_airpls()` | Adaptive weights | Complex, varying baselines |
+| `step_measure_baseline_arpls()` | Asymmetric reweighted PLS | Robust to outliers |
 | `step_measure_baseline_snip()` | Iterative clipping | Sharp peaks, spectroscopy |
+| `step_measure_baseline_tophat()` | Top-hat filter | Morphological baseline |
+| `step_measure_baseline_morph()` | Iterative morphological | Gradual baselines |
+| `step_measure_baseline_minima()` | Local minima interpolation | Simple chromatography |
+| `step_measure_baseline_auto()` | Automatic selection | Unknown baseline type |
 | `step_measure_detrend()` | Polynomial detrend | Linear/quadratic drift |
 
 ### Peak Operations
@@ -944,6 +949,7 @@ Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto
 | `step_measure_peaks_detect()` | Find peaks | Chromatography, feature extraction |
 | `step_measure_peaks_integrate()` | Calculate areas | Quantitative analysis |
 | `step_measure_peaks_filter()` | Remove small peaks | Focus on major peaks |
+| `step_measure_peaks_deconvolve()` | Separate overlapping peaks | Resolve co-eluting peaks |
 | `step_measure_peaks_to_table()` | Wide format output | Modeling with peak features |
 
 ### SEC/GPC Analysis
@@ -951,6 +957,8 @@ Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto
 | Step | Effect | Use when |
 |------|--------|----------|
 | `step_measure_mw_averages()` | Calculate Mn, Mw, Mz, Mp, Đ | Polymer characterization |
+| `step_measure_mw_distribution()` | Generate MW distribution curve | Distribution analysis |
+| `step_measure_mw_fractions()` | Calculate MW fractions | Size-based fractionation |
 
 ### Custom
 

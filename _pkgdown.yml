@@ -75,6 +75,7 @@ reference:
   - step_measure_trim
   - step_measure_exclude
   - step_measure_resample
+  - step_measure_interpolate
 - title: Sample-wise Normalization
   desc: Normalize each spectrum independently
   contents:
@@ -106,6 +107,7 @@ reference:
   - step_measure_peaks_detect
   - step_measure_peaks_integrate
   - step_measure_peaks_filter
+  - step_measure_peaks_deconvolve
   - step_measure_peaks_to_table
   - is_peaks_list
   - find_peaks_cols
@@ -132,6 +134,8 @@ reference:
   desc: Molecular weight calculations for size exclusion chromatography
   contents:
   - step_measure_mw_averages
+  - step_measure_mw_distribution
+  - step_measure_mw_fractions
 - title: Utilities
   desc: Helper functions and utilities
   contents:
