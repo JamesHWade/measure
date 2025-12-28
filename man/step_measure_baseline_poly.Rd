@@ -107,11 +107,14 @@ rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
 }
 \seealso{
 Other measure-baseline: 
+\code{\link{step_measure_baseline_airpls}()},
 \code{\link{step_measure_baseline_als}()},
 \code{\link{step_measure_baseline_custom}()},
 \code{\link{step_measure_baseline_gpc}()},
 \code{\link{step_measure_baseline_py}()},
 \code{\link{step_measure_baseline_rf}()},
+\code{\link{step_measure_baseline_rolling}()},
+\code{\link{step_measure_baseline_snip}()},
 \code{\link{step_measure_detrend}()}
 }
 \concept{measure-baseline}

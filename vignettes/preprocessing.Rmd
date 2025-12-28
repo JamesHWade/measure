@@ -366,6 +366,72 @@ plot_spectra(region_pipeline_data, "Region Selection + Preprocessing",
              "Trim → Resample → SG derivative → SNV")
 ```
 
+## Baseline Correction
+
+Baseline correction is critical for removing unwanted background signals from spectral data. The measure package provides several algorithms suited for different situations.
+
+### Available methods
+
+| Step | Algorithm | Best for |
+|------|-----------|----------|
+| `step_measure_baseline_als()` | Asymmetric Least Squares | General purpose, smooth baselines |
+| `step_measure_baseline_poly()` | Polynomial fitting | Simple, predictable baselines |
+| `step_measure_baseline_rolling()` | Rolling ball | Wide peaks, chromatography |
+| `step_measure_baseline_airpls()` | Adaptive Iteratively Reweighted PLS | Complex baselines |
+| `step_measure_baseline_snip()` | SNIP algorithm | Spectroscopy with sharp peaks |
+| `step_measure_detrend()` | Polynomial detrending | Linear/quadratic drift |
+
+### Rolling ball baseline
+
+The rolling ball algorithm "rolls" a ball of specified radius under the spectrum to estimate the baseline:
+
+```{r rolling-baseline}
+rec_rolling <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_baseline_rolling(window_size = 50)
+
+rolling_data <- get_internal(rec_rolling)
+plot_spectra(rolling_data, "Rolling Ball Baseline Correction",
+             "Window size = 50")
+```
+
+Key parameters:
+- `window_size`: Diameter of the rolling ball (larger = smoother baseline)
+- `smoothing`: Amount of smoothing applied to the estimated baseline
+
+### airPLS baseline
+
+Adaptive Iteratively Reweighted Penalized Least Squares adapts to complex, varying baselines:
+```{r airpls-baseline}
+rec_airpls <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_baseline_airpls(lambda = 1e5, max_iter = 20)
+
+airpls_data <- get_internal(rec_airpls)
+plot_spectra(airpls_data, "airPLS Baseline Correction",
+             "lambda = 1e5")
+```
+
+The `lambda` parameter controls smoothness (larger = smoother baseline) and is tunable with dials.
+
+### SNIP baseline
+
+Statistics-sensitive Non-linear Iterative Peak-clipping (SNIP) is well-suited for spectroscopy with sharp peaks:
+
+```{r snip-baseline}
+rec_snip <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_baseline_snip(iterations = 30)
+
+snip_data <- get_internal(rec_snip)
+plot_spectra(snip_data, "SNIP Baseline Correction",
+             "30 iterations, decreasing window")
+```
+
+Key parameters:
+- `iterations`: Number of clipping iterations (more = more aggressive baseline removal)
+- `decreasing`: Whether to decrease window size with iterations (recommended for peaks)
+
 ## Standard Normal Variate (SNV)
 
 ### What it does
@@ -860,6 +926,17 @@ Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto
 | `step_measure_exclude()` | Remove x-ranges | Remove solvent peaks, artifacts |
 | `step_measure_resample()` | Interpolate to grid | Align instruments, reduce density |
 
+### Baseline Correction
+
+| Step | Effect | Use when |
+|------|--------|----------|
+| `step_measure_baseline_als()` | Asymmetric LS | Smooth baselines, general purpose |
+| `step_measure_baseline_poly()` | Polynomial fit | Simple, predictable baselines |
+| `step_measure_baseline_rolling()` | Rolling ball | Wide peaks, chromatography |
+| `step_measure_baseline_airpls()` | Adaptive weights | Complex, varying baselines |
+| `step_measure_baseline_snip()` | Iterative clipping | Sharp peaks, spectroscopy |
+| `step_measure_detrend()` | Polynomial detrend | Linear/quadratic drift |
+
 ### Peak Operations
 
 | Step | Effect | Use when |
@@ -868,6 +945,12 @@ Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto
 | `step_measure_peaks_integrate()` | Calculate areas | Quantitative analysis |
 | `step_measure_peaks_filter()` | Remove small peaks | Focus on major peaks |
 | `step_measure_peaks_to_table()` | Wide format output | Modeling with peak features |
+
+### SEC/GPC Analysis
+
+| Step | Effect | Use when |
+|------|--------|----------|
+| `step_measure_mw_averages()` | Calculate Mn, Mw, Mz, Mp, Đ | Polymer characterization |
 
 ### Custom
 

@@ -121,21 +121,27 @@ find_peaks_cols <- function(data) {
     return(new_peaks_tbl())
   }
 
-  # Filter by minimum distance
+  # Filter by minimum distance using greedy approach
   if (min_distance > 0 && length(peaks_idx) > 1) {
-    keep <- rep(TRUE, length(peaks_idx))
-    for (i in seq_along(peaks_idx)[-1]) {
-      dist_to_prev <- location[peaks_idx[i]] - location[peaks_idx[i - 1]]
-      if (dist_to_prev < min_distance) {
-        # Keep the higher peak
-        if (value[peaks_idx[i]] > value[peaks_idx[i - 1]]) {
-          keep[i - 1] <- FALSE
-        } else {
-          keep[i] <- FALSE
-        }
+    # Sort by height descending to keep highest peaks
+    height_order <- order(value[peaks_idx], decreasing = TRUE)
+    sorted_idx <- peaks_idx[height_order]
+
+    keep <- logical(length(sorted_idx))
+    keep[1] <- TRUE  # Always keep the highest peak
+
+    for (i in seq_along(sorted_idx)[-1]) {
+      current_loc <- location[sorted_idx[i]]
+      # Check distance to all already-kept peaks
+      kept_locs <- location[sorted_idx[keep]]
+      if (all(abs(current_loc - kept_locs) >= min_distance)) {
+        keep[i] <- TRUE
       }
     }
-    peaks_idx <- peaks_idx[keep]
+
+    # Restore original order (by location)
+    kept_idx <- sorted_idx[keep]
+    peaks_idx <- kept_idx[order(location[kept_idx])]
   }
 
   if (length(peaks_idx) == 0) {
@@ -256,23 +262,30 @@ find_peaks_cols <- function(data) {
     return(new_peaks_tbl())
   }
 
-  # Filter by minimum distance
+  # Filter by minimum distance using greedy approach
   if (min_distance > 0 && length(peaks_idx) > 1) {
-    keep <- rep(TRUE, length(peaks_idx))
-    for (i in seq_along(peaks_idx)[-1]) {
-      if (!keep[i - 1]) next
-      dist_to_prev <- location[peaks_idx[i]] - location[peaks_idx[i - 1]]
-      if (dist_to_prev < min_distance) {
-        if (prominences[i] > prominences[i - 1]) {
-          keep[i - 1] <- FALSE
-        } else {
-          keep[i] <- FALSE
-        }
+    # Sort by prominence descending to keep most prominent peaks
+    prom_order <- order(prominences, decreasing = TRUE)
+
+    keep <- logical(length(prom_order))
+    keep[1] <- TRUE  # Always keep the most prominent peak
+
+    for (i in seq_along(prom_order)[-1]) {
+      current_loc <- location[peaks_idx[prom_order[i]]]
+      # Check distance to all already-kept peaks
+      kept_locs <- location[peaks_idx[prom_order[keep]]]
+      if (all(abs(current_loc - kept_locs) >= min_distance)) {
+        keep[i] <- TRUE
       }
     }
-    peaks_idx <- peaks_idx[keep]
-    left_bases <- left_bases[keep]
-    right_bases <- right_bases[keep]
+
+    # Get indices of kept peaks in original order
+    kept_order <- prom_order[keep]
+    kept_order <- kept_order[order(location[peaks_idx[kept_order]])]
+
+    peaks_idx <- peaks_idx[kept_order]
+    left_bases <- left_bases[kept_order]
+    right_bases <- right_bases[kept_order]
   }
 
   if (length(peaks_idx) == 0) {

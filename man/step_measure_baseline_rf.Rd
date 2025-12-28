@@ -94,11 +94,14 @@ bake(rec, new_data = NULL)
 \code{\link[=subtract_rf_baseline]{subtract_rf_baseline()}} for the standalone function this step wraps.
 
 Other measure-baseline: 
+\code{\link{step_measure_baseline_airpls}()},
 \code{\link{step_measure_baseline_als}()},
 \code{\link{step_measure_baseline_custom}()},
 \code{\link{step_measure_baseline_gpc}()},
 \code{\link{step_measure_baseline_poly}()},
 \code{\link{step_measure_baseline_py}()},
+\code{\link{step_measure_baseline_rolling}()},
+\code{\link{step_measure_baseline_snip}()},
 \code{\link{step_measure_detrend}()}
 }
 \concept{measure-baseline}

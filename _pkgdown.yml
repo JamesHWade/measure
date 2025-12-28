@@ -128,6 +128,10 @@ reference:
   - starts_with("step_measure_baseline")
   - step_measure_detrend
   - subtract_rf_baseline
+- title: SEC/GPC Analysis
+  desc: Molecular weight calculations for size exclusion chromatography
+  contents:
+  - step_measure_mw_averages
 - title: Utilities
   desc: Helper functions and utilities
   contents:
