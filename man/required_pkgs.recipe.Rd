@@ -3,12 +3,18 @@
 %   R/savitzky_golay.R
 \name{required_pkgs.step_measure_mw_averages}
 \alias{required_pkgs.step_measure_mw_averages}
+\alias{required_pkgs.step_measure_mw_fractions}
+\alias{required_pkgs.step_measure_mw_distribution}
 \alias{required_pkgs.step_measure_resample}
 \alias{required_pkgs.recipe}
 \alias{required_pkgs.step_measure_savitzky_golay}
 \title{Set package dependencies}
 \usage{
 \method{required_pkgs}{step_measure_mw_averages}(x, ...)
+
+\method{required_pkgs}{step_measure_mw_fractions}(x, ...)
+
+\method{required_pkgs}{step_measure_mw_distribution}(x, ...)
 
 \method{required_pkgs}{step_measure_resample}(x, ...)
 

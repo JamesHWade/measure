@@ -107,12 +107,17 @@ correction, \code{\link[=step_measure_detrend]{step_measure_detrend()}} for simp
 Other measure-baseline: 
 \code{\link{step_measure_baseline_airpls}()},
 \code{\link{step_measure_baseline_als}()},
+\code{\link{step_measure_baseline_arpls}()},
+\code{\link{step_measure_baseline_auto}()},
 \code{\link{step_measure_baseline_custom}()},
+\code{\link{step_measure_baseline_minima}()},
+\code{\link{step_measure_baseline_morph}()},
 \code{\link{step_measure_baseline_poly}()},
 \code{\link{step_measure_baseline_py}()},
 \code{\link{step_measure_baseline_rf}()},
 \code{\link{step_measure_baseline_rolling}()},
 \code{\link{step_measure_baseline_snip}()},
+\code{\link{step_measure_baseline_tophat}()},
 \code{\link{step_measure_detrend}()}
 }
 \concept{measure-baseline}

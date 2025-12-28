@@ -4,6 +4,7 @@
 \name{tunable.step_measure_baseline_custom}
 \alias{tunable.step_measure_baseline_custom}
 \alias{tunable.step_measure_baseline_airpls}
+\alias{tunable.step_measure_baseline_arpls}
 \alias{tunable.step_measure_baseline_py}
 \alias{tunable_measure}
 \alias{tunable.step_measure_savitzky_golay}
@@ -19,6 +20,8 @@
 \method{tunable}{step_measure_baseline_custom}(x, ...)
 
 \method{tunable}{step_measure_baseline_airpls}(x, ...)
+
+\method{tunable}{step_measure_baseline_arpls}(x, ...)
 
 \method{tunable}{step_measure_baseline_py}(x, ...)
 

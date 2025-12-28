@@ -689,3 +689,205 @@ tidy.step_measure_resample <- function(x, ...) {
 required_pkgs.step_measure_resample <- function(x, ...) {
   c("measure", "stats")
 }
+
+# ==============================================================================
+# step_measure_interpolate
+# ==============================================================================
+
+#' Interpolate Gaps in Measurement Data
+#'
+#' `step_measure_interpolate()` creates a *specification* of a recipe step that
+#' fills gaps or missing values in measurement data using interpolation.
+#'
+#' @param recipe A recipe object.
+#' @param ranges A list of numeric vectors specifying ranges to interpolate.
+#'   Each element should be a vector of length 2: `c(min, max)`.
+#' @param method Interpolation method: "linear" or "spline". Default is "linear".
+#' @param measures An optional character vector of measure column names.
+#' @param role Not used.
+#' @param trained Logical indicating if the step has been trained.
+#' @param skip Logical. Should the step be skipped when baking?
+#' @param id Unique step identifier.
+#'
+#' @return An updated recipe with the new step added.
+#'
+#' @details
+#' This step is useful for:
+#' - Filling gaps left by excluded regions that need restoration
+#' - Handling missing or invalid data points
+#' - Smoothing over detector saturation regions
+#'
+#' The interpolation uses data points immediately outside the specified
+#' ranges to estimate values within the ranges.
+#'
+#' @family measure-region
+#' @export
+#'
+#' @examples
+#' library(recipes)
+#'
+#' # Interpolate over a problematic region
+#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+#'   update_role(id, new_role = "id") |>
+#'   step_measure_input_long(transmittance, location = vars(channel)) |>
+#'   step_measure_interpolate(ranges = list(c(40, 50)), method = "spline") |>
+#'   prep()
+step_measure_interpolate <- function(
+    recipe,
+    ranges,
+    method = c("linear", "spline"),
+    measures = NULL,
+    role = NA,
+    trained = FALSE,
+    skip = FALSE,
+    id = recipes::rand_id("measure_interpolate")) {
+
+  method <- rlang::arg_match(method)
+
+  if (!is.list(ranges)) {
+    if (is.numeric(ranges) && length(ranges) == 2) {
+      ranges <- list(ranges)
+    } else {
+      cli::cli_abort("{.arg ranges} must be a list of numeric vectors of length 2.")
+    }
+  }
+
+  for (r in ranges) {
+    if (!is.numeric(r) || length(r) != 2) {
+      cli::cli_abort("Each range must be a numeric vector of length 2.")
+    }
+    if (r[1] >= r[2]) {
+      cli::cli_abort("Range minimum must be less than maximum.")
+    }
+  }
+
+  recipes::add_step(
+    recipe,
+    step_measure_interpolate_new(
+      ranges = ranges,
+      method = method,
+      measures = measures,
+      role = role,
+      trained = trained,
+      skip = skip,
+      id = id
+    )
+  )
+}
+
+step_measure_interpolate_new <- function(
+    ranges, method, measures, role, trained, skip, id) {
+  recipes::step(
+    subclass = "measure_interpolate",
+    ranges = ranges,
+    method = method,
+    measures = measures,
+    role = role,
+    trained = trained,
+    skip = skip,
+    id = id
+  )
+}
+
+#' @export
+prep.step_measure_interpolate <- function(x, training, info = NULL, ...) {
+  check_for_measure(training)
+
+  if (is.null(x$measures)) {
+    measure_cols <- find_measure_cols(training)
+  } else {
+    measure_cols <- x$measures
+  }
+
+  step_measure_interpolate_new(
+    ranges = x$ranges,
+    method = x$method,
+    measures = measure_cols,
+    role = x$role,
+    trained = TRUE,
+    skip = x$skip,
+    id = x$id
+  )
+}
+
+#' Interpolate values within specified ranges
+#' @noRd
+.interpolate_ranges <- function(location, value, ranges, method) {
+  result <- value
+
+  for (r in ranges) {
+    # Find indices within the range
+    in_range <- location >= r[1] & location <= r[2]
+
+    if (!any(in_range)) next
+
+    # Find boundary points (just outside the range)
+    below_range <- location < r[1]
+    above_range <- location > r[2]
+
+    if (!any(below_range) || !any(above_range)) {
+      # Can't interpolate without points on both sides
+      next
+    }
+
+    # Get the closest points outside the range
+    anchor_idx <- c(
+      which(below_range),
+      which(above_range)
+    )
+    anchor_x <- location[anchor_idx]
+    anchor_y <- value[anchor_idx]
+
+    # Interpolate
+    if (method == "spline" && length(anchor_idx) >= 4) {
+      interp <- stats::spline(anchor_x, anchor_y, xout = location[in_range])
+      result[in_range] <- interp$y
+    } else {
+      interp <- stats::approx(anchor_x, anchor_y, xout = location[in_range])
+      result[in_range] <- interp$y
+    }
+  }
+
+  result
+}
+
+#' @export
+bake.step_measure_interpolate <- function(object, new_data, ...) {
+  ranges <- object$ranges
+  method <- object$method
+
+  for (col in object$measures) {
+    new_data[[col]] <- purrr::map(new_data[[col]], function(m) {
+      m$value <- .interpolate_ranges(m$location, m$value, ranges, method)
+      m
+    })
+    new_data[[col]] <- new_measure_list(new_data[[col]])
+  }
+
+  tibble::as_tibble(new_data)
+}
+
+#' @export
+print.step_measure_interpolate <- function(x, width = max(20, options()$width - 30), ...) {
+  n_ranges <- length(x$ranges)
+  title <- paste0("Interpolate ", n_ranges, " region(s) (", x$method, ")")
+  if (x$trained) {
+    cat(title, " on <internal measurements>", sep = "")
+  } else {
+    cat(title)
+  }
+  cat("\n")
+  invisible(x)
+}
+
+#' @rdname tidy.recipe
+#' @export
+#' @keywords internal
+tidy.step_measure_interpolate <- function(x, ...) {
+  tibble::tibble(
+    terms = if (is_trained(x)) x$measures else "<all measure columns>",
+    n_ranges = length(x$ranges),
+    method = x$method,
+    id = x$id
+  )
+}

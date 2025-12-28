@@ -12,6 +12,11 @@
 \alias{tidy.step_measure_baseline_rolling}
 \alias{tidy.step_measure_baseline_airpls}
 \alias{tidy.step_measure_baseline_snip}
+\alias{tidy.step_measure_baseline_arpls}
+\alias{tidy.step_measure_baseline_tophat}
+\alias{tidy.step_measure_baseline_morph}
+\alias{tidy.step_measure_baseline_minima}
+\alias{tidy.step_measure_baseline_auto}
 \alias{tidy.step_measure_baseline_gpc}
 \alias{tidy.step_measure_baseline_poly}
 \alias{tidy.step_measure_baseline_py}
@@ -24,6 +29,8 @@
 \alias{tidy.step_measure_map}
 \alias{tidy.step_measure_msc}
 \alias{tidy.step_measure_mw_averages}
+\alias{tidy.step_measure_mw_fractions}
+\alias{tidy.step_measure_mw_distribution}
 \alias{tidy.step_measure_normalize_sum}
 \alias{tidy.step_measure_normalize_max}
 \alias{tidy.step_measure_normalize_range}
@@ -36,12 +43,14 @@
 \alias{tidy.step_measure_peaks_integrate}
 \alias{tidy.step_measure_peaks_filter}
 \alias{tidy.step_measure_peaks_to_table}
+\alias{tidy.step_measure_peaks_deconvolve}
 \alias{tidy.step_measure_subtract_blank}
 \alias{tidy.step_measure_subtract_reference}
 \alias{tidy.step_measure_ratio_reference}
 \alias{tidy.step_measure_trim}
 \alias{tidy.step_measure_exclude}
 \alias{tidy.step_measure_resample}
+\alias{tidy.step_measure_interpolate}
 \alias{tidy.step_measure_savitzky_golay}
 \alias{tidy.step_measure_center}
 \alias{tidy.step_measure_scale_auto}
@@ -67,6 +76,16 @@
 
 \method{tidy}{step_measure_baseline_snip}(x, ...)
 
+\method{tidy}{step_measure_baseline_arpls}(x, ...)
+
+\method{tidy}{step_measure_baseline_tophat}(x, ...)
+
+\method{tidy}{step_measure_baseline_morph}(x, ...)
+
+\method{tidy}{step_measure_baseline_minima}(x, ...)
+
+\method{tidy}{step_measure_baseline_auto}(x, ...)
+
 \method{tidy}{step_measure_baseline_gpc}(x, ...)
 
 \method{tidy}{step_measure_baseline_poly}(x, ...)
@@ -90,6 +109,10 @@
 \method{tidy}{step_measure_msc}(x, ...)
 
 \method{tidy}{step_measure_mw_averages}(x, ...)
+
+\method{tidy}{step_measure_mw_fractions}(x, ...)
+
+\method{tidy}{step_measure_mw_distribution}(x, ...)
 
 \method{tidy}{step_measure_normalize_sum}(x, ...)
 
@@ -115,6 +138,8 @@
 
 \method{tidy}{step_measure_peaks_to_table}(x, ...)
 
+\method{tidy}{step_measure_peaks_deconvolve}(x, ...)
+
 \method{tidy}{step_measure_subtract_blank}(x, ...)
 
 \method{tidy}{step_measure_subtract_reference}(x, ...)
@@ -126,6 +151,8 @@
 \method{tidy}{step_measure_exclude}(x, ...)
 
 \method{tidy}{step_measure_resample}(x, ...)
+
+\method{tidy}{step_measure_interpolate}(x, ...)
 
 \method{tidy}{step_measure_savitzky_golay}(x, ...)
 
