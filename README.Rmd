@@ -183,6 +183,14 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | `step_measure_subtract_reference()` | Reference spectrum subtraction |
 | `step_measure_ratio_reference()` | Reference ratio with optional blank |
 
+### Region Operations
+
+| Step | Description |
+|------|-------------|
+| `step_measure_trim()` | Keep measurements within specified x-range |
+| `step_measure_exclude()` | Remove measurements within specified range(s) |
+| `step_measure_resample()` | Interpolate to new regular grid |
+
 ## Learning more
 
 - [Getting Started](https://jameshwade.github.io/measure/articles/measure.html) - A comprehensive introduction to measure

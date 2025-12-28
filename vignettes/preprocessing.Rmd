@@ -273,6 +273,99 @@ Both `gap` and `segment` parameters are tunable with dials.
 | `step_measure_derivative()` | No | Very fast | Clean data, unsmoothed derivative |
 | `step_measure_derivative_gap()` | Optional (segment) | Fast | NIR chemometrics, configurable gap |
 
+## Region Operations
+
+Region operations allow you to select, exclude, or resample specific portions of your measurements. These are essential for chromatographic workflows and useful for focusing analysis on regions of interest.
+
+### Trimming to a range
+
+`step_measure_trim()` keeps only measurements within a specified x-axis range:
+
+```{r trim-example}
+# Keep only wavelengths 880-1020
+rec_trim <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_trim(range = c(880, 1020))
+
+trim_data <- get_internal(rec_trim)
+plot_spectra(trim_data, "Trimmed to 880-1020 nm",
+             "Removed noisy edge regions")
+```
+
+Common use cases:
+- Remove noisy regions at measurement edges
+- Focus on spectral region of interest
+- Define integration windows for chromatography
+
+### Excluding ranges
+
+`step_measure_exclude()` removes measurements within one or more specified ranges:
+
+```{r exclude-example}
+# Exclude water absorption bands
+rec_exclude <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_exclude(ranges = list(c(920, 940), c(980, 1000)))
+
+exclude_data <- get_internal(rec_exclude)
+plot_spectra(exclude_data, "Excluded Regions",
+             "Removed wavelength ranges 920-940 and 980-1000")
+```
+
+Common use cases:
+- Remove solvent peaks in chromatography
+- Exclude detector saturation regions
+- Remove known interference regions
+
+### Resampling to a new grid
+
+`step_measure_resample()` interpolates measurements to a new regular grid:
+
+```{r resample-example}
+# Resample to 50 evenly spaced points
+rec_resample <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_resample(n = 50, method = "spline")
+
+resample_data <- get_internal(rec_resample)
+plot_spectra(resample_data, "Resampled to 50 Points",
+             "Spline interpolation to regular grid")
+```
+
+You can also specify the spacing between points:
+
+```{r resample-spacing, eval = FALSE}
+# Resample with 5 nm spacing
+rec_resample_spacing <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_resample(spacing = 5, method = "linear")
+```
+
+Common use cases:
+- Align data from different instruments with different sampling rates
+- Reduce data density for faster processing
+- Ensure uniform spacing for methods that require it
+
+### Combining region operations
+
+Region operations are often used together at the start of a preprocessing pipeline:
+
+```{r region-pipeline}
+rec_regions <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  # First trim to region of interest
+  step_measure_trim(range = c(860, 1040)) |>
+  # Then resample to regular grid
+  step_measure_resample(n = 50, method = "spline") |>
+  # Now apply spectral preprocessing
+  step_measure_savitzky_golay(window_side = 3, differentiation_order = 1) |>
+  step_measure_snv()
+
+region_pipeline_data <- get_internal(rec_regions)
+plot_spectra(region_pipeline_data, "Region Selection + Preprocessing",
+             "Trim → Resample → SG derivative → SNV")
+```
+
 ## Standard Normal Variate (SNV)
 
 ### What it does
@@ -758,6 +851,14 @@ Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto
 | `step_measure_scale_pareto()` | Pareto scaling | Metabolomics |
 | `step_measure_scale_range()` | Range scaling | Bounded scaling |
 | `step_measure_scale_vast()` | VAST scaling | Variable stability focus |
+
+### Region Operations
+
+| Step | Effect | Use when |
+|------|--------|----------|
+| `step_measure_trim()` | Keep x-range | Focus on region of interest |
+| `step_measure_exclude()` | Remove x-ranges | Remove solvent peaks, artifacts |
+| `step_measure_resample()` | Interpolate to grid | Align instruments, reduce density |
 
 ### Custom
 
