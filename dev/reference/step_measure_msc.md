@@ -115,8 +115,14 @@ Applied Spectroscopy, 39(3):491-500.
 for a simpler scatter correction method
 
 Other measure-preprocessing:
+[`step_measure_calibrate_x()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.md),
+[`step_measure_calibrate_y()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.md),
 [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md),
-[`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)
+[`step_measure_normalize_istd()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_istd.md),
+[`step_measure_ratio_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.md),
+[`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md),
+[`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md),
+[`step_measure_subtract_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.md)
 
 ## Examples
 

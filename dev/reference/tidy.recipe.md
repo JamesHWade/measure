@@ -23,6 +23,12 @@ tidy(x, ...)
 # S3 method for class 'step_measure_baseline_rf'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_calibrate_x'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_calibrate_y'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_detrend'
 tidy(x, ...)
 
@@ -60,6 +66,15 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_output_wide'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_subtract_blank'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_subtract_reference'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_ratio_reference'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_savitzky_golay'

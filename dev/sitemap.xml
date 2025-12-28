@@ -34,6 +34,8 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_center.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.html</loc></url>
@@ -41,6 +43,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_map.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_msc.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_istd.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.html</loc></url>
@@ -48,12 +51,15 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_scale_range.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_snv.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/subtract_rf_baseline.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/tidy.recipe.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/tunable_measure.html</loc></url>

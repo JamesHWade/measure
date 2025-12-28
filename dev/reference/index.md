@@ -28,6 +28,8 @@ Normalize each spectrum independently
 
 - [`step_measure_normalize_auc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.md)
   : Normalize by Area Under Curve
+- [`step_measure_normalize_istd()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_istd.md)
+  : Internal Standard Normalization
 - [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md)
   : Normalize by Maximum Value
 - [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md)
@@ -53,6 +55,26 @@ Scale across samples at each measurement location
   : Range Scaling
 - [`step_measure_scale_vast()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.md)
   : VAST Scaling (Variable Stability Scaling)
+
+## Reference-Based Corrections
+
+Blank subtraction and reference corrections
+
+- [`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md)
+  : Subtract Blank Measurement
+- [`step_measure_subtract_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.md)
+  : Subtract or Divide by Reference Spectrum
+- [`step_measure_ratio_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.md)
+  : Compute Ratio to Reference Spectrum
+
+## Calibration
+
+X-axis and Y-axis calibration steps
+
+- [`step_measure_calibrate_x()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.md)
+  : Apply X-Axis Calibration
+- [`step_measure_calibrate_y()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.md)
+  : Apply Y-Axis Calibration (Response Factor)
 
 ## Output Steps
 
