@@ -860,6 +860,15 @@ Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto
 | `step_measure_exclude()` | Remove x-ranges | Remove solvent peaks, artifacts |
 | `step_measure_resample()` | Interpolate to grid | Align instruments, reduce density |
 
+### Peak Operations
+
+| Step | Effect | Use when |
+|------|--------|----------|
+| `step_measure_peaks_detect()` | Find peaks | Chromatography, feature extraction |
+| `step_measure_peaks_integrate()` | Calculate areas | Quantitative analysis |
+| `step_measure_peaks_filter()` | Remove small peaks | Focus on major peaks |
+| `step_measure_peaks_to_table()` | Wide format output | Modeling with peak features |
+
 ### Custom
 
 | Step | Effect | Use when |

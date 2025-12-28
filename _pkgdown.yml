@@ -100,6 +100,15 @@ reference:
   contents:
   - step_measure_output_wide
   - step_measure_output_long
+- title: Peak Operations
+  desc: Peak detection, integration, and analysis for chromatography
+  contents:
+  - step_measure_peaks_detect
+  - step_measure_peaks_integrate
+  - step_measure_peaks_filter
+  - step_measure_peaks_to_table
+  - is_peaks_list
+  - find_peaks_cols
 - title: Tunable Parameters
   desc: Parameters for hyperparameter tuning with dials
   contents:

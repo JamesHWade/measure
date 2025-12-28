@@ -212,6 +212,15 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | `step_measure_exclude()`  | Remove measurements within specified range(s) |
 | `step_measure_resample()` | Interpolate to new regular grid               |
 
+### Peak Operations
+
+| Step | Description |
+|----|----|
+| `step_measure_peaks_detect()` | Detect peaks using prominence or derivative methods |
+| `step_measure_peaks_integrate()` | Calculate peak areas |
+| `step_measure_peaks_filter()` | Filter peaks by height, area, or count |
+| `step_measure_peaks_to_table()` | Convert peaks to wide format for modeling |
+
 ## Learning more
 
 - [Getting

@@ -3,8 +3,8 @@
 %   R/baseline-gpc.R, R/baseline-poly.R, R/baseline-py.R, R/baseline-rf.R,
 %   R/calibrate.R, R/detrend.R, R/input_long.R, R/input_wide.R, R/measure-map.R,
 %   R/msc.R, R/normalize-sample.R, R/output_long.R, R/output_wide.R,
-%   R/reference-subtract.R, R/region-operations.R, R/savitzky_golay.R,
-%   R/scale-variable.R, R/snv.R, R/spectral-math.R
+%   R/peak-operations.R, R/reference-subtract.R, R/region-operations.R,
+%   R/savitzky_golay.R, R/scale-variable.R, R/snv.R, R/spectral-math.R
 \name{tidy.step_measure_baseline_als}
 \alias{tidy.step_measure_baseline_als}
 \alias{tidy.step_measure_baseline_custom}
@@ -27,6 +27,10 @@
 \alias{tidy.step_measure_normalize_peak}
 \alias{tidy.step_measure_output_long}
 \alias{tidy.step_measure_output_wide}
+\alias{tidy.step_measure_peaks_detect}
+\alias{tidy.step_measure_peaks_integrate}
+\alias{tidy.step_measure_peaks_filter}
+\alias{tidy.step_measure_peaks_to_table}
 \alias{tidy.step_measure_subtract_blank}
 \alias{tidy.step_measure_subtract_reference}
 \alias{tidy.step_measure_ratio_reference}
@@ -89,6 +93,14 @@
 \method{tidy}{step_measure_output_long}(x, ...)
 
 \method{tidy}{step_measure_output_wide}(x, ...)
+
+\method{tidy}{step_measure_peaks_detect}(x, ...)
+
+\method{tidy}{step_measure_peaks_integrate}(x, ...)
+
+\method{tidy}{step_measure_peaks_filter}(x, ...)
+
+\method{tidy}{step_measure_peaks_to_table}(x, ...)
 
 \method{tidy}{step_measure_subtract_blank}(x, ...)
 
