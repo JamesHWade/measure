@@ -14,6 +14,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/authors.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/index.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/baseline_lambda.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/derivative_order.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/find_measure_cols.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/glucose_bioreactors.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/has_measure_col.html</loc></url>
@@ -28,6 +29,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/peak_location_min.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/reexports.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.html</loc></url>
@@ -37,9 +39,13 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_center.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_log.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_map.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_msc.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.html</loc></url>
@@ -60,6 +66,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_snv.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/subtract_rf_baseline.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/tidy.recipe.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/tunable_measure.html</loc></url>

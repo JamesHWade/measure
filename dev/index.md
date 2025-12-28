@@ -126,33 +126,71 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 
 ## Available Steps
 
-### Input Steps
+### Input/Output Steps
 
-Convert your data to measure’s internal format:
+| Step                                                                                                           | Description                                                      |
+|----------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
+| [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)   | Convert wide format (measurements in columns) to internal format |
+| [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md)   | Convert long format (measurements in rows) to internal format    |
+| [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md) | Convert back to wide format for modeling                         |
+| [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md) | Convert back to long format                                      |
 
-| Step                                                                                                         | Description                                                               |
-|--------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md) | For data with measurements in columns (e.g., wavelengths as column names) |
-| [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md) | For data with measurements in rows (long format)                          |
+### Spectral Math
 
-### Processing Steps
+| Step                                                                                                                 | Description                                      |
+|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
+| [`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md)         | Convert transmittance to absorbance              |
+| [`step_measure_transmittance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.md)   | Convert absorbance to transmittance              |
+| [`step_measure_log()`](https://jameshwade.github.io/measure/dev/reference/step_measure_log.md)                       | Log transformation with configurable base/offset |
+| [`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md)     | Kubelka-Munk transformation for reflectance      |
+| [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md)         | Simple finite difference derivatives             |
+| [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md) | Gap (Norris-Williams) derivatives                |
 
-Apply spectral preprocessing:
+### Filtering & Scatter Correction
 
-| Step                                                                                                                 | Description                                                  |
-|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|
-| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Smoothing and/or differentiation using Savitzky-Golay filter |
-| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)                       | Standard Normal Variate normalization                        |
-| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)                       | Multiplicative Scatter Correction                            |
+| Step                                                                                                                 | Description                           |
+|----------------------------------------------------------------------------------------------------------------------|---------------------------------------|
+| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Smoothing and/or differentiation      |
+| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)                       | Standard Normal Variate normalization |
+| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)                       | Multiplicative Scatter Correction     |
 
-### Output Steps
+### Sample-wise Normalization
 
-Convert back to modeling-ready format:
+| Step                                                                                                                     | Description                        |
+|--------------------------------------------------------------------------------------------------------------------------|------------------------------------|
+| [`step_measure_normalize_sum()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.md)       | Divide by sum (total intensity)    |
+| [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md)       | Divide by maximum value            |
+| [`step_measure_normalize_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.md)   | Scale to 0-1 range                 |
+| [`step_measure_normalize_vector()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.md) | L2/Euclidean normalization         |
+| [`step_measure_normalize_auc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.md)       | Divide by area under curve         |
+| [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md)     | Normalize by peak region (tunable) |
 
-| Step                                                                                                           | Description                                               |
-|----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
-| [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md) | Convert to wide format (one column per measurement point) |
-| [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md) | Convert to long format                                    |
+### Variable-wise Scaling
+
+| Step                                                                                                             | Description            |
+|------------------------------------------------------------------------------------------------------------------|------------------------|
+| [`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md)             | Mean centering         |
+| [`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md)     | Auto-scaling (z-score) |
+| [`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md) | Pareto scaling         |
+| [`step_measure_scale_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_range.md)   | Range scaling          |
+| [`step_measure_scale_vast()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.md)     | VAST scaling           |
+
+### Baseline Correction
+
+| Step                                                                                                               | Description                 |
+|--------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)   | Asymmetric least squares    |
+| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md) | Polynomial baseline fitting |
+| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)     | Rolling ball/LOESS baseline |
+| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)             | Polynomial detrending       |
+
+### Reference Corrections
+
+| Step                                                                                                                         | Description                         |
+|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| [`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md)         | Blank/background subtraction        |
+| [`step_measure_subtract_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.md) | Reference spectrum subtraction      |
+| [`step_measure_ratio_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.md)       | Reference ratio with optional blank |
 
 ## Learning more
 

@@ -1,22 +1,19 @@
-# Apply Y-Axis Calibration (Response Factor)
+# Convert Transmittance to Absorbance
 
-`step_measure_calibrate_y()` creates a *specification* of a recipe step
-that applies a response factor or calibration function to y-axis (value)
-values.
+`step_measure_absorbance()` creates a *specification* of a recipe step
+that converts transmittance values to absorbance using the Beer-Lambert
+law.
 
 ## Usage
 
 ``` r
-step_measure_calibrate_y(
+step_measure_absorbance(
   recipe,
-  response_factor = 1,
-  calibration = NULL,
   measures = NULL,
   role = NA,
   trained = FALSE,
-  cal_fn = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_calibrate_y")
+  id = recipes::rand_id("measure_absorbance")
 )
 ```
 
@@ -26,17 +23,6 @@ step_measure_calibrate_y(
 
   A recipe object. The step will be added to the sequence of operations
   for this recipe.
-
-- response_factor:
-
-  A numeric value to multiply all values by. Default is `1.0` (no
-  change). This is a simple scalar calibration.
-
-- calibration:
-
-  An optional calibration function that takes value(s) and returns
-  calibrated value(s). If provided, this takes precedence over
-  `response_factor`.
 
 - measures:
 
@@ -50,10 +36,6 @@ step_measure_calibrate_y(
 - trained:
 
   A logical to indicate if the step has been trained.
-
-- cal_fn:
-
-  The calibration function to apply (built during prep).
 
 - skip:
 
@@ -69,42 +51,26 @@ An updated version of `recipe` with the new step added.
 
 ## Details
 
-Y-axis calibration is used to convert raw signal intensities to
-quantitative values. Common examples include:
+This step applies the Beer-Lambert law transformation:
 
-- **Chromatography**: Apply detector response factors
+\$\$A = -\log\_{10}(T)\$\$
 
-- **Spectroscopy**: Apply molar absorptivity corrections
+where \\T\\ is transmittance and \\A\\ is absorbance.
 
-- **Mass spectrometry**: Apply ionization efficiency corrections
+**Important**: Transmittance values should be in the range (0, 1\] or
+(0, 100\]. Zero or negative values will produce `-Inf` or `NaN` with a
+warning.
 
-**Simple mode**: Use `response_factor` to multiply all values by a
-constant.
-
-**Complex mode**: Use `calibration` to provide a function for non-linear
-calibration curves (e.g., from fitting standards).
-
-**No selectors should be supplied to this step function**. The data
-should be in the internal format produced by
-[`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)
-or
-[`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md).
-
-## Tidying
-
-When you
-[`tidy()`](https://recipes.tidymodels.org/reference/tidy.recipe.html)
-this step, a tibble with columns `terms`, `response_factor`,
-`has_calibration`, and `id` is returned.
+The measurement locations are preserved unchanged.
 
 ## See also
 
-[`step_measure_calibrate_x()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.md)
-for x-axis calibration
+[`step_measure_transmittance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.md)
+for the inverse transformation
 
 Other measure-preprocessing:
-[`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md),
 [`step_measure_calibrate_x()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.md),
+[`step_measure_calibrate_y()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.md),
 [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md),
 [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md),
 [`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md),
@@ -123,15 +89,25 @@ Other measure-preprocessing:
 ``` r
 library(recipes)
 
-# Simple response factor
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
-  step_measure_calibrate_y(response_factor = 2.5)
+  step_measure_absorbance() |>
+  prep()
 
-# With calibration function (e.g., log transform)
-rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
-  update_role(id, new_role = "id") |>
-  step_measure_input_long(transmittance, location = vars(channel)) |>
-  step_measure_calibrate_y(calibration = function(x) log10(x + 0.001))
+bake(rec, new_data = NULL)
+#> # A tibble: 215 × 5
+#>       id water   fat protein .measures
+#>    <int> <dbl> <dbl>   <dbl>    <meas>
+#>  1     1  60.5  22.5    16.7 [100 × 2]
+#>  2     2  46    40.1    13.5 [100 × 2]
+#>  3     3  71     8.4    20.5 [100 × 2]
+#>  4     4  72.8   5.9    20.7 [100 × 2]
+#>  5     5  58.3  25.5    15.5 [100 × 2]
+#>  6     6  44    42.7    13.7 [100 × 2]
+#>  7     7  44    42.7    13.7 [100 × 2]
+#>  8     8  69.3  10.6    19.3 [100 × 2]
+#>  9     9  61.4  19.9    17.7 [100 × 2]
+#> 10    10  61.4  19.9    17.7 [100 × 2]
+#> # ℹ 205 more rows
 ```

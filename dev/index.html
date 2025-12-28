@@ -189,9 +189,8 @@
 <h2 id="available-steps">Available Steps<a class="anchor" aria-label="anchor" href="#available-steps"></a>
 </h2>
 <div class="section level3">
-<h3 id="input-steps">Input Steps<a class="anchor" aria-label="anchor" href="#input-steps"></a>
+<h3 id="inputoutput-steps">Input/Output Steps<a class="anchor" aria-label="anchor" href="#inputoutput-steps"></a>
 </h3>
-<p>Convert your data to measure’s internal format:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -204,19 +203,26 @@
 <tbody>
 <tr class="odd">
 <td><code><a href="reference/step_measure_input_wide.html">step_measure_input_wide()</a></code></td>
-<td>For data with measurements in columns (e.g., wavelengths as column names)</td>
+<td>Convert wide format (measurements in columns) to internal format</td>
 </tr>
 <tr class="even">
 <td><code><a href="reference/step_measure_input_long.html">step_measure_input_long()</a></code></td>
-<td>For data with measurements in rows (long format)</td>
+<td>Convert long format (measurements in rows) to internal format</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_output_wide.html">step_measure_output_wide()</a></code></td>
+<td>Convert back to wide format for modeling</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_output_long.html">step_measure_output_long()</a></code></td>
+<td>Convert back to long format</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="processing-steps">Processing Steps<a class="anchor" aria-label="anchor" href="#processing-steps"></a>
+<h3 id="spectral-math">Spectral Math<a class="anchor" aria-label="anchor" href="#spectral-math"></a>
 </h3>
-<p>Apply spectral preprocessing:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -228,8 +234,48 @@
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td><code><a href="reference/step_measure_absorbance.html">step_measure_absorbance()</a></code></td>
+<td>Convert transmittance to absorbance</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_transmittance.html">step_measure_transmittance()</a></code></td>
+<td>Convert absorbance to transmittance</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_log.html">step_measure_log()</a></code></td>
+<td>Log transformation with configurable base/offset</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_kubelka_munk.html">step_measure_kubelka_munk()</a></code></td>
+<td>Kubelka-Munk transformation for reflectance</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_derivative.html">step_measure_derivative()</a></code></td>
+<td>Simple finite difference derivatives</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_derivative_gap.html">step_measure_derivative_gap()</a></code></td>
+<td>Gap (Norris-Williams) derivatives</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="filtering--scatter-correction">Filtering &amp; Scatter Correction<a class="anchor" aria-label="anchor" href="#filtering--scatter-correction"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="45%">
+<col width="54%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
 <td><code><a href="reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code></td>
-<td>Smoothing and/or differentiation using Savitzky-Golay filter</td>
+<td>Smoothing and/or differentiation</td>
 </tr>
 <tr class="even">
 <td><code><a href="reference/step_measure_snv.html">step_measure_snv()</a></code></td>
@@ -243,9 +289,108 @@
 </table>
 </div>
 <div class="section level3">
-<h3 id="output-steps">Output Steps<a class="anchor" aria-label="anchor" href="#output-steps"></a>
+<h3 id="sample-wise-normalization">Sample-wise Normalization<a class="anchor" aria-label="anchor" href="#sample-wise-normalization"></a>
 </h3>
-<p>Convert back to modeling-ready format:</p>
+<table class="table">
+<colgroup>
+<col width="49%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_normalize_sum.html">step_measure_normalize_sum()</a></code></td>
+<td>Divide by sum (total intensity)</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_normalize_max.html">step_measure_normalize_max()</a></code></td>
+<td>Divide by maximum value</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_normalize_range.html">step_measure_normalize_range()</a></code></td>
+<td>Scale to 0-1 range</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_normalize_vector.html">step_measure_normalize_vector()</a></code></td>
+<td>L2/Euclidean normalization</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_normalize_auc.html">step_measure_normalize_auc()</a></code></td>
+<td>Divide by area under curve</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_normalize_peak.html">step_measure_normalize_peak()</a></code></td>
+<td>Normalize by peak region (tunable)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="variable-wise-scaling">Variable-wise Scaling<a class="anchor" aria-label="anchor" href="#variable-wise-scaling"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_center.html">step_measure_center()</a></code></td>
+<td>Mean centering</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_scale_auto.html">step_measure_scale_auto()</a></code></td>
+<td>Auto-scaling (z-score)</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_scale_pareto.html">step_measure_scale_pareto()</a></code></td>
+<td>Pareto scaling</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_scale_range.html">step_measure_scale_range()</a></code></td>
+<td>Range scaling</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_scale_vast.html">step_measure_scale_vast()</a></code></td>
+<td>VAST scaling</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="baseline-correction">Baseline Correction<a class="anchor" aria-label="anchor" href="#baseline-correction"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_baseline_als.html">step_measure_baseline_als()</a></code></td>
+<td>Asymmetric least squares</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_baseline_poly.html">step_measure_baseline_poly()</a></code></td>
+<td>Polynomial baseline fitting</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_baseline_rf.html">step_measure_baseline_rf()</a></code></td>
+<td>Rolling ball/LOESS baseline</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_detrend.html">step_measure_detrend()</a></code></td>
+<td>Polynomial detrending</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="reference-corrections">Reference Corrections<a class="anchor" aria-label="anchor" href="#reference-corrections"></a>
+</h3>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -257,12 +402,16 @@
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code><a href="reference/step_measure_output_wide.html">step_measure_output_wide()</a></code></td>
-<td>Convert to wide format (one column per measurement point)</td>
+<td><code><a href="reference/step_measure_subtract_blank.html">step_measure_subtract_blank()</a></code></td>
+<td>Blank/background subtraction</td>
 </tr>
 <tr class="even">
-<td><code><a href="reference/step_measure_output_long.html">step_measure_output_long()</a></code></td>
-<td>Convert to long format</td>
+<td><code><a href="reference/step_measure_subtract_reference.html">step_measure_subtract_reference()</a></code></td>
+<td>Reference spectrum subtraction</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_ratio_reference.html">step_measure_ratio_reference()</a></code></td>
+<td>Reference ratio with optional blank</td>
 </tr>
 </tbody>
 </table>

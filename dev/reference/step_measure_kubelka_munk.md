@@ -1,22 +1,19 @@
-# Apply Y-Axis Calibration (Response Factor)
+# Kubelka-Munk Transformation
 
-`step_measure_calibrate_y()` creates a *specification* of a recipe step
-that applies a response factor or calibration function to y-axis (value)
-values.
+`step_measure_kubelka_munk()` creates a *specification* of a recipe step
+that applies the Kubelka-Munk transformation for diffuse reflectance
+data.
 
 ## Usage
 
 ``` r
-step_measure_calibrate_y(
+step_measure_kubelka_munk(
   recipe,
-  response_factor = 1,
-  calibration = NULL,
   measures = NULL,
   role = NA,
   trained = FALSE,
-  cal_fn = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_calibrate_y")
+  id = recipes::rand_id("measure_kubelka_munk")
 )
 ```
 
@@ -26,17 +23,6 @@ step_measure_calibrate_y(
 
   A recipe object. The step will be added to the sequence of operations
   for this recipe.
-
-- response_factor:
-
-  A numeric value to multiply all values by. Default is `1.0` (no
-  change). This is a simple scalar calibration.
-
-- calibration:
-
-  An optional calibration function that takes value(s) and returns
-  calibrated value(s). If provided, this takes precedence over
-  `response_factor`.
 
 - measures:
 
@@ -50,10 +36,6 @@ step_measure_calibrate_y(
 - trained:
 
   A logical to indicate if the step has been trained.
-
-- cal_fn:
-
-  The calibration function to apply (built during prep).
 
 - skip:
 
@@ -69,45 +51,35 @@ An updated version of `recipe` with the new step added.
 
 ## Details
 
-Y-axis calibration is used to convert raw signal intensities to
-quantitative values. Common examples include:
+The Kubelka-Munk transformation is used for diffuse reflectance
+spectroscopy to convert reflectance to a quantity proportional to
+concentration:
 
-- **Chromatography**: Apply detector response factors
+\$\$f(R) = \frac{(1-R)^2}{2R}\$\$
 
-- **Spectroscopy**: Apply molar absorptivity corrections
+where \\R\\ is the reflectance (0 to 1).
 
-- **Mass spectrometry**: Apply ionization efficiency corrections
+**Important**: Reflectance values should be in the range (0, 1). Values
+at the boundaries will produce extreme values or `Inf`.
 
-**Simple mode**: Use `response_factor` to multiply all values by a
-constant.
+This transformation is commonly used in:
 
-**Complex mode**: Use `calibration` to provide a function for non-linear
-calibration curves (e.g., from fitting standards).
+- NIR diffuse reflectance spectroscopy
 
-**No selectors should be supplied to this step function**. The data
-should be in the internal format produced by
-[`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)
-or
-[`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md).
+- Analysis of powders and solid samples
 
-## Tidying
+- When Beer-Lambert law doesn't apply directly
 
-When you
-[`tidy()`](https://recipes.tidymodels.org/reference/tidy.recipe.html)
-this step, a tibble with columns `terms`, `response_factor`,
-`has_calibration`, and `id` is returned.
+The measurement locations are preserved unchanged.
 
 ## See also
-
-[`step_measure_calibrate_x()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.md)
-for x-axis calibration
 
 Other measure-preprocessing:
 [`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md),
 [`step_measure_calibrate_x()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.md),
+[`step_measure_calibrate_y()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.md),
 [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md),
 [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md),
-[`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md),
 [`step_measure_log()`](https://jameshwade.github.io/measure/dev/reference/step_measure_log.md),
 [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md),
 [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md),
@@ -123,15 +95,10 @@ Other measure-preprocessing:
 ``` r
 library(recipes)
 
-# Simple response factor
+# Assuming reflectance data in (0, 1) range
+# Note: meats_long has transmittance, this is illustrative
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
-  step_measure_calibrate_y(response_factor = 2.5)
-
-# With calibration function (e.g., log transform)
-rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
-  update_role(id, new_role = "id") |>
-  step_measure_input_long(transmittance, location = vars(channel)) |>
-  step_measure_calibrate_y(calibration = function(x) log10(x + 0.001))
+  step_measure_kubelka_munk()
 ```

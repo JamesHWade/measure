@@ -259,6 +259,152 @@ you want to preserve.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="spectral-math-transformations">Spectral Math Transformations<a class="anchor" aria-label="anchor" href="#spectral-math-transformations"></a>
+</h2>
+<p>The measure package includes mathematical transformations commonly
+used in spectroscopy and chemometrics.</p>
+<div class="section level3">
+<h3 id="absorbance-and-transmittance">Absorbance and Transmittance<a class="anchor" aria-label="anchor" href="#absorbance-and-transmittance"></a>
+</h3>
+<p>Convert between transmittance and absorbance using the Beer-Lambert
+relationship:</p>
+<ul>
+<li>
+<strong>Absorbance</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>=</mo><mo>−</mo><msub><mo>log</mo><mn>10</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>T</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">A = -\log_{10}(T)</annotation></semantics></math>
+</li>
+<li>
+<strong>Transmittance</strong>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><msup><mn>10</mn><mrow><mo>−</mo><mi>A</mi></mrow></msup></mrow><annotation encoding="application/x-tex">T = 10^{-A}</annotation></semantics></math>
+</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Convert transmittance to absorbance</span></span>
+<span><span class="va">rec_abs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_absorbance.html">step_measure_absorbance</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">plot_spectra</span><span class="op">(</span><span class="fu">get_internal</span><span class="op">(</span><span class="va">rec_abs</span><span class="op">)</span>, <span class="st">"Absorbance"</span>, <span class="st">"Converted from transmittance"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="preprocessing_files/figure-html/absorbance-example-1.png" class="r-plt" alt="" width="672"></p>
+<p>These transformations are inverses - a round-trip preserves
+values:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec_roundtrip</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_absorbance.html">step_measure_absorbance</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_transmittance.html">step_measure_transmittance</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Back to original</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="log-transformation">Log Transformation<a class="anchor" aria-label="anchor" href="#log-transformation"></a>
+</h3>
+<p>Apply logarithmic transformation with configurable base and
+offset:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Natural log (base e)</span></span>
+<span><span class="va">rec_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_log.html">step_measure_log</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Log base 10 with offset for handling zeros</span></span>
+<span><span class="va">rec_log10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_log.html">step_measure_log</a></span><span class="op">(</span>base <span class="op">=</span> <span class="fl">10</span>, offset <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">plot_spectra</span><span class="op">(</span><span class="fu">get_internal</span><span class="op">(</span><span class="va">rec_log</span><span class="op">)</span>, <span class="st">"Natural Log Transform"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="preprocessing_files/figure-html/log-example-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level3">
+<h3 id="kubelka-munk-transformation">Kubelka-Munk Transformation<a class="anchor" aria-label="anchor" href="#kubelka-munk-transformation"></a>
+</h3>
+<p>For diffuse reflectance data, the Kubelka-Munk transformation
+converts reflectance to a quantity proportional to concentration:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>R</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>R</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mrow><mn>2</mn><mi>R</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">f(R) = \frac{(1-R)^2}{2R}</annotation></semantics></math></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># For reflectance data (values between 0 and 1)</span></span>
+<span><span class="va">rec_km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">concentration</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">reflectance_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"r_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_kubelka_munk.html">step_measure_kubelka_munk</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="simple-finite-difference-derivatives">Simple Finite Difference Derivatives<a class="anchor" aria-label="anchor" href="#simple-finite-difference-derivatives"></a>
+</h3>
+<p>For quick derivatives without smoothing, use
+<code><a href="../reference/step_measure_derivative.html">step_measure_derivative()</a></code>:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># First derivative - removes constant baseline offsets</span></span>
+<span><span class="va">rec_fd1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_derivative.html">step_measure_derivative</a></span><span class="op">(</span>order <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Second derivative - removes linear baseline trends</span></span>
+<span><span class="va">rec_fd2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_derivative.html">step_measure_derivative</a></span><span class="op">(</span>order <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Note</strong>: Derivatives reduce spectrum length (first
+derivative: n-1 points, second derivative: n-2 points). The
+<code>order</code> parameter is tunable.</p>
+</div>
+<div class="section level3">
+<h3 id="gap-norris-williams-derivatives">Gap (Norris-Williams) Derivatives<a class="anchor" aria-label="anchor" href="#gap-norris-williams-derivatives"></a>
+</h3>
+<p>Gap derivatives compute differences between points separated by a
+gap, commonly used in NIR chemometrics:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Gap derivative with gap=5</span></span>
+<span><span class="va">rec_gap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_derivative_gap.html">step_measure_derivative_gap</a></span><span class="op">(</span>gap <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Norris-Williams with segment averaging for noise reduction</span></span>
+<span><span class="va">rec_nw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_derivative_gap.html">step_measure_derivative_gap</a></span><span class="op">(</span>gap <span class="op">=</span> <span class="fl">5</span>, segment <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">plot_spectra</span><span class="op">(</span><span class="fu">get_internal</span><span class="op">(</span><span class="va">rec_gap</span><span class="op">)</span>, <span class="st">"Gap Derivative (gap=5)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="preprocessing_files/figure-html/gap-derivative-1.png" class="r-plt" alt="" width="672"></p>
+<p>Both <code>gap</code> and <code>segment</code> parameters are tunable
+with dials.</p>
+</div>
+<div class="section level3">
+<h3 id="when-to-use-each-derivative-method">When to use each derivative method<a class="anchor" aria-label="anchor" href="#when-to-use-each-derivative-method"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="22%">
+<col width="30%">
+<col width="19%">
+<col width="27%">
+</colgroup>
+<thead><tr class="header">
+<th>Method</th>
+<th>Smoothing</th>
+<th>Speed</th>
+<th>Use when</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code></td>
+<td>Yes (polynomial)</td>
+<td>Fast</td>
+<td>Noisy data, need smoothing</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_derivative.html">step_measure_derivative()</a></code></td>
+<td>No</td>
+<td>Very fast</td>
+<td>Clean data, unsmoothed derivative</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_derivative_gap.html">step_measure_derivative_gap()</a></code></td>
+<td>Optional (segment)</td>
+<td>Fast</td>
+<td>NIR chemometrics, configurable gap</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section level2">
 <h2 id="standard-normal-variate-snv">Standard Normal Variate (SNV)<a class="anchor" aria-label="anchor" href="#standard-normal-variate-snv"></a>
 </h2>
 <div class="section level3">
@@ -287,7 +433,7 @@ particle size causes scatter variations.</p>
 <div class="section level3">
 <h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_snv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -301,7 +447,7 @@ particle size causes scatter variations.</p>
 </h3>
 <p>SNV is often combined with Savitzky-Golay derivatives. The order
 matters:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Derivative then SNV (more common)</span></span>
 <span><span class="va">rec_d1_snv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -361,7 +507,7 @@ data.</p>
 <div class="section level3">
 <h3 id="example-1">Example<a class="anchor" aria-label="anchor" href="#example-1"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_msc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_msc.html">step_measure_msc</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -373,7 +519,7 @@ data.</p>
 <div class="section level3">
 <h3 id="comparing-snv-and-msc">Comparing SNV and MSC<a class="anchor" aria-label="anchor" href="#comparing-snv-and-msc"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_snv</span> <span class="op">&lt;-</span> <span class="fu">plot_spectra</span><span class="op">(</span><span class="fu">get_internal</span><span class="op">(</span><span class="va">rec_snv</span><span class="op">)</span>, <span class="st">"SNV"</span><span class="op">)</span></span>
 <span><span class="va">p_msc</span> <span class="op">&lt;-</span> <span class="fu">plot_spectra</span><span class="op">(</span><span class="fu">get_internal</span><span class="op">(</span><span class="va">rec_msc</span><span class="op">)</span>, <span class="st">"MSC"</span><span class="op">)</span></span>
 <span></span>
@@ -443,7 +589,7 @@ intensity.</p>
 </h3>
 <p>Divides each spectrum by its total intensity. After transformation,
 all spectra sum to 1:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_norm_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_normalize_sum.html">step_measure_normalize_sum</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -457,7 +603,7 @@ all spectra sum to 1:</p>
 </h3>
 <p>Divides each spectrum by its maximum value, useful for peak-focused
 analysis:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_norm_max</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_normalize_max.html">step_measure_normalize_max</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -472,7 +618,7 @@ analysis:</p>
 <p>When you have an internal standard at a known location, use
 <code><a href="../reference/step_measure_normalize_peak.html">step_measure_normalize_peak()</a></code> to normalize by a specific
 region:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_norm_peak</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_normalize_peak.html">step_measure_normalize_peak</a></span><span class="op">(</span></span>
@@ -486,7 +632,7 @@ region:</p>
 <p><img src="preprocessing_files/figure-html/normalize-peak-1.png" class="r-plt" alt="" width="672"></p>
 <p>The <code>location_min</code> and <code>location_max</code>
 parameters are tunable:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_tunable_peak</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_normalize_peak.html">step_measure_normalize_peak</a></span><span class="op">(</span></span>
@@ -524,7 +670,7 @@ practice</li>
 </h3>
 <p><code><a href="../reference/step_measure_center.html">step_measure_center()</a></code> subtracts the column mean at each
 location:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_center</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_center.html">step_measure_center</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -539,7 +685,7 @@ location:</p>
 </h3>
 <p><code><a href="../reference/step_measure_scale_auto.html">step_measure_scale_auto()</a></code> centers and scales to unit
 variance at each location:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_auto</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_scale_auto.html">step_measure_scale_auto</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -555,7 +701,7 @@ variance at each location:</p>
 <p><code><a href="../reference/step_measure_scale_pareto.html">step_measure_scale_pareto()</a></code> divides by the square root
 of the standard deviation - a compromise between no scaling and
 auto-scaling:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_pareto</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_scale_pareto.html">step_measure_scale_pareto</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -568,7 +714,7 @@ auto-scaling:</p>
 <div class="section level3">
 <h3 id="comparing-scaling-methods">Comparing scaling methods<a class="anchor" aria-label="anchor" href="#comparing-scaling-methods"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_raw</span> <span class="op">&lt;-</span> <span class="fu">plot_spectra</span><span class="op">(</span><span class="va">raw_data</span>, <span class="st">"Raw"</span><span class="op">)</span></span>
 <span><span class="va">p_center</span> <span class="op">&lt;-</span> <span class="fu">plot_spectra</span><span class="op">(</span><span class="va">center_data</span>, <span class="st">"Centered"</span><span class="op">)</span></span>
 <span><span class="va">p_auto</span> <span class="op">&lt;-</span> <span class="fu">plot_spectra</span><span class="op">(</span><span class="va">auto_data</span>, <span class="st">"Auto-Scaled"</span><span class="op">)</span></span>
@@ -582,7 +728,7 @@ auto-scaling:</p>
 </h3>
 <p>Variable-wise scaling steps store learned parameters that can be
 examined after training:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_prepped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_auto</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># View learned parameters</span></span>
@@ -591,12 +737,12 @@ examined after training:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
 <span><span class="co">#&gt;   terms     location  mean    sd id                      </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> .measures     850   2.81 0.411 measure_scale_auto_ZQdHO</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> .measures     852.  2.81 0.413 measure_scale_auto_ZQdHO</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> .measures     854.  2.81 0.416 measure_scale_auto_ZQdHO</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> .measures     856.  2.82 0.418 measure_scale_auto_ZQdHO</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> .measures     858.  2.82 0.421 measure_scale_auto_ZQdHO</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> .measures     860.  2.82 0.424 measure_scale_auto_ZQdHO</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> .measures     850   2.81 0.411 measure_scale_auto_jisyY</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> .measures     852.  2.81 0.413 measure_scale_auto_jisyY</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> .measures     854.  2.81 0.416 measure_scale_auto_jisyY</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> .measures     856.  2.82 0.418 measure_scale_auto_jisyY</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> .measures     858.  2.82 0.421 measure_scale_auto_jisyY</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> .measures     860.  2.82 0.424 measure_scale_auto_jisyY</span></span>
 <span></span>
 <span><span class="co"># Plot the learned means and SDs</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tidy_params</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">location</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -633,7 +779,7 @@ the recipes framework.</p>
 <p>The function you provide must accept a tibble with
 <code>location</code> and <code>value</code> columns and return a tibble
 with the same structure:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example: Shift spectra to start at zero</span></span>
 <span><span class="va">zero_baseline</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span></span>
@@ -654,7 +800,7 @@ with the same structure:</p>
 </h3>
 <p>For simple transformations, use formula syntax instead of defining a
 separate function:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_inline</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span><span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span><span class="fu"><a href="../reference/step_measure_map.html">step_measure_map</a></span><span class="op">(</span><span class="op">~</span> <span class="op">{</span></span>
@@ -667,7 +813,7 @@ separate function:</p>
 <h3 id="passing-additional-arguments">Passing additional arguments<a class="anchor" aria-label="anchor" href="#passing-additional-arguments"></a>
 </h3>
 <p>You can pass extra arguments to your transformation function:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># A function with configurable parameters</span></span>
 <span><span class="va">robust_scale</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">center_fn</span> <span class="op">=</span> <span class="va">median</span>, <span class="va">scale_fn</span> <span class="op">=</span> <span class="va">mad</span><span class="op">)</span> <span class="op">{</span></span>
 <span><span class="va">x</span><span class="op">$</span><span class="va">value</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">value</span> <span class="op">-</span> <span class="fu">center_fn</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu">scale_fn</span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">value</span><span class="op">)</span></span>
@@ -685,7 +831,7 @@ separate function:</p>
 <p>When developing a custom transformation, it helps to prototype
 interactively before putting it in a recipe. Use
 <code><a href="../reference/measure_map.html">measure_map()</a></code> for exploration:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># First, get data in internal format</span></span>
 <span><span class="va">rec_internal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span><span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span>, location_values <span class="op">=</span> <span class="va">wavelengths</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -733,7 +879,7 @@ transformation is:</p>
 </h3>
 <p>Use <code><a href="../reference/measure_map_safely.html">measure_map_safely()</a></code> when exploring data that might
 have problematic samples:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># A transformation that might fail for some samples</span></span>
 <span><span class="va">risky_transform</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">value</span> <span class="op">&lt;=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"Non-positive values!"</span><span class="op">)</span></span>
@@ -757,7 +903,7 @@ have problematic samples:</p>
 </h3>
 <p>Before preprocessing, it’s often helpful to compute summary
 statistics across samples:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute mean and SD at each wavelength</span></span>
 <span><span class="va">summary_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_summarize.html">measure_summarize</a></span><span class="op">(</span><span class="va">baked_data</span><span class="op">)</span></span>
 <span><span class="va">summary_stats</span></span>
@@ -794,7 +940,7 @@ Potential outliers - Reference spectra for custom corrections</p>
 <h3 id="common-combinations">Common combinations<a class="anchor" aria-label="anchor" href="#common-combinations"></a>
 </h3>
 <p>Here are some commonly used preprocessing pipelines:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pipeline 1: Basic scatter correction</span></span>
 <span><span class="va">pipe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -900,6 +1046,54 @@ outperforms complex pipelines</li>
 <td><code><a href="../reference/step_measure_msc.html">step_measure_msc()</a></code></td>
 <td>Align to reference</td>
 <td>Scatter (supervised)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="spectral-math">Spectral Math<a class="anchor" aria-label="anchor" href="#spectral-math"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="33%">
+<col width="41%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Effect</th>
+<th>Use when</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_absorbance.html">step_measure_absorbance()</a></code></td>
+<td>T → A</td>
+<td>Convert transmittance</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_transmittance.html">step_measure_transmittance()</a></code></td>
+<td>A → T</td>
+<td>Convert absorbance</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_log.html">step_measure_log()</a></code></td>
+<td>Log transform</td>
+<td>Variance stabilization</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_kubelka_munk.html">step_measure_kubelka_munk()</a></code></td>
+<td>K-M transform</td>
+<td>Diffuse reflectance</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_derivative.html">step_measure_derivative()</a></code></td>
+<td>Finite difference</td>
+<td>Fast unsmoothed derivative</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_derivative_gap.html">step_measure_derivative_gap()</a></code></td>
+<td>Gap derivative</td>
+<td>NIR chemometrics</td>
 </tr>
 </tbody>
 </table>

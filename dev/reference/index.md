@@ -22,6 +22,23 @@ Apply spectral preprocessing transformations
 - [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
   : Apply a Custom Function to Measurements
 
+## Spectral Math
+
+Mathematical transformations for spectral data
+
+- [`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md)
+  : Convert Transmittance to Absorbance
+- [`step_measure_transmittance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.md)
+  : Convert Absorbance to Transmittance
+- [`step_measure_log()`](https://jameshwade.github.io/measure/dev/reference/step_measure_log.md)
+  : Log Transformation
+- [`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md)
+  : Kubelka-Munk Transformation
+- [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md)
+  : Simple Finite Difference Derivatives
+- [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md)
+  : Gap (Norris-Williams) Derivatives
+
 ## Sample-wise Normalization
 
 Normalize each spectrum independently
@@ -101,6 +118,10 @@ Parameters for hyperparameter tuning with dials
 - [`peak_location_min()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
   [`peak_location_max()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
   : Parameters for peak normalization
+- [`derivative_order()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
+  [`derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
+  [`derivative_segment()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
+  : Parameters for derivative steps
 
 ## Data
 

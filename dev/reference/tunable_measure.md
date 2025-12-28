@@ -31,6 +31,12 @@ tunable(x, ...)
 
 # S3 method for class 'step_measure_normalize_peak'
 tunable(x, ...)
+
+# S3 method for class 'step_measure_derivative'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_derivative_gap'
+tunable(x, ...)
 ```
 
 ## Arguments

@@ -176,6 +176,125 @@ rec_tunable <- recipe(water ~ ., data = meats) |>
 tunable(rec_tunable)
 ```
 
+## Spectral Math Transformations
+
+The measure package includes mathematical transformations commonly used
+in spectroscopy and chemometrics.
+
+### Absorbance and Transmittance
+
+Convert between transmittance and absorbance using the Beer-Lambert
+relationship:
+
+- **Absorbance**: $A = - \log_{10}(T)$
+- **Transmittance**: $T = 10^{- A}$
+
+``` r
+# Convert transmittance to absorbance
+rec_abs <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_absorbance()
+
+plot_spectra(get_internal(rec_abs), "Absorbance", "Converted from transmittance")
+```
+
+![](preprocessing_files/figure-html/absorbance-example-1.png)
+
+These transformations are inverses - a round-trip preserves values:
+
+``` r
+rec_roundtrip <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_absorbance() |>
+  step_measure_transmittance()  # Back to original
+```
+
+### Log Transformation
+
+Apply logarithmic transformation with configurable base and offset:
+
+``` r
+# Natural log (base e)
+rec_log <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_log()
+
+# Log base 10 with offset for handling zeros
+rec_log10 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_log(base = 10, offset = 1)
+
+plot_spectra(get_internal(rec_log), "Natural Log Transform")
+```
+
+![](preprocessing_files/figure-html/log-example-1.png)
+
+### Kubelka-Munk Transformation
+
+For diffuse reflectance data, the Kubelka-Munk transformation converts
+reflectance to a quantity proportional to concentration:
+
+$$f(R) = \frac{(1 - R)^{2}}{2R}$$
+
+``` r
+# For reflectance data (values between 0 and 1)
+rec_km <- recipe(concentration ~ ., data = reflectance_data) |>
+  step_measure_input_wide(starts_with("r_")) |>
+  step_measure_kubelka_munk()
+```
+
+### Simple Finite Difference Derivatives
+
+For quick derivatives without smoothing, use
+[`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md):
+
+``` r
+# First derivative - removes constant baseline offsets
+rec_fd1 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_derivative(order = 1)
+
+# Second derivative - removes linear baseline trends
+rec_fd2 <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_derivative(order = 2)
+```
+
+**Note**: Derivatives reduce spectrum length (first derivative: n-1
+points, second derivative: n-2 points). The `order` parameter is
+tunable.
+
+### Gap (Norris-Williams) Derivatives
+
+Gap derivatives compute differences between points separated by a gap,
+commonly used in NIR chemometrics:
+
+``` r
+# Gap derivative with gap=5
+rec_gap <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_derivative_gap(gap = 5)
+
+# Norris-Williams with segment averaging for noise reduction
+rec_nw <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_derivative_gap(gap = 5, segment = 3)
+
+plot_spectra(get_internal(rec_gap), "Gap Derivative (gap=5)")
+```
+
+![](preprocessing_files/figure-html/gap-derivative-1.png)
+
+Both `gap` and `segment` parameters are tunable with dials.
+
+### When to use each derivative method
+
+| Method                                                                                                               | Smoothing          | Speed     | Use when                           |
+|----------------------------------------------------------------------------------------------------------------------|--------------------|-----------|------------------------------------|
+| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Yes (polynomial)   | Fast      | Noisy data, need smoothing         |
+| [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md)         | No                 | Very fast | Clean data, unsmoothed derivative  |
+| [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md) | Optional (segment) | Fast      | NIR chemometrics, configurable gap |
+
 ## Standard Normal Variate (SNV)
 
 ### What it does
@@ -458,12 +577,12 @@ head(tidy_params)
 #> # A tibble: 6 × 5
 #>   terms     location  mean    sd id                      
 #>   <chr>        <dbl> <dbl> <dbl> <chr>                   
-#> 1 .measures     850   2.81 0.411 measure_scale_auto_ZQdHO
-#> 2 .measures     852.  2.81 0.413 measure_scale_auto_ZQdHO
-#> 3 .measures     854.  2.81 0.416 measure_scale_auto_ZQdHO
-#> 4 .measures     856.  2.82 0.418 measure_scale_auto_ZQdHO
-#> 5 .measures     858.  2.82 0.421 measure_scale_auto_ZQdHO
-#> 6 .measures     860.  2.82 0.424 measure_scale_auto_ZQdHO
+#> 1 .measures     850   2.81 0.411 measure_scale_auto_jisyY
+#> 2 .measures     852.  2.81 0.413 measure_scale_auto_jisyY
+#> 3 .measures     854.  2.81 0.416 measure_scale_auto_jisyY
+#> 4 .measures     856.  2.82 0.418 measure_scale_auto_jisyY
+#> 5 .measures     858.  2.82 0.421 measure_scale_auto_jisyY
+#> 6 .measures     860.  2.82 0.424 measure_scale_auto_jisyY
 
 # Plot the learned means and SDs
 ggplot(tidy_params, aes(x = location)) +
@@ -738,6 +857,17 @@ A typical order might be:
 | `step_measure_savitzky_golay(order=2)`                                                         | 2nd derivative     | Linear baselines     |
 | [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Row normalization  | Scatter, path length |
 | [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Align to reference | Scatter (supervised) |
+
+### Spectral Math
+
+| Step                                                                                                                 | Effect            | Use when                   |
+|----------------------------------------------------------------------------------------------------------------------|-------------------|----------------------------|
+| [`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md)         | T → A             | Convert transmittance      |
+| [`step_measure_transmittance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.md)   | A → T             | Convert absorbance         |
+| [`step_measure_log()`](https://jameshwade.github.io/measure/dev/reference/step_measure_log.md)                       | Log transform     | Variance stabilization     |
+| [`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md)     | K-M transform     | Diffuse reflectance        |
+| [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md)         | Finite difference | Fast unsmoothed derivative |
+| [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md) | Gap derivative    | NIR chemometrics           |
 
 ### Sample-wise Normalization
 

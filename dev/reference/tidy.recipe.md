@@ -97,6 +97,24 @@ tidy(x, ...)
 
 # S3 method for class 'step_measure_snv'
 tidy(x, ...)
+
+# S3 method for class 'step_measure_absorbance'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_transmittance'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_log'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_kubelka_munk'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_derivative'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_derivative_gap'
+tidy(x, ...)
 ```
 
 ## Arguments

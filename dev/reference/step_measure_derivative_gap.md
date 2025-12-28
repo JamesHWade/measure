@@ -1,22 +1,20 @@
-# Apply Y-Axis Calibration (Response Factor)
+# Gap (Norris-Williams) Derivatives
 
-`step_measure_calibrate_y()` creates a *specification* of a recipe step
-that applies a response factor or calibration function to y-axis (value)
-values.
+`step_measure_derivative_gap()` creates a *specification* of a recipe
+step that computes gap derivatives using the Norris-Williams method.
 
 ## Usage
 
 ``` r
-step_measure_calibrate_y(
+step_measure_derivative_gap(
   recipe,
-  response_factor = 1,
-  calibration = NULL,
+  gap = 2L,
+  segment = 1L,
   measures = NULL,
   role = NA,
   trained = FALSE,
-  cal_fn = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_calibrate_y")
+  id = recipes::rand_id("measure_derivative_gap")
 )
 ```
 
@@ -27,16 +25,16 @@ step_measure_calibrate_y(
   A recipe object. The step will be added to the sequence of operations
   for this recipe.
 
-- response_factor:
+- gap:
 
-  A numeric value to multiply all values by. Default is `1.0` (no
-  change). This is a simple scalar calibration.
+  The gap size (number of points to skip on each side). Default is `2`.
+  The derivative at point i is computed from points i-gap and i+gap.
 
-- calibration:
+- segment:
 
-  An optional calibration function that takes value(s) and returns
-  calibrated value(s). If provided, this takes precedence over
-  `response_factor`.
+  The segment size for averaging. Default is `1` (no averaging). When
+  greater than 1, multiple points are averaged on each side before
+  computing the difference.
 
 - measures:
 
@@ -50,10 +48,6 @@ step_measure_calibrate_y(
 - trained:
 
   A logical to indicate if the step has been trained.
-
-- cal_fn:
-
-  The calibration function to apply (built during prep).
 
 - skip:
 
@@ -69,44 +63,34 @@ An updated version of `recipe` with the new step added.
 
 ## Details
 
-Y-axis calibration is used to convert raw signal intensities to
-quantitative values. Common examples include:
+Gap derivatives compute the difference between points separated by a
+gap:
 
-- **Chromatography**: Apply detector response factors
+\$\$\frac{dy}{dx} \approx \frac{y\_{i+g} - y\_{i-g}}{x\_{i+g} -
+x\_{i-g}}\$\$
 
-- **Spectroscopy**: Apply molar absorptivity corrections
+where \\g\\ is the gap size.
 
-- **Mass spectrometry**: Apply ionization efficiency corrections
+When `segment > 1`, the Norris-Williams method is used, which averages
+`segment` points on each side before computing the difference.
 
-**Simple mode**: Use `response_factor` to multiply all values by a
-constant.
+The spectrum length is reduced by `2 * gap` points.
 
-**Complex mode**: Use `calibration` to provide a function for non-linear
-calibration curves (e.g., from fitting standards).
-
-**No selectors should be supplied to this step function**. The data
-should be in the internal format produced by
-[`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)
-or
-[`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md).
-
-## Tidying
-
-When you
-[`tidy()`](https://recipes.tidymodels.org/reference/tidy.recipe.html)
-this step, a tibble with columns `terms`, `response_factor`,
-`has_calibration`, and `id` is returned.
+Gap derivatives are often used in NIR chemometrics as an alternative to
+Savitzky-Golay derivatives when less smoothing is desired.
 
 ## See also
 
-[`step_measure_calibrate_x()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.md)
-for x-axis calibration
+[`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md)
+for simple finite differences,
+[`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md)
+for smoothed derivatives
 
 Other measure-preprocessing:
 [`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md),
 [`step_measure_calibrate_x()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.md),
+[`step_measure_calibrate_y()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.md),
 [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md),
-[`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md),
 [`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md),
 [`step_measure_log()`](https://jameshwade.github.io/measure/dev/reference/step_measure_log.md),
 [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md),
@@ -123,15 +107,17 @@ Other measure-preprocessing:
 ``` r
 library(recipes)
 
-# Simple response factor
+# Gap derivative with gap=2
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
-  step_measure_calibrate_y(response_factor = 2.5)
+  step_measure_derivative_gap(gap = 2) |>
+  prep()
 
-# With calibration function (e.g., log transform)
+# Norris-Williams with gap=3, segment=2
 rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
-  step_measure_calibrate_y(calibration = function(x) log10(x + 0.001))
+  step_measure_derivative_gap(gap = 3, segment = 2) |>
+  prep()
 ```
