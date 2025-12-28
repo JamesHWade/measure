@@ -69,6 +69,13 @@ reference:
   - step_measure_kubelka_munk
   - step_measure_derivative
   - step_measure_derivative_gap
+- title: Region Operations
+  desc: Trim, exclude, and resample measurement regions
+  contents:
+  - step_measure_trim
+  - step_measure_exclude
+  - step_measure_resample
+  - step_measure_interpolate
 - title: Sample-wise Normalization
   desc: Normalize each spectrum independently
   contents:
@@ -94,6 +101,16 @@ reference:
   contents:
   - step_measure_output_wide
   - step_measure_output_long
+- title: Peak Operations
+  desc: Peak detection, integration, and analysis for chromatography
+  contents:
+  - step_measure_peaks_detect
+  - step_measure_peaks_integrate
+  - step_measure_peaks_filter
+  - step_measure_peaks_deconvolve
+  - step_measure_peaks_to_table
+  - is_peaks_list
+  - find_peaks_cols
 - title: Tunable Parameters
   desc: Parameters for hyperparameter tuning with dials
   contents:
@@ -113,6 +130,12 @@ reference:
   - starts_with("step_measure_baseline")
   - step_measure_detrend
   - subtract_rf_baseline
+- title: SEC/GPC Analysis
+  desc: Molecular weight calculations for size exclusion chromatography
+  contents:
+  - step_measure_mw_averages
+  - step_measure_mw_distribution
+  - step_measure_mw_fractions
 - title: Utilities
   desc: Helper functions and utilities
   contents:

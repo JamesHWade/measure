@@ -189,12 +189,20 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 
 ### Baseline Correction
 
-| Step                           | Description                 |
-|--------------------------------|-----------------------------|
-| `step_measure_baseline_als()`  | Asymmetric least squares    |
+| Step | Description |
+|----|----|
+| `step_measure_baseline_als()` | Asymmetric least squares |
 | `step_measure_baseline_poly()` | Polynomial baseline fitting |
-| `step_measure_baseline_rf()`   | Rolling ball/LOESS baseline |
-| `step_measure_detrend()`       | Polynomial detrending       |
+| `step_measure_baseline_rf()` | Rolling ball/LOESS baseline |
+| `step_measure_baseline_rolling()` | Rolling ball algorithm |
+| `step_measure_baseline_airpls()` | Adaptive Iteratively Reweighted PLS |
+| `step_measure_baseline_arpls()` | Asymmetrically Reweighted PLS |
+| `step_measure_baseline_snip()` | SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping) |
+| `step_measure_baseline_tophat()` | Top-hat morphological filter |
+| `step_measure_baseline_morph()` | Iterative morphological correction |
+| `step_measure_baseline_minima()` | Local minima interpolation |
+| `step_measure_baseline_auto()` | Automatic method selection |
+| `step_measure_detrend()` | Polynomial detrending |
 
 ### Reference Corrections
 
@@ -203,6 +211,32 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | `step_measure_subtract_blank()`     | Blank/background subtraction        |
 | `step_measure_subtract_reference()` | Reference spectrum subtraction      |
 | `step_measure_ratio_reference()`    | Reference ratio with optional blank |
+
+### Region Operations
+
+| Step                      | Description                                   |
+|---------------------------|-----------------------------------------------|
+| `step_measure_trim()`     | Keep measurements within specified x-range    |
+| `step_measure_exclude()`  | Remove measurements within specified range(s) |
+| `step_measure_resample()` | Interpolate to new regular grid               |
+
+### Peak Operations
+
+| Step | Description |
+|----|----|
+| `step_measure_peaks_detect()` | Detect peaks using prominence or derivative methods |
+| `step_measure_peaks_integrate()` | Calculate peak areas |
+| `step_measure_peaks_filter()` | Filter peaks by height, area, or count |
+| `step_measure_peaks_deconvolve()` | Deconvolve overlapping peaks |
+| `step_measure_peaks_to_table()` | Convert peaks to wide format for modeling |
+
+### SEC/GPC Analysis
+
+| Step | Description |
+|----|----|
+| `step_measure_mw_averages()` | Calculate Mn, Mw, Mz, Mp, and dispersity |
+| `step_measure_mw_distribution()` | Generate molecular weight distribution curve |
+| `step_measure_mw_fractions()` | Calculate molecular weight fractions |
 
 ## Learning more
 
