@@ -103,6 +103,16 @@ When you
 [`tidy()`](https://recipes.tidymodels.org/reference/tidy.recipe.html)
 this step, a tibble with columns is returned.
 
+## See also
+
+Other measure-smoothing:
+[`step_measure_despike()`](https://jameshwade.github.io/measure/dev/reference/step_measure_despike.md),
+[`step_measure_filter_fourier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_filter_fourier.md),
+[`step_measure_smooth_gaussian()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_gaussian.md),
+[`step_measure_smooth_ma()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_ma.md),
+[`step_measure_smooth_median()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_median.md),
+[`step_measure_smooth_wavelet()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_wavelet.md)
+
 ## Examples
 
 ``` r

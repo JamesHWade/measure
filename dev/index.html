@@ -289,6 +289,46 @@
 </table>
 </div>
 <div class="section level3">
+<h3 id="smoothing--noise-reduction">Smoothing &amp; Noise Reduction<a class="anchor" aria-label="anchor" href="#smoothing--noise-reduction"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="47%">
+<col width="52%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_smooth_ma.html">step_measure_smooth_ma()</a></code></td>
+<td>Moving average smoothing</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_smooth_median.html">step_measure_smooth_median()</a></code></td>
+<td>Median filter (robust to spikes)</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_smooth_gaussian.html">step_measure_smooth_gaussian()</a></code></td>
+<td>Gaussian kernel smoothing</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_smooth_wavelet.html">step_measure_smooth_wavelet()</a></code></td>
+<td>Wavelet denoising</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_filter_fourier.html">step_measure_filter_fourier()</a></code></td>
+<td>Fourier low-pass/high-pass filtering</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_despike.html">step_measure_despike()</a></code></td>
+<td>Spike/outlier detection and removal</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
 <h3 id="sample-wise-normalization">Sample-wise Normalization<a class="anchor" aria-label="anchor" href="#sample-wise-normalization"></a>
 </h3>
 <table class="table">
@@ -476,6 +516,70 @@
 <tr class="odd">
 <td><code><a href="reference/step_measure_resample.html">step_measure_resample()</a></code></td>
 <td>Interpolate to new regular grid</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="alignment--registration">Alignment &amp; Registration<a class="anchor" aria-label="anchor" href="#alignment--registration"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="45%">
+<col width="54%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_align_shift.html">step_measure_align_shift()</a></code></td>
+<td>Cross-correlation shift alignment</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_align_reference.html">step_measure_align_reference()</a></code></td>
+<td>Align to external reference spectrum</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_align_dtw.html">step_measure_align_dtw()</a></code></td>
+<td>Dynamic Time Warping alignment</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_align_ptw.html">step_measure_align_ptw()</a></code></td>
+<td>Parametric Time Warping</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_align_cow.html">step_measure_align_cow()</a></code></td>
+<td>Correlation Optimized Warping (tunable)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="quality-control">Quality Control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_qc_snr.html">step_measure_qc_snr()</a></code></td>
+<td>Calculate signal-to-noise ratio</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_qc_saturated.html">step_measure_qc_saturated()</a></code></td>
+<td>Detect saturated measurements</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_qc_outlier.html">step_measure_qc_outlier()</a></code></td>
+<td>Detect outlier samples</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_impute.html">step_measure_impute()</a></code></td>
+<td>Interpolate missing values</td>
 </tr>
 </tbody>
 </table>

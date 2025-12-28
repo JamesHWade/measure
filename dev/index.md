@@ -154,6 +154,17 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)                       | Standard Normal Variate normalization |
 | [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)                       | Multiplicative Scatter Correction     |
 
+### Smoothing & Noise Reduction
+
+| Step                                                                                                                   | Description                          |
+|------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
+| [`step_measure_smooth_ma()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_ma.md)             | Moving average smoothing             |
+| [`step_measure_smooth_median()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_median.md)     | Median filter (robust to spikes)     |
+| [`step_measure_smooth_gaussian()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_gaussian.md) | Gaussian kernel smoothing            |
+| [`step_measure_smooth_wavelet()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_wavelet.md)   | Wavelet denoising                    |
+| [`step_measure_filter_fourier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_filter_fourier.md)   | Fourier low-pass/high-pass filtering |
+| [`step_measure_despike()`](https://jameshwade.github.io/measure/dev/reference/step_measure_despike.md)                 | Spike/outlier detection and removal  |
+
 ### Sample-wise Normalization
 
 | Step                                                                                                                     | Description                        |
@@ -207,6 +218,25 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | [`step_measure_trim()`](https://jameshwade.github.io/measure/dev/reference/step_measure_trim.md)         | Keep measurements within specified x-range    |
 | [`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md)   | Remove measurements within specified range(s) |
 | [`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md) | Interpolate to new regular grid               |
+
+### Alignment & Registration
+
+| Step                                                                                                                   | Description                             |
+|------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| [`step_measure_align_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_shift.md)         | Cross-correlation shift alignment       |
+| [`step_measure_align_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_reference.md) | Align to external reference spectrum    |
+| [`step_measure_align_dtw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_dtw.md)             | Dynamic Time Warping alignment          |
+| [`step_measure_align_ptw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_ptw.md)             | Parametric Time Warping                 |
+| [`step_measure_align_cow()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_cow.md)             | Correlation Optimized Warping (tunable) |
+
+### Quality Control
+
+| Step                                                                                                             | Description                     |
+|------------------------------------------------------------------------------------------------------------------|---------------------------------|
+| [`step_measure_qc_snr()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_snr.md)             | Calculate signal-to-noise ratio |
+| [`step_measure_qc_saturated()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_saturated.md) | Detect saturated measurements   |
+| [`step_measure_qc_outlier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_outlier.md)     | Detect outlier samples          |
+| [`step_measure_impute()`](https://jameshwade.github.io/measure/dev/reference/step_measure_impute.md)             | Interpolate missing values      |
 
 ### Peak Operations
 

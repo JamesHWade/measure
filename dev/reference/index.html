@@ -431,6 +431,138 @@
         </dt>
         <dd>Find peaks columns in a data frame</dd>
       </dl></div><div class="section level2">
+      <h2 id="smoothing-noise-reduction">Smoothing &amp; Noise Reduction<a class="anchor" aria-label="anchor" href="#smoothing-noise-reduction"></a></h2>
+
+      <div class="section-desc"><p>Noise reduction and spike removal steps</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_smooth_ma.html">step_measure_smooth_ma()</a></code>
+
+        </dt>
+        <dd>Moving Average Smoothing</dd>
+
+        <dt>
+
+          <code><a href="step_measure_smooth_median.html">step_measure_smooth_median()</a></code>
+
+        </dt>
+        <dd>Median Filter Smoothing</dd>
+
+        <dt>
+
+          <code><a href="step_measure_smooth_gaussian.html">step_measure_smooth_gaussian()</a></code>
+
+        </dt>
+        <dd>Gaussian Kernel Smoothing</dd>
+
+        <dt>
+
+          <code><a href="step_measure_smooth_wavelet.html">step_measure_smooth_wavelet()</a></code>
+
+        </dt>
+        <dd>Wavelet Denoising</dd>
+
+        <dt>
+
+          <code><a href="step_measure_filter_fourier.html">step_measure_filter_fourier()</a></code>
+
+        </dt>
+        <dd>Fourier Low-Pass Filtering</dd>
+
+        <dt>
+
+          <code><a href="step_measure_despike.html">step_measure_despike()</a></code>
+
+        </dt>
+        <dd>Remove Spikes and Outliers from Measurements</dd>
+      </dl></div><div class="section level2">
+      <h2 id="alignment-registration">Alignment &amp; Registration<a class="anchor" aria-label="anchor" href="#alignment-registration"></a></h2>
+
+      <div class="section-desc"><p>Spectral alignment and shift correction</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_align_shift.html">step_measure_align_shift()</a></code>
+
+        </dt>
+        <dd>Shift Alignment via Cross-Correlation</dd>
+
+        <dt>
+
+          <code><a href="step_measure_align_reference.html">step_measure_align_reference()</a></code>
+
+        </dt>
+        <dd>Align to Reference Spectrum</dd>
+
+        <dt>
+
+          <code><a href="step_measure_align_dtw.html">step_measure_align_dtw()</a></code>
+
+        </dt>
+        <dd>Dynamic Time Warping Alignment</dd>
+
+        <dt>
+
+          <code><a href="step_measure_align_ptw.html">step_measure_align_ptw()</a></code>
+
+        </dt>
+        <dd>Parametric Time Warping Alignment</dd>
+
+        <dt>
+
+          <code><a href="step_measure_align_cow.html">step_measure_align_cow()</a></code>
+
+        </dt>
+        <dd>Correlation Optimized Warping Alignment</dd>
+      </dl></div><div class="section level2">
+      <h2 id="quality-control">Quality Control<a class="anchor" aria-label="anchor" href="#quality-control"></a></h2>
+
+      <div class="section-desc"><p>Quality metrics and data cleaning</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_qc_snr.html">step_measure_qc_snr()</a></code>
+
+        </dt>
+        <dd>Calculate Signal-to-Noise Ratio</dd>
+
+        <dt>
+
+          <code><a href="step_measure_qc_saturated.html">step_measure_qc_saturated()</a></code>
+
+        </dt>
+        <dd>Detect Saturated Measurements</dd>
+
+        <dt>
+
+          <code><a href="step_measure_qc_outlier.html">step_measure_qc_outlier()</a></code>
+
+        </dt>
+        <dd>Detect Outlier Samples</dd>
+
+        <dt>
+
+          <code><a href="step_measure_impute.html">step_measure_impute()</a></code>
+
+        </dt>
+        <dd>Impute Missing Values in Measurements</dd>
+      </dl></div><div class="section level2">
       <h2 id="tunable-parameters">Tunable Parameters<a class="anchor" aria-label="anchor" href="#tunable-parameters"></a></h2>
 
       <div class="section-desc"><p>Parameters for hyperparameter tuning with dials</p></div>
@@ -467,6 +599,27 @@
 
         </dt>
         <dd>Parameters for derivative steps</dd>
+
+        <dt>
+
+          <code><a href="smooth_window.html">smooth_window()</a></code> <code><a href="smooth_window.html">smooth_sigma()</a></code> <code><a href="smooth_window.html">fourier_cutoff()</a></code> <code><a href="smooth_window.html">despike_threshold()</a></code>
+
+        </dt>
+        <dd>Parameters for smoothing steps</dd>
+
+        <dt>
+
+          <code><a href="align_max_shift.html">align_max_shift()</a></code> <code><a href="align_max_shift.html">align_segment_length()</a></code>
+
+        </dt>
+        <dd>Parameters for alignment steps</dd>
+
+        <dt>
+
+          <code><a href="outlier_threshold.html">outlier_threshold()</a></code>
+
+        </dt>
+        <dd>Parameters for quality control steps</dd>
       </dl></div><div class="section level2">
       <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
@@ -681,7 +834,7 @@
 
         <dt>
 
-          <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_averages&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_fractions&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_distribution&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_resample&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_savitzky_golay&gt;</i>)</a></code>
+          <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_align_dtw&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_align_ptw&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_averages&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_fractions&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_distribution&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_resample&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_savitzky_golay&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_smooth_wavelet&gt;</i>)</a></code>
 
         </dt>
         <dd>Set package dependencies</dd>

@@ -8,6 +8,9 @@ characteristics.
 ## Usage
 
 ``` r
+# S3 method for class 'step_measure_align_cow'
+tunable(x, ...)
+
 # S3 method for class 'step_measure_baseline_custom'
 tunable(x, ...)
 
@@ -42,6 +45,33 @@ tunable(x, ...)
 tunable(x, ...)
 
 # S3 method for class 'step_measure_derivative_gap'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_baseline_airpls'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_baseline_arpls'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_smooth_ma'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_smooth_median'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_smooth_gaussian'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_filter_fourier'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_despike'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_align_shift'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_qc_outlier'
 tunable(x, ...)
 ```
 

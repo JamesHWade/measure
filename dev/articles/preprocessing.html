@@ -1422,6 +1422,135 @@ outperforms complex pipelines</li>
 </table>
 </div>
 <div class="section level3">
+<h3 id="smoothing-noise-reduction">Smoothing &amp; Noise Reduction<a class="anchor" aria-label="anchor" href="#smoothing-noise-reduction"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="33%">
+<col width="41%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Effect</th>
+<th>Use when</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_smooth_ma.html">step_measure_smooth_ma()</a></code></td>
+<td>Moving average</td>
+<td>Simple noise reduction</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_smooth_median.html">step_measure_smooth_median()</a></code></td>
+<td>Median filter</td>
+<td>Spike removal, robust smoothing</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_smooth_gaussian.html">step_measure_smooth_gaussian()</a></code></td>
+<td>Gaussian kernel</td>
+<td>Preserve peak shapes</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_smooth_wavelet.html">step_measure_smooth_wavelet()</a></code></td>
+<td>Wavelet denoising</td>
+<td>Complex noise patterns</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_filter_fourier.html">step_measure_filter_fourier()</a></code></td>
+<td>Frequency filtering</td>
+<td>Periodic noise removal</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_despike.html">step_measure_despike()</a></code></td>
+<td>Spike removal</td>
+<td>Cosmic rays, detector glitches</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="alignment-registration">Alignment &amp; Registration<a class="anchor" aria-label="anchor" href="#alignment-registration"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="33%">
+<col width="41%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Effect</th>
+<th>Use when</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_align_shift.html">step_measure_align_shift()</a></code></td>
+<td>Cross-correlation alignment</td>
+<td>Simple linear shifts</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_align_reference.html">step_measure_align_reference()</a></code></td>
+<td>Align to reference</td>
+<td>External calibration standard</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_align_dtw.html">step_measure_align_dtw()</a></code></td>
+<td>Dynamic time warping</td>
+<td>Non-linear distortions</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_align_ptw.html">step_measure_align_ptw()</a></code></td>
+<td>Parametric time warping</td>
+<td>Polynomial warping functions</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_align_cow.html">step_measure_align_cow()</a></code></td>
+<td>Correlation optimized warping</td>
+<td>Piecewise segment alignment</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="quality-control">Quality Control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="33%">
+<col width="41%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Effect</th>
+<th>Use when</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_qc_snr.html">step_measure_qc_snr()</a></code></td>
+<td>Calculate SNR</td>
+<td>Quality filtering</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_qc_saturated.html">step_measure_qc_saturated()</a></code></td>
+<td>Detect saturation</td>
+<td>Identify clipped data</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/step_measure_qc_outlier.html">step_measure_qc_outlier()</a></code></td>
+<td>Detect outliers</td>
+<td>Sample screening</td>
+</tr>
+<tr class="even">
+<td><code><a href="../reference/step_measure_impute.html">step_measure_impute()</a></code></td>
+<td>Fill missing values</td>
+<td>Gap interpolation</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
 <h3 id="baseline-correction-1">Baseline Correction<a class="anchor" aria-label="anchor" href="#baseline-correction-1"></a>
 </h3>
 <table class="table">

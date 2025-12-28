@@ -1080,6 +1080,36 @@ A typical order might be:
 | [`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md)   | Remove x-ranges     | Remove solvent peaks, artifacts   |
 | [`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md) | Interpolate to grid | Align instruments, reduce density |
 
+### Smoothing & Noise Reduction
+
+| Step                                                                                                                   | Effect              | Use when                        |
+|------------------------------------------------------------------------------------------------------------------------|---------------------|---------------------------------|
+| [`step_measure_smooth_ma()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_ma.md)             | Moving average      | Simple noise reduction          |
+| [`step_measure_smooth_median()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_median.md)     | Median filter       | Spike removal, robust smoothing |
+| [`step_measure_smooth_gaussian()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_gaussian.md) | Gaussian kernel     | Preserve peak shapes            |
+| [`step_measure_smooth_wavelet()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_wavelet.md)   | Wavelet denoising   | Complex noise patterns          |
+| [`step_measure_filter_fourier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_filter_fourier.md)   | Frequency filtering | Periodic noise removal          |
+| [`step_measure_despike()`](https://jameshwade.github.io/measure/dev/reference/step_measure_despike.md)                 | Spike removal       | Cosmic rays, detector glitches  |
+
+### Alignment & Registration
+
+| Step                                                                                                                   | Effect                        | Use when                      |
+|------------------------------------------------------------------------------------------------------------------------|-------------------------------|-------------------------------|
+| [`step_measure_align_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_shift.md)         | Cross-correlation alignment   | Simple linear shifts          |
+| [`step_measure_align_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_reference.md) | Align to reference            | External calibration standard |
+| [`step_measure_align_dtw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_dtw.md)             | Dynamic time warping          | Non-linear distortions        |
+| [`step_measure_align_ptw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_ptw.md)             | Parametric time warping       | Polynomial warping functions  |
+| [`step_measure_align_cow()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_cow.md)             | Correlation optimized warping | Piecewise segment alignment   |
+
+### Quality Control
+
+| Step                                                                                                             | Effect              | Use when              |
+|------------------------------------------------------------------------------------------------------------------|---------------------|-----------------------|
+| [`step_measure_qc_snr()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_snr.md)             | Calculate SNR       | Quality filtering     |
+| [`step_measure_qc_saturated()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_saturated.md) | Detect saturation   | Identify clipped data |
+| [`step_measure_qc_outlier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_outlier.md)     | Detect outliers     | Sample screening      |
+| [`step_measure_impute()`](https://jameshwade.github.io/measure/dev/reference/step_measure_impute.md)             | Fill missing values | Gap interpolation     |
+
 ### Baseline Correction
 
 | Step                                                                                                                     | Effect                     | Use when                          |

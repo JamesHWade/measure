@@ -5,6 +5,21 @@ Tidiers for measure steps
 ## Usage
 
 ``` r
+# S3 method for class 'step_measure_align_shift'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_align_reference'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_align_dtw'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_align_ptw'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_align_cow'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_baseline_als'
 tidy(x, ...)
 
@@ -51,6 +66,9 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_calibrate_y'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_despike'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_detrend'
@@ -116,6 +134,18 @@ tidy(x, ...)
 # S3 method for class 'step_measure_peaks_deconvolve'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_qc_snr'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_qc_saturated'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_impute'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_qc_outlier'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_subtract_blank'
 tidy(x, ...)
 
@@ -153,6 +183,21 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_scale_vast'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_smooth_wavelet'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_smooth_ma'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_smooth_median'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_smooth_gaussian'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_filter_fourier'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_snv'

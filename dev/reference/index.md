@@ -134,6 +134,51 @@ Peak detection, integration, and analysis for chromatography
 - [`find_peaks_cols()`](https://jameshwade.github.io/measure/dev/reference/find_peaks_cols.md)
   : Find peaks columns in a data frame
 
+## Smoothing & Noise Reduction
+
+Noise reduction and spike removal steps
+
+- [`step_measure_smooth_ma()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_ma.md)
+  : Moving Average Smoothing
+- [`step_measure_smooth_median()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_median.md)
+  : Median Filter Smoothing
+- [`step_measure_smooth_gaussian()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_gaussian.md)
+  : Gaussian Kernel Smoothing
+- [`step_measure_smooth_wavelet()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_wavelet.md)
+  : Wavelet Denoising
+- [`step_measure_filter_fourier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_filter_fourier.md)
+  : Fourier Low-Pass Filtering
+- [`step_measure_despike()`](https://jameshwade.github.io/measure/dev/reference/step_measure_despike.md)
+  : Remove Spikes and Outliers from Measurements
+
+## Alignment & Registration
+
+Spectral alignment and shift correction
+
+- [`step_measure_align_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_shift.md)
+  : Shift Alignment via Cross-Correlation
+- [`step_measure_align_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_reference.md)
+  : Align to Reference Spectrum
+- [`step_measure_align_dtw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_dtw.md)
+  : Dynamic Time Warping Alignment
+- [`step_measure_align_ptw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_ptw.md)
+  : Parametric Time Warping Alignment
+- [`step_measure_align_cow()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_cow.md)
+  : Correlation Optimized Warping Alignment
+
+## Quality Control
+
+Quality metrics and data cleaning
+
+- [`step_measure_qc_snr()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_snr.md)
+  : Calculate Signal-to-Noise Ratio
+- [`step_measure_qc_saturated()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_saturated.md)
+  : Detect Saturated Measurements
+- [`step_measure_qc_outlier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_outlier.md)
+  : Detect Outlier Samples
+- [`step_measure_impute()`](https://jameshwade.github.io/measure/dev/reference/step_measure_impute.md)
+  : Impute Missing Values in Measurements
+
 ## Tunable Parameters
 
 Parameters for hyperparameter tuning with dials
@@ -154,6 +199,16 @@ Parameters for hyperparameter tuning with dials
   [`derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
   [`derivative_segment()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
   : Parameters for derivative steps
+- [`smooth_window()`](https://jameshwade.github.io/measure/dev/reference/smooth_window.md)
+  [`smooth_sigma()`](https://jameshwade.github.io/measure/dev/reference/smooth_window.md)
+  [`fourier_cutoff()`](https://jameshwade.github.io/measure/dev/reference/smooth_window.md)
+  [`despike_threshold()`](https://jameshwade.github.io/measure/dev/reference/smooth_window.md)
+  : Parameters for smoothing steps
+- [`align_max_shift()`](https://jameshwade.github.io/measure/dev/reference/align_max_shift.md)
+  [`align_segment_length()`](https://jameshwade.github.io/measure/dev/reference/align_max_shift.md)
+  : Parameters for alignment steps
+- [`outlier_threshold()`](https://jameshwade.github.io/measure/dev/reference/outlier_threshold.md)
+  : Parameters for quality control steps
 
 ## Data
 
@@ -227,11 +282,14 @@ Helper functions and utilities
   : Find measure columns in a data frame
 - [`has_measure_col()`](https://jameshwade.github.io/measure/dev/reference/has_measure_col.md)
   : Check if data frame has measure column(s)
-- [`required_pkgs(`*`<step_measure_mw_averages>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+- [`required_pkgs(`*`<step_measure_align_dtw>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_align_ptw>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_mw_averages>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_mw_fractions>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_mw_distribution>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_resample>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_savitzky_golay>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_smooth_wavelet>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   : Set package dependencies
 
 ## Exploration & Analysis
