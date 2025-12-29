@@ -277,6 +277,44 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
   Techniques](https://jameshwade.github.io/measure/articles/preprocessing.html) -
   Deep dive into available preprocessing methods
 
+## Example Datasets
+
+The package includes several datasets for examples, testing, and
+vignettes:
+
+### Spectroscopy Data
+
+| Dataset             | Technique | Description                                      | Use Case                     |
+|---------------------|-----------|--------------------------------------------------|------------------------------|
+| `meats_long`        | NIR       | NIR transmittance spectra of meat samples        | Composition prediction       |
+| `bioreactors_small` | Raman     | Raman spectra from 15 small-scale bioreactors    | Glucose prediction           |
+| `bioreactors_large` | Raman     | Raman spectra from 3 large-scale bioreactors     | Model validation             |
+| `maldi_spectra`     | MALDI-TOF | Simulated mass spectra (4 groups, 4 replicates)  | Peak detection, comparison   |
+
+### Chromatography Data
+
+| Dataset             | Technique | Description                                       | Use Case              |
+|---------------------|-----------|---------------------------------------------------|-----------------------|
+| `hplc_chromatograms`| HPLC-UV   | Simulated HPLC chromatograms (20 samples)         | Peak integration      |
+| `sec_chromatograms` | SEC/GPC   | Simulated SEC chromatograms (5 stds + 5 polymers) | MW analysis           |
+| `sec_calibration`   | SEC/GPC   | Calibration standards summary                     | MW calibration curves |
+
+### Loading Datasets
+
+``` r
+# Load the glucose bioreactors data
+data(glucose_bioreactors)
+
+# Or load all at once
+data(meats_long)
+data(hplc_chromatograms)
+data(sec_chromatograms)
+data(maldi_spectra)
+```
+
+See `?meats_long`, `?hplc_chromatograms`, etc. for detailed
+documentation.
+
 ## Related packages
 
 measure builds on the [tidymodels](https://www.tidymodels.org/)
