@@ -5,7 +5,7 @@
 \alias{maldi_spectra}
 \title{Simulated MALDI-TOF Mass Spectrometry Data}
 \format{
-A tibble with 304,000 observations and 5 variables:
+A tibble with 304,016 observations and 5 variables:
 \describe{
 \item{sample_id}{Sample identifier combining group and replicate}
 \item{group}{Experimental group ("Control", "Treatment_A", "Treatment_B", "Treatment_C")}
@@ -56,7 +56,8 @@ Each group has a characteristic peak pattern:
 }
 
 The m/z resolution is approximately 500 ppm (parts per million), typical for
-linear MALDI-TOF instruments.
+linear MALDI-TOF instruments. Note that simulated spectra include baseline
+noise and minor peaks in addition to the characteristic peaks listed above.
 }
 \examples{
 data(maldi_spectra)

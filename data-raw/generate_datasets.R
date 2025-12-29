@@ -219,7 +219,8 @@ generate_sec_data <- function() {
       standard = standards_names,
       mw = standards_mw,
       # Calculate peak retention time for calibration
-      peak_time = a/(-b) + log10(standards_mw)/(-b)
+      # From: log10(MW) = a + b * time => time = (log10(MW) - a) / b
+      peak_time = (log10(standards_mw) - a) / b
     )
   )
 }

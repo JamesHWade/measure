@@ -38,7 +38,7 @@
 #' **Polymer Samples** (broad distribution):
 #' - Polymer_A through Polymer_E with varying Mw and dispersity
 #'
-#' The calibration relationship follows: log(MW) = 9.5 - 0.35 * time
+#' The calibration relationship follows: log10(MW) = 9.5 - 0.35 * time
 #'
 #' @source Simulated data generated for the measure package. See
 #'   `data-raw/generate_datasets.R` for the generation script.

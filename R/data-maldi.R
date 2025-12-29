@@ -23,7 +23,7 @@
 #' - Normalization between samples
 #' - Differential analysis between groups
 #'
-#' @format A tibble with 304,000 observations and 5 variables:
+#' @format A tibble with 304,016 observations and 5 variables:
 #' \describe{
 #'   \item{sample_id}{Sample identifier combining group and replicate}
 #'   \item{group}{Experimental group ("Control", "Treatment_A", "Treatment_B", "Treatment_C")}
@@ -40,7 +40,8 @@
 #' - **Treatment_C**: Peptides at m/z ~1050, 1280, 1520, 1890, 2340, 2980, 3650, 4500
 #'
 #' The m/z resolution is approximately 500 ppm (parts per million), typical for
-#' linear MALDI-TOF instruments.
+#' linear MALDI-TOF instruments. Note that simulated spectra include baseline
+#' noise and minor peaks in addition to the characteristic peaks listed above.
 #'
 #' @source Simulated data generated for the measure package. See
 #'   `data-raw/generate_datasets.R` for the generation script.

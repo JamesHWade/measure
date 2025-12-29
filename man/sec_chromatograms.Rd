@@ -54,7 +54,7 @@ The dataset contains:
 \item Polymer_A through Polymer_E with varying Mw and dispersity
 }
 
-The calibration relationship follows: log(MW) = 9.5 - 0.35 * time
+The calibration relationship follows: log10(MW) = 9.5 - 0.35 * time
 }
 \examples{
 data(sec_chromatograms)
