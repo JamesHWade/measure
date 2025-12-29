@@ -118,14 +118,14 @@ Other measure-smoothing:
 ``` r
 if (rlang::is_installed("prospectr")) {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_savitzky_golay(
       differentiation_order = 1,
       degree = 3,
       window_side = 5
-    ) %>%
+    ) |>
     prep()
 }
 ```

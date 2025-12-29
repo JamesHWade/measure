@@ -90,14 +90,14 @@ small_tr <- bioreactors_small[1:200, ]
 small_te <- bioreactors_small[201:210, ]
 
 small_rec <-
-  recipe(glucose ~ ., data = small_tr) %>%
-  update_role(batch_id, day, new_role = "id columns") %>%
-  step_measure_input_wide(`400`:`3050`) %>%
+  recipe(glucose ~ ., data = small_tr) |>
+  update_role(batch_id, day, new_role = "id columns") |>
+  step_measure_input_wide(`400`:`3050`) |>
   prep()
 
 # Before reformatting:
 
-small_rec %>% bake(new_data = small_te)
+small_rec |> bake(new_data = small_te)
 #> # A tibble: 10 × 4
 #>    batch_id   day glucose   .measures
 #>    <chr>    <int>   <dbl>      <meas>
@@ -115,11 +115,11 @@ small_rec %>% bake(new_data = small_te)
 # After reformatting:
 
 output_rec <-
-  small_rec %>%
-  step_measure_output_wide() %>%
+  small_rec |>
+  step_measure_output_wide() |>
   prep()
 
-output_rec %>% bake(new_data = small_te)
+output_rec |> bake(new_data = small_te)
 #> # A tibble: 10 × 2,654
 #>    batch_id   day glucose measure_0001 measure_0002 measure_0003 measure_0004
 #>    <chr>    <int>   <dbl>        <dbl>        <dbl>        <dbl>        <dbl>
