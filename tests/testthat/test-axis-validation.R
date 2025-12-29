@@ -217,3 +217,115 @@ test_that("measure_quality_summary works with single sample",
   expect_equal(result$n_samples, 1)
   expect_true(result$consistency$consistent)
 })
+
+# Additional edge case tests
+
+test_that("validate_measure works with data frame input", {
+  specs <- new_measure_list(list(
+    new_measure_tbl(location = 1:10, value = rnorm(10))
+  ))
+  df <- tibble::tibble(.measures = specs)
+
+  expect_silent(validate_measure(df, action = "message"))
+})
+
+test_that("validate_measure errors on data frame without measure column", {
+  df <- tibble::tibble(x = 1:10, y = rnorm(10))
+
+  expect_error(validate_measure(df), "No measure column found")
+})
+
+test_that("validate_measure errors on invalid input type", {
+  expect_error(validate_measure(1:10), "must be")
+  expect_error(validate_measure("string"), "must be")
+})
+
+test_that("measure_axis_info handles empty measure_tbl", {
+  empty_spec <- new_measure_tbl(location = numeric(0), value = numeric(0))
+
+  info <- measure_axis_info(empty_spec)
+
+  expect_true(is.na(info$min) || is.infinite(info$min))
+  expect_true(is.na(info$max) || is.infinite(info$max))
+  expect_equal(info$n_points, 0L)
+  expect_true(is.na(info$spacing))
+  expect_true(is.na(info$axis_type))
+})
+
+test_that("validation handles single-element measure data", {
+  single <- new_measure_tbl(location = 1, value = 0.5)
+
+  # Should pass all checks (nothing to validate with single point)
+  result <- validate_measure(single, action = "message")
+  expect_true(result$monotonic$valid)
+  expect_true(result$duplicates$valid)
+  expect_true(result$missing$valid)
+  expect_true(result$spacing$valid)
+
+  # Axis info should handle single point
+  info <- measure_axis_info(single)
+  expect_equal(info$n_points, 1)
+  expect_true(is.na(info$direction))
+  expect_true(info$regular)
+})
+
+test_that("validation handles two-element measure data", {
+  two_pts <- new_measure_tbl(location = c(1, 2), value = c(0.5, 0.6))
+
+  result <- validate_measure(two_pts, action = "message")
+  expect_true(result$monotonic$valid)
+  expect_true(result$spacing$valid)
+
+  info <- measure_axis_info(two_pts)
+  expect_equal(info$direction, "increasing")
+  expect_true(info$regular)
+})
+
+test_that("check_axis_consistency handles single sample", {
+  single <- new_measure_list(list(
+    new_measure_tbl(location = 1:10, value = rnorm(10))
+  ))
+
+  result <- check_axis_consistency(single, action = "message")
+  expect_true(result$consistent)
+  expect_equal(result$reference_locations, 1:10)
+  expect_equal(length(result$inconsistent_samples), 0)
+})
+
+test_that("measure_axis_info errors on invalid sample index", {
+  specs <- new_measure_list(list(
+    new_measure_tbl(location = 1:10, value = rnorm(10))
+  ))
+
+  expect_error(measure_axis_info(specs, sample = 5), "does not exist")
+})
+
+test_that("measure_quality_summary errors on empty data", {
+  empty_list <- new_measure_list(list())
+
+  expect_error(measure_quality_summary(empty_list), "empty")
+})
+
+test_that("check_regular_spacing handles zero median spacing", {
+  # All identical locations - median diff is zero
+  spec <- new_measure_tbl(
+    location = rep(5, 10),
+    value = 1:10
+  )
+
+  # Should detect as having duplicates (not crash from division by zero)
+  expect_error(validate_measure(spec), "Duplicate")
+})
+
+test_that("measure_axis_info handles constant locations", {
+  # All same location values
+  spec <- new_measure_tbl(
+    location = rep(100, 5),
+    value = 1:5
+  )
+
+  # Should not crash - should handle zero spacing gracefully
+  info <- measure_axis_info(spec)
+  expect_equal(info$n_points, 5)
+  expect_equal(info$spacing, 0)
+})

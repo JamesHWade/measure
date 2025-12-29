@@ -268,15 +268,25 @@ check_regular_spacing <- function(measures, tolerance = 1e-6) {
     loc <- measures[[i]]$location
     if (length(loc) < 3) next
 
+    # Skip if NAs present (handled by check_no_missing)
+    if (anyNA(loc)) next
+
     diffs <- diff(loc)
     median_diff <- stats::median(diffs)
 
     # Check if all differences are approximately equal
-    rel_diffs <- abs(diffs - median_diff) / abs(median_diff)
-    irregular <- which(rel_diffs > tolerance)
+    # Guard against division by zero when median_diff is zero
+    if (abs(median_diff) < .Machine$double.eps) {
+      # All diffs should be approximately zero for regular spacing
+      irregular <- which(abs(diffs) > tolerance)
+      max_dev <- if (length(irregular) > 0) max(abs(diffs)) else 0
+    } else {
+      rel_diffs <- abs(diffs - median_diff) / abs(median_diff)
+      irregular <- which(rel_diffs > tolerance)
+      max_dev <- if (length(irregular) > 0) max(rel_diffs) else 0
+    }
 
     if (length(irregular) > 0) {
-      max_dev <- max(rel_diffs)
       issues <- c(issues, sprintf(
         "Sample %s: irregular spacing (max deviation: %.2f%%, %d irregular intervals)",
         names(measures)[i],
@@ -313,9 +323,9 @@ check_regular_spacing <- function(measures, tolerance = 1e-6) {
 #' @return A list with:
 #'   - `min`, `max`: Range of location values
 #'   - `n_points`: Number of data points
-#'   - `spacing`: Median spacing between points (NA if irregular)
+#'   - `spacing`: Median absolute spacing between points
 #'   - `direction`: "increasing", "decreasing", or "mixed"
-#'   - `regular`: Logical indicating if spacing is regular
+#'   - `regular`: Logical indicating if spacing is regular (within tolerance)
 #'   - `axis_type`: Inferred axis type (see [infer_axis_type()])
 #'
 #' @examples
@@ -390,6 +400,9 @@ measure_axis_info <- function(x, sample = 1L) {
   # Check regularity
   regular <- if (n < 3) {
     TRUE
+  } else if (abs(median_spacing) < .Machine$double.eps) {
+    # Zero median spacing - check if all diffs are approximately zero
+    all(abs(diffs) < 1e-6)
   } else {
     rel_diffs <- abs(diffs - median_spacing) / abs(median_spacing)
     all(rel_diffs < 1e-6)
@@ -656,6 +669,11 @@ measure_quality_summary <- function(x, verbose = TRUE) {
     n_samples <- length(measures)
   } else {
     cli::cli_abort("{.arg x} must be measure_tbl, measure_list, or data frame.")
+  }
+
+  # Check for empty data
+ if (n_samples == 0) {
+    cli::cli_abort("Cannot summarize empty measure data.")
   }
 
   # Get axis info from first sample

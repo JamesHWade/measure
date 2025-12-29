@@ -17,9 +17,9 @@ A list with:
 \itemize{
 \item \code{min}, \code{max}: Range of location values
 \item \code{n_points}: Number of data points
-\item \code{spacing}: Median spacing between points (NA if irregular)
+\item \code{spacing}: Median absolute spacing between points
 \item \code{direction}: "increasing", "decreasing", or "mixed"
-\item \code{regular}: Logical indicating if spacing is regular
+\item \code{regular}: Logical indicating if spacing is regular (within tolerance)
 \item \code{axis_type}: Inferred axis type (see \code{\link[=infer_axis_type]{infer_axis_type()}})
 }
 }
