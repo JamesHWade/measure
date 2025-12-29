@@ -149,6 +149,9 @@ reference:
   - align_max_shift
   - align_segment_length
   - outlier_threshold
+  - bin_width
+  - emsc_degree
+  - osc_n_components
   - starts_with("tunable")
 - title: Data
   desc: Included datasets for examples and testing
@@ -167,6 +170,24 @@ reference:
   - step_measure_mw_averages
   - step_measure_mw_distribution
   - step_measure_mw_fractions
+- title: Feature Engineering
+  desc: Extract features from spectral data
+  contents:
+  - step_measure_integrals
+  - step_measure_ratios
+  - step_measure_moments
+  - step_measure_bin
+- title: Extended Scatter Correction
+  desc: Advanced scatter correction methods
+  contents:
+  - step_measure_emsc
+  - step_measure_osc
+- title: Data Augmentation
+  desc: Training data augmentation for improved model robustness
+  contents:
+  - step_measure_augment_noise
+  - step_measure_augment_shift
+  - step_measure_augment_scale
 - title: Utilities
   desc: Helper functions and utilities
   contents:

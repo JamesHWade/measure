@@ -160,11 +160,13 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 
 ### Filtering & Scatter Correction
 
-| Step                            | Description                           |
-|---------------------------------|---------------------------------------|
-| `step_measure_savitzky_golay()` | Smoothing and/or differentiation      |
-| `step_measure_snv()`            | Standard Normal Variate normalization |
-| `step_measure_msc()`            | Multiplicative Scatter Correction     |
+| Step | Description |
+|----|----|
+| `step_measure_savitzky_golay()` | Smoothing and/or differentiation |
+| `step_measure_snv()` | Standard Normal Variate normalization |
+| `step_measure_msc()` | Multiplicative Scatter Correction |
+| `step_measure_emsc()` | Extended MSC with wavelength-dependent correction |
+| `step_measure_osc()` | Orthogonal Signal Correction |
 
 ### Smoothing & Noise Reduction
 
@@ -267,6 +269,23 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | `step_measure_mw_averages()` | Calculate Mn, Mw, Mz, Mp, and dispersity |
 | `step_measure_mw_distribution()` | Generate molecular weight distribution curve |
 | `step_measure_mw_fractions()` | Calculate molecular weight fractions |
+
+### Feature Engineering
+
+| Step | Description |
+|----|----|
+| `step_measure_integrals()` | Calculate integrated areas for specified regions |
+| `step_measure_ratios()` | Calculate ratios between integrated regions |
+| `step_measure_moments()` | Calculate statistical moments from spectra |
+| `step_measure_bin()` | Reduce spectrum to fewer points via binning |
+
+### Data Augmentation
+
+| Step                           | Description                                |
+|--------------------------------|--------------------------------------------|
+| `step_measure_augment_noise()` | Add random noise for training augmentation |
+| `step_measure_augment_shift()` | Random x-axis shifts for shift invariance  |
+| `step_measure_augment_scale()` | Random intensity scaling                   |
 
 ## Learning more
 
