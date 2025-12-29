@@ -44,7 +44,7 @@ matrix_to_measure <- function(x, loc) {
 
 measure_to_tibble <- function(x) {
   x <-
-    tibble::tibble(x = x, sample_num = seq_along(x)) %>%
+    tibble::tibble(x = x, sample_num = seq_along(x)) |>
     tidyr::unnest(cols = x)
   x
 }

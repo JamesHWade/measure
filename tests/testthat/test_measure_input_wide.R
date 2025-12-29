@@ -9,7 +9,7 @@ test_that("ingest wide format data", {
   # ----------------------------------------------------------------------------
 
   rec_1 <-
-    recipe(water + fat + protein ~ ., data = meats_data$train) %>%
+    recipe(water + fat + protein ~ ., data = meats_data$train) |>
     step_measure_input_wide(x_001:x_100, id = "potato")
   expect_snapshot(print(rec_1))
   expect_snapshot(print(summary(rec_1)))
@@ -46,14 +46,14 @@ test_that("ingest wide format data", {
   ## missing values
 
   prep_2 <-
-    recipe(water + fat + protein ~ ., data = na_train) %>%
-    step_measure_input_wide(x_001:x_100) %>%
+    recipe(water + fat + protein ~ ., data = na_train) |>
+    step_measure_input_wide(x_001:x_100) |>
     prep()
 
   ## bad inputs
   expect_snapshot(
-    recipe(water + fat + protein ~ ., data = na_train) %>%
-      step_measure_input_wide(x_001:x_100, location_values = 1:2) %>%
+    recipe(water + fat + protein ~ ., data = na_train) |>
+      step_measure_input_wide(x_001:x_100, location_values = 1:2) |>
       prep(),
     error = TRUE
   )

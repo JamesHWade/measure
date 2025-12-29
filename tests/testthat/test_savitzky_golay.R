@@ -4,9 +4,9 @@ test_that("savitzky-golay computations", {
   # ------------------------------------------------------------------------------
 
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   spect_start <- measure_to_matrix(rec$template$.measures)
@@ -22,7 +22,7 @@ test_that("savitzky-golay computations", {
         diffs = grid$diffs[i],
         degree = grid$deg[i],
         window = grid$wn[i]
-      ) %>%
+      ) |>
       measure_to_matrix()
     prosp_res <-
       prospectr::savitzkyGolay(
@@ -41,9 +41,9 @@ test_that("savitzky-golay inputs", {
   # ------------------------------------------------------------------------------
 
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   spect_start <- measure_to_matrix(rec$template$.measures)
@@ -94,22 +94,22 @@ test_that("savitzky-golay inputs", {
 
     if (warn_val) {
       expect_snapshot(
-        rec %>%
+        rec |>
           step_measure_savitzky_golay(
             differentiation_order = arg_inputs$order[i],
             window_side = arg_inputs$win_side[i],
             degree = arg_inputs$degree[i]
-          ) %>%
+          ) |>
           prep()
       )
     } else {
       expect_silent(
-        rec %>%
+        rec |>
           step_measure_savitzky_golay(
             differentiation_order = arg_inputs$order[i],
             window_side = arg_inputs$win_side[i],
             degree = arg_inputs$degree[i]
-          ) %>%
+          ) |>
           prep()
       )
     }
@@ -123,10 +123,10 @@ test_that("savitzky-golay tuning parameters", {
   expect_snapshot(differentiation_order())
 
   expect_snapshot(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_input_long(transmittance, location = vars(channel)) %>%
-      step_measure_savitzky_golay() %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_savitzky_golay() |>
       tunable()
   )
 })

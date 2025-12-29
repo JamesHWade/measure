@@ -1,8 +1,8 @@
 # savitzky-golay inputs
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The window size (3) should be greater than `degree` (4). `window_side` was increased from 1 to 2.
@@ -27,8 +27,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The window size (3) should be greater than `degree` (3). `window_side` was increased from 1 to 2.
@@ -53,8 +53,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The window size (3) should be greater than `degree` (5). `window_side` was increased from 1 to 3.
@@ -79,8 +79,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order` (2). The polynomial degree was increased from 1 to 2.
@@ -105,8 +105,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order` (4). The polynomial degree was increased from 2 to 4.
@@ -133,8 +133,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The window size (5) should be greater than `degree` (5). `window_side` was increased from 2 to 3.
@@ -159,8 +159,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order` (3). The polynomial degree was increased from 1 to 3.
@@ -185,8 +185,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order` (4). The polynomial degree was increased from 2 to 4.
@@ -211,8 +211,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order` (4). The polynomial degree was increased from 1 to 4.
@@ -237,8 +237,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order` (4). The polynomial degree was increased from 3 to 4.
@@ -263,8 +263,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order` (2). The polynomial degree was increased from 1 to 2.
@@ -289,8 +289,8 @@
 ---
 
     Code
-      rec %>% step_measure_savitzky_golay(differentiation_order = arg_inputs$order[i],
-      window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]) %>% prep()
+      prep(step_measure_savitzky_golay(rec, differentiation_order = arg_inputs$order[
+        i], window_side = arg_inputs$win_side[i], degree = arg_inputs$degree[i]))
     Condition
       Warning:
       The `degree` argument to `step_measure_savitzky_golay()` should be greater than or equal to `differentiation_order` (3). The polynomial degree was increased from 2 to 3.
@@ -339,9 +339,9 @@
 ---
 
     Code
-      recipe(water + fat + protein ~ ., data = meats_long) %>% update_role(id,
-        new_role = "id") %>% step_measure_input_long(transmittance, location = vars(
-        channel)) %>% step_measure_savitzky_golay() %>% tunable()
+      tunable(step_measure_savitzky_golay(step_measure_input_long(update_role(recipe(
+        water + fat + protein ~ ., data = meats_long), id, new_role = "id"),
+      transmittance, location = vars(channel))))
     Output
       # A tibble: 3 x 5
         name                  call_info        source component           component_id

@@ -97,8 +97,7 @@
 ---
 
     Code
-      recipe(water + fat + protein ~ ., data = meats_train) %>%
-        step_measure_output_long() %>% prep()
+      prep(step_measure_output_long(recipe(water + fat + protein ~ ., data = meats_train)))
     Condition
       Error in `step_measure_output_long()`:
       Caused by error in `check_has_measure()`:

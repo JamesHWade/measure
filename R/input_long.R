@@ -130,16 +130,16 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
   col_name <- object$col_name
 
   new_data <-
-    new_data %>%
+    new_data |>
     rename_long_cols(object$columns[1], object$columns[2])
 
   if (!is.na(object$columns[2])) {
     new_data <-
-      new_data %>%
+      new_data |>
       tidyr::nest(.by = c(-value, -location), .key = ".measures_temp")
   } else {
     new_data <-
-      new_data %>%
+      new_data |>
       tidyr::nest(.by = c(-value), .key = ".measures_temp")
   }
 

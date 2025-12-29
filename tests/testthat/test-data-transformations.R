@@ -1,8 +1,8 @@
 test_that("transform measure to matrix", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   spect_mat <- measure_to_matrix(rec$template$.measures)
@@ -21,9 +21,9 @@ test_that("transform measure to matrix", {
 
 test_that("transform matrix to measure", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   spect_mat <- measure_to_matrix(rec$template$.measures)
@@ -42,9 +42,9 @@ test_that("transform matrix to measure", {
 
 test_that("transform tidy format", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   spect_df <- measure_to_tibble(rec$template$.measures)

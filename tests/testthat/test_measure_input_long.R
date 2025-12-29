@@ -6,13 +6,13 @@ test_that("ingest long format data", {
   na_test <- meats_data$test
   na_test$absorp[2] <- NA_real_
 
-  miss_train <- meats_data$train %>% dplyr::slice(-5)
-  miss_test <- meats_data$test %>% dplyr::slice(-5)
+  miss_train <- meats_data$train |> dplyr::slice(-5)
+  miss_test <- meats_data$test |> dplyr::slice(-5)
 
   # ----------------------------------------------------------------------------
 
   rec_1 <-
-    recipe(water + fat + protein ~ ., data = meats_data$train) %>%
+    recipe(water + fat + protein ~ ., data = meats_data$train) |>
     step_measure_input_long(absorp, location = vars(ind), id = "potato")
   expect_snapshot(print(rec_1))
   expect_snapshot(print(summary(rec_1)))
@@ -48,8 +48,8 @@ test_that("ingest long format data", {
 
   ## missing location
   expect_snapshot(
-    recipe(water + fat + protein ~ absorp, data = na_train) %>%
-      step_measure_input_long(absorp) %>%
+    recipe(water + fat + protein ~ absorp, data = na_train) |>
+      step_measure_input_long(absorp) |>
       prep(),
     error = TRUE
   )
@@ -57,8 +57,8 @@ test_that("ingest long format data", {
   ### missing rows
 
   expect_snapshot(
-    recipe(water + fat + protein ~ ., data = miss_train) %>%
-      step_measure_input_long(absorp, location = vars(ind)) %>%
+    recipe(water + fat + protein ~ ., data = miss_train) |>
+      step_measure_input_long(absorp, location = vars(ind)) |>
       prep(),
     error = TRUE
   )
@@ -66,8 +66,8 @@ test_that("ingest long format data", {
   ## missing values
 
   prep_3 <-
-    recipe(water + fat + protein ~ ., data = na_train) %>%
-    step_measure_input_long(absorp, location = vars(ind)) %>%
+    recipe(water + fat + protein ~ ., data = na_train) |>
+    step_measure_input_long(absorp, location = vars(ind)) |>
     prep()
 
   ## non-unique rows
@@ -75,8 +75,8 @@ test_that("ingest long format data", {
   # TODO need to find a better way of figuring this out
   # expect_snapshot(
   #   recipe(water + fat + protein ~ .,
-  #          data = meats_data$train %>% select(-.sample_num)) %>%
-  #     step_measure_input_long(absorp, location = vars(ind)) %>%
+  #          data = meats_data$train |> select(-.sample_num)) |>
+  #     step_measure_input_long(absorp, location = vars(ind)) |>
   #     prep(),
   #   error = TRUE
   # )
@@ -87,14 +87,14 @@ test_that("ingest long format data", {
 
   ## bad inputs
   expect_snapshot(
-    recipe(water + fat + protein ~ ., data = na_train) %>%
-      step_measure_input_long(dplyr::everything(), location = vars(ind)) %>%
+    recipe(water + fat + protein ~ ., data = na_train) |>
+      step_measure_input_long(dplyr::everything(), location = vars(ind)) |>
       prep(),
     error = TRUE
   )
   expect_snapshot(
-    recipe(water + fat + protein ~ ., data = na_train) %>%
-      step_measure_input_long(absorp, location = vars(dplyr::everything())) %>%
+    recipe(water + fat + protein ~ ., data = na_train) |>
+      step_measure_input_long(absorp, location = vars(dplyr::everything())) |>
       prep(),
     error = TRUE
   )

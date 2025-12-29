@@ -29,23 +29,23 @@
 #' small_te <- bioreactors_small[201:210, ]
 #'
 #' small_rec <-
-#'   recipe(glucose ~ ., data = small_tr) %>%
-#'   update_role(batch_id, day, new_role = "id columns") %>%
-#'   step_measure_input_wide(`400`:`3050`) %>%
+#'   recipe(glucose ~ ., data = small_tr) |>
+#'   update_role(batch_id, day, new_role = "id columns") |>
+#'   step_measure_input_wide(`400`:`3050`) |>
 #'   prep()
 #'
 #' # Before reformatting:
 #'
-#' small_rec %>% bake(new_data = small_te)
+#' small_rec |> bake(new_data = small_te)
 #'
 #' # After reformatting:
 #'
 #' output_rec <-
-#'   small_rec %>%
-#'   step_measure_output_long() %>%
+#'   small_rec |>
+#'   step_measure_output_long() |>
 #'   prep()
 #'
-#' output_rec %>% bake(new_data = small_te)
+#' output_rec |> bake(new_data = small_te)
 #'
 #' @export
 
@@ -128,8 +128,8 @@ bake.step_measure_output_long <- function(object, new_data, ...) {
   col <- object$measures
   rnm <- c(paste0(col, ".value"), paste0(col, ".location"))
   names(rnm) <- c(object$values_to, object$location_to)
-  new_data %>%
-    tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") %>%
+  new_data |>
+    tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") |>
     dplyr::rename(!!rnm)
 }
 
