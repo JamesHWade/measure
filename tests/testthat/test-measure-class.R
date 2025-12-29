@@ -251,9 +251,9 @@ test_that("has_measure_col errors when no measure column", {
 
 test_that("input steps create measure_list", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -267,10 +267,10 @@ test_that("input steps create measure_list", {
 
 test_that("processing steps preserve measure_list class", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_snv() %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_snv() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -281,11 +281,11 @@ test_that("processing steps preserve measure_list class", {
 
 test_that("chained processing steps preserve measure_list class", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_snv() %>%
-    step_measure_msc() %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_snv() |>
+    step_measure_msc() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -299,8 +299,8 @@ test_that("wide input creates measure_list", {
   data(meats, package = "modeldata")
 
   rec <-
-    recipe(water + fat + protein ~ ., data = meats) %>%
-    step_measure_input_wide(dplyr::starts_with("x_")) %>%
+    recipe(water + fat + protein ~ ., data = meats) |>
+    step_measure_input_wide(dplyr::starts_with("x_")) |>
     prep()
 
   result <- bake(rec, new_data = NULL)

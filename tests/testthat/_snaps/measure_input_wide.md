@@ -90,8 +90,8 @@
 ---
 
     Code
-      recipe(water + fat + protein ~ ., data = na_train) %>% step_measure_input_wide(
-        x_001:x_100, location_values = 1:2) %>% prep()
+      prep(step_measure_input_wide(recipe(water + fat + protein ~ ., data = na_train),
+      x_001:x_100, location_values = 1:2))
     Condition
       Error in `step_measure_input_wide()`:
       Caused by error in `prep()`:

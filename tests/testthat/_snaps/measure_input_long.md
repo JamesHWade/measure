@@ -85,8 +85,8 @@
 ---
 
     Code
-      recipe(water + fat + protein ~ absorp, data = na_train) %>%
-        step_measure_input_long(absorp) %>% prep()
+      prep(step_measure_input_long(recipe(water + fat + protein ~ absorp, data = na_train),
+      absorp))
     Condition
       Error in `step_measure_input_long()`:
       Caused by error in `prep()`:
@@ -95,8 +95,8 @@
 ---
 
     Code
-      recipe(water + fat + protein ~ ., data = miss_train) %>%
-        step_measure_input_long(absorp, location = vars(ind)) %>% prep()
+      prep(step_measure_input_long(recipe(water + fat + protein ~ ., data = miss_train),
+      absorp, location = vars(ind)))
     Condition
       Error in `step_measure_input_long()`:
       Caused by error in `check_measure_dims()`:
@@ -105,8 +105,8 @@
 ---
 
     Code
-      recipe(water + fat + protein ~ ., data = na_train) %>% step_measure_input_long(
-        dplyr::everything(), location = vars(ind)) %>% prep()
+      prep(step_measure_input_long(recipe(water + fat + protein ~ ., data = na_train),
+      dplyr::everything(), location = vars(ind)))
     Condition
       Error in `step_measure_input_long()`:
       Caused by error in `check_single_selector()`:
@@ -115,8 +115,8 @@
 ---
 
     Code
-      recipe(water + fat + protein ~ ., data = na_train) %>% step_measure_input_long(
-        absorp, location = vars(dplyr::everything())) %>% prep()
+      prep(step_measure_input_long(recipe(water + fat + protein ~ ., data = na_train),
+      absorp, location = vars(dplyr::everything())))
     Condition
       Error in `step_measure_input_long()`:
       Caused by error in `check_single_selector()`:

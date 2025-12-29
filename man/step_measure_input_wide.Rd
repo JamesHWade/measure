@@ -80,14 +80,14 @@ the original columns were used to reformat the data.
 data(meats, package = "modeldata")
 
 # Outcome data is to the right
-names(meats) \%>\% tail(10)
+names(meats) |> tail(10)
 
 # ------------------------------------------------------------------------------
 # Ingest data without adding the location (i.e. wave number) for the spectra
 
 rec <-
-  recipe(water + fat + protein ~ ., data = meats) \%>\%
-  step_measure_input_wide(starts_with("x_")) \%>\%
+  recipe(water + fat + protein ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
   prep()
 
 summary(rec)
@@ -99,8 +99,8 @@ summary(rec)
 index <- seq(1, 2, length.out = 100)
 
 rec <-
-  recipe(water + fat + protein ~ ., data = meats) \%>\%
-  step_measure_input_wide(starts_with("x_"), location_values = index) \%>\%
+  recipe(water + fat + protein ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = index) |>
   prep()
 
 summary(rec)

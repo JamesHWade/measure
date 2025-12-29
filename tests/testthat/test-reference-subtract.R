@@ -13,10 +13,10 @@
 
 # Create test data in internal format
 create_test_data <- function() {
-  recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    prep() %>%
+  recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    prep() |>
     bake(new_data = NULL)
 }
 
@@ -37,10 +37,10 @@ test_that("step_measure_subtract_blank works with external numeric blank", {
   # Create external blank (all zeros - no change)
   blank <- rep(0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_blank(blank = blank) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_blank(blank = blank) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -58,10 +58,10 @@ test_that("step_measure_subtract_blank actually subtracts values", {
   # Create blank with value 0.1
   blank <- rep(0.1, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_blank(blank = blank) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_blank(blank = blank) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -79,10 +79,10 @@ test_that("step_measure_subtract_blank divide method works", {
   # Create blank with value 2.0 (will divide)
   blank <- rep(2.0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_blank(blank = blank, method = "divide") %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_blank(blank = blank, method = "divide") |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -95,10 +95,10 @@ test_that("step_measure_subtract_blank divide method works", {
 
 test_that("step_measure_subtract_blank errors without blank or blank_col", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_input_long(transmittance, location = vars(channel)) %>%
-      step_measure_subtract_blank() %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_subtract_blank() |>
       prep(),
     "blank.*blank_col"
   )
@@ -106,10 +106,10 @@ test_that("step_measure_subtract_blank errors without blank or blank_col", {
 
 test_that("step_measure_subtract_blank errors with wrong blank length", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_input_long(transmittance, location = vars(channel)) %>%
-      step_measure_subtract_blank(blank = c(1, 2, 3)) %>% # Wrong length
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_subtract_blank(blank = c(1, 2, 3)) |> # Wrong length
       prep(),
     "length"
   )
@@ -120,10 +120,10 @@ test_that("step_measure_subtract_blank errors with invalid method", {
   blank <- rep(0.1, n_locs)
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_input_long(transmittance, location = vars(channel)) %>%
-      step_measure_subtract_blank(blank = blank, method = "invalid") %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_subtract_blank(blank = blank, method = "invalid") |>
       prep(),
     "subtract.*divide"
   )
@@ -134,10 +134,10 @@ test_that("step_measure_subtract_blank preserves locations", {
   n_locs <- get_n_locations()
   blank <- rep(0.1, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_blank(blank = blank) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_blank(blank = blank) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -152,9 +152,9 @@ test_that("step_measure_subtract_blank print method works", {
   n_locs <- get_n_locations()
   blank <- rep(0.1, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_subtract_blank(blank = blank)
 
   # Before training
@@ -169,10 +169,10 @@ test_that("step_measure_subtract_blank tidy method works", {
   n_locs <- get_n_locations()
   blank <- rep(0.1, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_blank(blank = blank) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_blank(blank = blank) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -186,9 +186,9 @@ test_that("step_measure_subtract_blank tidy method works", {
 
 test_that("step_measure_subtract_blank works without input step error", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_subtract_blank(blank = rep(0.1, 100)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+      update_role(id, new_role = "id") |>
+      step_measure_subtract_blank(blank = rep(0.1, 100)) |>
       prep(),
     "measures"
   )
@@ -204,10 +204,10 @@ test_that("step_measure_subtract_reference works with numeric reference", {
 
   ref <- rep(0.5, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_reference(reference = ref) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_reference(reference = ref) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -223,10 +223,10 @@ test_that("step_measure_subtract_reference divide method works", {
 
   ref <- rep(2.0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_reference(reference = ref, method = "divide") %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_reference(reference = ref, method = "divide") |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -238,7 +238,7 @@ test_that("step_measure_subtract_reference divide method works", {
 
 test_that("step_measure_subtract_reference requires reference argument", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_subtract_reference(),
     "reference.*required"
   )
@@ -248,10 +248,10 @@ test_that("step_measure_subtract_reference print method works", {
   n_locs <- get_n_locations()
   ref <- rep(1.0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_reference(reference = ref, method = "divide") %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_reference(reference = ref, method = "divide") |>
     prep()
 
   expect_output(print(rec$steps[[2]]), "Reference division")
@@ -261,10 +261,10 @@ test_that("step_measure_subtract_reference tidy method works", {
   n_locs <- get_n_locations()
   ref <- rep(1.0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_reference(reference = ref) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_reference(reference = ref) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -284,10 +284,10 @@ test_that("step_measure_ratio_reference works without blank", {
 
   ref <- rep(2.0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_ratio_reference(reference = ref) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_ratio_reference(reference = ref) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -305,10 +305,10 @@ test_that("step_measure_ratio_reference works with blank", {
   ref <- rep(4.0, n_locs)
   blank <- rep(2.0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_ratio_reference(reference = ref, blank = blank) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_ratio_reference(reference = ref, blank = blank) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -323,7 +323,7 @@ test_that("step_measure_ratio_reference works with blank", {
 
 test_that("step_measure_ratio_reference requires reference argument", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_ratio_reference(),
     "reference.*required"
   )
@@ -334,10 +334,10 @@ test_that("step_measure_ratio_reference print method works", {
   ref <- rep(2.0, n_locs)
   blank <- rep(0.1, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_ratio_reference(reference = ref, blank = blank) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_ratio_reference(reference = ref, blank = blank) |>
     prep()
 
   expect_output(print(rec$steps[[2]]), "with blank")
@@ -347,10 +347,10 @@ test_that("step_measure_ratio_reference tidy method works", {
   n_locs <- get_n_locations()
   ref <- rep(2.0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_ratio_reference(reference = ref) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_ratio_reference(reference = ref) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -369,11 +369,11 @@ test_that("reference steps work in a pipeline", {
   blank <- rep(0.1, n_locs)
   ref <- rep(1.0, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_subtract_blank(blank = blank) %>%
-    step_measure_subtract_reference(reference = ref, method = "divide") %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_subtract_blank(blank = blank) |>
+    step_measure_subtract_reference(reference = ref, method = "divide") |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -383,7 +383,7 @@ test_that("reference steps work in a pipeline", {
 })
 
 test_that("reference steps work with wide input format", {
-  test_data_wide <- meats_long %>%
+  test_data_wide <- meats_long |>
     tidyr::pivot_wider(
       names_from = channel,
       names_prefix = "x_",
@@ -396,10 +396,10 @@ test_that("reference steps work with wide input format", {
 
   blank <- rep(0.1, n_locs)
 
-  rec <- recipe(water + fat + protein ~ ., data = test_data_wide) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_wide(starts_with("x_")) %>%
-    step_measure_subtract_blank(blank = blank) %>%
+  rec <- recipe(water + fat + protein ~ ., data = test_data_wide) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_wide(starts_with("x_")) |>
+    step_measure_subtract_blank(blank = blank) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -413,16 +413,16 @@ test_that("required_pkgs methods work", {
   blank <- rep(0.1, n_locs)
   ref <- rep(1.0, n_locs)
 
-  rec1 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec1 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_subtract_blank(blank = blank)
 
-  rec2 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_subtract_reference(reference = ref)
 
-  rec3 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec3 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_ratio_reference(reference = ref)
 
   expect_true("measure" %in% required_pkgs(rec1$steps[[2]]))

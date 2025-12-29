@@ -45,10 +45,10 @@ create_bimodal_gpc_data <- function() {
 test_that("step_measure_mw_averages calculates all metrics", {
   data <- create_gpc_data()
 
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
-    step_measure_mw_averages() %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
+    step_measure_mw_averages() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -63,10 +63,10 @@ test_that("step_measure_mw_averages calculates all metrics", {
 test_that("step_measure_mw_averages produces reasonable values for Gaussian peak", {
   data <- create_gpc_data()
 
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
-    step_measure_mw_averages() %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
+    step_measure_mw_averages() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -86,10 +86,10 @@ test_that("step_measure_mw_averages produces reasonable values for Gaussian peak
 test_that("step_measure_mw_averages respects output_cols", {
   data <- create_gpc_data()
 
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
-    step_measure_mw_averages(output_cols = c("mn", "mw")) %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
+    step_measure_mw_averages(output_cols = c("mn", "mw")) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -103,10 +103,10 @@ test_that("step_measure_mw_averages respects output_cols", {
 test_that("step_measure_mw_averages respects prefix", {
   data <- create_gpc_data()
 
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
-    step_measure_mw_averages(prefix = "sec_") %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
+    step_measure_mw_averages(prefix = "sec_") |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -124,10 +124,10 @@ test_that("step_measure_mw_averages with linear calibration works", {
 
   # Calibration: log10(MW) = -0.5 * RT + 9
   # At RT = 10, log10(MW) = 4, so MW = 10000
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(rt)) %>%
-    step_measure_mw_averages(calibration = c(-0.5, 9)) %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(rt)) |>
+    step_measure_mw_averages(calibration = c(-0.5, 9)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -141,10 +141,10 @@ test_that("step_measure_mw_averages with integration_range works", {
   data <- create_bimodal_gpc_data()
 
   # Only integrate the high MW peak (log_mw 4.5-6)
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
-    step_measure_mw_averages(integration_range = c(4.5, 6)) %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
+    step_measure_mw_averages(integration_range = c(4.5, 6)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -155,16 +155,16 @@ test_that("step_measure_mw_averages with integration_range works", {
 
 test_that("step_measure_mw_averages errors with invalid output_cols", {
   expect_error(
-    recipe(~., data = create_gpc_data()) %>%
+    recipe(~., data = create_gpc_data()) |>
       step_measure_mw_averages(output_cols = c("invalid")),
     "Invalid output columns"
   )
 })
 
 test_that("step_measure_mw_averages print method works", {
-  rec <- recipe(~., data = create_gpc_data()) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
+  rec <- recipe(~., data = create_gpc_data()) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
     step_measure_mw_averages()
 
   expect_output(print(rec$steps[[2]]), "MW averages")
@@ -173,10 +173,10 @@ test_that("step_measure_mw_averages print method works", {
 test_that("step_measure_mw_averages tidy method works", {
   data <- create_gpc_data()
 
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
-    step_measure_mw_averages() %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
+    step_measure_mw_averages() |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -196,10 +196,10 @@ test_that("step_measure_mw_averages handles multiple samples", {
     )
   )
 
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
-    step_measure_mw_averages(output_cols = c("mp")) %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
+    step_measure_mw_averages(output_cols = c("mp")) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -218,11 +218,11 @@ test_that("MW calculations work with baseline correction", {
   # Add a baseline offset
   data$signal <- data$signal + 0.1
 
-  rec <- recipe(~., data = data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(signal, location = vars(log_mw)) %>%
-    step_measure_baseline_rolling(window_size = 20) %>%
-    step_measure_mw_averages() %>%
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(log_mw)) |>
+    step_measure_baseline_rolling(window_size = 20) |>
+    step_measure_mw_averages() |>
     prep()
 
   result <- bake(rec, new_data = NULL)

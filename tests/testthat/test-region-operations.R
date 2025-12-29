@@ -13,10 +13,10 @@
 
 # Create test data in internal format
 create_test_data <- function() {
-  recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    prep() %>%
+  recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    prep() |>
     bake(new_data = NULL)
 }
 
@@ -37,10 +37,10 @@ get_locations <- function() {
 # ==============================================================================
 
 test_that("step_measure_trim keeps only points in range", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_trim(range = c(20, 80)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_trim(range = c(20, 80)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -54,10 +54,10 @@ test_that("step_measure_trim reduces number of points", {
   test_data <- create_test_data()
   original_n <- nrow(test_data$.measures[[1]])
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_trim(range = c(20, 80)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_trim(range = c(20, 80)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -70,10 +70,10 @@ test_that("step_measure_trim preserves values in range", {
   test_data <- create_test_data()
   original <- test_data$.measures[[1]]
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_trim(range = c(20, 80)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_trim(range = c(20, 80)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -88,19 +88,19 @@ test_that("step_measure_trim preserves values in range", {
 
 test_that("step_measure_trim errors with invalid range", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_trim(range = c(80, 20)),
     "must have the minimum value first"
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_trim(range = c(50, 50)),
     "must have the minimum value first"
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_trim(range = c(20)),
     "must be a numeric vector of length 2"
   )
@@ -108,16 +108,16 @@ test_that("step_measure_trim errors with invalid range", {
 
 test_that("step_measure_trim errors when range is missing", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_trim(),
     "must be provided"
   )
 })
 
 test_that("step_measure_trim print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_trim(range = c(20, 80))
 
   expect_output(print(rec$steps[[2]]), "Trim measurements to \\[20, 80\\]")
@@ -127,10 +127,10 @@ test_that("step_measure_trim print method works", {
 })
 
 test_that("step_measure_trim tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_trim(range = c(20, 80)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_trim(range = c(20, 80)) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -148,10 +148,10 @@ test_that("step_measure_trim tidy method works", {
 # ==============================================================================
 
 test_that("step_measure_exclude removes points in ranges", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_exclude(ranges = list(c(1, 10), c(90, 100))) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_exclude(ranges = list(c(1, 10), c(90, 100))) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -166,10 +166,10 @@ test_that("step_measure_exclude reduces number of points", {
   test_data <- create_test_data()
   original_n <- nrow(test_data$.measures[[1]])
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_exclude(ranges = list(c(1, 20))) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_exclude(ranges = list(c(1, 20))) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -179,10 +179,10 @@ test_that("step_measure_exclude reduces number of points", {
 })
 
 test_that("step_measure_exclude accepts single range as vector", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_exclude(ranges = c(1, 10)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_exclude(ranges = c(1, 10)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -195,10 +195,10 @@ test_that("step_measure_exclude preserves values outside ranges", {
   test_data <- create_test_data()
   original <- test_data$.measures[[1]]
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_exclude(ranges = list(c(1, 10))) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_exclude(ranges = list(c(1, 10))) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -213,13 +213,13 @@ test_that("step_measure_exclude preserves values outside ranges", {
 
 test_that("step_measure_exclude errors with invalid ranges", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_exclude(ranges = list(c(80, 20))),
     "must have the minimum value first"
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_exclude(ranges = list(c(20))),
     "must be a numeric vector of length 2"
   )
@@ -227,16 +227,16 @@ test_that("step_measure_exclude errors with invalid ranges", {
 
 test_that("step_measure_exclude errors when ranges is missing", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_exclude(),
     "must be provided"
   )
 })
 
 test_that("step_measure_exclude print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_exclude(ranges = list(c(1, 10), c(90, 100)))
 
   expect_output(print(rec$steps[[2]]), "Exclude 2 ranges")
@@ -246,10 +246,10 @@ test_that("step_measure_exclude print method works", {
 })
 
 test_that("step_measure_exclude tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_exclude(ranges = list(c(1, 10), c(90, 100))) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_exclude(ranges = list(c(1, 10), c(90, 100))) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -266,10 +266,10 @@ test_that("step_measure_exclude tidy method works", {
 # ==============================================================================
 
 test_that("step_measure_resample creates specified number of points with n", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(n = 50) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(n = 50) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -279,10 +279,10 @@ test_that("step_measure_resample creates specified number of points with n", {
 })
 
 test_that("step_measure_resample creates evenly spaced grid", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(n = 50) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(n = 50) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -294,10 +294,10 @@ test_that("step_measure_resample creates evenly spaced grid", {
 })
 
 test_that("step_measure_resample with spacing parameter works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(spacing = 5) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(spacing = 5) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -309,10 +309,10 @@ test_that("step_measure_resample with spacing parameter works", {
 })
 
 test_that("step_measure_resample linear method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(n = 50, method = "linear") %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(n = 50, method = "linear") |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -322,10 +322,10 @@ test_that("step_measure_resample linear method works", {
 })
 
 test_that("step_measure_resample spline method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(n = 50, method = "spline") %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(n = 50, method = "spline") |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -335,10 +335,10 @@ test_that("step_measure_resample spline method works", {
 })
 
 test_that("step_measure_resample respects custom range", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(n = 25, range = c(25, 75)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(n = 25, range = c(25, 75)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -351,7 +351,7 @@ test_that("step_measure_resample respects custom range", {
 
 test_that("step_measure_resample errors when neither n nor spacing provided", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_resample(),
     "Either.*n.*or.*spacing.*must be specified"
   )
@@ -359,7 +359,7 @@ test_that("step_measure_resample errors when neither n nor spacing provided", {
 
 test_that("step_measure_resample errors when both n and spacing provided", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_resample(n = 50, spacing = 5),
     "n.*and.*spacing.*are mutually exclusive"
   )
@@ -367,19 +367,19 @@ test_that("step_measure_resample errors when both n and spacing provided", {
 
 test_that("step_measure_resample errors with invalid n", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_resample(n = 1),
     "must be a positive integer >= 2"
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_resample(n = -5),
     "must be a positive integer >= 2"
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_resample(n = 2.5),
     "must be a positive integer >= 2"
   )
@@ -387,13 +387,13 @@ test_that("step_measure_resample errors with invalid n", {
 
 test_that("step_measure_resample errors with invalid spacing", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_resample(spacing = 0),
     "must be a positive number"
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_resample(spacing = -1),
     "must be a positive number"
   )
@@ -401,16 +401,16 @@ test_that("step_measure_resample errors with invalid spacing", {
 
 test_that("step_measure_resample errors with invalid range", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_resample(n = 50, range = c(80, 20)),
     "must have the minimum value first"
   )
 })
 
 test_that("step_measure_resample print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_resample(n = 50)
 
   expect_output(print(rec$steps[[2]]), "Resample to 50 points")
@@ -420,10 +420,10 @@ test_that("step_measure_resample print method works", {
 })
 
 test_that("step_measure_resample tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(n = 50, method = "spline") %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(n = 50, method = "spline") |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -437,10 +437,10 @@ test_that("step_measure_resample tidy method works", {
 })
 
 test_that("step_measure_resample works on new data", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(n = 50) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(n = 50) |>
     prep()
 
   # Bake on new data (first 50 rows)
@@ -451,10 +451,10 @@ test_that("step_measure_resample works on new data", {
 })
 
 test_that("step_measure_resample learns grid from training data", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_resample(n = 50) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_resample(n = 50) |>
     prep()
 
   # The new_locations should be learned during prep
@@ -466,12 +466,12 @@ test_that("step_measure_resample learns grid from training data", {
 # ==============================================================================
 
 test_that("region operations can be combined", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_trim(range = c(10, 90)) %>%
-    step_measure_exclude(ranges = list(c(40, 50))) %>%
-    step_measure_resample(n = 30) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_trim(range = c(10, 90)) |>
+    step_measure_exclude(ranges = list(c(40, 50))) |>
+    step_measure_resample(n = 30) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -487,10 +487,10 @@ test_that("region operations can be combined", {
 
 test_that("region operations preserve measure class",
 {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_trim(range = c(20, 80)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_trim(range = c(20, 80)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -501,17 +501,17 @@ test_that("region operations preserve measure class",
 
 test_that("region operations work with wide input", {
   # Create wide format data
-  wide_data <- meats_long %>%
+  wide_data <- meats_long |>
     tidyr::pivot_wider(
       names_from = channel,
       values_from = transmittance,
       names_prefix = "x_"
     )
 
-  rec <- recipe(water + fat + protein ~ ., data = wide_data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_wide(starts_with("x_")) %>%
-    step_measure_trim(range = c(20, 80)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = wide_data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_wide(starts_with("x_")) |>
+    step_measure_trim(range = c(20, 80)) |>
     prep()
 
   result <- bake(rec, new_data = NULL)

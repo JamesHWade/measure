@@ -10,10 +10,10 @@
 
 # Helper to create test data
 create_test_data <- function() {
-  recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    prep() %>%
+  recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    prep() |>
     bake(new_data = NULL)
 }
 
@@ -39,10 +39,10 @@ test_that("step_measure_map works with a named function", {
     x
   }
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(my_center) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_map(my_center) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -54,15 +54,15 @@ test_that("step_measure_map works with a named function", {
 })
 
 test_that("step_measure_map works with formula syntax", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_map(
       ~ {
         .x$value <- .x$value * 2
         .x
       }
-    ) %>%
+    ) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -71,16 +71,16 @@ test_that("step_measure_map works with formula syntax", {
 })
 
 test_that("step_measure_map can be chained with other steps", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_map(
       ~ {
         .x$value <- log1p(.x$value)
         .x
       }
-    ) %>%
-    step_measure_snv() %>%
+    ) |>
+    step_measure_snv() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -99,15 +99,15 @@ test_that("step_measure_map works on new data", {
   train_data <- meats_long[meats_long$id %in% train_ids, ]
   test_data <- meats_long[meats_long$id %in% test_ids, ]
 
-  rec <- recipe(water + fat + protein ~ ., data = train_data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = train_data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_map(
       ~ {
         .x$value <- .x$value - mean(.x$value)
         .x
       }
-    ) %>%
+    ) |>
     prep()
 
   result <- bake(rec, new_data = test_data)
@@ -119,9 +119,9 @@ test_that("step_measure_map works on new data", {
 })
 
 test_that("step_measure_map print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_map(
       ~ {
         .x$value <- .x$value * 2
@@ -136,9 +136,9 @@ test_that("step_measure_map print method works", {
 })
 
 test_that("step_measure_map tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_map(~.x, id = "map_test")
 
   # Before prep
@@ -160,22 +160,22 @@ test_that("step_measure_map integrates with workflows", {
   library(workflows)
   library(parsnip)
 
-  rec <- recipe(water ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_map(
       ~ {
         .x$value <- log1p(.x$value)
         .x
       }
-    ) %>%
+    ) |>
     step_measure_output_wide()
 
-  spec <- linear_reg() %>%
+  spec <- linear_reg() |>
     set_engine("lm")
 
-  wf <- workflow() %>%
-    add_recipe(rec) %>%
+  wf <- workflow() |>
+    add_recipe(rec) |>
     add_model(spec)
 
   # Should fit without error
@@ -340,11 +340,11 @@ test_that("measure_map works with column selection", {
 
   wide_data <- meats[1:10, ]
 
-  rec1 <- recipe(water + fat + protein ~ ., data = wide_data) %>%
+  rec1 <- recipe(water + fat + protein ~ ., data = wide_data) |>
     step_measure_input_wide(
       dplyr::starts_with("x_"),
       col_name = "spectra1"
-    ) %>%
+    ) |>
     prep()
 
   test_data <- bake(rec1, new_data = NULL)
@@ -565,11 +565,11 @@ test_that("measure_map can replicate SNV transformation", {
     }
   )
 
-  snv_via_step <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_snv() %>%
-    prep() %>%
+  snv_via_step <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_snv() |>
+    prep() |>
     bake(new_data = NULL)
 
   for (i in seq_len(nrow(snv_via_map))) {
@@ -584,8 +584,8 @@ test_that("measure_map can replicate SNV transformation", {
 test_that("measure_map works in a dplyr pipeline", {
   test_data <- create_test_data()
 
-  result <- test_data %>%
-    dplyr::filter(water > 50) %>%
+  result <- test_data |>
+    dplyr::filter(water > 50) |>
     measure_map(
       ~ {
         .x$value <- .x$value * 2
@@ -613,10 +613,10 @@ test_that("prototyping with measure_map transfers to step_measure_map", {
   prototype_result <- measure_map(test_data, my_transform)
 
   # Step 2: Use the same function in a recipe step
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(my_transform) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_map(my_transform) |>
     prep()
 
   production_result <- bake(rec, new_data = NULL)
@@ -641,9 +641,9 @@ test_that("step_measure_map verbosity = 0 suppresses output", {
     x
   }
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_map(noisy_fn, verbosity = 0L)
 
   # Should not produce cat() output when verbosity = 0 (output happens during prep)
@@ -665,9 +665,9 @@ test_that("step_measure_map verbosity = 1 allows output (default)", {
     x
   }
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_map(noisy_fn, verbosity = 1L)
 
   # Should produce output when verbosity = 1 (output happens during prep)
@@ -712,10 +712,10 @@ test_that("measure_map verbosity = 1 allows output (default)", {
 })
 
 test_that("step_measure_map verbosity is preserved through prep", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_map(~.x, verbosity = 0L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_map(~.x, verbosity = 0L) |>
     prep()
 
   # Check that verbosity is preserved in the prepped step

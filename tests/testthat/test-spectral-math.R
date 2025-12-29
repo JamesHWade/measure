@@ -16,10 +16,10 @@
 
 # Create test data in internal format
 create_test_data <- function() {
-  recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    prep() %>%
+  recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    prep() |>
     bake(new_data = NULL)
 }
 
@@ -51,10 +51,10 @@ local({
 # ==============================================================================
 
 test_that("step_measure_absorbance converts transmittance to absorbance", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_absorbance() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_absorbance() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -69,10 +69,10 @@ test_that("step_measure_absorbance converts transmittance to absorbance", {
 test_that("step_measure_absorbance preserves locations", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_absorbance() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_absorbance() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -83,9 +83,9 @@ test_that("step_measure_absorbance preserves locations", {
 })
 
 test_that("step_measure_absorbance print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_absorbance()
 
   expect_output(print(rec$steps[[2]]), "Transmittance to absorbance")
@@ -95,10 +95,10 @@ test_that("step_measure_absorbance print method works", {
 })
 
 test_that("step_measure_absorbance tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_absorbance() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_absorbance() |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -113,11 +113,11 @@ test_that("step_measure_absorbance tidy method works", {
 
 test_that("step_measure_transmittance converts absorbance to transmittance", {
   # First convert to absorbance, then back to transmittance
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_absorbance() %>%
-    step_measure_transmittance() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_absorbance() |>
+    step_measure_transmittance() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -132,10 +132,10 @@ test_that("step_measure_transmittance converts absorbance to transmittance", {
 test_that("step_measure_transmittance preserves locations", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_transmittance() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_transmittance() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -146,9 +146,9 @@ test_that("step_measure_transmittance preserves locations", {
 })
 
 test_that("step_measure_transmittance print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_transmittance()
 
   expect_output(print(rec$steps[[2]]), "Absorbance to transmittance")
@@ -158,10 +158,10 @@ test_that("step_measure_transmittance print method works", {
 })
 
 test_that("step_measure_transmittance tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_transmittance() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_transmittance() |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -175,10 +175,10 @@ test_that("step_measure_transmittance tidy method works", {
 # ==============================================================================
 
 test_that("step_measure_log applies natural log by default", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_log() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_log() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -190,10 +190,10 @@ test_that("step_measure_log applies natural log by default", {
 })
 
 test_that("step_measure_log works with base 10", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_log(base = 10) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_log(base = 10) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -205,10 +205,10 @@ test_that("step_measure_log works with base 10", {
 })
 
 test_that("step_measure_log works with offset", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_log(offset = 1) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_log(offset = 1) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -222,10 +222,10 @@ test_that("step_measure_log works with offset", {
 test_that("step_measure_log preserves locations", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_log() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_log() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -236,9 +236,9 @@ test_that("step_measure_log preserves locations", {
 })
 
 test_that("step_measure_log print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_log(base = 10)
 
   expect_output(print(rec$steps[[2]]), "Log transformation")
@@ -248,10 +248,10 @@ test_that("step_measure_log print method works", {
 })
 
 test_that("step_measure_log tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_log(base = 10, offset = 0.5) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_log(base = 10, offset = 0.5) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -267,15 +267,15 @@ test_that("step_measure_log tidy method works", {
 
 test_that("step_measure_kubelka_munk computes K-M transformation", {
   # Use reflectance data with values in (0, 1)
-  input_rec <- recipe(outcome ~ ., data = reflectance_data) %>%
-    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
+  input_rec <- recipe(outcome ~ ., data = reflectance_data) |>
+    step_measure_input_long(reflectance, location = vars(wavelength)) |>
     prep()
   input_data <- bake(input_rec, new_data = NULL)
   original <- input_data$.measures[[1]]$value
 
-  rec <- recipe(outcome ~ ., data = reflectance_data) %>%
-    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
-    step_measure_kubelka_munk() %>%
+  rec <- recipe(outcome ~ ., data = reflectance_data) |>
+    step_measure_input_long(reflectance, location = vars(wavelength)) |>
+    step_measure_kubelka_munk() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -287,14 +287,14 @@ test_that("step_measure_kubelka_munk computes K-M transformation", {
 })
 
 test_that("step_measure_kubelka_munk preserves locations", {
-  input_rec <- recipe(outcome ~ ., data = reflectance_data) %>%
-    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
+  input_rec <- recipe(outcome ~ ., data = reflectance_data) |>
+    step_measure_input_long(reflectance, location = vars(wavelength)) |>
     prep()
   input_data <- bake(input_rec, new_data = NULL)
 
-  rec <- recipe(outcome ~ ., data = reflectance_data) %>%
-    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
-    step_measure_kubelka_munk() %>%
+  rec <- recipe(outcome ~ ., data = reflectance_data) |>
+    step_measure_input_long(reflectance, location = vars(wavelength)) |>
+    step_measure_kubelka_munk() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -305,8 +305,8 @@ test_that("step_measure_kubelka_munk preserves locations", {
 })
 
 test_that("step_measure_kubelka_munk print method works", {
-  rec <- recipe(outcome ~ ., data = reflectance_data) %>%
-    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
+  rec <- recipe(outcome ~ ., data = reflectance_data) |>
+    step_measure_input_long(reflectance, location = vars(wavelength)) |>
     step_measure_kubelka_munk()
 
   expect_output(print(rec$steps[[2]]), "Kubelka-Munk")
@@ -316,9 +316,9 @@ test_that("step_measure_kubelka_munk print method works", {
 })
 
 test_that("step_measure_kubelka_munk tidy method works", {
-  rec <- recipe(outcome ~ ., data = reflectance_data) %>%
-    step_measure_input_long(reflectance, location = vars(wavelength)) %>%
-    step_measure_kubelka_munk() %>%
+  rec <- recipe(outcome ~ ., data = reflectance_data) |>
+    step_measure_input_long(reflectance, location = vars(wavelength)) |>
+    step_measure_kubelka_munk() |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -334,10 +334,10 @@ test_that("step_measure_kubelka_munk tidy method works", {
 test_that("step_measure_derivative computes first derivative", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_derivative(order = 1L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_derivative(order = 1L) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -363,10 +363,10 @@ test_that("step_measure_derivative computes first derivative", {
 test_that("step_measure_derivative computes second derivative", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_derivative(order = 2L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_derivative(order = 2L) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -382,10 +382,10 @@ test_that("step_measure_derivative computes second derivative", {
 test_that("step_measure_derivative uses left locations", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_derivative(order = 1L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_derivative(order = 1L) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -400,19 +400,19 @@ test_that("step_measure_derivative uses left locations", {
 
 test_that("step_measure_derivative validates order parameter", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_input_long(transmittance, location = vars(channel)) %>%
-      step_measure_derivative(order = 0L) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_derivative(order = 0L) |>
       prep(),
     "must be 1 or 2"
   )
 })
 
 test_that("step_measure_derivative print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_derivative(order = 2L)
 
   expect_output(print(rec$steps[[2]]), "2nd derivative")
@@ -422,10 +422,10 @@ test_that("step_measure_derivative print method works", {
 })
 
 test_that("step_measure_derivative tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_derivative(order = 2L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_derivative(order = 2L) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -435,9 +435,9 @@ test_that("step_measure_derivative tidy method works", {
 })
 
 test_that("step_measure_derivative is tunable", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_derivative(order = 1L)
 
   tun <- tunable(rec$steps[[2]])
@@ -451,10 +451,10 @@ test_that("step_measure_derivative is tunable", {
 test_that("step_measure_derivative_gap computes gap derivative", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_derivative_gap(gap = 2L, segment = 1L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_derivative_gap(gap = 2L, segment = 1L) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -484,10 +484,10 @@ test_that("step_measure_derivative_gap computes gap derivative", {
 test_that("step_measure_derivative_gap uses center locations", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_derivative_gap(gap = 2L, segment = 1L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_derivative_gap(gap = 2L, segment = 1L) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -507,10 +507,10 @@ test_that("step_measure_derivative_gap uses center locations", {
 test_that("step_measure_derivative_gap with segment > 1 uses averaging", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_derivative_gap(gap = 3L, segment = 2L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_derivative_gap(gap = 3L, segment = 2L) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -544,10 +544,10 @@ test_that("step_measure_derivative_gap with segment > 1 uses averaging", {
 
 test_that("step_measure_derivative_gap validates gap parameter", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_input_long(transmittance, location = vars(channel)) %>%
-      step_measure_derivative_gap(gap = 0L) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_derivative_gap(gap = 0L) |>
       prep(),
     "at least 1"
   )
@@ -555,19 +555,19 @@ test_that("step_measure_derivative_gap validates gap parameter", {
 
 test_that("step_measure_derivative_gap validates segment parameter", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_input_long(transmittance, location = vars(channel)) %>%
-      step_measure_derivative_gap(gap = 2L, segment = 0L) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_derivative_gap(gap = 2L, segment = 0L) |>
       prep(),
     "at least 1"
   )
 })
 
 test_that("step_measure_derivative_gap print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_derivative_gap(gap = 3L, segment = 2L)
 
   expect_output(print(rec$steps[[2]]), "Gap derivative")
@@ -578,10 +578,10 @@ test_that("step_measure_derivative_gap print method works", {
 })
 
 test_that("step_measure_derivative_gap tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_derivative_gap(gap = 3L, segment = 2L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_derivative_gap(gap = 3L, segment = 2L) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -592,9 +592,9 @@ test_that("step_measure_derivative_gap tidy method works", {
 })
 
 test_that("step_measure_derivative_gap is tunable", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_derivative_gap(gap = 2L)
 
   tun <- tunable(rec$steps[[2]])
@@ -607,11 +607,11 @@ test_that("step_measure_derivative_gap is tunable", {
 # ==============================================================================
 
 test_that("spectral math steps work in a pipeline", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_absorbance() %>%
-    step_measure_derivative(order = 1L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_absorbance() |>
+    step_measure_derivative(order = 1L) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -623,11 +623,11 @@ test_that("spectral math steps work in a pipeline", {
 test_that("absorbance and transmittance are inverses", {
   original <- get_original_values()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_absorbance() %>%
-    step_measure_transmittance() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_absorbance() |>
+    step_measure_transmittance() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -637,17 +637,17 @@ test_that("absorbance and transmittance are inverses", {
 })
 
 test_that("spectral math steps work with wide input format", {
-  test_data_wide <- meats_long %>%
+  test_data_wide <- meats_long |>
     tidyr::pivot_wider(
       names_from = channel,
       names_prefix = "x_",
       values_from = transmittance
     )
 
-  rec <- recipe(water + fat + protein ~ ., data = test_data_wide) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_wide(starts_with("x_")) %>%
-    step_measure_absorbance() %>%
+  rec <- recipe(water + fat + protein ~ ., data = test_data_wide) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_wide(starts_with("x_")) |>
+    step_measure_absorbance() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -657,28 +657,28 @@ test_that("spectral math steps work with wide input format", {
 })
 
 test_that("required_pkgs methods work for all steps", {
-  rec1 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec1 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_absorbance()
 
-  rec2 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_transmittance()
 
-  rec3 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec3 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_log()
 
-  rec4 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec4 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_kubelka_munk()
 
-  rec5 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec5 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_derivative()
 
-  rec6 <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec6 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_derivative_gap(gap = 2L)
 
   expect_true("measure" %in% required_pkgs(rec1$steps[[2]]))
@@ -698,14 +698,14 @@ test_that("spectral math steps work on new data", {
   train_ids <- unique(meats_long$id)[1:100]
   test_ids <- unique(meats_long$id)[101:150]
 
-  train_data <- meats_long %>% dplyr::filter(id %in% train_ids)
-  test_data <- meats_long %>% dplyr::filter(id %in% test_ids)
+  train_data <- meats_long |> dplyr::filter(id %in% train_ids)
+  test_data <- meats_long |> dplyr::filter(id %in% test_ids)
 
-  rec <- recipe(water + fat + protein ~ ., data = train_data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_absorbance() %>%
-    step_measure_derivative(order = 1L) %>%
+  rec <- recipe(water + fat + protein ~ ., data = train_data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_absorbance() |>
+    step_measure_derivative(order = 1L) |>
     prep()
 
   # Bake on new data

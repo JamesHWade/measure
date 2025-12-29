@@ -58,9 +58,9 @@ pad_measure_dims <- function(x, col = ".measures") {
         rows_to_add <- most_freq - nrow(df)
         # Create a data frame with the required number of missing rows
         missing_rows <-
-          purrr::map_dfc(names(df), ~ rep(NA_real_, rows_to_add)) %>%
-          tibble::as_tibble() %>%
-          setNames(names(df)) %>%
+          purrr::map_dfc(names(df), ~ rep(NA_real_, rows_to_add)) |>
+          tibble::as_tibble() |>
+          setNames(names(df)) |>
           suppressMessages() # suppress message about new column names
         # Bind the missing rows to the original data frame
         df <- bind_rows(df, missing_rows)

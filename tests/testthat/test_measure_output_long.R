@@ -1,21 +1,21 @@
 test_that("output long format data", {
   meats_data <- data_meat_long()
-  meats_train <- meats_data$train %>% filter(ind < 1.2)
-  meats_test <- meats_data$test %>% filter(ind < 1.2)
+  meats_train <- meats_data$train |> filter(ind < 1.2)
+  meats_test <- meats_data$test |> filter(ind < 1.2)
 
   na_train <- meats_train
   na_train$absorp[1] <- NA_real_
   na_test <- meats_test
   na_test$absorp[1] <- NA_real_
 
-  miss_train <- meats_train %>% dplyr::slice(-2)
-  miss_test <- meats_test %>% dplyr::slice(-2)
+  miss_train <- meats_train |> dplyr::slice(-2)
+  miss_test <- meats_test |> dplyr::slice(-2)
 
   # ----------------------------------------------------------------------------
 
   rec_1 <-
-    recipe(water + fat + protein ~ ., data = meats_train) %>%
-    step_measure_input_long(absorp, location = vars(ind), id = "potato") %>%
+    recipe(water + fat + protein ~ ., data = meats_train) |>
+    step_measure_input_long(absorp, location = vars(ind), id = "potato") |>
     step_measure_output_long(id = "turnip")
   expect_snapshot(print(rec_1))
   expect_snapshot(print(summary(rec_1)))
@@ -46,19 +46,19 @@ test_that("output long format data", {
   ### missing rows
 
   expect_snapshot_error(
-    recipe(water + fat + protein ~ ., data = miss_train) %>%
-      step_measure_input_long(absorp, location = vars(ind)) %>%
-      step_measure_output_long("rstudio", "posit", id = "turnip") %>%
-      prep() %>%
+    recipe(water + fat + protein ~ ., data = miss_train) |>
+      step_measure_input_long(absorp, location = vars(ind)) |>
+      step_measure_output_long("rstudio", "posit", id = "turnip") |>
+      prep() |>
       bake(new_data = NULL)
   )
 
   ### missing rows with padding
 
-  bake_2 <- recipe(water + fat + protein ~ ., data = miss_train) %>%
-    step_measure_input_long(absorp, location = vars(ind), pad = TRUE) %>%
-    step_measure_output_long("rstudio", "posit", id = "turnip") %>%
-    prep() %>%
+  bake_2 <- recipe(water + fat + protein ~ ., data = miss_train) |>
+    step_measure_input_long(absorp, location = vars(ind), pad = TRUE) |>
+    step_measure_output_long("rstudio", "posit", id = "turnip") |>
+    prep() |>
     bake(new_data = NULL)
 
   dat_ptype <-
@@ -76,10 +76,10 @@ test_that("output long format data", {
   ## missing values
 
   bake_3 <-
-    recipe(water + fat + protein ~ ., data = na_train) %>%
-    step_measure_input_long(absorp, location = vars(ind)) %>%
-    step_measure_output_long(id = "turnip") %>%
-    prep() %>%
+    recipe(water + fat + protein ~ ., data = na_train) |>
+    step_measure_input_long(absorp, location = vars(ind)) |>
+    step_measure_output_long(id = "turnip") |>
+    prep() |>
     bake(new_data = NULL)
   expect_equal(sum(complete.cases(bake_3)), 399L)
   expect_true(is.na(bake_3$.measure[1]))
@@ -87,8 +87,8 @@ test_that("output long format data", {
   ## Bad format
 
   expect_snapshot(
-    recipe(water + fat + protein ~ ., data = meats_train) %>%
-      step_measure_output_long() %>%
+    recipe(water + fat + protein ~ ., data = meats_train) |>
+      step_measure_output_long() |>
       prep(),
     error = TRUE
   )

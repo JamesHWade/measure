@@ -19,10 +19,10 @@ test_that("SNV transformation computes correctly", {
 
 test_that("SNV works with recipe workflow (long format)", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_snv() %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_snv() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -43,9 +43,9 @@ test_that("SNV works with recipe workflow (wide format)", {
   data(meats, package = "modeldata")
 
   rec <-
-    recipe(water + fat + protein ~ ., data = meats) %>%
-    step_measure_input_wide(dplyr::starts_with("x_")) %>%
-    step_measure_snv() %>%
+    recipe(water + fat + protein ~ ., data = meats) |>
+    step_measure_input_wide(dplyr::starts_with("x_")) |>
+    step_measure_snv() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -63,18 +63,18 @@ test_that("SNV works with recipe workflow (wide format)", {
 
 test_that("SNV preserves location values", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   before <- bake(rec, new_data = NULL)
 
   rec_snv <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_snv() %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_snv() |>
     prep()
 
   after <- bake(rec_snv, new_data = NULL)
@@ -93,8 +93,8 @@ test_that("SNV fails without measure input step", {
   data(meats, package = "modeldata")
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats) %>%
-      step_measure_snv() %>%
+    recipe(water + fat + protein ~ ., data = meats) |>
+      step_measure_snv() |>
       prep(),
     "should be in the data"
   )
@@ -108,11 +108,11 @@ test_that("SNV handles constant spectrum with warning", {
   constant_data$transmittance[constant_data$id == first_id] <- 5.0
 
   expect_warning(
-    recipe(water + fat + protein ~ ., data = constant_data) %>%
-      update_role(id, new_role = "id") %>%
-      step_measure_input_long(transmittance, location = vars(channel)) %>%
-      step_measure_snv() %>%
-      prep() %>%
+    recipe(water + fat + protein ~ ., data = constant_data) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(transmittance, location = vars(channel)) |>
+      step_measure_snv() |>
+      prep() |>
       bake(new_data = NULL),
     "Standard deviation is zero"
   )
@@ -120,9 +120,9 @@ test_that("SNV handles constant spectrum with warning", {
 
 test_that("SNV print method works", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_snv()
 
   expect_snapshot(rec)
@@ -133,9 +133,9 @@ test_that("SNV print method works", {
 
 test_that("SNV tidy method works", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_snv(id = "snv_test")
 
   # Before prep
@@ -159,10 +159,10 @@ test_that("SNV works on new data", {
   test_data <- meats_long[meats_long$id %in% test_ids, ]
 
   rec <-
-    recipe(water + fat + protein ~ ., data = train_data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_snv() %>%
+    recipe(water + fat + protein ~ ., data = train_data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_snv() |>
     prep()
 
   # Bake on new data
@@ -189,9 +189,9 @@ test_that("SNV produces expected results compared to manual calculation", {
 
   # Recipe-based SNV
   rec <-
-    recipe(water + fat + protein ~ ., data = meats[1, , drop = FALSE]) %>%
-    step_measure_input_wide(dplyr::starts_with("x_")) %>%
-    step_measure_snv() %>%
+    recipe(water + fat + protein ~ ., data = meats[1, , drop = FALSE]) |>
+    step_measure_input_wide(dplyr::starts_with("x_")) |>
+    step_measure_snv() |>
     prep()
 
   result <- bake(rec, new_data = NULL)

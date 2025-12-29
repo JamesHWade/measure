@@ -27,23 +27,23 @@
 #' small_te <- bioreactors_small[201:210, ]
 #'
 #' small_rec <-
-#'   recipe(glucose ~ ., data = small_tr) %>%
-#'   update_role(batch_id, day, new_role = "id columns") %>%
-#'   step_measure_input_wide(`400`:`3050`) %>%
+#'   recipe(glucose ~ ., data = small_tr) |>
+#'   update_role(batch_id, day, new_role = "id columns") |>
+#'   step_measure_input_wide(`400`:`3050`) |>
 #'   prep()
 #'
 #' # Before reformatting:
 #'
-#' small_rec %>% bake(new_data = small_te)
+#' small_rec |> bake(new_data = small_te)
 #'
 #' # After reformatting:
 #'
 #' output_rec <-
-#'   small_rec %>%
-#'   step_measure_output_wide() %>%
+#'   small_rec |>
+#'   step_measure_output_wide() |>
 #'   prep()
 #'
-#' output_rec %>% bake(new_data = small_te)
+#' output_rec |> bake(new_data = small_te)
 #'
 #' @export
 
@@ -124,16 +124,16 @@ bake.step_measure_output_wide <- function(object, new_data, ...) {
   non_meas <- non_meas[non_meas != col]
 
   res <-
-    new_data %>%
-    tidyr::unnest(cols = dplyr::all_of(col)) %>%
-    dplyr::mutate(location = gsub(" ", "0", format(location))) %>%
+    new_data |>
+    tidyr::unnest(cols = dplyr::all_of(col)) |>
+    dplyr::mutate(location = gsub(" ", "0", format(location))) |>
     # remove NA values that are introduced by padding
-    tidyr::drop_na("value") %>%
+    tidyr::drop_na("value") |>
     tidyr::pivot_wider(
       id_cols = c(dplyr::all_of(non_meas)),
       names_from = "location",
       values_from = "value"
-    ) %>%
+    ) |>
     dplyr::rename_with(~ paste0(object$prefix, .x), c(-dplyr::all_of(non_meas)))
 }
 

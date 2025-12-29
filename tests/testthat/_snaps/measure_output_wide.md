@@ -95,8 +95,7 @@
 ---
 
     Code
-      recipe(water + fat + protein ~ ., data = meats_train) %>%
-        step_measure_output_wide() %>% prep()
+      prep(step_measure_output_wide(recipe(water + fat + protein ~ ., data = meats_train)))
     Condition
       Error in `step_measure_output_wide()`:
       Caused by error in `check_has_measure()`:

@@ -33,10 +33,10 @@ test_that("MSC single spectrum correction works", {
 
 test_that("MSC works with recipe workflow (long format)", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_msc() %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_msc() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -57,9 +57,9 @@ test_that("MSC works with recipe workflow (wide format)", {
   data(meats, package = "modeldata")
 
   rec <-
-    recipe(water + fat + protein ~ ., data = meats) %>%
-    step_measure_input_wide(dplyr::starts_with("x_")) %>%
-    step_measure_msc() %>%
+    recipe(water + fat + protein ~ ., data = meats) |>
+    step_measure_input_wide(dplyr::starts_with("x_")) |>
+    step_measure_msc() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -74,18 +74,18 @@ test_that("MSC works with recipe workflow (wide format)", {
 
 test_that("MSC preserves location values", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   before <- bake(rec, new_data = NULL)
 
   rec_msc <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_msc() %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_msc() |>
     prep()
 
   after <- bake(rec_msc, new_data = NULL)
@@ -104,8 +104,8 @@ test_that("MSC fails without measure input step", {
   data(meats, package = "modeldata")
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats) %>%
-      step_measure_msc() %>%
+    recipe(water + fat + protein ~ ., data = meats) |>
+      step_measure_msc() |>
       prep(),
     "should be in the data"
   )
@@ -120,10 +120,10 @@ test_that("MSC uses same reference for new data", {
   test_data <- meats_long[meats_long$id %in% test_ids, ]
 
   rec <-
-    recipe(water + fat + protein ~ ., data = train_data) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_msc() %>%
+    recipe(water + fat + protein ~ ., data = train_data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_msc() |>
     prep()
 
   # Get the reference spectrum from training
@@ -139,9 +139,9 @@ test_that("MSC uses same reference for new data", {
 
 test_that("MSC print method works", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_msc()
 
   expect_snapshot(rec)
@@ -152,9 +152,9 @@ test_that("MSC print method works", {
 
 test_that("MSC tidy method works", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_msc(id = "msc_test")
 
   # Before prep
@@ -183,9 +183,9 @@ test_that("MSC produces expected results compared to prospectr", {
 
   # Apply MSC using measure
   rec <-
-    recipe(water + fat + protein ~ ., data = meats) %>%
-    step_measure_input_wide(dplyr::starts_with("x_")) %>%
-    step_measure_msc() %>%
+    recipe(water + fat + protein ~ ., data = meats) |>
+    step_measure_input_wide(dplyr::starts_with("x_")) |>
+    step_measure_msc() |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -207,9 +207,9 @@ test_that("MSC reference spectrum matches mean of training spectra", {
   data(meats, package = "modeldata")
 
   rec <-
-    recipe(water + fat + protein ~ ., data = meats) %>%
-    step_measure_input_wide(dplyr::starts_with("x_")) %>%
-    step_measure_msc() %>%
+    recipe(water + fat + protein ~ ., data = meats) |>
+    step_measure_input_wide(dplyr::starts_with("x_")) |>
+    step_measure_msc() |>
     prep()
 
   # Get the stored reference spectrum

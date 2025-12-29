@@ -7,30 +7,30 @@
 # ==============================================================================
 
 test_that("step_measure_baseline_rolling removes baseline", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_rolling(window_size = 50) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_rolling(window_size = 50) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
 
   expect_true(is_measure_list(result$.measures))
   # Baseline correction should change values
-  original <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    prep() %>%
+  original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    prep() |>
     bake(new_data = NULL)
 
   expect_false(identical(result$.measures[[1]]$value, original$.measures[[1]]$value))
 })
 
 test_that("step_measure_baseline_rolling preserves locations", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_rolling(window_size = 30) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_rolling(window_size = 30) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -41,26 +41,26 @@ test_that("step_measure_baseline_rolling preserves locations", {
 
 test_that("step_measure_baseline_rolling errors with invalid window_size", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_baseline_rolling(window_size = 1),
     "must be a number >= 3"
   )
 })
 
 test_that("step_measure_baseline_rolling print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_rolling(window_size = 50)
 
   expect_output(print(rec$steps[[2]]), "Rolling ball baseline")
 })
 
 test_that("step_measure_baseline_rolling tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_rolling(window_size = 50) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_rolling(window_size = 50) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -73,10 +73,10 @@ test_that("step_measure_baseline_rolling tidy method works", {
 # ==============================================================================
 
 test_that("step_measure_baseline_airpls removes baseline", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_airpls(lambda = 1e4, max_iter = 10) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_airpls(lambda = 1e4, max_iter = 10) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -85,10 +85,10 @@ test_that("step_measure_baseline_airpls removes baseline", {
 })
 
 test_that("step_measure_baseline_airpls preserves locations", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_airpls(lambda = 1e4) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_airpls(lambda = 1e4) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -99,25 +99,25 @@ test_that("step_measure_baseline_airpls preserves locations", {
 
 test_that("step_measure_baseline_airpls errors with invalid lambda", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_baseline_airpls(lambda = -1),
     "must be a positive number"
   )
 })
 
 test_that("step_measure_baseline_airpls print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_airpls(lambda = 1e5)
 
   expect_output(print(rec$steps[[2]]), "airPLS baseline")
 })
 
 test_that("step_measure_baseline_airpls is tunable", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_airpls(lambda = 1e5)
 
   tunable_params <- tunable(rec$steps[[2]])
@@ -129,10 +129,10 @@ test_that("step_measure_baseline_airpls is tunable", {
 # ==============================================================================
 
 test_that("step_measure_baseline_snip removes baseline", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_snip(iterations = 20) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_snip(iterations = 20) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -141,10 +141,10 @@ test_that("step_measure_baseline_snip removes baseline", {
 })
 
 test_that("step_measure_baseline_snip with decreasing works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_snip(iterations = 20, decreasing = TRUE) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_snip(iterations = 20, decreasing = TRUE) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -152,10 +152,10 @@ test_that("step_measure_baseline_snip with decreasing works", {
 })
 
 test_that("step_measure_baseline_snip with fixed window works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_snip(iterations = 10, decreasing = FALSE) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_snip(iterations = 10, decreasing = FALSE) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -164,26 +164,26 @@ test_that("step_measure_baseline_snip with fixed window works", {
 
 test_that("step_measure_baseline_snip errors with invalid iterations", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) %>%
+    recipe(water + fat + protein ~ ., data = meats_long) |>
       step_measure_baseline_snip(iterations = 0),
     "must be a positive integer"
   )
 })
 
 test_that("step_measure_baseline_snip print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_snip(iterations = 30)
 
   expect_output(print(rec$steps[[2]]), "SNIP baseline")
 })
 
 test_that("step_measure_baseline_snip tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_snip(iterations = 30) %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_snip(iterations = 30) |>
     prep()
 
   tidy_result <- tidy(rec, number = 2)
@@ -196,11 +196,11 @@ test_that("step_measure_baseline_snip tidy method works", {
 # ==============================================================================
 
 test_that("extended baseline methods can be combined with other steps", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) %>%
-    update_role(id, new_role = "id") %>%
-    step_measure_input_long(transmittance, location = vars(channel)) %>%
-    step_measure_baseline_rolling(window_size = 30) %>%
-    step_measure_snv() %>%
+  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_rolling(window_size = 30) |>
+    step_measure_snv() |>
     prep()
 
   result <- bake(rec, new_data = NULL)

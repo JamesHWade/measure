@@ -43,14 +43,14 @@
 #' data(meats, package = "modeldata")
 #'
 #' # Outcome data is to the right
-#' names(meats) %>% tail(10)
+#' names(meats) |> tail(10)
 #'
 #' # ------------------------------------------------------------------------------
 #' # Ingest data without adding the location (i.e. wave number) for the spectra
 #'
 #' rec <-
-#'   recipe(water + fat + protein ~ ., data = meats) %>%
-#'   step_measure_input_wide(starts_with("x_")) %>%
+#'   recipe(water + fat + protein ~ ., data = meats) |>
+#'   step_measure_input_wide(starts_with("x_")) |>
 #'   prep()
 #'
 #' summary(rec)
@@ -62,8 +62,8 @@
 #' index <- seq(1, 2, length.out = 100)
 #'
 #' rec <-
-#'   recipe(water + fat + protein ~ ., data = meats) %>%
-#'   step_measure_input_wide(starts_with("x_"), location_values = index) %>%
+#'   recipe(water + fat + protein ~ ., data = meats) |>
+#'   step_measure_input_wide(starts_with("x_"), location_values = index) |>
 #'   prep()
 #'
 #' summary(rec)
@@ -182,15 +182,15 @@ tidy.step_measure_input_wide <- function(x, ...) {
 
 
 wide_to_list <- function(x, ind, selections, col_name = ".measures") {
-  x <- x %>%
-    dplyr::mutate(..row = seq_len(nrow(x))) %>%
+  x <- x |>
+    dplyr::mutate(..row = seq_len(nrow(x))) |>
     tidyr::pivot_longer(
       cols = c(!!!selections),
       names_to = "temp",
       values_to = "value"
-    ) %>%
-    dplyr::select(-temp) %>%
-    tidyr::nest(.by = c(-value), .key = ".measures_temp") %>%
+    ) |>
+    dplyr::select(-temp) |>
+    tidyr::nest(.by = c(-value), .key = ".measures_temp") |>
     dplyr::select(-..row)
 
   # Rename to the user-specified column name
