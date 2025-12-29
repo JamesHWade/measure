@@ -613,3 +613,58 @@ tunable.step_measure_qc_outlier <- function(x, ...) {
     component_id = x$id
   )
 }
+
+# ==============================================================================
+# Parameters for feature engineering and scatter correction steps
+# ==============================================================================
+
+#' Parameters for feature engineering and scatter correction
+#'
+#' `bin_width()` controls the width of bins in spectral binning.
+#' `emsc_degree()` controls the polynomial degree for EMSC correction.
+#' `osc_n_components()` controls the number of orthogonal components in OSC.
+#'
+#' @inheritParams window_side
+#'
+#' @return A function with classes `"quant_param"` and `"param"`.
+#' @examples
+#' bin_width()
+#' emsc_degree()
+#' osc_n_components()
+#' @export
+bin_width <- function(range = c(1, 20), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(bin_width = "Bin Width"),
+    finalize = NULL
+  )
+}
+
+#' @rdname bin_width
+#' @export
+emsc_degree <- function(range = c(0L, 4L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(emsc_degree = "EMSC Polynomial Degree"),
+    finalize = NULL
+  )
+}
+
+#' @rdname bin_width
+#' @export
+osc_n_components <- function(range = c(1L, 10L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(osc_n_components = "Number of OSC Components"),
+    finalize = NULL
+  )
+}
