@@ -24,6 +24,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
     <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
+    <li><a class="dropdown-item" href="../articles/roles-diagnostics.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
     <li><a class="dropdown-item" href="../articles/baseline.html">Baseline Correction</a></li>
@@ -931,6 +932,20 @@
 
       <dl><dt>
 
+          <code><a href="new_measure_tbl.html">new_measure_tbl()</a></code>
+
+        </dt>
+        <dd>Create a new measure tibble</dd>
+
+        <dt>
+
+          <code><a href="new_measure_list.html">new_measure_list()</a></code>
+
+        </dt>
+        <dd>Create a new measure list</dd>
+
+        <dt>
+
           <code><a href="is_measure_tbl.html">is_measure_tbl()</a></code>
 
         </dt>
@@ -993,6 +1008,87 @@
 
         </dt>
         <dd>Summarize Measurements Across Samples</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data-organization">Data Organization<a class="anchor" aria-label="anchor" href="#data-organization"></a></h2>
+
+      <div class="section-desc"><p>Column detection and role assignment helpers</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="measure_identify_columns.html">measure_identify_columns()</a></code>
+
+        </dt>
+        <dd>Identify Column Types in Analytical Data</dd>
+
+        <dt>
+
+          <code><a href="measure_column_summary.html">measure_column_summary()</a></code>
+
+        </dt>
+        <dd>Get Column Summary by Type</dd>
+
+        <dt>
+
+          <code><a href="measure_column_patterns.html">measure_column_patterns</a></code>
+
+        </dt>
+        <dd>Common column naming patterns for analytical data</dd>
+
+        <dt>
+
+          <code><a href="set_measure_roles.html">set_measure_roles()</a></code>
+
+        </dt>
+        <dd>Set Measure Roles in a Recipe</dd>
+
+        <dt>
+
+          <code><a href="check_measure_recipe.html">check_measure_recipe()</a></code>
+
+        </dt>
+        <dd>Check Measure Recipe Structure</dd>
+      </dl></div><div class="section level2">
+      <h2 id="visualization-diagnostics">Visualization &amp; Diagnostics<a class="anchor" aria-label="anchor" href="#visualization-diagnostics"></a></h2>
+
+      <div class="section-desc"><p>Plotting and diagnostic functions for measure data</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="autoplot-measure.html">autoplot(<i>&lt;measure_tbl&gt;</i>)</a></code> <code><a href="autoplot-measure.html">autoplot(<i>&lt;measure_list&gt;</i>)</a></code> <code><a href="autoplot-measure.html">autoplot(<i>&lt;recipe&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Autoplot Methods for Measure Objects</dd>
+
+        <dt>
+
+          <code><a href="fortify-measure.html">fortify(<i>&lt;measure_tbl&gt;</i>)</a></code> <code><a href="fortify-measure.html">fortify(<i>&lt;measure_list&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Convert Measure Objects to Data Frames for Plotting</dd>
+
+        <dt>
+
+          <code><a href="plot_measure_comparison.html">plot_measure_comparison()</a></code>
+
+        </dt>
+        <dd>Compare Multiple Preprocessing Recipes</dd>
+
+        <dt>
+
+          <code><a href="measure_plot_summary.html">measure_plot_summary()</a></code>
+
+        </dt>
+        <dd>Plot Summary Statistics for Measure Data</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

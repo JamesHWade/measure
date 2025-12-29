@@ -11,6 +11,8 @@
   Techniques](https://jameshwade.github.io/measure/dev/articles/preprocessing.md):
 - [Integrating with
   tidymodels](https://jameshwade.github.io/measure/dev/articles/recipes.md):
+- [Data Organization and Diagnostic
+  Plots](https://jameshwade.github.io/measure/dev/articles/roles-diagnostics.md):
 
 ### Examples
 

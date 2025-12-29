@@ -319,6 +319,10 @@ Training data augmentation for improved model robustness
 
 Helper functions and utilities
 
+- [`new_measure_tbl()`](https://jameshwade.github.io/measure/dev/reference/new_measure_tbl.md)
+  : Create a new measure tibble
+- [`new_measure_list()`](https://jameshwade.github.io/measure/dev/reference/new_measure_list.md)
+  : Create a new measure list
 - [`is_measure_tbl()`](https://jameshwade.github.io/measure/dev/reference/is_measure_tbl.md)
   : Test if object is a measure tibble
 - [`is_measure_list()`](https://jameshwade.github.io/measure/dev/reference/is_measure_list.md)
@@ -356,3 +360,34 @@ Interactive exploration and summary functions for prototyping
   : Apply a Function Safely to Each Sample's Measurements
 - [`measure_summarize()`](https://jameshwade.github.io/measure/dev/reference/measure_summarize.md)
   : Summarize Measurements Across Samples
+
+## Data Organization
+
+Column detection and role assignment helpers
+
+- [`measure_identify_columns()`](https://jameshwade.github.io/measure/dev/reference/measure_identify_columns.md)
+  : Identify Column Types in Analytical Data
+- [`measure_column_summary()`](https://jameshwade.github.io/measure/dev/reference/measure_column_summary.md)
+  : Get Column Summary by Type
+- [`measure_column_patterns`](https://jameshwade.github.io/measure/dev/reference/measure_column_patterns.md)
+  : Common column naming patterns for analytical data
+- [`set_measure_roles()`](https://jameshwade.github.io/measure/dev/reference/set_measure_roles.md)
+  : Set Measure Roles in a Recipe
+- [`check_measure_recipe()`](https://jameshwade.github.io/measure/dev/reference/check_measure_recipe.md)
+  : Check Measure Recipe Structure
+
+## Visualization & Diagnostics
+
+Plotting and diagnostic functions for measure data
+
+- [`autoplot(`*`<measure_tbl>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
+  [`autoplot(`*`<measure_list>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
+  [`autoplot(`*`<recipe>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
+  : Autoplot Methods for Measure Objects
+- [`fortify(`*`<measure_tbl>`*`)`](https://jameshwade.github.io/measure/dev/reference/fortify-measure.md)
+  [`fortify(`*`<measure_list>`*`)`](https://jameshwade.github.io/measure/dev/reference/fortify-measure.md)
+  : Convert Measure Objects to Data Frames for Plotting
+- [`plot_measure_comparison()`](https://jameshwade.github.io/measure/dev/reference/plot_measure_comparison.md)
+  : Compare Multiple Preprocessing Recipes
+- [`measure_plot_summary()`](https://jameshwade.github.io/measure/dev/reference/measure_plot_summary.md)
+  : Plot Summary Statistics for Measure Data

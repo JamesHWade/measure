@@ -24,6 +24,7 @@
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
     <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
+    <li><a class="dropdown-item" href="../articles/roles-diagnostics.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
     <li><a class="dropdown-item" href="../articles/baseline.html">Baseline Correction</a></li>
@@ -73,7 +74,7 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a measure tibble</span></span></span>
-<span class="r-in"><span><span class="va">mt</span> <span class="op">&lt;-</span> <span class="fu">measure</span><span class="fu">:::</span><span class="fu">new_measure_tbl</span><span class="op">(</span>location <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mt</span> <span class="op">&lt;-</span> <span class="fu">measure</span><span class="fu">:::</span><span class="fu"><a href="new_measure_tbl.html">new_measure_tbl</a></span><span class="op">(</span>location <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">is_measure_tbl</span><span class="op">(</span><span class="va">mt</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
