@@ -242,6 +242,47 @@ measure recipes work seamlessly with the broader tidymodels ecosystem. See `vign
 - Hyperparameter tuning for preprocessing steps
 - Comparing preprocessing strategies
 
+## Finding test data
+
+### Included datasets
+
+The measure package includes several datasets for testing and examples:
+```{r datasets, eval=FALSE}
+# NIR spectroscopy
+data(meats_long)           # 215 meat samples, long format
+
+# Raman spectroscopy
+data(glucose_bioreactors)  # Loads bioreactors_small (210) and bioreactors_large (42)
+
+# Chromatography
+data(hplc_chromatograms)   # 20 simulated HPLC samples
+data(sec_chromatograms)    # 10 SEC samples (5 standards + 5 polymers)
+data(sec_calibration)      # MW calibration standards
+
+# Mass spectrometry
+data(maldi_spectra)        # 16 simulated MALDI-TOF spectra
+```
+
+### External data sources
+
+For additional test data, several R packages provide spectral datasets:
+
+```{r external-data, eval=FALSE}
+# modeldata - meats dataset in wide format
+library(modeldata)
+data(meats)
+
+# prospectr - NIR soil spectroscopy (825 samples)
+data(NIRsoil, package = "prospectr")
+```
+**Online repositories** with public analytical data:
+
+- **[Mendeley Data](https://data.mendeley.com)** - Search for spectroscopy/chromatography datasets
+- **[Zenodo](https://zenodo.org)** - Open science data repository
+- **[NIST Chemistry WebBook](https://webbook.nist.gov/chemistry/)** - Reference IR, MS, UV-Vis spectra
+- **[MassBank](https://massbank.eu/MassBank/)** - Mass spectrometry database
+- **[HMDB](https://hmdb.ca/)** - Human Metabolome Database (NMR, MS)
+
 ## Next steps
 
 - See `vignette("preprocessing")` for a detailed guide to each preprocessing technique, including:
