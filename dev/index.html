@@ -728,6 +728,179 @@
 </ul>
 </div>
 <div class="section level2">
+<h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a>
+</h2>
+<div class="section level3">
+<h3 id="included-datasets">Included Datasets<a class="anchor" aria-label="anchor" href="#included-datasets"></a>
+</h3>
+<p>The package includes datasets for examples and testing:</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Dataset</th>
+<th>Technique</th>
+<th>Samples</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>meats_long</code></td>
+<td>NIR</td>
+<td>215</td>
+<td>NIR transmittance spectra of meat samples (from modeldata)</td>
+</tr>
+<tr class="even">
+<td><code>bioreactors_small</code></td>
+<td>Raman</td>
+<td>210</td>
+<td>Raman spectra from 15 small-scale bioreactors</td>
+</tr>
+<tr class="odd">
+<td><code>bioreactors_large</code></td>
+<td>Raman</td>
+<td>42</td>
+<td>Raman spectra from 3 large-scale bioreactors</td>
+</tr>
+<tr class="even">
+<td><code>hplc_chromatograms</code></td>
+<td>HPLC-UV</td>
+<td>20</td>
+<td>Simulated HPLC chromatograms with 5 compounds</td>
+</tr>
+<tr class="odd">
+<td><code>sec_chromatograms</code></td>
+<td>SEC/GPC</td>
+<td>10</td>
+<td>Simulated SEC chromatograms (5 standards + 5 polymers)</td>
+</tr>
+<tr class="even">
+<td><code>sec_calibration</code></td>
+<td>SEC/GPC</td>
+<td>5</td>
+<td>Calibration standards for molecular weight curves</td>
+</tr>
+<tr class="odd">
+<td><code>maldi_spectra</code></td>
+<td>MALDI-TOF</td>
+<td>16</td>
+<td>Simulated mass spectra (4 groups × 4 replicates)</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load datasets</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">glucose_bioreactors</span><span class="op">)</span>  <span class="co"># loads bioreactors_small and bioreactors_large</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">hplc_chromatograms</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sec_chromatograms</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sec_calibration</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">maldi_spectra</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="external-data-sources">External Data Sources<a class="anchor" aria-label="anchor" href="#external-data-sources"></a>
+</h3>
+<p>For additional test data beyond what’s included with measure, these sources provide publicly available analytical measurement data:</p>
+<p><strong>R Packages with Spectral Data:</strong></p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Package</th>
+<th>Dataset</th>
+<th>Technique</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://modeldata.tidymodels.org/" class="external-link">modeldata</a></td>
+<td><code>meats</code></td>
+<td>NIR</td>
+<td>Meat composition (wide format version)</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/l-ramirez-lopez/prospectr" class="external-link">prospectr</a></td>
+<td><code>NIRsoil</code></td>
+<td>NIR</td>
+<td>Soil analysis with 825 samples</td>
+</tr>
+<tr class="odd">
+<td><a href="https://bryanhanson.github.io/ChemoSpec/" class="external-link">ChemoSpec</a></td>
+<td>Various</td>
+<td>IR, NMR</td>
+<td>Multiple spectroscopy datasets</td>
+</tr>
+<tr class="even">
+<td><a href="http://hyperspec.r-forge.r-project.org/" class="external-link">hyperSpec</a></td>
+<td>Various</td>
+<td>Raman, IR</td>
+<td>Hyperspectral data examples</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Example: Load NIRsoil from prospectr</span></span>
+<span><span class="co"># install.packages("prospectr")</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">NIRsoil</span>, package <span class="op">=</span> <span class="st">"prospectr"</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Online Repositories:</strong></p>
+<ul>
+<li>
+<a href="https://data.mendeley.com" class="external-link">Mendeley Data</a> - Search “spectroscopy”, “chromatography”, or “mass spectrometry”</li>
+<li>
+<a href="https://zenodo.org" class="external-link">Zenodo</a> - Open science data repository</li>
+<li>
+<a href="https://www.kaggle.com/datasets" class="external-link">Kaggle Datasets</a> - Community-contributed datasets</li>
+<li>
+<a href="https://webbook.nist.gov/chemistry/" class="external-link">NIST Chemistry WebBook</a> - Reference spectra (IR, MS, UV-Vis)</li>
+<li>
+<a href="https://sdbs.db.aist.go.jp/" class="external-link">SDBS</a> - Spectral Database for Organic Compounds (NMR, IR, MS)</li>
+</ul>
+<p><strong>Domain-Specific Databases:</strong></p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Database</th>
+<th>Data Type</th>
+<th>URL</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>MassBank</td>
+<td>Mass spectra</td>
+<td><a href="https://massbank.eu/MassBank/" class="external-link uri">https://massbank.eu/MassBank/</a></td>
+</tr>
+<tr class="even">
+<td>HMDB</td>
+<td>NMR, MS metabolomics</td>
+<td><a href="https://hmdb.ca/" class="external-link uri">https://hmdb.ca/</a></td>
+</tr>
+<tr class="odd">
+<td>NMRShiftDB</td>
+<td>NMR spectra</td>
+<td><a href="https://nmrshiftdb.nmr.uni-koeln.de/" class="external-link uri">https://nmrshiftdb.nmr.uni-koeln.de/</a></td>
+</tr>
+<tr class="even">
+<td>Crystallography Open Database</td>
+<td>XRD patterns</td>
+<td><a href="https://www.crystallography.net/cod/" class="external-link uri">https://www.crystallography.net/cod/</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section level2">
 <h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
 </h2>
 <p>measure builds on the <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a> ecosystem:</p>

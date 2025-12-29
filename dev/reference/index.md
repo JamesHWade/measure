@@ -224,6 +224,14 @@ Included datasets for examples and testing
   [`bioreactors_large`](https://jameshwade.github.io/measure/dev/reference/glucose_bioreactors.md)
   [`bioreactors_small`](https://jameshwade.github.io/measure/dev/reference/glucose_bioreactors.md)
   : Raman Spectra Bioreactor Data
+- [`hplc_chromatograms`](https://jameshwade.github.io/measure/dev/reference/hplc_chromatograms.md)
+  : Simulated HPLC Chromatography Data
+- [`sec_chromatograms`](https://jameshwade.github.io/measure/dev/reference/sec_chromatograms.md)
+  : Simulated SEC/GPC Chromatography Data
+- [`sec_calibration`](https://jameshwade.github.io/measure/dev/reference/sec_calibration.md)
+  : SEC/GPC Calibration Standards Summary
+- [`maldi_spectra`](https://jameshwade.github.io/measure/dev/reference/maldi_spectra.md)
+  : Simulated MALDI-TOF Mass Spectrometry Data
 
 ## Baseline Correction
 

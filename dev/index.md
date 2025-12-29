@@ -284,6 +284,73 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
   Techniques](https://jameshwade.github.io/measure/articles/preprocessing.html) -
   Deep dive into available preprocessing methods
 
+## Datasets
+
+### Included Datasets
+
+The package includes datasets for examples and testing:
+
+| Dataset              | Technique | Samples | Description                                                |
+|----------------------|-----------|---------|------------------------------------------------------------|
+| `meats_long`         | NIR       | 215     | NIR transmittance spectra of meat samples (from modeldata) |
+| `bioreactors_small`  | Raman     | 210     | Raman spectra from 15 small-scale bioreactors              |
+| `bioreactors_large`  | Raman     | 42      | Raman spectra from 3 large-scale bioreactors               |
+| `hplc_chromatograms` | HPLC-UV   | 20      | Simulated HPLC chromatograms with 5 compounds              |
+| `sec_chromatograms`  | SEC/GPC   | 10      | Simulated SEC chromatograms (5 standards + 5 polymers)     |
+| `sec_calibration`    | SEC/GPC   | 5       | Calibration standards for molecular weight curves          |
+| `maldi_spectra`      | MALDI-TOF | 16      | Simulated mass spectra (4 groups × 4 replicates)           |
+
+``` r
+# Load datasets
+data(meats_long)
+data(glucose_bioreactors)  # loads bioreactors_small and bioreactors_large
+data(hplc_chromatograms)
+data(sec_chromatograms)
+data(sec_calibration)
+data(maldi_spectra)
+```
+
+### External Data Sources
+
+For additional test data beyond what’s included with measure, these
+sources provide publicly available analytical measurement data:
+
+**R Packages with Spectral Data:**
+
+| Package                                                   | Dataset   | Technique | Description                            |
+|-----------------------------------------------------------|-----------|-----------|----------------------------------------|
+| [modeldata](https://modeldata.tidymodels.org/)            | `meats`   | NIR       | Meat composition (wide format version) |
+| [prospectr](https://github.com/l-ramirez-lopez/prospectr) | `NIRsoil` | NIR       | Soil analysis with 825 samples         |
+| [ChemoSpec](https://bryanhanson.github.io/ChemoSpec/)     | Various   | IR, NMR   | Multiple spectroscopy datasets         |
+| [hyperSpec](http://hyperspec.r-forge.r-project.org/)      | Various   | Raman, IR | Hyperspectral data examples            |
+
+``` r
+# Example: Load NIRsoil from prospectr
+# install.packages("prospectr")
+data(NIRsoil, package = "prospectr")
+```
+
+**Online Repositories:**
+
+- [Mendeley Data](https://data.mendeley.com) - Search “spectroscopy”,
+  “chromatography”, or “mass spectrometry”
+- [Zenodo](https://zenodo.org) - Open science data repository
+- [Kaggle Datasets](https://www.kaggle.com/datasets) -
+  Community-contributed datasets
+- [NIST Chemistry WebBook](https://webbook.nist.gov/chemistry/) -
+  Reference spectra (IR, MS, UV-Vis)
+- [SDBS](https://sdbs.db.aist.go.jp/) - Spectral Database for Organic
+  Compounds (NMR, IR, MS)
+
+**Domain-Specific Databases:**
+
+| Database                      | Data Type            | URL                                    |
+|-------------------------------|----------------------|----------------------------------------|
+| MassBank                      | Mass spectra         | <https://massbank.eu/MassBank/>        |
+| HMDB                          | NMR, MS metabolomics | <https://hmdb.ca/>                     |
+| NMRShiftDB                    | NMR spectra          | <https://nmrshiftdb.nmr.uni-koeln.de/> |
+| Crystallography Open Database | XRD patterns         | <https://www.crystallography.net/cod/> |
+
 ## Related packages
 
 measure builds on the [tidymodels](https://www.tidymodels.org/)

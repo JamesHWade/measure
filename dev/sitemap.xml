@@ -21,10 +21,12 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/find_peaks_cols.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/glucose_bioreactors.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/has_measure_col.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/hplc_chromatograms.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/index.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_list.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_tbl.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_peaks_list.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/maldi_spectra.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure-package.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_map.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_map_safely.html</loc></url>
@@ -34,6 +36,8 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/peak_location_min.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/reexports.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/sec_calibration.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/sec_chromatograms.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/smooth_window.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_align_cow.html</loc></url>

@@ -468,6 +468,61 @@ including:</p>
 </ul>
 </div>
 <div class="section level2">
+<h2 id="finding-test-data">Finding test data<a class="anchor" aria-label="anchor" href="#finding-test-data"></a>
+</h2>
+<div class="section level3">
+<h3 id="included-datasets">Included datasets<a class="anchor" aria-label="anchor" href="#included-datasets"></a>
+</h3>
+<p>The measure package includes several datasets for testing and
+examples:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># NIR spectroscopy</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span>           <span class="co"># 215 meat samples, long format</span></span>
+<span></span>
+<span><span class="co"># Raman spectroscopy</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">glucose_bioreactors</span><span class="op">)</span>  <span class="co"># Loads bioreactors_small (210) and bioreactors_large (42)</span></span>
+<span></span>
+<span><span class="co"># Chromatography</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">hplc_chromatograms</span><span class="op">)</span>   <span class="co"># 20 simulated HPLC samples</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sec_chromatograms</span><span class="op">)</span>    <span class="co"># 10 SEC samples (5 standards + 5 polymers)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sec_calibration</span><span class="op">)</span>      <span class="co"># MW calibration standards</span></span>
+<span></span>
+<span><span class="co"># Mass spectrometry</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">maldi_spectra</span><span class="op">)</span>        <span class="co"># 16 simulated MALDI-TOF spectra</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="external-data-sources">External data sources<a class="anchor" aria-label="anchor" href="#external-data-sources"></a>
+</h3>
+<p>For additional test data, several R packages provide spectral
+datasets:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># modeldata - meats dataset in wide format</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># prospectr - NIR soil spectroscopy (825 samples)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">NIRsoil</span>, package <span class="op">=</span> <span class="st">"prospectr"</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Online repositories</strong> with public analytical data:</p>
+<ul>
+<li>
+<strong><a href="https://data.mendeley.com" class="external-link">Mendeley
+Data</a></strong> - Search for spectroscopy/chromatography datasets</li>
+<li>
+<strong><a href="https://zenodo.org" class="external-link">Zenodo</a></strong> - Open
+science data repository</li>
+<li>
+<strong><a href="https://webbook.nist.gov/chemistry/" class="external-link">NIST Chemistry
+WebBook</a></strong> - Reference IR, MS, UV-Vis spectra</li>
+<li>
+<strong><a href="https://massbank.eu/MassBank/" class="external-link">MassBank</a></strong> - Mass
+spectrometry database</li>
+<li>
+<strong><a href="https://hmdb.ca/" class="external-link">HMDB</a></strong> - Human
+Metabolome Database (NMR, MS)</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
 <h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
 </h2>
 <ul>
