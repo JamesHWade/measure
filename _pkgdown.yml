@@ -219,6 +219,14 @@ reference:
   - measure_column_patterns
   - set_measure_roles
   - check_measure_recipe
+- title: Axis Validation
+  desc: Axis semantics and data quality validation
+  contents:
+  - validate_measure
+  - measure_axis_info
+  - infer_axis_type
+  - check_axis_consistency
+  - measure_quality_summary
 - title: Visualization & Diagnostics
   desc: Plotting and diagnostic functions for measure data
   contents:
