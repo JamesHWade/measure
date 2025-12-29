@@ -21,6 +21,7 @@ Imports:
     dials,
     dplyr,
     generics,
+    ggplot2,
     glue,
     IDPmisc,
     MASS,
@@ -34,7 +35,6 @@ Imports:
 Suggests:
     covr,
     dtw,
-    ggplot2,
     knitr,
     modeldata,
     parsnip,

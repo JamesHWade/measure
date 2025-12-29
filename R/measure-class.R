@@ -17,14 +17,29 @@
 
 #' Create a new measure tibble
 #'
-#' Low-level constructor for creating a single measurement object.
-#' This is an internal function used by input steps.
+#' Constructor for creating a single measurement object containing
+#' location (e.g., wavelength, retention time) and value pairs.
 #'
-#' @param location Numeric vector of measurement locations (e.g., wavelengths).
-#' @param value Numeric vector of measurement values.
+#' @param location Numeric vector of measurement locations (e.g., wavelengths,
+#'   wavenumbers, retention times).
+#' @param value Numeric vector of measurement values (e.g., absorbance,
+#'   intensity, signal).
 #'
-#' @return A tibble with class `measure_tbl`.
-#' @noRd
+#' @return A tibble with class `measure_tbl` containing `location` and `value`
+#'   columns.
+#'
+#' @seealso [new_measure_list()] for creating collections of measurements,
+#'   [is_measure_tbl()] for checking object class.
+#'
+#' @examples
+#' # Create a simple spectrum
+#' spec <- new_measure_tbl(
+#'   location = seq(1000, 1100, by = 10),
+#'   value = sin(seq(1000, 1100, by = 10) / 50)
+#' )
+#' spec
+#'
+#' @export
 new_measure_tbl <- function(location = double(), value = double()) {
   if (!is.numeric(location)) {
     cli::cli_abort(
@@ -123,13 +138,28 @@ vec_ptype_abbr.measure_tbl <- function(x, ...) {
 
 #' Create a new measure list
 #'
-#' Low-level constructor for creating a list of measurements suitable
-#' for use as a column in a data frame.
+#' Constructor for creating a collection of measurements suitable
+#' for use as a list column in a data frame. Each element should be
+#' a `measure_tbl` or tibble with `location` and `value` columns.
 #'
-#' @param x A list of tibbles, each with `location` and `value` columns.
+#' @param x A list of `measure_tbl` objects or tibbles with `location`
+#'   and `value` columns.
 #'
 #' @return A list with class `measure_list`.
-#' @noRd
+#'
+#' @seealso [new_measure_tbl()] for creating individual measurements,
+#'   [is_measure_list()] for checking object class.
+#'
+#' @examples
+#' # Create individual spectra
+#' spec1 <- new_measure_tbl(location = 1:10, value = rnorm(10))
+#' spec2 <- new_measure_tbl(location = 1:10, value = rnorm(10))
+#'
+#' # Combine into a measure_list
+#' specs <- new_measure_list(list(spec1, spec2))
+#' specs
+#'
+#' @export
 new_measure_list <- function(x = list()) {
   if (!is.list(x)) {
     cli::cli_abort("{.arg x} must be a list, not {.obj_type_friendly {x}}.")
