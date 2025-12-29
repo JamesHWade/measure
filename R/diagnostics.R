@@ -5,7 +5,7 @@
 #'
 #' @name diagnostics
 #' @keywords internal
-#' @importFrom ggplot2 autoplot
+#' @importFrom ggplot2 autoplot fortify
 NULL
 
 
@@ -54,6 +54,12 @@ check_ggplot2 <- function(call = rlang::caller_env()) {
 #' @name fortify-measure
 #' @exportS3Method ggplot2::fortify
 fortify.measure_tbl <- function(model, data = NULL, ...) {
+  if (!inherits(model, "measure_tbl")) {
+    cli::cli_abort("{.arg model} must be a {.cls measure_tbl} object.")
+  }
+  if (is.null(model$location) || is.null(model$value)) {
+    cli::cli_abort("{.cls measure_tbl} object is missing required {.field location} or {.field value} columns.")
+  }
   tibble::tibble(
     location = model$location,
     value = model$value
@@ -63,6 +69,12 @@ fortify.measure_tbl <- function(model, data = NULL, ...) {
 #' @rdname fortify-measure
 #' @exportS3Method ggplot2::fortify
 fortify.measure_list <- function(model, data = NULL, ...) {
+  if (!inherits(model, "measure_list")) {
+    cli::cli_abort("{.arg model} must be a {.cls measure_list} object.")
+  }
+  if (length(model) == 0) {
+    cli::cli_abort("{.cls measure_list} object is empty.")
+  }
   # Use existing helper function
   result <- measure_to_tibble(model)
   names(result)[names(result) == "sample_num"] <- "sample"
@@ -145,13 +157,11 @@ autoplot.measure_tbl <- function(object, ...) {
 #' @param max_spectra Maximum number of individual spectra to plot.
 #'   Default 50. Set to NULL for no limit.
 #' @param alpha Transparency for individual spectrum lines. Default 0.3.
-#' @param color_by Optional column name for coloring spectra by group.
 #' @export
 autoplot.measure_list <- function(object,
                                   summary = FALSE,
                                   max_spectra = 50,
                                   alpha = 0.3,
-                                  color_by = NULL,
                                   ...) {
   check_ggplot2()
 
@@ -225,8 +235,9 @@ autoplot.measure_list <- function(object,
 #' @rdname autoplot-measure
 #' @param n_samples Number of samples to show in before/after comparison.
 #'   Default 10.
-#' @param which Which comparison to show: "before_after" (default),
-#'   "steps" (show each step), or "summary" (summary statistics).
+#' @param which Which comparison to show: `"before_after"` (default) shows
+#'   side-by-side before/after comparison, `"summary"` shows summary statistics
+#'   (mean +/- SD) for the processed data.
 #' @export
 autoplot.recipe <- function(object,
                             n_samples = 10,
@@ -358,6 +369,7 @@ autoplot.recipe <- function(object,
 apply_input_step_only <- function(recipe) {
   # Find input step index
   step_classes <- vapply(recipe$steps, function(s) class(s)[1], character(1))
+
   input_idx <- grep("^step_measure_input", step_classes)
 
   if (length(input_idx) == 0) {
@@ -375,6 +387,11 @@ apply_input_step_only <- function(recipe) {
     result <- recipes::bake(input_step, new_data = template_data)
     result
   }, error = function(e) {
+    cli::cli_warn(c(
+      "Could not extract 'before' data for comparison.",
+      "i" = "Showing processed data only.",
+      "x" = conditionMessage(e)
+    ))
     NULL
   })
 }
@@ -575,23 +592,19 @@ measure_plot_summary <- function(data, measure_col = NULL, show_range = FALSE) {
 
   measures <- data[[measure_col]]
 
-  # Use measure_summarize if available, otherwise compute manually
-  summary_data <- tryCatch({
-    measure_summarize(measures)
-  }, error = function(e) {
-    # Manual computation
-    plot_df <- fortify.measure_list(new_measure_list(measures))
-    plot_df |>
-      dplyr::group_by(.data$location) |>
-      dplyr::summarize(
-        mean = mean(.data$value, na.rm = TRUE),
-        sd = stats::sd(.data$value, na.rm = TRUE),
-        min = min(.data$value, na.rm = TRUE),
-        max = max(.data$value, na.rm = TRUE),
-        n = dplyr::n(),
-        .groups = "drop"
-      )
-  })
+  # Compute summary statistics
+
+  plot_df <- fortify.measure_list(new_measure_list(measures))
+  summary_data <- plot_df |>
+    dplyr::group_by(.data$location) |>
+    dplyr::summarize(
+      mean = mean(.data$value, na.rm = TRUE),
+      sd = stats::sd(.data$value, na.rm = TRUE),
+      min = min(.data$value, na.rm = TRUE),
+      max = max(.data$value, na.rm = TRUE),
+      n = dplyr::n(),
+      .groups = "drop"
+    )
 
   p <- ggplot2::ggplot(summary_data, ggplot2::aes(x = .data$location))
 

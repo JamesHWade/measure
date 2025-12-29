@@ -2,9 +2,8 @@
 title: "Data Organization and Diagnostic Plots"
 output: rmarkdown::html_vignette
 vignette: >
-
   %\VignetteIndexEntry{Data Organization and Diagnostic Plots}
- %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -323,8 +322,7 @@ measure_plot_summary(baked, show_range = TRUE)
 
 3. **Assign roles explicitly** for ID columns, metadata, and special sample types
 
-4
-. **Visualize at each stage** - use `autoplot()` to verify preprocessing effects
+4. **Visualize at each stage** - use `autoplot()` to verify preprocessing effects
 
 5. **Compare strategies** with `plot_measure_comparison()` before committing to a preprocessing approach
 

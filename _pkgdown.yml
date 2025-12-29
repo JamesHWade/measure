@@ -198,6 +198,8 @@ reference:
 - title: Utilities
   desc: Helper functions and utilities
   contents:
+  - new_measure_tbl
+  - new_measure_list
   - is_measure_tbl
   - is_measure_list
   - find_measure_cols
@@ -214,6 +216,7 @@ reference:
   contents:
   - measure_identify_columns
   - measure_column_summary
+  - measure_column_patterns
   - set_measure_roles
   - check_measure_recipe
 - title: Visualization & Diagnostics

@@ -21,6 +21,15 @@ measure_column_patterns
 }
 \description{
 Named list of regex patterns for detecting measurement column types.
-Used by \code{measure_identify_columns()} for auto-detection.
+Used by \code{measure_identify_columns()} for auto-detection. Users can
+extend or modify these patterns and pass them to detection functions.
 }
-\keyword{internal}
+\examples{
+# View default patterns
+measure_column_patterns
+
+# Create custom patterns
+my_patterns <- c(measure_column_patterns, list(custom = "^my_prefix_"))
+
+}
+\keyword{datasets}

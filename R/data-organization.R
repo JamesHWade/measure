@@ -13,7 +13,8 @@ NULL
 #' Common column naming patterns for analytical data
 #'
 #' Named list of regex patterns for detecting measurement column types.
-#' Used by `measure_identify_columns()` for auto-detection.
+#' Used by `measure_identify_columns()` for auto-detection. Users can
+#' extend or modify these patterns and pass them to detection functions.
 #'
 #' @format Named list with regex patterns:
 #' \describe{
@@ -26,7 +27,14 @@ NULL
 #'   \item{generic}{`x_` prefix for generic/unknown axis}
 #' }
 #'
-#' @keywords internal
+#' @examples
+#' # View default patterns
+#' measure_column_patterns
+#'
+#' # Create custom patterns
+#' my_patterns <- c(measure_column_patterns, list(custom = "^my_prefix_"))
+#'
+#' @export
 measure_column_patterns <- list(
 
   wavenumber = "^wn_",
@@ -104,9 +112,7 @@ measure_identify_columns <- function(data, patterns = measure_column_patterns) {
     cli::cli_abort("{.arg data} must be a data frame.")
   }
 
-
   col_names <- names(data)
-  n_cols <- length(col_names)
 
   # Detect type for each column
   types <- vapply(col_names, function(col) {
@@ -125,8 +131,7 @@ measure_identify_columns <- function(data, patterns = measure_column_patterns) {
     col_data <- data[[col]]
 
     # Measurement columns become predictors
-
-if (type != "other") {
+    if (type != "other") {
       return("predictor")
     }
 
@@ -189,7 +194,6 @@ if (type != "other") {
 #' @param standard_cols Column(s) to assign "standard" role. Accepts tidyselect.
 #' @param metadata_cols Column(s) to assign "metadata" role. Accepts tidyselect.
 #' @param measure_cols Column(s) to assign "measure" role. Accepts tidyselect.
-#'   If NULL (default), auto-detects using `measure_column_patterns`.
 #'
 #' @return Updated recipe object with roles assigned.
 #'
@@ -218,12 +222,12 @@ if (type != "other") {
 #'     metadata_cols = c(batch, operator)
 #'   )
 #'
-#' # With QC and blank identification
+#' # With QC and blank identification by column name patterns
 #' rec <- recipe(outcome ~ ., data = my_data) |>
 #'   set_measure_roles(
 #'     id_cols = sample_id,
-#'     blank_cols = where(~ .x == "blank"),
-#'     qc_cols = starts_with("QC_")
+#'     blank_cols = starts_with("blank_"),
+#'     qc_cols = starts_with("qc_")
 #'   )
 #' }
 #'

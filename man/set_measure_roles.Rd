@@ -27,8 +27,7 @@ set_measure_roles(
 
 \item{metadata_cols}{Column(s) to assign "metadata" role. Accepts tidyselect.}
 
-\item{measure_cols}{Column(s) to assign "measure" role. Accepts tidyselect.
-If NULL (default), auto-detects using \code{measure_column_patterns}.}
+\item{measure_cols}{Column(s) to assign "measure" role. Accepts tidyselect.}
 }
 \value{
 Updated recipe object with roles assigned.
@@ -62,12 +61,12 @@ rec <- recipe(outcome ~ ., data = my_data) |>
     metadata_cols = c(batch, operator)
   )
 
-# With QC and blank identification
+# With QC and blank identification by column name patterns
 rec <- recipe(outcome ~ ., data = my_data) |>
   set_measure_roles(
     id_cols = sample_id,
-    blank_cols = where(~ .x == "blank"),
-    qc_cols = starts_with("QC_")
+    blank_cols = starts_with("blank_"),
+    qc_cols = starts_with("qc_")
   )
 }
 

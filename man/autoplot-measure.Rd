@@ -9,14 +9,7 @@
 \usage{
 \method{autoplot}{measure_tbl}(object, ...)
 
-\method{autoplot}{measure_list}(
-  object,
-  summary = FALSE,
-  max_spectra = 50,
-  alpha = 0.3,
-  color_by = NULL,
-  ...
-)
+\method{autoplot}{measure_list}(object, summary = FALSE, max_spectra = 50, alpha = 0.3, ...)
 
 \method{autoplot}{recipe}(object, n_samples = 10, which = c("before_after", "summary"), ...)
 }
@@ -32,13 +25,12 @@ Default 50. Set to NULL for no limit.}
 
 \item{alpha}{Transparency for individual spectrum lines. Default 0.3.}
 
-\item{color_by}{Optional column name for coloring spectra by group.}
-
 \item{n_samples}{Number of samples to show in before/after comparison.
 Default 10.}
 
-\item{which}{Which comparison to show: "before_after" (default),
-"steps" (show each step), or "summary" (summary statistics).}
+\item{which}{Which comparison to show: \code{"before_after"} (default) shows
+side-by-side before/after comparison, \code{"summary"} shows summary statistics
+(mean +/- SD) for the processed data.}
 }
 \value{
 A ggplot2 object.
