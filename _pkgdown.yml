@@ -22,6 +22,8 @@ navbar:
         href: articles/preprocessing.html
       - text: Integrating with tidymodels
         href: articles/recipes.html
+      - text: Data Organization & Diagnostics
+        href: articles/roles-diagnostics.html
       - text: '---'
       - text: Examples
       - text: Baseline Correction
@@ -41,6 +43,7 @@ articles:
   contents:
   - preprocessing
   - recipes
+  - roles-diagnostics
 - title: Examples
   contents:
   - baseline
@@ -206,4 +209,18 @@ reference:
   - measure_map
   - measure_map_safely
   - measure_summarize
+- title: Data Organization
+  desc: Column detection and role assignment helpers
+  contents:
+  - measure_identify_columns
+  - measure_column_summary
+  - set_measure_roles
+  - check_measure_recipe
+- title: Visualization & Diagnostics
+  desc: Plotting and diagnostic functions for measure data
+  contents:
+  - starts_with("autoplot")
+  - starts_with("fortify")
+  - plot_measure_comparison
+  - measure_plot_summary
 
