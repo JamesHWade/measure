@@ -764,6 +764,21 @@ Column detection and role assignment helpers
 - [`check_measure_recipe()`](https://jameshwade.github.io/measure/dev/reference/check_measure_recipe.md)
   : Check Measure Recipe Structure
 
+## Axis Validation
+
+Axis semantics and data quality validation
+
+- [`validate_measure()`](https://jameshwade.github.io/measure/dev/reference/validate_measure.md)
+  : Validate measure data
+- [`measure_axis_info()`](https://jameshwade.github.io/measure/dev/reference/measure_axis_info.md)
+  : Get axis information from measure data
+- [`infer_axis_type()`](https://jameshwade.github.io/measure/dev/reference/infer_axis_type.md)
+  : Infer axis type from location values
+- [`check_axis_consistency()`](https://jameshwade.github.io/measure/dev/reference/check_axis_consistency.md)
+  : Check axis consistency across samples
+- [`measure_quality_summary()`](https://jameshwade.github.io/measure/dev/reference/measure_quality_summary.md)
+  : Summarize measure data quality
+
 ## Visualization & Diagnostics
 
 Plotting and diagnostic functions for measure data
