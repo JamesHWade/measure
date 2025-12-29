@@ -582,6 +582,172 @@ p_snv / p_msc
 Both methods produce similar results for this dataset. In practice, try
 both and compare model performance.
 
+## Extended Scatter Correction
+
+For more complex scatter effects, measure provides advanced scatter
+correction methods.
+
+### Extended MSC (EMSC)
+
+EMSC extends standard MSC by modeling wavelength-dependent scatter
+effects using polynomial terms:
+
+``` r
+rec_emsc <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_emsc(degree = 2)
+
+emsc_data <- get_internal(rec_emsc)
+plot_spectra(emsc_data, "After EMSC (degree=2)", "Wavelength-dependent scatter correction")
+```
+
+![](preprocessing_files/figure-html/emsc-example-1.png)
+
+The `degree` parameter controls the polynomial order for wavelength
+terms (0 = standard MSC, higher = more flexibility). This parameter is
+tunable.
+
+### Orthogonal Signal Correction (OSC)
+
+OSC removes variation in spectra that is orthogonal (uncorrelated) to
+the response variable. This is a supervised technique that requires
+outcome variables:
+
+``` r
+rec_osc <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_osc(n_components = 2)
+
+osc_data <- get_internal(rec_osc)
+plot_spectra(osc_data, "After OSC", "Removed 2 orthogonal components")
+```
+
+![](preprocessing_files/figure-html/osc-example-1.png)
+
+OSC automatically detects outcome variables from the recipe formula. The
+`n_components` parameter controls how many orthogonal components to
+remove and is tunable.
+
+**When to use EMSC vs OSC:** - **EMSC**: Physical scatter effects that
+vary with wavelength - **OSC**: Systematic variation unrelated to your
+response (supervised)
+
+## Feature Engineering
+
+Feature engineering steps extract scalar features from spectral data,
+creating new predictor columns useful for modeling.
+
+### Region Integration
+
+[`step_measure_integrals()`](https://jameshwade.github.io/measure/dev/reference/step_measure_integrals.md)
+calculates integrated areas for specified regions, useful for
+quantifying peak areas:
+
+``` r
+rec_integrals <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_integrals(
+    regions = list(
+      region_a = c(870, 920),
+      region_b = c(950, 1000)
+    ),
+    method = "trapezoid"
+  )
+
+# View extracted features
+bake(prep(rec_integrals), new_data = NULL) |>
+  select(starts_with("integral_")) |>
+  head()
+#> # A tibble: 6 × 2
+#>   integral_region_a integral_region_b
+#>               <dbl>             <dbl>
+#> 1              131.              161.
+#> 2              146.              170.
+#> 3              129.              152.
+#> 4              140.              167.
+#> 5              141.              177.
+#> 6              155.              183.
+```
+
+### Region Ratios
+
+[`step_measure_ratios()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratios.md)
+calculates ratios between integrated regions, often used for internal
+calibration:
+
+``` r
+rec_ratios <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_ratios(
+    numerator = c(870, 920),
+    denominator = c(950, 1000),
+    name = "peak_ratio"
+  )
+
+bake(prep(rec_ratios), new_data = NULL) |>
+  select(peak_ratio) |>
+  head()
+#> # A tibble: 6 × 1
+#>   peak_ratio
+#>        <dbl>
+#> 1      0.810
+#> 2      0.855
+#> 3      0.849
+#> 4      0.841
+#> 5      0.795
+#> 6      0.851
+```
+
+### Statistical Moments
+
+[`step_measure_moments()`](https://jameshwade.github.io/measure/dev/reference/step_measure_moments.md)
+extracts statistical moments from spectra:
+
+``` r
+rec_moments <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_moments(moments = c("mean", "sd", "skewness", "kurtosis"))
+
+bake(prep(rec_moments), new_data = NULL) |>
+  select(starts_with("moment_")) |>
+  head()
+#> # A tibble: 6 × 4
+#>   moment_mean moment_sd moment_skewness moment_kurtosis
+#>         <dbl>     <dbl>           <dbl>           <dbl>
+#> 1        2.97     0.270           0.222           -1.38
+#> 2        3.24     0.234          -0.311           -1.19
+#> 3        2.82     0.206           0.536           -1.15
+#> 4        3.09     0.238           0.540           -1.19
+#> 5        3.25     0.326           0.102           -1.37
+#> 6        3.48     0.262          -0.387           -1.17
+```
+
+### Spectral Binning
+
+[`step_measure_bin()`](https://jameshwade.github.io/measure/dev/reference/step_measure_bin.md)
+reduces spectral resolution by averaging or summing bins. This can
+reduce noise and dimensionality:
+
+``` r
+rec_bin <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_bin(n_bins = 20, method = "mean")
+
+bin_data <- get_internal(rec_bin)
+plot_spectra(bin_data, "Binned to 20 Points", "Reduced dimensionality")
+```
+
+![](preprocessing_files/figure-html/binning-example-1.png)
+
+The `bin_width` parameter is tunable:
+
+``` r
+rec_tunable_bin <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_bin(bin_width = tune()) |>
+  step_measure_output_wide()
+```
+
 ## Sample-wise Normalization
 
 The measure package provides several sample-wise normalization methods
@@ -759,12 +925,12 @@ head(tidy_params)
 #> # A tibble: 6 × 5
 #>   terms     location  mean    sd id                      
 #>   <chr>        <dbl> <dbl> <dbl> <chr>                   
-#> 1 .measures     850   2.81 0.411 measure_scale_auto_hncrU
-#> 2 .measures     852.  2.81 0.413 measure_scale_auto_hncrU
-#> 3 .measures     854.  2.81 0.416 measure_scale_auto_hncrU
-#> 4 .measures     856.  2.82 0.418 measure_scale_auto_hncrU
-#> 5 .measures     858.  2.82 0.421 measure_scale_auto_hncrU
-#> 6 .measures     860.  2.82 0.424 measure_scale_auto_hncrU
+#> 1 .measures     850   2.81 0.411 measure_scale_auto_uVs7T
+#> 2 .measures     852.  2.81 0.413 measure_scale_auto_uVs7T
+#> 3 .measures     854.  2.81 0.416 measure_scale_auto_uVs7T
+#> 4 .measures     856.  2.82 0.418 measure_scale_auto_uVs7T
+#> 5 .measures     858.  2.82 0.421 measure_scale_auto_uVs7T
+#> 6 .measures     860.  2.82 0.424 measure_scale_auto_uVs7T
 
 # Plot the learned means and SDs
 ggplot(tidy_params, aes(x = location)) +
@@ -1028,17 +1194,95 @@ A typical order might be:
 
     Derivatives → Sample normalization (SNV/MSC) → Variable scaling (center/auto-scale)
 
+## Data Augmentation
+
+Data augmentation steps add controlled variations to training data,
+helping models generalize better. These steps default to `skip = TRUE`,
+meaning they only apply during training (via
+[`prep()`](https://recipes.tidymodels.org/reference/prep.html)) and are
+skipped when applying the recipe to new data (via
+[`bake()`](https://recipes.tidymodels.org/reference/bake.html) with
+`new_data`).
+
+### Adding Random Noise
+
+[`step_measure_augment_noise()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_noise.md)
+adds random noise to simulate measurement uncertainty:
+
+``` r
+rec_noise <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_augment_noise(
+    sd = 0.01,              # Noise level (relative to signal range)
+    distribution = "gaussian",
+    relative = TRUE         # TRUE = sd is relative to signal range
+  ) |>
+  step_measure_output_wide()
+```
+
+### Random X-axis Shifts
+
+[`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md)
+applies small random shifts along the x-axis, helping models become
+shift-invariant:
+
+``` r
+rec_shift <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_augment_shift(max_shift = 2) |>  # Max shift in location units
+  step_measure_output_wide()
+```
+
+### Random Intensity Scaling
+
+[`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md)
+applies random scaling factors to intensities:
+
+``` r
+rec_scale <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_augment_scale(range = c(0.9, 1.1)) |>  # Scale between 90-110%
+  step_measure_output_wide()
+```
+
+### Combining Augmentations
+
+Multiple augmentation steps can be combined. Augmentations are
+reproducible - applying the same recipe to the same data produces
+identical results:
+
+``` r
+rec_augment <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_augment_noise(sd = 0.005) |>
+  step_measure_augment_shift(max_shift = 1) |>
+  step_measure_augment_scale(range = c(0.95, 1.05)) |>
+  step_measure_snv() |>
+  step_measure_output_wide()
+
+# Augmentation only applies during training
+prepped <- prep(rec_augment)
+training_data <- bake(prepped, new_data = NULL)  # Augmented
+new_data <- bake(prepped, new_data = meats[1:5, ])  # Not augmented
+```
+
+**When to use augmentation:** - Training deep learning models - Small
+training sets where more variation helps - Building
+shift/scale-invariant models
+
 ## Summary table
 
 ### Filtering and Scatter Correction
 
-| Step                                                                                           | Effect             | Use when             |
-|------------------------------------------------------------------------------------------------|--------------------|----------------------|
-| `step_measure_savitzky_golay(order=0)`                                                         | Smoothing          | High-frequency noise |
-| `step_measure_savitzky_golay(order=1)`                                                         | 1st derivative     | Baseline offsets     |
-| `step_measure_savitzky_golay(order=2)`                                                         | 2nd derivative     | Linear baselines     |
-| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Row normalization  | Scatter, path length |
-| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Align to reference | Scatter (supervised) |
+| Step                                                                                             | Effect                     | Use when                 |
+|--------------------------------------------------------------------------------------------------|----------------------------|--------------------------|
+| `step_measure_savitzky_golay(order=0)`                                                           | Smoothing                  | High-frequency noise     |
+| `step_measure_savitzky_golay(order=1)`                                                           | 1st derivative             | Baseline offsets         |
+| `step_measure_savitzky_golay(order=2)`                                                           | 2nd derivative             | Linear baselines         |
+| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)   | Row normalization          | Scatter, path length     |
+| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)   | Align to reference         | Scatter (supervised)     |
+| [`step_measure_emsc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_emsc.md) | Wavelength-dependent MSC   | Complex scatter effects  |
+| [`step_measure_osc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_osc.md)   | Remove orthogonal variance | Supervised noise removal |
 
 ### Spectral Math
 
@@ -1143,6 +1387,23 @@ A typical order might be:
 | [`step_measure_mw_averages()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.md)         | Calculate Mn, Mw, Mz, Mp, Đ    | Polymer characterization |
 | [`step_measure_mw_distribution()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_distribution.md) | Generate MW distribution curve | Distribution analysis    |
 | [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md)       | Calculate MW fractions         | Size-based fractionation |
+
+### Feature Engineering
+
+| Step                                                                                                       | Effect                      | Use when                 |
+|------------------------------------------------------------------------------------------------------------|-----------------------------|--------------------------|
+| [`step_measure_integrals()`](https://jameshwade.github.io/measure/dev/reference/step_measure_integrals.md) | Calculate region areas      | Quantify peak regions    |
+| [`step_measure_ratios()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratios.md)       | Calculate region ratios     | Internal calibration     |
+| [`step_measure_moments()`](https://jameshwade.github.io/measure/dev/reference/step_measure_moments.md)     | Extract statistical moments | Shape characterization   |
+| [`step_measure_bin()`](https://jameshwade.github.io/measure/dev/reference/step_measure_bin.md)             | Reduce spectral resolution  | Dimensionality reduction |
+
+### Data Augmentation
+
+| Step                                                                                                               | Effect                   | Use when            |
+|--------------------------------------------------------------------------------------------------------------------|--------------------------|---------------------|
+| [`step_measure_augment_noise()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_noise.md) | Add random noise         | Training robustness |
+| [`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md) | Random x-axis shifts     | Shift invariance    |
+| [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md) | Random intensity scaling | Scale invariance    |
 
 ### Custom
 

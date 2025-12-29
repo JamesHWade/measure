@@ -265,8 +265,8 @@
 </h3>
 <table class="table">
 <colgroup>
-<col width="45%">
-<col width="54%">
+<col width="50%">
+<col width="50%">
 </colgroup>
 <thead><tr class="header">
 <th>Step</th>
@@ -284,6 +284,14 @@
 <tr class="odd">
 <td><code><a href="reference/step_measure_msc.html">step_measure_msc()</a></code></td>
 <td>Multiplicative Scatter Correction</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_emsc.html">step_measure_emsc()</a></code></td>
+<td>Extended MSC with wavelength-dependent correction</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_osc.html">step_measure_osc()</a></code></td>
+<td>Orthogonal Signal Correction</td>
 </tr>
 </tbody>
 </table>
@@ -644,6 +652,66 @@
 <tr class="odd">
 <td><code><a href="reference/step_measure_mw_fractions.html">step_measure_mw_fractions()</a></code></td>
 <td>Calculate molecular weight fractions</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="feature-engineering">Feature Engineering<a class="anchor" aria-label="anchor" href="#feature-engineering"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_integrals.html">step_measure_integrals()</a></code></td>
+<td>Calculate integrated areas for specified regions</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_ratios.html">step_measure_ratios()</a></code></td>
+<td>Calculate ratios between integrated regions</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_moments.html">step_measure_moments()</a></code></td>
+<td>Calculate statistical moments from spectra</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_bin.html">step_measure_bin()</a></code></td>
+<td>Reduce spectrum to fewer points via binning</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="data-augmentation">Data Augmentation<a class="anchor" aria-label="anchor" href="#data-augmentation"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="42%">
+<col width="57%">
+</colgroup>
+<thead><tr class="header">
+<th>Step</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_augment_noise.html">step_measure_augment_noise()</a></code></td>
+<td>Add random noise for training augmentation</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_augment_shift.html">step_measure_augment_shift()</a></code></td>
+<td>Random x-axis shifts for shift invariance</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_augment_scale.html">step_measure_augment_scale()</a></code></td>
+<td>Random intensity scaling</td>
 </tr>
 </tbody>
 </table>

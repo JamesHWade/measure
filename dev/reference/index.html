@@ -620,6 +620,13 @@
 
         </dt>
         <dd>Parameters for quality control steps</dd>
+
+        <dt>
+
+          <code><a href="bin_width.html">bin_width()</a></code> <code><a href="bin_width.html">emsc_degree()</a></code> <code><a href="bin_width.html">osc_n_components()</a></code>
+
+        </dt>
+        <dd>Parameters for feature engineering and scatter correction</dd>
       </dl></div><div class="section level2">
       <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
@@ -795,6 +802,96 @@
         </dt>
         <dd>Calculate Molecular Weight Fractions for SEC/GPC</dd>
       </dl></div><div class="section level2">
+      <h2 id="feature-engineering">Feature Engineering<a class="anchor" aria-label="anchor" href="#feature-engineering"></a></h2>
+
+      <div class="section-desc"><p>Extract features from spectral data</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_integrals.html">step_measure_integrals()</a></code>
+
+        </dt>
+        <dd>Calculate Region Integrals</dd>
+
+        <dt>
+
+          <code><a href="step_measure_ratios.html">step_measure_ratios()</a></code>
+
+        </dt>
+        <dd>Calculate Region Ratios</dd>
+
+        <dt>
+
+          <code><a href="step_measure_moments.html">step_measure_moments()</a></code>
+
+        </dt>
+        <dd>Calculate Statistical Moments</dd>
+
+        <dt>
+
+          <code><a href="step_measure_bin.html">step_measure_bin()</a></code>
+
+        </dt>
+        <dd>Spectral Binning</dd>
+      </dl></div><div class="section level2">
+      <h2 id="extended-scatter-correction">Extended Scatter Correction<a class="anchor" aria-label="anchor" href="#extended-scatter-correction"></a></h2>
+
+      <div class="section-desc"><p>Advanced scatter correction methods</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_emsc.html">step_measure_emsc()</a></code>
+
+        </dt>
+        <dd>Extended Multiplicative Scatter Correction (EMSC)</dd>
+
+        <dt>
+
+          <code><a href="step_measure_osc.html">step_measure_osc()</a></code>
+
+        </dt>
+        <dd>Orthogonal Signal Correction (OSC)</dd>
+      </dl></div><div class="section level2">
+      <h2 id="data-augmentation">Data Augmentation<a class="anchor" aria-label="anchor" href="#data-augmentation"></a></h2>
+
+      <div class="section-desc"><p>Training data augmentation for improved model robustness</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_augment_noise.html">step_measure_augment_noise()</a></code>
+
+        </dt>
+        <dd>Add Random Noise to Measurements</dd>
+
+        <dt>
+
+          <code><a href="step_measure_augment_shift.html">step_measure_augment_shift()</a></code>
+
+        </dt>
+        <dd>Add Random X-axis Shifts</dd>
+
+        <dt>
+
+          <code><a href="step_measure_augment_scale.html">step_measure_augment_scale()</a></code>
+
+        </dt>
+        <dd>Random Intensity Scaling</dd>
+      </dl></div><div class="section level2">
       <h2 id="utilities">Utilities<a class="anchor" aria-label="anchor" href="#utilities"></a></h2>
 
       <div class="section-desc"><p>Helper functions and utilities</p></div>
@@ -834,7 +931,7 @@
 
         <dt>
 
-          <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_align_dtw&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_align_ptw&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_averages&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_fractions&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_distribution&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_resample&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_savitzky_golay&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_smooth_wavelet&gt;</i>)</a></code>
+          <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_align_dtw&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_align_ptw&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_augment_noise&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_augment_shift&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_augment_scale&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_integrals&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_ratios&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_moments&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_bin&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_averages&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_fractions&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_mw_distribution&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_resample&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_savitzky_golay&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_emsc&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_osc&gt;</i>)</a></code> <code><a href="required_pkgs.recipe.html">required_pkgs(<i>&lt;step_measure_smooth_wavelet&gt;</i>)</a></code>
 
         </dt>
         <dd>Set package dependencies</dd>

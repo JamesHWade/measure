@@ -20,6 +20,15 @@ tidy(x, ...)
 # S3 method for class 'step_measure_align_cow'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_augment_noise'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_augment_shift'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_augment_scale'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_baseline_als'
 tidy(x, ...)
 
@@ -72,6 +81,18 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_detrend'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_integrals'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_ratios'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_moments'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_bin'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_input_long'
@@ -183,6 +204,12 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_scale_vast'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_emsc'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_osc'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_smooth_wavelet'

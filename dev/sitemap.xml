@@ -15,6 +15,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/index.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/align_max_shift.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/baseline_lambda.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/bin_width.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/derivative_order.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/find_measure_cols.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/find_peaks_cols.html</loc></url>
@@ -40,6 +41,9 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_align_ptw.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_align_reference.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_align_shift.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_augment_noise.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_airpls.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_arpls.html</loc></url>
@@ -54,6 +58,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rolling.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_snip.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_tophat.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_bin.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_x.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_center.html</loc></url>
@@ -61,15 +66,18 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_despike.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_emsc.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_filter_fourier.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_impute.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_integrals.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_interpolate.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_log.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_map.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_moments.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_msc.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_mw_distribution.html</loc></url>
@@ -81,6 +89,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_osc.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.html</loc></url>
@@ -92,6 +101,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_qc_saturated.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_qc_snr.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_ratios.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_resample.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.html</loc></url>

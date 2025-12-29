@@ -209,6 +209,10 @@ Parameters for hyperparameter tuning with dials
   : Parameters for alignment steps
 - [`outlier_threshold()`](https://jameshwade.github.io/measure/dev/reference/outlier_threshold.md)
   : Parameters for quality control steps
+- [`bin_width()`](https://jameshwade.github.io/measure/dev/reference/bin_width.md)
+  [`emsc_degree()`](https://jameshwade.github.io/measure/dev/reference/bin_width.md)
+  [`osc_n_components()`](https://jameshwade.github.io/measure/dev/reference/bin_width.md)
+  : Parameters for feature engineering and scatter correction
 
 ## Data
 
@@ -270,6 +274,39 @@ Molecular weight calculations for size exclusion chromatography
 - [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md)
   : Calculate Molecular Weight Fractions for SEC/GPC
 
+## Feature Engineering
+
+Extract features from spectral data
+
+- [`step_measure_integrals()`](https://jameshwade.github.io/measure/dev/reference/step_measure_integrals.md)
+  : Calculate Region Integrals
+- [`step_measure_ratios()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratios.md)
+  : Calculate Region Ratios
+- [`step_measure_moments()`](https://jameshwade.github.io/measure/dev/reference/step_measure_moments.md)
+  : Calculate Statistical Moments
+- [`step_measure_bin()`](https://jameshwade.github.io/measure/dev/reference/step_measure_bin.md)
+  : Spectral Binning
+
+## Extended Scatter Correction
+
+Advanced scatter correction methods
+
+- [`step_measure_emsc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_emsc.md)
+  : Extended Multiplicative Scatter Correction (EMSC)
+- [`step_measure_osc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_osc.md)
+  : Orthogonal Signal Correction (OSC)
+
+## Data Augmentation
+
+Training data augmentation for improved model robustness
+
+- [`step_measure_augment_noise()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_noise.md)
+  : Add Random Noise to Measurements
+- [`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md)
+  : Add Random X-axis Shifts
+- [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md)
+  : Random Intensity Scaling
+
 ## Utilities
 
 Helper functions and utilities
@@ -284,11 +321,20 @@ Helper functions and utilities
   : Check if data frame has measure column(s)
 - [`required_pkgs(`*`<step_measure_align_dtw>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_align_ptw>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_augment_noise>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_augment_shift>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_augment_scale>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_integrals>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_ratios>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_moments>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_bin>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_mw_averages>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_mw_fractions>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_mw_distribution>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_resample>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_savitzky_golay>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_emsc>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
+  [`required_pkgs(`*`<step_measure_osc>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_smooth_wavelet>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   : Set package dependencies
 

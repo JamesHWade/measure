@@ -148,11 +148,13 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 
 ### Filtering & Scatter Correction
 
-| Step                                                                                                                 | Description                           |
-|----------------------------------------------------------------------------------------------------------------------|---------------------------------------|
-| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Smoothing and/or differentiation      |
-| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)                       | Standard Normal Variate normalization |
-| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)                       | Multiplicative Scatter Correction     |
+| Step                                                                                                                 | Description                                       |
+|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------|
+| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Smoothing and/or differentiation                  |
+| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)                       | Standard Normal Variate normalization             |
+| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)                       | Multiplicative Scatter Correction                 |
+| [`step_measure_emsc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_emsc.md)                     | Extended MSC with wavelength-dependent correction |
+| [`step_measure_osc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_osc.md)                       | Orthogonal Signal Correction                      |
 
 ### Smoothing & Noise Reduction
 
@@ -255,6 +257,23 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | [`step_measure_mw_averages()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.md)         | Calculate Mn, Mw, Mz, Mp, and dispersity     |
 | [`step_measure_mw_distribution()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_distribution.md) | Generate molecular weight distribution curve |
 | [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md)       | Calculate molecular weight fractions         |
+
+### Feature Engineering
+
+| Step                                                                                                       | Description                                      |
+|------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
+| [`step_measure_integrals()`](https://jameshwade.github.io/measure/dev/reference/step_measure_integrals.md) | Calculate integrated areas for specified regions |
+| [`step_measure_ratios()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratios.md)       | Calculate ratios between integrated regions      |
+| [`step_measure_moments()`](https://jameshwade.github.io/measure/dev/reference/step_measure_moments.md)     | Calculate statistical moments from spectra       |
+| [`step_measure_bin()`](https://jameshwade.github.io/measure/dev/reference/step_measure_bin.md)             | Reduce spectrum to fewer points via binning      |
+
+### Data Augmentation
+
+| Step                                                                                                               | Description                                |
+|--------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| [`step_measure_augment_noise()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_noise.md) | Add random noise for training augmentation |
+| [`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md) | Random x-axis shifts for shift invariance  |
+| [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md) | Random intensity scaling                   |
 
 ## Learning more
 

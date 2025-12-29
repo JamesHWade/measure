@@ -23,6 +23,9 @@ tunable(x, ...)
 # S3 method for class 'step_measure_baseline_py'
 tunable(x, ...)
 
+# S3 method for class 'step_measure_bin'
+tunable(x, ...)
+
 # S3 method for class 'step_measure_savitzky_golay'
 tunable(x, ...)
 
@@ -72,6 +75,12 @@ tunable(x, ...)
 tunable(x, ...)
 
 # S3 method for class 'step_measure_qc_outlier'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_emsc'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_osc'
 tunable(x, ...)
 ```
 
