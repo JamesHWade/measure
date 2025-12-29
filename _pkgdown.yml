@@ -158,6 +158,10 @@ reference:
   contents:
   - meats_long
   - glucose_bioreactors
+  - hplc_chromatograms
+  - sec_chromatograms
+  - sec_calibration
+  - maldi_spectra
 - title: Baseline Correction
   desc: Baseline correction steps and utilities
   contents:
