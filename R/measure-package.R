@@ -62,6 +62,7 @@ utils::globalVariables(
     "baseline",
     ".index",
     ".measures",
+    ".weights",
     "value",
     "location",
     "..row",
