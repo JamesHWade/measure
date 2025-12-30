@@ -325,6 +325,24 @@ method validation, designed for compatibility with ICH Q2(R2), ISO
 | `measure_linearity()` | Linearity with lack-of-fit testing |
 | `measure_carryover()` | Carryover evaluation |
 
+### Method Comparison
+
+| Function | Description |
+|----|----|
+| `measure_bland_altman()` | Bland-Altman analysis with limits of agreement |
+| `measure_deming_regression()` | Deming regression for method comparison |
+| `measure_passing_bablok()` | Passing-Bablok non-parametric regression |
+| `measure_proficiency_score()` | z-scores, En scores, zeta scores for PT |
+
+### Matrix Effects & Sample Prep QC
+
+| Function/Step                       | Description                           |
+|-------------------------------------|---------------------------------------|
+| `measure_matrix_effect()`           | Quantify ion suppression/enhancement  |
+| `step_measure_standard_addition()`  | Standard addition correction          |
+| `step_measure_dilution_correct()`   | Back-calculate diluted concentrations |
+| `step_measure_surrogate_recovery()` | Surrogate/internal standard recovery  |
+
 ### Uncertainty & Quality Control
 
 | Function                       | Description                        |

@@ -36,6 +36,7 @@ Suggests:
     covr,
     dtw,
     knitr,
+    mcr,
     modeldata,
     parsnip,
     patchwork,

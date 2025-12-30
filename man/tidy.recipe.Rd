@@ -3,12 +3,14 @@
 %   R/baseline-als.R, R/baseline-custom.R, R/baseline-extended.R,
 %   R/baseline-gpc.R, R/baseline-poly.R, R/baseline-py.R, R/baseline-rf.R,
 %   R/batch-correction.R, R/calibrate.R, R/control-limits.R, R/despike.R,
-%   R/detrend.R, R/drift-correction.R, R/feature-engineering.R, R/input_long.R,
-%   R/input_wide.R, R/measure-map.R, R/msc.R, R/mw-calculations.R,
+%   R/detrend.R, R/dilution-correction.R, R/drift-correction.R,
+%   R/feature-engineering.R, R/input_long.R, R/input_wide.R, R/matrix-effects.R,
+%   R/measure-map.R, R/method-comparison.R, R/msc.R, R/mw-calculations.R,
 %   R/normalize-sample.R, R/output_long.R, R/output_wide.R, R/peak-operations.R,
 %   R/precision.R, R/qc.R, R/reference-subtract.R, R/region-operations.R,
 %   R/savitzky_golay.R, R/scale-variable.R, R/scatter-extended.R,
-%   R/smooth-wavelet.R, R/smooth.R, R/snv.R, R/spectral-math.R
+%   R/smooth-wavelet.R, R/smooth.R, R/snv.R, R/spectral-math.R,
+%   R/surrogate-recovery.R
 \name{tidy.measure_accuracy}
 \alias{tidy.measure_accuracy}
 \alias{tidy.measure_linearity}
@@ -43,6 +45,7 @@
 \alias{tidy.measure_sst}
 \alias{tidy.step_measure_despike}
 \alias{tidy.step_measure_detrend}
+\alias{tidy.step_measure_dilution_correct}
 \alias{tidy.step_measure_drift_qc_loess}
 \alias{tidy.step_measure_drift_linear}
 \alias{tidy.step_measure_drift_spline}
@@ -53,7 +56,18 @@
 \alias{tidy.step_measure_bin}
 \alias{tidy.step_measure_input_long}
 \alias{tidy.step_measure_input_wide}
+\alias{tidy.measure_matrix_effect}
+\alias{glance.measure_matrix_effect}
+\alias{tidy.step_measure_standard_addition}
 \alias{tidy.step_measure_map}
+\alias{tidy.measure_bland_altman}
+\alias{tidy.measure_deming_regression}
+\alias{tidy.measure_passing_bablok}
+\alias{tidy.measure_proficiency_score}
+\alias{glance.measure_bland_altman}
+\alias{glance.measure_deming_regression}
+\alias{glance.measure_passing_bablok}
+\alias{glance.measure_proficiency_score}
 \alias{tidy.step_measure_msc}
 \alias{tidy.step_measure_mw_averages}
 \alias{tidy.step_measure_mw_fractions}
@@ -104,6 +118,7 @@
 \alias{tidy.step_measure_kubelka_munk}
 \alias{tidy.step_measure_derivative}
 \alias{tidy.step_measure_derivative_gap}
+\alias{tidy.step_measure_surrogate_recovery}
 \title{Tidiers for measure steps}
 \usage{
 \method{tidy}{measure_accuracy}(x, ...)
@@ -172,6 +187,8 @@
 
 \method{tidy}{step_measure_detrend}(x, ...)
 
+\method{tidy}{step_measure_dilution_correct}(x, ...)
+
 \method{tidy}{step_measure_drift_qc_loess}(x, ...)
 
 \method{tidy}{step_measure_drift_linear}(x, ...)
@@ -192,7 +209,29 @@
 
 \method{tidy}{step_measure_input_wide}(x, ...)
 
+\method{tidy}{measure_matrix_effect}(x, ...)
+
+\method{glance}{measure_matrix_effect}(x, ...)
+
+\method{tidy}{step_measure_standard_addition}(x, ...)
+
 \method{tidy}{step_measure_map}(x, ...)
+
+\method{tidy}{measure_bland_altman}(x, ...)
+
+\method{tidy}{measure_deming_regression}(x, ...)
+
+\method{tidy}{measure_passing_bablok}(x, ...)
+
+\method{tidy}{measure_proficiency_score}(x, type = c("scores", "summary"), ...)
+
+\method{glance}{measure_bland_altman}(x, ...)
+
+\method{glance}{measure_deming_regression}(x, ...)
+
+\method{glance}{measure_passing_bablok}(x, ...)
+
+\method{glance}{measure_proficiency_score}(x, ...)
 
 \method{tidy}{step_measure_msc}(x, ...)
 
@@ -293,6 +332,8 @@
 \method{tidy}{step_measure_derivative}(x, ...)
 
 \method{tidy}{step_measure_derivative_gap}(x, ...)
+
+\method{tidy}{step_measure_surrogate_recovery}(x, ...)
 }
 \arguments{
 \item{x}{A step object.}
