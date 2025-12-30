@@ -591,7 +591,17 @@ tidy.measure_sst <- function(x, ...) {
 # Autoplot methods
 # ==============================================================================
 
-#' @rdname autoplot.measure_uncertainty_budget
+#' Plot Control Chart
+#'
+#' Creates a control chart visualization showing data points, control limits,
+#' and any rule violations.
+#'
+#' @param object A [measure_control_chart] object.
+#' @param ... Additional arguments (unused).
+#'
+#' @return A ggplot object showing the control chart.
+#'
+#' @importFrom ggplot2 autoplot
 #' @export
 autoplot.measure_control_chart <- function(object, ...) {
   data <- object$data

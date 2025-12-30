@@ -524,10 +524,12 @@ get_failures <- function(assessment) {
 #' Factory functions that return commonly-used criteria sets for analytical
 #' validation workflows.
 #'
-#' @param cv_qc Maximum allowable CV for QC samples (default 15%).
+#' @param cv_qc Maximum allowable CV for QC samples (default 15%, bioanalytical).
 #' @param cv_calibration Maximum allowable CV for calibration replicates (default 20%).
-#' @param r_squared Minimum R-squared for calibration curve (default 0.99).
-#' @param recovery_range Acceptable recovery range (default 80-120%).
+#' @param cv_repeatability Maximum allowable CV for repeatability (default 2%, ICH Q2).
+#' @param cv_intermediate Maximum allowable CV for intermediate precision (default 5%, ICH Q2).
+#' @param r_squared Minimum R-squared for calibration curve.
+#' @param recovery_range Acceptable recovery range as c(lower, upper).
 #' @param accuracy_bias Maximum allowable bias (default 15%).
 #'
 #' @return A [measure_criteria] object.

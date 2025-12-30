@@ -22,15 +22,19 @@ criteria_ich_q2(
 )
 }
 \arguments{
-\item{cv_qc}{Maximum allowable CV for QC samples (default 15\%).}
+\item{cv_qc}{Maximum allowable CV for QC samples (default 15\%, bioanalytical).}
 
 \item{cv_calibration}{Maximum allowable CV for calibration replicates (default 20\%).}
 
-\item{r_squared}{Minimum R-squared for calibration curve (default 0.99).}
+\item{r_squared}{Minimum R-squared for calibration curve.}
 
-\item{recovery_range}{Acceptable recovery range (default 80-120\%).}
+\item{recovery_range}{Acceptable recovery range as c(lower, upper).}
 
 \item{accuracy_bias}{Maximum allowable bias (default 15\%).}
+
+\item{cv_repeatability}{Maximum allowable CV for repeatability (default 2\%, ICH Q2).}
+
+\item{cv_intermediate}{Maximum allowable CV for intermediate precision (default 5\%, ICH Q2).}
 }
 \value{
 A \link{measure_criteria} object.

@@ -672,7 +672,17 @@ tidy.measure_carryover <- function(x, ...) {
 # Autoplot methods
 # ==============================================================================
 
-#' @rdname autoplot.measure_uncertainty_budget
+#' Plot Linearity Assessment Results
+#'
+#' Creates diagnostic plots for linearity assessment.
+#'
+#' @param object A linearity assessment result from [measure_linearity()].
+#' @param type Type of plot: `"fit"` for fitted vs actual, or `"residuals"`.
+#' @param ... Additional arguments (unused).
+#'
+#' @return A ggplot object.
+#'
+#' @importFrom ggplot2 autoplot
 #' @export
 autoplot.measure_linearity <- function(object, type = c("fit", "residuals"), ...) {
   type <- match.arg(type)
