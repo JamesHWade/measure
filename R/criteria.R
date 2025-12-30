@@ -604,3 +604,141 @@ criteria_ich_q2 <- function(
     )
   )
 }
+
+#' @rdname criteria_presets
+#' @param loa_width Maximum acceptable limits of agreement width.
+#' @param bias_max Maximum acceptable mean bias.
+#' @param proportional_bias_p Significance level for proportional bias test.
+#' @export
+criteria_bland_altman <- function(
+    loa_width = NULL,
+    bias_max = NULL,
+    proportional_bias_p = 0.05) {
+
+  criteria_list <- list()
+
+  if (!is.null(loa_width)) {
+    criteria_list <- c(criteria_list, list(
+      criterion("loa_width", "<=", loa_width,
+        description = sprintf("LOA width <= %s", loa_width),
+        priority = "major"
+      )
+    ))
+  }
+
+  if (!is.null(bias_max)) {
+    criteria_list <- c(criteria_list, list(
+      criterion("mean_bias", "between", c(-bias_max, bias_max),
+        description = sprintf("Mean bias within +/-%s", bias_max),
+        priority = "critical"
+      )
+    ))
+  }
+
+  criteria_list <- c(criteria_list, list(
+    criterion("proportional_bias_p", ">=", proportional_bias_p,
+      description = sprintf("Proportional bias p >= %s (not significant)", proportional_bias_p),
+      priority = "major"
+    )
+  ))
+
+  measure_criteria(.list = criteria_list)
+}
+
+#' @rdname criteria_presets
+#' @param slope_range Acceptable range for regression slope (default c(0.9, 1.1)).
+#' @param intercept_range Acceptable range for regression intercept.
+#' @export
+criteria_method_comparison <- function(
+    slope_range = c(0.9, 1.1),
+    intercept_range = NULL,
+    r_squared = 0.95) {
+
+  criteria_list <- list(
+    criterion("slope", "between", slope_range,
+      description = sprintf("Slope in [%s, %s]", slope_range[1], slope_range[2]),
+      priority = "critical"
+    ),
+    criterion("r_squared", ">=", r_squared,
+      description = sprintf("R\u00b2 >= %s", r_squared),
+      priority = "major"
+    )
+  )
+
+  if (!is.null(intercept_range)) {
+    criteria_list <- c(criteria_list, list(
+      criterion("intercept", "between", intercept_range,
+        description = sprintf("Intercept in [%s, %s]", intercept_range[1], intercept_range[2]),
+        priority = "major"
+      )
+    ))
+  }
+
+  measure_criteria(.list = criteria_list)
+}
+
+#' @rdname criteria_presets
+#' @param max_z_score Maximum acceptable absolute z-score.
+#' @param pct_satisfactory Minimum percentage of satisfactory results.
+#' @export
+criteria_proficiency_testing <- function(
+    max_z_score = 2,
+    pct_satisfactory = 100) {
+
+  measure_criteria(
+    criterion("max_abs_score", "<=", max_z_score,
+      description = sprintf("Max |z-score| <= %s", max_z_score),
+      priority = "critical"
+    ),
+    criterion("pct_satisfactory", ">=", pct_satisfactory,
+      description = sprintf("Satisfactory results >= %s%%", pct_satisfactory),
+      priority = "major"
+    )
+  )
+}
+
+#' @rdname criteria_presets
+#' @param me_range Acceptable matrix effect range (default c(80, 120)).
+#' @param me_cv Maximum acceptable CV of matrix effects.
+#' @export
+criteria_matrix_effects <- function(
+    me_range = c(80, 120),
+    me_cv = 15) {
+
+  measure_criteria(
+    criterion("mean_me_pct", "between", me_range,
+      description = sprintf("Mean ME in [%s%%, %s%%]", me_range[1], me_range[2]),
+      priority = "critical"
+    ),
+    criterion("cv_me_pct", "<=", me_cv,
+      description = sprintf("CV of ME <= %s%%", me_cv),
+      priority = "major"
+    ),
+    criterion("min_me_pct", ">=", me_range[1],
+      description = sprintf("Min ME >= %s%%", me_range[1]),
+      priority = "major"
+    ),
+    criterion("max_me_pct", "<=", me_range[2],
+      description = sprintf("Max ME <= %s%%", me_range[2]),
+      priority = "major"
+    )
+  )
+}
+
+#' @rdname criteria_presets
+#' @param surrogate_recovery Acceptable surrogate recovery range.
+#' @export
+criteria_surrogate_recovery <- function(
+    surrogate_recovery = c(70, 130)) {
+
+  measure_criteria(
+    criterion("min_recovery", ">=", surrogate_recovery[1],
+      description = sprintf("Min recovery >= %s%%", surrogate_recovery[1]),
+      priority = "major"
+    ),
+    criterion("max_recovery", "<=", surrogate_recovery[2],
+      description = sprintf("Max recovery <= %s%%", surrogate_recovery[2]),
+      priority = "major"
+    )
+  )
+}

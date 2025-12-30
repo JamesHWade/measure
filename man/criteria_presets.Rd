@@ -4,6 +4,11 @@
 \alias{criteria_presets}
 \alias{criteria_bioanalytical}
 \alias{criteria_ich_q2}
+\alias{criteria_bland_altman}
+\alias{criteria_method_comparison}
+\alias{criteria_proficiency_testing}
+\alias{criteria_matrix_effects}
+\alias{criteria_surrogate_recovery}
 \title{Preset Acceptance Criteria}
 \usage{
 criteria_bioanalytical(
@@ -20,6 +25,24 @@ criteria_ich_q2(
   recovery_range = c(98, 102),
   r_squared = 0.999
 )
+
+criteria_bland_altman(
+  loa_width = NULL,
+  bias_max = NULL,
+  proportional_bias_p = 0.05
+)
+
+criteria_method_comparison(
+  slope_range = c(0.9, 1.1),
+  intercept_range = NULL,
+  r_squared = 0.95
+)
+
+criteria_proficiency_testing(max_z_score = 2, pct_satisfactory = 100)
+
+criteria_matrix_effects(me_range = c(80, 120), me_cv = 15)
+
+criteria_surrogate_recovery(surrogate_recovery = c(70, 130))
 }
 \arguments{
 \item{cv_qc}{Maximum allowable CV for QC samples (default 15\%, bioanalytical).}
@@ -35,6 +58,26 @@ criteria_ich_q2(
 \item{cv_repeatability}{Maximum allowable CV for repeatability (default 2\%, ICH Q2).}
 
 \item{cv_intermediate}{Maximum allowable CV for intermediate precision (default 5\%, ICH Q2).}
+
+\item{loa_width}{Maximum acceptable limits of agreement width.}
+
+\item{bias_max}{Maximum acceptable mean bias.}
+
+\item{proportional_bias_p}{Significance level for proportional bias test.}
+
+\item{slope_range}{Acceptable range for regression slope (default c(0.9, 1.1)).}
+
+\item{intercept_range}{Acceptable range for regression intercept.}
+
+\item{max_z_score}{Maximum acceptable absolute z-score.}
+
+\item{pct_satisfactory}{Minimum percentage of satisfactory results.}
+
+\item{me_range}{Acceptable matrix effect range (default c(80, 120)).}
+
+\item{me_cv}{Maximum acceptable CV of matrix effects.}
+
+\item{surrogate_recovery}{Acceptable surrogate recovery range.}
 }
 \value{
 A \link{measure_criteria} object.
