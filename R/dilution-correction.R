@@ -196,6 +196,17 @@ if (!object$dilution_col %in% names(new_data)) {
 
   dilution_factors <- new_data[[object$dilution_col]]
 
+  # Handle negative dilution factors (not physically meaningful)
+  neg_idx <- which(dilution_factors < 0)
+  if (length(neg_idx) > 0) {
+    cli::cli_abort(
+      c(
+        "Negative dilution factor{?s} found at row{?s}: {neg_idx}.",
+        "i" = "Dilution factors must be non-negative."
+      )
+    )
+  }
+
   # Handle zero dilution factors
   zero_idx <- which(dilution_factors == 0)
   if (length(zero_idx) > 0) {

@@ -393,3 +393,71 @@ test_that("criteria_surrogate_recovery creates valid criteria", {
   expect_true("min_recovery" %in% names(crit))
   expect_true("max_recovery" %in% names(crit))
 })
+
+# ==============================================================================
+# Edge case tests (added for PR review fixes)
+# ==============================================================================
+
+test_that("step_measure_dilution_correct handle_zero='skip' continues silently", {
+  data <- data.frame(
+    dilution_factor = c(1, 0, 2),
+    analyte = c(100, 100, 100)
+  )
+
+  # No warning or error expected with skip mode
+  rec <- recipes::recipe(~ ., data = data) |>
+    step_measure_dilution_correct(
+      analyte,
+      dilution_col = "dilution_factor",
+      handle_zero = "skip"
+    ) |>
+    recipes::prep()
+
+  result <- recipes::bake(rec, new_data = NULL)
+
+  expect_equal(result$analyte[1], 100)
+  expect_equal(result$analyte[2], 0)  # Zero * 100 = 0 (multiply mode default)
+  expect_equal(result$analyte[3], 200)
+})
+
+test_that("step_measure_dilution_correct errors on negative factors", {
+  data <- data.frame(
+    dilution_factor = c(1, -2, 2),
+    analyte = c(100, 100, 100)
+  )
+
+  expect_error(
+    recipes::recipe(~ ., data = data) |>
+      step_measure_dilution_correct(
+        analyte,
+        dilution_col = "dilution_factor"
+      ) |>
+      recipes::prep(),
+    "Negative"
+  )
+})
+
+test_that("step_measure_dilution_correct divide with zero handled", {
+  data <- data.frame(
+    dilution_factor = c(2, 0, 4),
+    analyte = c(100, 100, 100)
+  )
+
+  expect_warning(
+    rec <- recipes::recipe(~ ., data = data) |>
+      step_measure_dilution_correct(
+        analyte,
+        dilution_col = "dilution_factor",
+        operation = "divide",
+        handle_zero = "warn"
+      ) |>
+      recipes::prep(),
+    "Zero dilution"
+  )
+
+  result <- recipes::bake(rec, new_data = NULL)
+
+  expect_equal(result$analyte[1], 50)   # 100 / 2
+  expect_true(is.na(result$analyte[2])) # 100 / 0 = NA (warned)
+  expect_equal(result$analyte[3], 25)   # 100 / 4
+})

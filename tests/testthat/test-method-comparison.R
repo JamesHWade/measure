@@ -308,3 +308,65 @@ test_that("autoplot methods return ggplot objects", {
   p <- autoplot(ba)
   expect_s3_class(p, "ggplot")
 })
+
+# ==============================================================================
+# Edge case tests (added for PR review fixes)
+# ==============================================================================
+
+test_that("measure_proficiency_score errors when IQR is zero (identical differences)", {
+  # All differences are identical, so IQR = 0
+  data <- data.frame(
+    measured = c(100, 101, 102),
+    reference = c(100, 101, 102)  # Differences are all 0
+  )
+
+  expect_error(
+    measure_proficiency_score(
+      data,
+      measured_col = "measured",
+      reference_col = "reference",
+      score_type = "z_score"
+      # sigma not provided, will try to estimate from IQR
+    ),
+    "IQR = 0"
+  )
+})
+
+test_that("measure_proficiency_score errors on zero sigma", {
+  data <- data.frame(
+    measured = c(100, 105, 110),
+    reference = c(100, 100, 100)
+  )
+
+  expect_error(
+    measure_proficiency_score(
+      data,
+      measured_col = "measured",
+      reference_col = "reference",
+      score_type = "z_score",
+      sigma = 0  # Zero sigma should error
+    ),
+    "positive"
+  )
+})
+
+test_that("measure_proficiency_score errors on zero combined uncertainty", {
+  data <- data.frame(
+    measured = c(100, 105, 110),
+    reference = c(100, 100, 100),
+    u_measured = c(0, 0, 0),  # All zeros
+    u_reference = c(0, 0, 0)
+  )
+
+  expect_error(
+    measure_proficiency_score(
+      data,
+      measured_col = "measured",
+      reference_col = "reference",
+      score_type = "en_score",
+      uncertainty_col = "u_measured",
+      reference_uncertainty_col = "u_reference"
+    ),
+    "zero"
+  )
+})

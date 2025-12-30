@@ -64,11 +64,14 @@ Standard addition works by:
 \item Splitting each unknown sample into multiple aliquots
 \item Adding increasing known amounts of analyte to each aliquot
 \item Measuring response for all aliquots
-\item Extrapolating the regression line to x = -concentration
+\item Fitting regression: \code{response = intercept + slope * addition}
+\item Calculating original concentration from the x-intercept
 }
 
-The original concentration is the absolute value of the x-intercept:
-\code{concentration = -intercept / slope}
+The x-intercept (where response = 0) is at \code{-intercept / slope}.
+Since intercept is positive (response from original sample) and slope
+is positive (response increases with addition), the original concentration
+is: \code{concentration = intercept / slope}
 }
 
 \subsection{Data Format}{

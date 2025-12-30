@@ -149,13 +149,24 @@
   ss_residual <- sum(residuals^2, na.rm = TRUE)
   r_squared <- 1 - ss_residual / ss_total
 
+  # Warn if R-squared is negative (model fits worse than horizontal line)
+  if (r_squared < 0) {
+    cli::cli_warn(
+      c(
+        "Negative R-squared ({format(r_squared, digits = 3)}) indicates model fits worse than a horizontal line.",
+        "i" = "The Deming regression may not be appropriate for this data."
+      )
+    )
+    r_squared <- 0
+  }
+
   list(
     intercept = intercept,
     slope = slope,
     fitted = fitted,
     residuals = residuals,
     rmse = rmse,
-    r_squared = max(0, r_squared),  # Prevent negative R^2
+    r_squared = r_squared,
     error_ratio = error_ratio,
     n = n,
     mean_x = mean_x,
@@ -175,6 +186,7 @@
   n <- length(x)
   boot_intercept <- numeric(n_boot)
   boot_slope <- numeric(n_boot)
+  error_messages <- character(0)
 
   for (i in seq_len(n_boot)) {
     idx <- sample(n, n, replace = TRUE)
@@ -185,6 +197,7 @@
     }, error = function(e) {
       boot_intercept[i] <<- NA
       boot_slope[i] <<- NA
+      error_messages <<- c(error_messages, e$message)
     })
   }
 
@@ -192,6 +205,17 @@
   valid <- !is.na(boot_intercept) & !is.na(boot_slope)
   boot_intercept <- boot_intercept[valid]
   boot_slope <- boot_slope[valid]
+  n_failed <- sum(!valid)
+
+  if (n_failed > 0) {
+    unique_errors <- unique(error_messages)
+    cli::cli_warn(
+      c(
+        "{n_failed} bootstrap sample{?s} failed.",
+        "i" = "Common error{?s}: {head(unique_errors, 3)}"
+      )
+    )
+  }
 
   if (length(boot_slope) < 100) {
     cli::cli_warn(
@@ -219,6 +243,10 @@
 #' @return z-score
 #' @noRd
 .calculate_z_score <- function(measured, reference, sigma) {
+  # Handle zero or negative sigma
+ if (any(sigma <= 0, na.rm = TRUE)) {
+    cli::cli_abort("Sigma must be positive for z-score calculation.")
+  }
   (measured - reference) / sigma
 }
 
@@ -231,6 +259,14 @@
 #' @noRd
 .calculate_en_score <- function(measured, reference, u_measured, u_reference) {
   combined_u <- sqrt(u_measured^2 + u_reference^2)
+
+  # Check for zero combined uncertainty
+  if (any(combined_u == 0, na.rm = TRUE)) {
+    cli::cli_abort(
+      "Combined uncertainty is zero for some observations; En-score cannot be calculated."
+    )
+  }
+
   (measured - reference) / combined_u
 }
 

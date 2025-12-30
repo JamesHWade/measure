@@ -667,7 +667,18 @@ measure_proficiency_score <- function(
     if (is.null(sigma)) {
       # Estimate from robust IQR
       differences <- measured - reference
-      sigma <- stats::IQR(differences, na.rm = TRUE) / 1.349  # Robust estimate
+      iqr_val <- stats::IQR(differences, na.rm = TRUE)
+
+      if (iqr_val == 0) {
+        cli::cli_abort(
+          c(
+            "Cannot estimate sigma: all differences are identical (IQR = 0).",
+            "i" = "Provide an explicit {.arg sigma} value."
+          )
+        )
+      }
+
+      sigma <- iqr_val / 1.349  # Robust estimate
       cli::cli_inform(
         "Estimated sigma = {format(sigma, digits = 3)} from IQR of differences."
       )
@@ -942,11 +953,17 @@ glance.measure_bland_altman <- function(x, ...) {
 glance.measure_deming_regression <- function(x, ...) {
   coefs <- x$coefficients
 
+  # Safe CI checks that handle NA values
+  int_ci_check <- !is.na(coefs$ci_lower[1]) && !is.na(coefs$ci_upper[1]) &&
+    coefs$ci_lower[1] <= 0 && coefs$ci_upper[1] >= 0
+  slope_ci_check <- !is.na(coefs$ci_lower[2]) && !is.na(coefs$ci_upper[2]) &&
+    coefs$ci_lower[2] <= 1 && coefs$ci_upper[2] >= 1
+
   tibble::tibble(
     intercept = coefs$estimate[1],
     slope = coefs$estimate[2],
-    intercept_ci_includes_0 = coefs$ci_lower[1] <= 0 & coefs$ci_upper[1] >= 0,
-    slope_ci_includes_1 = coefs$ci_lower[2] <= 1 & coefs$ci_upper[2] >= 1,
+    intercept_ci_includes_0 = int_ci_check,
+    slope_ci_includes_1 = slope_ci_check,
     r_squared = x$statistics$r_squared,
     rmse = x$statistics$rmse
   )
@@ -957,11 +974,17 @@ glance.measure_deming_regression <- function(x, ...) {
 glance.measure_passing_bablok <- function(x, ...) {
   coefs <- x$coefficients
 
+  # Safe CI checks that handle NA values
+  int_ci_check <- !is.na(coefs$ci_lower[1]) && !is.na(coefs$ci_upper[1]) &&
+    coefs$ci_lower[1] <= 0 && coefs$ci_upper[1] >= 0
+  slope_ci_check <- !is.na(coefs$ci_lower[2]) && !is.na(coefs$ci_upper[2]) &&
+    coefs$ci_lower[2] <= 1 && coefs$ci_upper[2] >= 1
+
   tibble::tibble(
     intercept = coefs$estimate[1],
     slope = coefs$estimate[2],
-    intercept_ci_includes_0 = coefs$ci_lower[1] <= 0 & coefs$ci_upper[1] >= 0,
-    slope_ci_includes_1 = coefs$ci_lower[2] <= 1 & coefs$ci_upper[2] >= 1,
+    intercept_ci_includes_0 = int_ci_check,
+    slope_ci_includes_1 = slope_ci_check,
     linearity_p = x$linearity$p_value,
     linear = x$linearity$linear
   )

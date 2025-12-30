@@ -165,11 +165,21 @@ measure_matrix_effect <- function(
 
   # Overall statistics
   all_me <- results$matrix_effect_pct
+  mean_me_val <- mean(all_me, na.rm = TRUE)
+  sd_me_val <- sd(all_me, na.rm = TRUE)
+
+  # Safe CV calculation (avoid division by zero)
+  cv_me_val <- if (!is.na(mean_me_val) && mean_me_val != 0) {
+    100 * sd_me_val / mean_me_val
+  } else {
+    NA_real_
+  }
+
   statistics <- list(
     n_groups = nrow(results),
-    mean_me = mean(all_me, na.rm = TRUE),
-    sd_me = sd(all_me, na.rm = TRUE),
-    cv_me = 100 * sd(all_me, na.rm = TRUE) / mean(all_me, na.rm = TRUE),
+    mean_me = mean_me_val,
+    sd_me = sd_me_val,
+    cv_me = cv_me_val,
     min_me = min(all_me, na.rm = TRUE),
     max_me = max(all_me, na.rm = TRUE),
     n_suppression = sum(all_me < 100, na.rm = TRUE),
@@ -206,8 +216,25 @@ measure_matrix_effect <- function(
   matrix_responses <- matrix_responses[!is.na(matrix_responses)]
   neat_responses <- neat_responses[!is.na(neat_responses)]
 
+  # Check for empty vectors after NA removal
+
+  if (length(matrix_responses) == 0) {
+    cli::cli_abort("All matrix responses are NA; cannot calculate matrix effect.")
+  }
+  if (length(neat_responses) == 0) {
+    cli::cli_abort("All neat responses are NA; cannot calculate matrix effect.")
+  }
+
   mean_matrix <- mean(matrix_responses)
   mean_neat <- mean(neat_responses)
+
+  # Check for division by zero
+  if (mean_neat == 0) {
+    cli::cli_abort(
+      "Mean response of neat samples is zero; cannot calculate matrix effect percentage."
+    )
+  }
+
   me_pct <- (mean_matrix / mean_neat) * 100
 
   # CI for ratio using delta method approximation
@@ -218,6 +245,10 @@ measure_matrix_effect <- function(
   min_n <- min(n_matrix, n_neat)
   if (min_n < 2) {
     # Cannot calculate CI with single observation
+    se_ratio <- NA_real_
+    t_crit <- NA_real_
+  } else if (mean_matrix == 0) {
+    # Cannot calculate SE ratio when mean_matrix is zero
     se_ratio <- NA_real_
     t_crit <- NA_real_
   } else {
@@ -462,10 +493,13 @@ autoplot.measure_matrix_effect <- function(object, type = c("bar", "point", "for
 #' 1. Splitting each unknown sample into multiple aliquots
 #' 2. Adding increasing known amounts of analyte to each aliquot
 #' 3. Measuring response for all aliquots
-#' 4. Extrapolating the regression line to x = -concentration
+#' 4. Fitting regression: `response = intercept + slope * addition`
+#' 5. Calculating original concentration from the x-intercept
 #'
-#' The original concentration is the absolute value of the x-intercept:
-#' `concentration = -intercept / slope`
+#' The x-intercept (where response = 0) is at `-intercept / slope`.
+#' Since intercept is positive (response from original sample) and slope
+#' is positive (response increases with addition), the original concentration
+#' is: `concentration = intercept / slope`
 #'
 #' ## Data Format
 #'
@@ -690,12 +724,17 @@ prep.step_measure_standard_addition <- function(x, training, info = NULL, ...) {
 
       fit <- tryCatch({
         stats::lm(responses ~ additions)
-      }, error = function(e) NULL)
+      }, error = function(e) {
+        cli::cli_warn(
+          c(
+            "Failed to fit standard addition for sample {.val {sample}}, {.field {resp_col}}.",
+            "i" = "Error: {e$message}"
+          )
+        )
+        NULL
+      })
 
       if (is.null(fit)) {
-        cli::cli_warn(
-          "Failed to fit standard addition for sample {.val {sample}}, {.field {resp_col}}."
-        )
         next
       }
 

@@ -292,3 +292,87 @@ test_that("print.step_measure_standard_addition works", {
 
   expect_output(print(rec), "Standard addition")
 })
+
+# ==============================================================================
+# Edge case tests (added for PR review fixes)
+# ==============================================================================
+
+test_that("measure_matrix_effect handles NA responses", {
+  data <- data.frame(
+    sample_type = rep(c("matrix", "neat"), each = 4),
+    response = c(90, NA, 95, 92, 100, 100, NA, 100)
+  )
+
+  me <- measure_matrix_effect(
+    data,
+    response_col = "response",
+    sample_type_col = "sample_type",
+    matrix_level = "matrix",
+    neat_level = "neat"
+  )
+
+  expect_s3_class(me, "measure_matrix_effect")
+  # Should count only non-NA values
+  expect_equal(me$results$n_matrix, 3)
+  expect_equal(me$results$n_neat, 3)
+})
+
+test_that("measure_matrix_effect errors on zero neat responses", {
+  data <- data.frame(
+    sample_type = c("matrix", "neat"),
+    response = c(100, 0)
+  )
+
+  expect_error(
+    measure_matrix_effect(
+      data,
+      response_col = "response",
+      sample_type_col = "sample_type",
+      matrix_level = "matrix",
+      neat_level = "neat"
+    ),
+    "zero"
+  )
+})
+
+test_that("measure_matrix_effect errors on all-NA responses", {
+  data <- data.frame(
+    sample_type = c("matrix", "matrix", "neat", "neat"),
+    response = c(NA, NA, 100, 100)
+  )
+
+  expect_error(
+    measure_matrix_effect(
+      data,
+      response_col = "response",
+      sample_type_col = "sample_type",
+      matrix_level = "matrix",
+      neat_level = "neat"
+    ),
+    "NA"
+  )
+})
+
+test_that("step_measure_standard_addition warns on zero/negative slope", {
+  # Data that produces a negative slope (decreasing response with addition)
+  sa_data <- data.frame(
+    sample_id = rep("S1", 3),
+    addition = c(0, 10, 20),
+    response = c(300, 200, 100)  # Decreasing - gives negative slope
+  )
+
+  expect_warning(
+    rec <- recipes::recipe(~ ., data = sa_data) |>
+      step_measure_standard_addition(
+        response,
+        addition_col = "addition",
+        sample_id_col = "sample_id"
+      ) |>
+      recipes::prep(),
+    "Non-positive slope"
+  )
+
+  result <- recipes::bake(rec, new_data = NULL)
+  # Concentration should be NA when slope is non-positive
+  expect_true(is.na(result$response_corrected[1]))
+})
