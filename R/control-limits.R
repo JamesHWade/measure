@@ -532,7 +532,7 @@ print.measure_control_chart <- function(x, ...) {
   } else {
     cat("\nStatus: OUT OF CONTROL\n")
     cat("\nViolation summary:\n")
-    print(x$violations, n = 10)
+    print(tibble::as_tibble(x$violations), n = 10)
   }
 
   invisible(x)
