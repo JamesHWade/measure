@@ -24,6 +24,8 @@ navbar:
         href: articles/recipes.html
       - text: Data Organization & Diagnostics
         href: articles/roles-diagnostics.html
+      - text: Analytical Validation
+        href: articles/validation.html
       - text: '---'
       - text: Examples
       - text: Baseline Correction
@@ -44,6 +46,7 @@ articles:
   - preprocessing
   - recipes
   - roles-diagnostics
+  - validation
 - title: Examples
   contents:
   - baseline
@@ -195,6 +198,66 @@ reference:
   - step_measure_augment_noise
   - step_measure_augment_shift
   - step_measure_augment_scale
+- title: Drift & Batch Correction
+  desc: Correct for signal drift and batch effects
+  contents:
+  - step_measure_drift_qc_loess
+  - step_measure_drift_linear
+  - step_measure_drift_spline
+  - step_measure_qc_bracket
+  - step_measure_batch_reference
+  - measure_detect_drift
+- title: Calibration & Quantitation
+  desc: Calibration curves, LOD/LOQ, and quantitation
+  contents:
+  - measure_calibration_fit
+  - measure_calibration_predict
+  - measure_calibration_verify
+  - measure_lod
+  - measure_loq
+  - measure_lod_loq
+  - is_measure_calibration
+- title: Precision & Accuracy
+  desc: Method validation for precision and accuracy
+  contents:
+  - measure_repeatability
+  - measure_intermediate_precision
+  - measure_reproducibility
+  - measure_gage_rr
+  - measure_accuracy
+  - measure_linearity
+  - measure_carryover
+- title: Uncertainty
+  desc: ISO GUM uncertainty budgets
+  contents:
+  - measure_uncertainty_budget
+  - measure_uncertainty
+  - uncertainty_component
+  - uncertainty_type_a
+  - uncertainty_type_b_rectangular
+  - uncertainty_type_b_expanded
+- title: Control Charts & QC
+  desc: Statistical process control and system suitability
+  contents:
+  - measure_control_limits
+  - measure_control_chart
+  - measure_system_suitability
+- title: Criteria & Assessment
+  desc: Acceptance criteria and pass/fail evaluation
+  contents:
+  - criterion
+  - measure_criteria
+  - measure_assess
+  - all_pass
+  - get_failures
+  - criteria_bioanalytical
+  - criteria_ich_q2
+- title: Metadata Validation
+  desc: Validate analytical metadata columns
+  contents:
+  - measure_validate_metadata
+  - measure_standardize_sample_type
+  - measure_sample_types
 - title: Utilities
   desc: Helper functions and utilities
   contents:

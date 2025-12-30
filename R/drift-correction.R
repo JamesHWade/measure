@@ -515,3 +515,840 @@ measure_detect_drift <- function(
 
   dplyr::bind_rows(results)
 }
+
+# ==============================================================================
+# Linear Drift Correction Step
+# ==============================================================================
+
+#' Linear Drift Correction
+#'
+#' `step_measure_drift_linear()` creates a *specification* of a recipe step
+#' that corrects for linear signal drift across run order using QC or reference
+#' samples. This is a simpler alternative to LOESS when drift is approximately
+#' linear.
+#'
+#' @inheritParams step_measure_drift_qc_loess
+#'
+#' @return An updated recipe with the new step added.
+#'
+#' @details
+#' ## How It Works
+#'
+#' 1. During `prep()`: A linear regression is fit to QC sample responses vs
+#'    run order for each feature.
+#'
+#' 2. During `bake()`: Correction factors are calculated as:
+#'    `correction = median(QC_responses) / predicted_value`
+#'
+#'    Each sample's response is multiplied by the correction factor.
+#'
+#' ## When to Use
+#'
+#' Use linear drift correction when:
+#' - Drift is approximately linear over the run
+#' - You have fewer QC samples (requires at least 3)
+#' - You want a more conservative correction
+#'
+#' For non-linear drift patterns, use [step_measure_drift_qc_loess()] or
+#' [step_measure_drift_spline()].
+#'
+#' @family drift-correction
+#' @seealso [step_measure_drift_qc_loess()] for LOESS-based correction,
+#'   [step_measure_drift_spline()] for spline-based correction.
+#'
+#' @export
+#'
+#' @examples
+#' library(recipes)
+#'
+#' # Data with linear drift
+#' data <- data.frame(
+#'   sample_id = paste0("S", 1:20),
+#'   sample_type = rep(c("qc", "unknown", "unknown", "unknown", "qc"), 4),
+#'   run_order = 1:20,
+#'   feature1 = 100 + (1:20) * 0.5 + rnorm(20, sd = 2)
+#' )
+#'
+#' rec <- recipe(~ ., data = data) |>
+#'   update_role(sample_id, new_role = "id") |>
+#'   step_measure_drift_linear(feature1) |>
+#'   prep()
+#'
+#' corrected <- bake(rec, new_data = NULL)
+step_measure_drift_linear <- function(
+    recipe,
+    ...,
+    run_order_col = "run_order",
+    sample_type_col = "sample_type",
+    qc_type = "qc",
+    apply_to = c("all", "unknown"),
+    min_qc = 3,
+    role = NA,
+    trained = FALSE,
+    skip = FALSE,
+    id = recipes::rand_id("measure_drift_linear")) {
+
+  apply_to <- match.arg(apply_to)
+
+  recipes::add_step(
+    recipe,
+    step_measure_drift_linear_new(
+      terms = rlang::enquos(...),
+      run_order_col = run_order_col,
+      sample_type_col = sample_type_col,
+      qc_type = qc_type,
+      apply_to = apply_to,
+      min_qc = min_qc,
+      drift_models = NULL,
+      qc_medians = NULL,
+      role = role,
+      trained = trained,
+      skip = skip,
+      id = id
+    )
+  )
+}
+
+step_measure_drift_linear_new <- function(
+    terms,
+    run_order_col,
+    sample_type_col,
+    qc_type,
+    apply_to,
+    min_qc,
+    drift_models,
+    qc_medians,
+    role,
+    trained,
+    skip,
+    id) {
+
+  recipes::step(
+    subclass = "measure_drift_linear",
+    terms = terms,
+    run_order_col = run_order_col,
+    sample_type_col = sample_type_col,
+    qc_type = qc_type,
+    apply_to = apply_to,
+    min_qc = min_qc,
+    drift_models = drift_models,
+    qc_medians = qc_medians,
+    role = role,
+    trained = trained,
+    skip = skip,
+    id = id
+  )
+}
+
+#' @export
+prep.step_measure_drift_linear <- function(x, training, info = NULL, ...) {
+
+  # Validate required columns
+  if (!x$run_order_col %in% names(training)) {
+    cli::cli_abort("Column {.field {x$run_order_col}} not found in data.")
+  }
+  if (!x$sample_type_col %in% names(training)) {
+    cli::cli_abort("Column {.field {x$sample_type_col}} not found in data.")
+  }
+
+  # Get feature columns
+  col_names <- recipes::recipes_eval_select(x$terms, training, info)
+
+  if (length(col_names) == 0) {
+    numeric_cols <- names(training)[vapply(training, is.numeric, logical(1))]
+    col_names <- setdiff(numeric_cols, x$run_order_col)
+  }
+
+  if (length(col_names) == 0) {
+    cli::cli_abort("No feature columns found for drift correction.")
+  }
+
+  # Extract QC samples
+  sample_types <- training[[x$sample_type_col]]
+  is_qc <- sample_types %in% x$qc_type
+
+  if (sum(is_qc) < x$min_qc) {
+    cli::cli_abort(
+      "Insufficient QC samples: found {sum(is_qc)}, need at least {x$min_qc}."
+    )
+  }
+
+  run_order <- training[[x$run_order_col]]
+
+  # Fit linear models for each feature
+  drift_models <- list()
+  qc_medians <- list()
+
+  for (col in col_names) {
+    qc_values <- training[[col]][is_qc]
+    qc_run_order <- run_order[is_qc]
+
+    qc_median <- stats::median(qc_values, na.rm = TRUE)
+    qc_medians[[col]] <- qc_median
+
+    # Fit linear model
+    lm_fit <- stats::lm(qc_values ~ qc_run_order)
+    drift_models[[col]] <- lm_fit
+  }
+
+  step_measure_drift_linear_new(
+    terms = x$terms,
+    run_order_col = x$run_order_col,
+    sample_type_col = x$sample_type_col,
+    qc_type = x$qc_type,
+    apply_to = x$apply_to,
+    min_qc = x$min_qc,
+    drift_models = drift_models,
+    qc_medians = qc_medians,
+    role = x$role,
+    trained = TRUE,
+    skip = x$skip,
+    id = x$id
+  )
+}
+
+#' @export
+bake.step_measure_drift_linear <- function(object, new_data, ...) {
+
+  run_order <- new_data[[object$run_order_col]]
+  sample_types <- new_data[[object$sample_type_col]]
+
+  # Determine which samples to correct
+  if (object$apply_to == "all") {
+    to_correct <- rep(TRUE, nrow(new_data))
+  } else {
+    to_correct <- !(sample_types %in% object$qc_type)
+  }
+
+  for (col in names(object$drift_models)) {
+    lm_fit <- object$drift_models[[col]]
+    qc_median <- object$qc_medians[[col]]
+
+    # Predict at each run order
+    predicted <- stats::predict(lm_fit, newdata = data.frame(qc_run_order = run_order))
+
+    # Calculate correction factors
+    correction_factors <- qc_median / predicted
+
+    # Apply correction
+    corrected <- new_data[[col]]
+    corrected[to_correct] <- new_data[[col]][to_correct] * correction_factors[to_correct]
+    new_data[[col]] <- corrected
+  }
+
+  tibble::as_tibble(new_data)
+}
+
+#' @export
+print.step_measure_drift_linear <- function(x, width = max(20, options()$width - 30), ...) {
+  title <- "Linear drift correction"
+
+  if (x$trained) {
+    features <- names(x$drift_models)
+    n_features <- length(features)
+    cat(title, " (", n_features, " feature", if (n_features != 1) "s", ")\n", sep = "")
+  } else {
+    cat(title, "\n", sep = "")
+  }
+
+  invisible(x)
+}
+
+#' @rdname tidy.recipe
+#' @export
+tidy.step_measure_drift_linear <- function(x, ...) {
+  if (!x$trained) {
+    return(tibble::tibble(
+      feature = character(),
+      qc_median = double(),
+      slope = double(),
+      intercept = double()
+    ))
+  }
+
+  tibble::tibble(
+    feature = names(x$drift_models),
+    qc_median = unlist(x$qc_medians),
+    slope = vapply(x$drift_models, function(m) unname(stats::coef(m)[2]), double(1)),
+    intercept = vapply(x$drift_models, function(m) unname(stats::coef(m)[1]), double(1))
+  )
+}
+
+# ==============================================================================
+# Spline Drift Correction Step
+# ==============================================================================
+
+#' Spline-Based Drift Correction
+#'
+#' `step_measure_drift_spline()` creates a *specification* of a recipe step
+#' that corrects for signal drift using smoothing splines fit to QC samples.
+#' This offers more flexibility than linear correction while being more stable
+#' than LOESS for sparse QC data.
+#'
+#' @inheritParams step_measure_drift_qc_loess
+#' @param df Degrees of freedom for the smoothing spline. Default is NULL,
+#'   which uses cross-validation to select optimal df. Lower values = smoother.
+#' @param spar Smoothing parameter (alternative to df). If NULL (default),
+#'   cross-validation is used.
+#'
+#' @return An updated recipe with the new step added.
+#'
+#' @details
+#' ## How It Works
+#'
+#' Uses [stats::smooth.spline()] to fit a flexible curve through QC responses.
+#' The spline automatically adapts to the data complexity when `df` is not
+#' specified.
+#'
+#' ## Comparison with Other Methods
+#'
+#' | Method | Best For | Min QC Samples |
+#' |--------|----------|----------------|
+#' | Linear | Simple linear drift | 3 |
+#' | Spline | Moderate non-linearity | 4+ |
+#' | LOESS | Complex patterns | 5+ |
+#'
+#' @family drift-correction
+#' @seealso [step_measure_drift_linear()] for linear correction,
+#'   [step_measure_drift_qc_loess()] for LOESS-based correction.
+#'
+#' @export
+#'
+#' @examples
+#' library(recipes)
+#'
+#' # Data with non-linear drift
+#' set.seed(123)
+#' data <- data.frame(
+#'   sample_id = paste0("S", 1:30),
+#'   sample_type = rep(c("qc", "unknown", "unknown", "unknown", "unknown", "qc"), 5),
+#'   run_order = 1:30,
+#'   feature1 = 100 + sin((1:30) / 5) * 10 + rnorm(30, sd = 2)
+#' )
+#'
+#' rec <- recipe(~ ., data = data) |>
+#'   update_role(sample_id, new_role = "id") |>
+#'   step_measure_drift_spline(feature1) |>
+#'   prep()
+#'
+#' corrected <- bake(rec, new_data = NULL)
+step_measure_drift_spline <- function(
+    recipe,
+    ...,
+    run_order_col = "run_order",
+    sample_type_col = "sample_type",
+    qc_type = "qc",
+    apply_to = c("all", "unknown"),
+    df = NULL,
+    spar = NULL,
+    min_qc = 4,
+    role = NA,
+    trained = FALSE,
+    skip = FALSE,
+    id = recipes::rand_id("measure_drift_spline")) {
+
+  apply_to <- match.arg(apply_to)
+
+  recipes::add_step(
+    recipe,
+    step_measure_drift_spline_new(
+      terms = rlang::enquos(...),
+      run_order_col = run_order_col,
+      sample_type_col = sample_type_col,
+      qc_type = qc_type,
+      apply_to = apply_to,
+      df = df,
+      spar = spar,
+      min_qc = min_qc,
+      drift_models = NULL,
+      qc_medians = NULL,
+      role = role,
+      trained = trained,
+      skip = skip,
+      id = id
+    )
+  )
+}
+
+step_measure_drift_spline_new <- function(
+    terms,
+    run_order_col,
+    sample_type_col,
+    qc_type,
+    apply_to,
+    df,
+    spar,
+    min_qc,
+    drift_models,
+    qc_medians,
+    role,
+    trained,
+    skip,
+    id) {
+
+  recipes::step(
+    subclass = "measure_drift_spline",
+    terms = terms,
+    run_order_col = run_order_col,
+    sample_type_col = sample_type_col,
+    qc_type = qc_type,
+    apply_to = apply_to,
+    df = df,
+    spar = spar,
+    min_qc = min_qc,
+    drift_models = drift_models,
+    qc_medians = qc_medians,
+    role = role,
+    trained = trained,
+    skip = skip,
+    id = id
+  )
+}
+
+#' @export
+prep.step_measure_drift_spline <- function(x, training, info = NULL, ...) {
+
+  # Validate required columns
+  if (!x$run_order_col %in% names(training)) {
+    cli::cli_abort("Column {.field {x$run_order_col}} not found in data.")
+  }
+  if (!x$sample_type_col %in% names(training)) {
+    cli::cli_abort("Column {.field {x$sample_type_col}} not found in data.")
+  }
+
+  # Get feature columns
+  col_names <- recipes::recipes_eval_select(x$terms, training, info)
+
+  if (length(col_names) == 0) {
+    numeric_cols <- names(training)[vapply(training, is.numeric, logical(1))]
+    col_names <- setdiff(numeric_cols, x$run_order_col)
+  }
+
+  if (length(col_names) == 0) {
+    cli::cli_abort("No feature columns found for drift correction.")
+  }
+
+  # Extract QC samples
+  sample_types <- training[[x$sample_type_col]]
+  is_qc <- sample_types %in% x$qc_type
+
+  if (sum(is_qc) < x$min_qc) {
+    cli::cli_abort(
+      "Insufficient QC samples: found {sum(is_qc)}, need at least {x$min_qc}."
+    )
+  }
+
+  run_order <- training[[x$run_order_col]]
+
+  # Fit spline models for each feature
+  drift_models <- list()
+  qc_medians <- list()
+
+  for (col in col_names) {
+    qc_values <- training[[col]][is_qc]
+    qc_run_order <- run_order[is_qc]
+
+    qc_median <- stats::median(qc_values, na.rm = TRUE)
+    qc_medians[[col]] <- qc_median
+
+    # Fit smoothing spline
+    spline_args <- list(x = qc_run_order, y = qc_values)
+    if (!is.null(x$df)) spline_args$df <- x$df
+    if (!is.null(x$spar)) spline_args$spar <- x$spar
+
+    spline_fit <- do.call(stats::smooth.spline, spline_args)
+    drift_models[[col]] <- spline_fit
+  }
+
+  step_measure_drift_spline_new(
+    terms = x$terms,
+    run_order_col = x$run_order_col,
+    sample_type_col = x$sample_type_col,
+    qc_type = x$qc_type,
+    apply_to = x$apply_to,
+    df = x$df,
+    spar = x$spar,
+    min_qc = x$min_qc,
+    drift_models = drift_models,
+    qc_medians = qc_medians,
+    role = x$role,
+    trained = TRUE,
+    skip = x$skip,
+    id = x$id
+  )
+}
+
+#' @export
+bake.step_measure_drift_spline <- function(object, new_data, ...) {
+
+  run_order <- new_data[[object$run_order_col]]
+  sample_types <- new_data[[object$sample_type_col]]
+
+  # Determine which samples to correct
+  if (object$apply_to == "all") {
+    to_correct <- rep(TRUE, nrow(new_data))
+  } else {
+    to_correct <- !(sample_types %in% object$qc_type)
+  }
+
+  for (col in names(object$drift_models)) {
+    spline_fit <- object$drift_models[[col]]
+    qc_median <- object$qc_medians[[col]]
+
+    # Predict at each run order
+    predicted <- stats::predict(spline_fit, x = run_order)$y
+
+    # Calculate correction factors
+    correction_factors <- qc_median / predicted
+
+    # Apply correction
+    corrected <- new_data[[col]]
+    corrected[to_correct] <- new_data[[col]][to_correct] * correction_factors[to_correct]
+    new_data[[col]] <- corrected
+  }
+
+  tibble::as_tibble(new_data)
+}
+
+#' @export
+print.step_measure_drift_spline <- function(x, width = max(20, options()$width - 30), ...) {
+  title <- "Spline drift correction"
+
+  if (x$trained) {
+    features <- names(x$drift_models)
+    n_features <- length(features)
+    cat(title, " (", n_features, " feature", if (n_features != 1) "s", ")\n", sep = "")
+  } else {
+    cat(title, "\n", sep = "")
+  }
+
+  invisible(x)
+}
+
+#' @rdname tidy.recipe
+#' @export
+tidy.step_measure_drift_spline <- function(x, ...) {
+  if (!x$trained) {
+    return(tibble::tibble(
+      feature = character(),
+      qc_median = double(),
+      df = double()
+    ))
+  }
+
+  tibble::tibble(
+    feature = names(x$drift_models),
+    qc_median = unlist(x$qc_medians),
+    df = vapply(x$drift_models, function(m) m$df, double(1))
+  )
+}
+
+# ==============================================================================
+# QC Bracket Interpolation Step
+# ==============================================================================
+
+#' QC Bracketing Interpolation
+#'
+#' `step_measure_qc_bracket()` creates a *specification* of a recipe step
+#' that corrects for drift using linear interpolation between bracketing
+#' QC or reference samples. This is a simple, intuitive method where each
+#' sample is corrected based on the two nearest QC samples.
+#'
+#' @inheritParams step_measure_drift_qc_loess
+#' @param extrapolate Logical. Should correction be extrapolated for samples
+#'   before the first or after the last QC? Default is TRUE. If FALSE, those
+#'   samples use the nearest QC's correction factor.
+#'
+#' @return An updated recipe with the new step added.
+#'
+#' @details
+#' ## How It Works
+#'
+#' For each sample at run order `t`:
+#' 1. Find the nearest QC samples before (`t1`) and after (`t2`)
+#' 2. Calculate correction factors at `t1` and `t2` (target / observed)
+#' 3. Linearly interpolate the correction factor for `t`
+#' 4. Apply the interpolated correction
+#'
+#' This method is commonly used in clinical and bioanalytical laboratories
+#' where QC samples are injected at regular intervals throughout the run.
+#'
+#' ## When to Use
+#'
+#' - Regular QC injection intervals
+#' - Short analytical runs
+#' - When you want simple, transparent corrections
+#' - Regulatory environments where interpretability is important
+#'
+#' @family drift-correction
+#'
+#' @export
+#'
+#' @examples
+#' library(recipes)
+#'
+#' # Data with QC samples at regular intervals
+#' data <- data.frame(
+#'   sample_id = paste0("S", 1:15),
+#'   sample_type = c("qc", rep("unknown", 4), "qc", rep("unknown", 4), "qc",
+#'                   rep("unknown", 3), "qc"),
+#'   run_order = 1:15,
+#'   feature1 = c(100, 101, 103, 105, 107, 105, 107, 109, 111, 113,
+#'                110, 112, 114, 116, 115)  # Drift pattern
+#' )
+#'
+#' rec <- recipe(~ ., data = data) |>
+#'   update_role(sample_id, new_role = "id") |>
+#'   step_measure_qc_bracket(feature1) |>
+#'   prep()
+#'
+#' corrected <- bake(rec, new_data = NULL)
+step_measure_qc_bracket <- function(
+    recipe,
+    ...,
+    run_order_col = "run_order",
+    sample_type_col = "sample_type",
+    qc_type = "qc",
+    apply_to = c("all", "unknown"),
+    extrapolate = TRUE,
+    min_qc = 2,
+    role = NA,
+    trained = FALSE,
+    skip = FALSE,
+    id = recipes::rand_id("measure_qc_bracket")) {
+
+  apply_to <- match.arg(apply_to)
+
+  recipes::add_step(
+    recipe,
+    step_measure_qc_bracket_new(
+      terms = rlang::enquos(...),
+      run_order_col = run_order_col,
+      sample_type_col = sample_type_col,
+      qc_type = qc_type,
+      apply_to = apply_to,
+      extrapolate = extrapolate,
+      min_qc = min_qc,
+      qc_data = NULL,
+      qc_targets = NULL,
+      role = role,
+      trained = trained,
+      skip = skip,
+      id = id
+    )
+  )
+}
+
+step_measure_qc_bracket_new <- function(
+    terms,
+    run_order_col,
+    sample_type_col,
+    qc_type,
+    apply_to,
+    extrapolate,
+    min_qc,
+    qc_data,
+    qc_targets,
+    role,
+    trained,
+    skip,
+    id) {
+
+  recipes::step(
+    subclass = "measure_qc_bracket",
+    terms = terms,
+    run_order_col = run_order_col,
+    sample_type_col = sample_type_col,
+    qc_type = qc_type,
+    apply_to = apply_to,
+    extrapolate = extrapolate,
+    min_qc = min_qc,
+    qc_data = qc_data,
+    qc_targets = qc_targets,
+    role = role,
+    trained = trained,
+    skip = skip,
+    id = id
+  )
+}
+
+#' @export
+prep.step_measure_qc_bracket <- function(x, training, info = NULL, ...) {
+
+  # Validate required columns
+  if (!x$run_order_col %in% names(training)) {
+    cli::cli_abort("Column {.field {x$run_order_col}} not found in data.")
+  }
+  if (!x$sample_type_col %in% names(training)) {
+    cli::cli_abort("Column {.field {x$sample_type_col}} not found in data.")
+  }
+
+  # Get feature columns
+  col_names <- recipes::recipes_eval_select(x$terms, training, info)
+
+  if (length(col_names) == 0) {
+    numeric_cols <- names(training)[vapply(training, is.numeric, logical(1))]
+    col_names <- setdiff(numeric_cols, x$run_order_col)
+  }
+
+  if (length(col_names) == 0) {
+    cli::cli_abort("No feature columns found for drift correction.")
+  }
+
+  # Extract QC samples
+  sample_types <- training[[x$sample_type_col]]
+  is_qc <- sample_types %in% x$qc_type
+
+  if (sum(is_qc) < x$min_qc) {
+    cli::cli_abort(
+      "Insufficient QC samples: found {sum(is_qc)}, need at least {x$min_qc}."
+    )
+  }
+
+  run_order <- training[[x$run_order_col]]
+  qc_run_orders <- run_order[is_qc]
+
+  # Store QC data for each feature
+  qc_data <- list()
+  qc_targets <- list()
+
+  for (col in col_names) {
+    qc_values <- training[[col]][is_qc]
+    qc_target <- stats::median(qc_values, na.rm = TRUE)
+
+    qc_data[[col]] <- data.frame(
+      run_order = qc_run_orders,
+      value = qc_values
+    )
+    qc_targets[[col]] <- qc_target
+  }
+
+  step_measure_qc_bracket_new(
+    terms = x$terms,
+    run_order_col = x$run_order_col,
+    sample_type_col = x$sample_type_col,
+    qc_type = x$qc_type,
+    apply_to = x$apply_to,
+    extrapolate = x$extrapolate,
+    min_qc = x$min_qc,
+    qc_data = qc_data,
+    qc_targets = qc_targets,
+    role = x$role,
+    trained = TRUE,
+    skip = x$skip,
+    id = x$id
+  )
+}
+
+#' @export
+bake.step_measure_qc_bracket <- function(object, new_data, ...) {
+
+  run_order <- new_data[[object$run_order_col]]
+  sample_types <- new_data[[object$sample_type_col]]
+
+  # Determine which samples to correct
+  if (object$apply_to == "all") {
+    to_correct <- rep(TRUE, nrow(new_data))
+  } else {
+    to_correct <- !(sample_types %in% object$qc_type)
+  }
+
+  for (col in names(object$qc_data)) {
+    qc_df <- object$qc_data[[col]]
+    qc_target <- object$qc_targets[[col]]
+
+    # Calculate correction factors at QC positions
+    qc_df$correction <- qc_target / qc_df$value
+
+    # Interpolate correction factors for all samples
+    correction_factors <- sapply(run_order, function(t) {
+      # Find bracketing QCs
+      before_idx <- which(qc_df$run_order <= t)
+      after_idx <- which(qc_df$run_order >= t)
+
+      if (length(before_idx) == 0) {
+        # Before first QC
+        if (object$extrapolate && length(after_idx) >= 2) {
+          # Linear extrapolation from first two QCs
+          idx1 <- after_idx[1]
+          idx2 <- after_idx[2]
+          slope <- (qc_df$correction[idx2] - qc_df$correction[idx1]) /
+                   (qc_df$run_order[idx2] - qc_df$run_order[idx1])
+          qc_df$correction[idx1] + slope * (t - qc_df$run_order[idx1])
+        } else {
+          qc_df$correction[after_idx[1]]
+        }
+      } else if (length(after_idx) == 0) {
+        # After last QC
+        if (object$extrapolate && length(before_idx) >= 2) {
+          # Linear extrapolation from last two QCs
+          idx1 <- before_idx[length(before_idx) - 1]
+          idx2 <- before_idx[length(before_idx)]
+          slope <- (qc_df$correction[idx2] - qc_df$correction[idx1]) /
+                   (qc_df$run_order[idx2] - qc_df$run_order[idx1])
+          qc_df$correction[idx2] + slope * (t - qc_df$run_order[idx2])
+        } else {
+          qc_df$correction[before_idx[length(before_idx)]]
+        }
+      } else {
+        # Between QCs - linear interpolation
+        idx1 <- before_idx[length(before_idx)]
+        idx2 <- after_idx[1]
+
+        if (idx1 == idx2) {
+          # Exactly at a QC
+          qc_df$correction[idx1]
+        } else {
+          # Interpolate
+          t1 <- qc_df$run_order[idx1]
+          t2 <- qc_df$run_order[idx2]
+          c1 <- qc_df$correction[idx1]
+          c2 <- qc_df$correction[idx2]
+          c1 + (c2 - c1) * (t - t1) / (t2 - t1)
+        }
+      }
+    })
+
+    # Apply correction
+    corrected <- new_data[[col]]
+    corrected[to_correct] <- new_data[[col]][to_correct] * correction_factors[to_correct]
+    new_data[[col]] <- corrected
+  }
+
+  tibble::as_tibble(new_data)
+}
+
+#' @export
+print.step_measure_qc_bracket <- function(x, width = max(20, options()$width - 30), ...) {
+  title <- "QC bracket interpolation"
+
+  if (x$trained) {
+    features <- names(x$qc_data)
+    n_features <- length(features)
+    n_qc <- nrow(x$qc_data[[1]])
+    cat(title, " (", n_features, " feature", if (n_features != 1) "s",
+        ", ", n_qc, " QC samples)\n", sep = "")
+  } else {
+    cat(title, "\n", sep = "")
+  }
+
+  invisible(x)
+}
+
+#' @rdname tidy.recipe
+#' @export
+tidy.step_measure_qc_bracket <- function(x, ...) {
+  if (!x$trained) {
+    return(tibble::tibble(
+      feature = character(),
+      n_qc = integer(),
+      qc_target = double()
+    ))
+  }
+
+  tibble::tibble(
+    feature = names(x$qc_data),
+    n_qc = vapply(x$qc_data, nrow, integer(1)),
+    qc_target = unlist(x$qc_targets)
+  )
+}

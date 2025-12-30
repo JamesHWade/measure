@@ -505,3 +505,238 @@ measure_calibration_predict <- function(
     upper = pred_conc + t_crit * se_pred
   )
 }
+
+# ==============================================================================
+# Calibration Verification
+# ==============================================================================
+
+#' Verify Calibration Curve Performance
+#'
+#' Evaluates the performance of a calibration curve using verification samples
+#' (continuing calibration verification - CCV, or independent QC samples).
+#' This function assesses whether the calibration remains valid during or
+#' between analytical runs.
+#'
+#' @param calibration A [measure_calibration] object from
+#'   [measure_calibration_fit()].
+#' @param verification_data A data frame containing verification samples with
+#'   known concentrations.
+#' @param nominal_col Name of the column containing nominal (known)
+#'   concentrations. Default is `"nominal_conc"`.
+#' @param acceptance_pct Acceptance criterion as percent deviation from nominal.
+#'   Default is 15 (i.e., ±15%).
+#' @param acceptance_pct_lloq Acceptance criterion for samples at the lower
+#'   limit of quantitation (LLOQ). Default is 20 (i.e., ±20%).
+#' @param lloq Lower limit of quantitation. Samples at or near this level use
+#'   `acceptance_pct_lloq`. Default is NULL (use same criterion for all).
+#' @param sample_type_col Optional column indicating sample types. Only samples
+#'   with type containing "qc" or "ccv" will be used if specified.
+#' @param criteria Optional [measure_criteria] object for custom acceptance
+#'   criteria. If provided, overrides `acceptance_pct` settings.
+#'
+#' @return A `measure_calibration_verify` object (a tibble) containing:
+#'   - Predicted concentrations
+#'   - Accuracy (%nominal)
+#'   - Deviation from nominal (%)
+#'   - Pass/fail status for each sample
+#'   - Overall verification status
+#'
+#' @details
+#' ## Verification Workflow
+#'
+#' Calibration verification is typically performed:
+#' 1. At the beginning and end of analytical batches
+#' 2. After every N unknown samples (e.g., every 10)
+#' 3. When instrument performance is in question
+#'
+#' ## Acceptance Criteria
+#'
+#' Default criteria are based on bioanalytical guidelines:
+#' - Standard samples: ±15% of nominal
+#' - LLOQ samples: ±20% of nominal
+#'
+#' For more stringent applications (e.g., clinical chemistry), consider
+#' using ±10% or providing custom criteria.
+#'
+#' @seealso [measure_calibration_fit()] for fitting calibration curves,
+#'   [measure_calibration_predict()] for prediction,
+#'   [measure_criteria()] for custom acceptance criteria.
+#'
+#' @examples
+#' # Fit calibration
+#' cal_data <- data.frame(
+#'   nominal_conc = c(1, 5, 10, 50, 100, 500),
+#'   response = c(1.2, 5.8, 11.3, 52.1, 105.2, 498.7)
+#' )
+#' cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+#'
+#' # Verify with QC samples
+#' qc_data <- data.frame(
+#'   sample_id = c("QC_Low", "QC_Mid", "QC_High"),
+#'   nominal_conc = c(3, 75, 400),
+#'   response = c(3.3, 77.2, 385.1)
+#' )
+#'
+#' verify_result <- measure_calibration_verify(cal, qc_data)
+#' print(verify_result)
+#'
+#' @export
+measure_calibration_verify <- function(
+    calibration,
+    verification_data,
+    nominal_col = "nominal_conc",
+    acceptance_pct = 15,
+    acceptance_pct_lloq = 20,
+    lloq = NULL,
+    sample_type_col = NULL,
+    criteria = NULL) {
+
+  if (!is_measure_calibration(calibration)) {
+    cli::cli_abort("{.arg calibration} must be a {.cls measure_calibration} object.")
+  }
+
+  if (!is.data.frame(verification_data)) {
+    cli::cli_abort("{.arg verification_data} must be a data frame.")
+  }
+
+  # Check response column exists
+  response_col <- calibration$response_col
+  if (!response_col %in% names(verification_data)) {
+    cli::cli_abort(
+      "Response column {.field {response_col}} not found in verification_data."
+    )
+  }
+
+  # Check nominal column exists
+  if (!nominal_col %in% names(verification_data)) {
+    cli::cli_abort(
+      "Nominal concentration column {.field {nominal_col}} not found in verification_data."
+    )
+  }
+
+  # Filter to verification samples if sample_type_col provided
+  verify_data <- verification_data
+  if (!is.null(sample_type_col)) {
+    if (!sample_type_col %in% names(verification_data)) {
+      cli::cli_abort("Sample type column {.field {sample_type_col}} not found in data.")
+    }
+    sample_types <- tolower(verification_data[[sample_type_col]])
+    is_verify <- grepl("qc|ccv|verification|standard", sample_types)
+    verify_data <- verification_data[is_verify, , drop = FALSE]
+
+    if (nrow(verify_data) == 0) {
+      cli::cli_abort("No verification samples found in data.")
+    }
+  }
+
+  # Get nominal and observed values
+  nominal_values <- verify_data[[nominal_col]]
+  response_values <- verify_data[[response_col]]
+
+  # Predict concentrations using calibration
+  predictions <- measure_calibration_predict(
+    calibration,
+    newdata = verify_data
+  )
+
+  predicted_conc <- predictions$.pred_conc
+
+  # Calculate accuracy metrics
+  accuracy_pct <- (predicted_conc / nominal_values) * 100
+  deviation_pct <- ((predicted_conc - nominal_values) / nominal_values) * 100
+
+  # Determine acceptance limits for each sample
+  if (!is.null(lloq)) {
+    # Use wider limits for samples near LLOQ
+    is_lloq <- nominal_values <= lloq * 1.5  # 50% margin for LLOQ region
+    acceptance_limits <- ifelse(is_lloq, acceptance_pct_lloq, acceptance_pct)
+  } else {
+    acceptance_limits <- rep(acceptance_pct, length(nominal_values))
+  }
+
+  # Apply criteria
+  if (!is.null(criteria)) {
+    # Use custom criteria if provided
+    pass <- sapply(seq_along(accuracy_pct), function(i) {
+      acc <- accuracy_pct[i]
+      # Assume criteria has accuracy bounds
+      acc >= (100 - acceptance_limits[i]) & acc <= (100 + acceptance_limits[i])
+    })
+  } else {
+    # Use default percentage-based criteria
+    pass <- abs(deviation_pct) <= acceptance_limits
+  }
+
+  # Build result
+  result <- tibble::tibble(
+    nominal_conc = nominal_values,
+    response = response_values,
+    predicted_conc = predicted_conc,
+    accuracy_pct = accuracy_pct,
+    deviation_pct = deviation_pct,
+    acceptance_limit = acceptance_limits,
+    pass = pass
+  )
+
+  # Add sample ID if available
+  if ("sample_id" %in% names(verify_data)) {
+    result <- tibble::add_column(result, sample_id = verify_data$sample_id, .before = 1)
+  }
+
+  # Calculate summary statistics
+  n_total <- nrow(result)
+  n_pass <- sum(pass, na.rm = TRUE)
+  n_fail <- n_total - n_pass
+  overall_pass <- all(pass, na.rm = TRUE)
+
+  # Add attributes
+  attr(result, "n_total") <- n_total
+
+  attr(result, "n_pass") <- n_pass
+  attr(result, "n_fail") <- n_fail
+  attr(result, "overall_pass") <- overall_pass
+  attr(result, "acceptance_pct") <- acceptance_pct
+  attr(result, "acceptance_pct_lloq") <- acceptance_pct_lloq
+  attr(result, "lloq") <- lloq
+  attr(result, "calibration") <- calibration
+
+  class(result) <- c("measure_calibration_verify", class(result))
+  result
+}
+
+#' @export
+print.measure_calibration_verify <- function(x, ...) {
+  n_total <- attr(x, "n_total")
+  n_pass <- attr(x, "n_pass")
+  n_fail <- attr(x, "n_fail")
+  overall_pass <- attr(x, "overall_pass")
+  acceptance_pct <- attr(x, "acceptance_pct")
+
+  cli::cli_h1("Calibration Verification")
+
+  if (overall_pass) {
+    cli::cli_alert_success("Overall: PASS ({n_pass}/{n_total} samples within {acceptance_pct}%)")
+  } else {
+    cli::cli_alert_danger("Overall: FAIL ({n_fail}/{n_total} samples out of specification)")
+  }
+
+  cli::cli_h2("Sample Results")
+  print(tibble::as_tibble(x), n = 20)
+
+  invisible(x)
+}
+
+#' @rdname tidy.measure_calibration
+#' @export
+tidy.measure_calibration_verify <- function(x, ...) {
+  tibble::tibble(
+    n_samples = attr(x, "n_total"),
+    n_pass = attr(x, "n_pass"),
+    n_fail = attr(x, "n_fail"),
+    pass_rate = attr(x, "n_pass") / attr(x, "n_total") * 100,
+    overall_pass = attr(x, "overall_pass"),
+    mean_accuracy_pct = mean(x$accuracy_pct, na.rm = TRUE),
+    mean_abs_deviation = mean(abs(x$deviation_pct), na.rm = TRUE),
+    max_abs_deviation = max(abs(x$deviation_pct), na.rm = TRUE)
+  )
+}

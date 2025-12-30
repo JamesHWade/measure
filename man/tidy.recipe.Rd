@@ -44,6 +44,9 @@
 \alias{tidy.step_measure_despike}
 \alias{tidy.step_measure_detrend}
 \alias{tidy.step_measure_drift_qc_loess}
+\alias{tidy.step_measure_drift_linear}
+\alias{tidy.step_measure_drift_spline}
+\alias{tidy.step_measure_qc_bracket}
 \alias{tidy.step_measure_integrals}
 \alias{tidy.step_measure_ratios}
 \alias{tidy.step_measure_moments}
@@ -170,6 +173,12 @@
 \method{tidy}{step_measure_detrend}(x, ...)
 
 \method{tidy}{step_measure_drift_qc_loess}(x, ...)
+
+\method{tidy}{step_measure_drift_linear}(x, ...)
+
+\method{tidy}{step_measure_drift_spline}(x, ...)
+
+\method{tidy}{step_measure_qc_bracket}(x, ...)
 
 \method{tidy}{step_measure_integrals}(x, ...)
 

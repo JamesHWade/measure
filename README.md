@@ -287,6 +287,63 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | `step_measure_augment_shift()` | Random x-axis shifts for shift invariance  |
 | `step_measure_augment_scale()` | Random intensity scaling                   |
 
+### Drift & Batch Correction
+
+| Step/Function                    | Description                            |
+|----------------------------------|----------------------------------------|
+| `step_measure_drift_qc_loess()`  | QC-RLSC drift correction using LOESS   |
+| `step_measure_drift_linear()`    | Linear drift correction                |
+| `step_measure_drift_spline()`    | Spline-based drift correction          |
+| `step_measure_qc_bracket()`      | QC bracketing interpolation            |
+| `step_measure_batch_reference()` | Reference-based batch correction       |
+| `measure_detect_drift()`         | Detect significant drift in QC samples |
+
+## Analytical Validation Functions
+
+measure provides a comprehensive suite of functions for analytical
+method validation, designed for compatibility with ICH Q2(R2), ISO
+17025, and similar regulatory frameworks.
+
+### Calibration & Quantitation
+
+| Function | Description |
+|----|----|
+| `measure_calibration_fit()` | Fit weighted calibration curves (linear/quadratic) |
+| `measure_calibration_predict()` | Predict concentrations with uncertainty |
+| `measure_calibration_verify()` | Continuing calibration verification |
+| `measure_lod()` / `measure_loq()` | Detection and quantitation limits |
+
+### Precision & Accuracy
+
+| Function | Description |
+|----|----|
+| `measure_repeatability()` | Within-run precision |
+| `measure_intermediate_precision()` | Between-run precision with variance components |
+| `measure_reproducibility()` | Between-lab precision |
+| `measure_gage_rr()` | Gage R&R / Measurement System Analysis |
+| `measure_accuracy()` | Bias, recovery, and accuracy assessment |
+| `measure_linearity()` | Linearity with lack-of-fit testing |
+| `measure_carryover()` | Carryover evaluation |
+
+### Uncertainty & Quality Control
+
+| Function                       | Description                        |
+|--------------------------------|------------------------------------|
+| `measure_uncertainty_budget()` | ISO GUM uncertainty budgets        |
+| `measure_uncertainty()`        | Combined and expanded uncertainty  |
+| `measure_control_limits()`     | Shewhart, EWMA, or CUSUM limits    |
+| `measure_control_chart()`      | Westgard multi-rule control charts |
+| `measure_system_suitability()` | System suitability testing         |
+
+### Criteria System
+
+| Function                   | Description                    |
+|----------------------------|--------------------------------|
+| `measure_criteria()`       | Define acceptance criteria     |
+| `measure_assess()`         | Evaluate data against criteria |
+| `criteria_bioanalytical()` | FDA/EMA bioanalytical presets  |
+| `criteria_ich_q2()`        | ICH Q2 validation presets      |
+
 ## Learning more
 
 - [Getting
@@ -295,6 +352,9 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 - [Preprocessing
   Techniques](https://jameshwade.github.io/measure/articles/preprocessing.html) -
   Deep dive into available preprocessing methods
+- [Analytical
+  Validation](https://jameshwade.github.io/measure/articles/validation.html) -
+  Calibration, uncertainty, and method validation
 
 ## Datasets
 

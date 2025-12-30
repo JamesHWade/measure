@@ -1,0 +1,439 @@
+---
+title: "Analytical Method Validation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Analytical Method Validation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+```{r setup, message = FALSE}
+library(measure)
+library(dplyr)
+library(ggplot2)
+```
+
+## Overview
+
+The `measure` package provides a comprehensive suite of functions for analytical method validation. These functions are designed to be compatible with regulatory frameworks including:
+- **ICH Q2(R2)**: Validation of Analytical Procedures
+- **ISO/IEC 17025**: General requirements for testing and calibration laboratories
+- **USP <1225>**: Validation of Compendial Procedures
+- **ICH M10**: Bioanalytical Method Validation (for applicable workflows)
+
+This vignette demonstrates key validation workflows including calibration, precision, accuracy, uncertainty, and quality control.
+
+## Calibration Curves
+
+### Fitting Calibration Curves
+
+The `measure_calibration_fit()` function fits weighted or unweighted calibration curves with comprehensive diagnostics.
+
+```{r calibration-fit}
+# Create calibration data
+set.seed(42)
+cal_data <- data.frame(
+  nominal_conc = c(1, 5, 10, 25, 50, 100, 250, 500),
+  response = c(1, 5, 10, 25, 50, 100, 250, 500) * 1.05 +
+             rnorm(8, sd = c(0.1, 0.3, 0.5, 1, 2, 4, 10, 20))
+)
+
+# Fit with 1/x^2 weighting (common for bioanalytical methods)
+cal <- measure_calibration_fit(
+  cal_data,
+  response ~ nominal_conc,
+  weights = "1/x2"
+)
+
+print(cal)
+```
+
+### Visualizing the Calibration
+
+```{r calibration-plot}
+autoplot(cal, type = "fit")
+```
+
+### Checking Residuals
+
+```{r calibration-residuals}
+autoplot(cal, type = "residuals")
+```
+
+### Predicting Unknown Concentrations
+
+```{r calibration-predict}
+unknowns <- data.frame(
+  sample_id = c("Sample_1", "Sample_2", "Sample_3"),
+  response = c(52.3, 125.8, 280.5)
+)
+
+predictions <- measure_calibration_predict(
+  cal,
+  newdata = unknowns,
+  interval = "confidence"
+)
+
+cbind(unknowns, predictions)
+```
+
+### Calibration Verification
+
+Verify that the calibration remains valid using QC samples:
+
+```{r calibration-verify}
+qc_data <- data.frame(
+  sample_id = c("QC_Low", "QC_Mid", "QC_High"),
+  nominal_conc = c(3, 75, 400),
+  response = c(3.1, 77.5, 395.2)
+)
+
+verification <- measure_calibration_verify(cal, qc_data)
+print(verification)
+```
+
+## Limits of Detection and Quantitation
+
+### Multiple Methods
+
+`measure` supports multiple approaches for calculating LOD/LOQ:
+
+```{r lod-loq}
+# Blank-based approach (3σ/10σ)
+blank_data <- data.frame(
+  response = rnorm(10, mean = 0.5, sd = 0.08)
+)
+
+lod_result <- measure_lod(
+  blank_data,
+  "response",
+  method = "blank_sd",
+  calibration = cal
+)
+print(lod_result)
+
+# Or calculate both together
+lod_loq <- measure_lod_loq(
+  blank_data,
+  "response",
+  method = "blank_sd",
+  calibration = cal
+)
+tidy(lod_loq)
+```
+
+## Precision Studies
+
+### Repeatability (Within-Run Precision)
+
+```{r repeatability}
+# Data from replicate measurements
+repeat_data <- data.frame(
+  sample_id = rep(c("Low", "Mid", "High"), each = 6),
+  concentration = c(
+    rnorm(6, 10, 0.5),
+    rnorm(6, 100, 4),
+    rnorm(6, 500, 18)
+  )
+)
+
+repeatability <- measure_repeatability(
+  repeat_data,
+  "concentration",
+  group_col = "sample_id"
+)
+print(repeatability)
+```
+
+### Intermediate Precision
+
+```{r intermediate-precision}
+# Data from multiple days
+ip_data <- data.frame(
+  day = rep(1:3, each = 6),
+  analyst = rep(c("A", "A", "A", "B", "B", "B"), 3),
+  concentration = 100 +
+    rep(c(-2, 0, 2), each = 6) +  # Day effect
+    rep(c(-1, 1), 9) +            # Analyst effect
+    rnorm(18, sd = 3)             # Residual
+)
+
+ip_result <- measure_intermediate_precision(
+  ip_data,
+  "concentration",
+  factors = c("day", "analyst")
+)
+print(ip_result)
+```
+
+### Gage R&R Analysis
+
+For measurement system analysis:
+
+```{r gage-rr}
+# Gage R&R data
+grr_data <- data.frame(
+  part = rep(1:5, each = 6),
+  operator = rep(rep(c("Op1", "Op2"), each = 3), 5),
+  measurement = c(
+    # Part 1
+    10.1, 10.2, 10.0, 10.3, 10.1, 10.2,
+    # Part 2
+    20.2, 20.1, 20.3, 20.0, 20.2, 20.1,
+    # Part 3
+    15.1, 15.0, 15.2, 15.3, 15.1, 15.0,
+    # Part 4
+    25.0, 25.1, 24.9, 25.2, 25.0, 25.1,
+    # Part 5
+    30.1, 30.2, 30.0, 30.1, 30.0, 30.2
+  )
+)
+
+grr_result <- measure_gage_rr(
+  grr_data,
+  "measurement",
+  part_col = "part",
+  operator_col = "operator"
+)
+print(grr_result)
+```
+
+## Accuracy Assessment
+
+### Bias and Recovery
+
+```{r accuracy}
+accuracy_data <- data.frame(
+  level = rep(c("Low", "Mid", "High"), each = 5),
+  measured = c(
+    rnorm(5, 10.2, 0.3),   # Low level, slight positive bias
+    rnorm(5, 100, 2.5),    # Mid level, no bias
+    rnorm(5, 498, 8)       # High level, slight negative bias
+  ),
+  reference = rep(c(10, 100, 500), each = 5)
+)
+
+accuracy <- measure_accuracy(
+  accuracy_data,
+  "measured",
+  "reference",
+  group_col = "level"
+)
+print(accuracy)
+```
+
+### Linearity Assessment
+
+```{r linearity}
+linearity_data <- data.frame(
+  concentration = rep(c(10, 25, 50, 75, 100), each = 3),
+  response = rep(c(10, 25, 50, 75, 100), each = 3) * 1.02 +
+             rnorm(15, sd = 1.5)
+)
+
+linearity <- measure_linearity(
+  linearity_data,
+  "concentration",
+  "response"
+)
+print(linearity)
+
+# Plot with fit line
+autoplot(linearity, type = "fit")
+```
+
+## Uncertainty Budgets
+
+### ISO GUM Uncertainty
+
+Create uncertainty budgets following the GUM (Guide to the Expression of Uncertainty in Measurement):
+
+```{r uncertainty}
+# Define uncertainty components
+components <- list(
+  uncertainty_component(
+    name = "Repeatability",
+    type = "A",
+    u = 0.5,
+    dof = 9
+  ),
+  uncertainty_component(
+    name = "Calibration",
+    type = "B",
+    u = 0.3,
+    distribution = "normal"
+  ),
+  uncertainty_component(
+    name = "Reference Standard",
+    type = "B",
+    u = 0.1,
+    distribution = "rectangular"
+  ),
+  uncertainty_component(
+    name = "Temperature",
+    type = "B",
+    u = 0.2,
+    sensitivity = 0.5  # Sensitivity coefficient
+  )
+)
+
+budget <- measure_uncertainty_budget(components)
+print(budget)
+```
+
+### Visualizing Uncertainty Contributions
+
+```{r uncertainty-plot}
+autoplot(budget)
+```
+
+## Control Charts
+
+### Setting Up Control Limits
+
+```{r control-limits}
+# Historical QC data
+qc_history <- data.frame(
+  run_order = 1:30,
+  qc_value = rnorm(30, mean = 100, sd = 2)
+)
+
+limits <- measure_control_limits(qc_history, "qc_value")
+print(limits)
+```
+### Monitoring with Westgard Rules
+
+```{r control-chart}
+# New run data including potential out-of-control point
+new_run <- data.frame(
+  run_order = 1:20,
+  qc_value = c(rnorm(19, 100, 2), 108)  # Last point is high
+)
+
+chart <- measure_control_chart(
+  new_run,
+  "qc_value",
+  "run_order",
+  limits = limits,
+  rules = c("1_3s", "2_2s", "R_4s", "10x")
+)
+print(chart)
+```
+
+```{r control-chart-plot}
+autoplot(chart)
+```
+
+## Acceptance Criteria
+
+### Defining Criteria
+
+```{r criteria}
+# Create custom criteria
+my_criteria <- measure_criteria(
+  criterion("cv", max = 15, label = "Precision CV"),
+  criterion("bias_pct", min = -10, max = 10, label = "Bias"),
+  criterion("recovery", min = 85, max = 115, label = "Recovery %")
+)
+print(my_criteria)
+```
+
+### Using Preset Criteria
+
+```{r preset-criteria}
+# ICH Q2 presets
+ich_criteria <- criteria_ich_q2()
+print(ich_criteria)
+
+# Bioanalytical presets
+bio_criteria <- criteria_bioanalytical()
+print(bio_criteria)
+```
+
+### Assessing Results
+
+```{r assess}
+# Sample results to assess
+results <- data.frame(
+  level = c("Low", "Mid", "High"),
+  cv = c(8.5, 5.2, 3.1),
+  bias_pct = c(-5.2, 1.3, 2.8),
+  recovery = c(94.8, 101.3, 102.8)
+)
+
+assessment <- measure_assess(results, my_criteria)
+print(assessment)
+
+# Check if all criteria passed
+all_pass(assessment)
+```
+
+## Drift Correction
+
+### Detecting Drift
+
+```{r detect-drift}
+# Data with drift
+drift_data <- data.frame(
+  sample_type = rep("qc", 20),
+  run_order = 1:20,
+  feature1 = 100 + (1:20) * 0.8 + rnorm(20, sd = 2),  # Has drift
+
+  feature2 = 100 + rnorm(20, sd = 2)                   # No drift
+)
+
+drift_result <- measure_detect_drift(
+  drift_data,
+  features = c("feature1", "feature2"),
+  qc_type = "qc"
+)
+print(drift_result)
+```
+
+### Correcting Drift
+
+```{r drift-correction, eval = FALSE}
+library(recipes)
+
+# Using QC-LOESS correction in a recipe
+rec <- recipe(~ ., data = drift_data) |>
+  step_measure_drift_qc_loess(
+    feature1, feature2,
+    qc_type = "qc"
+  ) |>
+  prep()
+
+corrected <- bake(rec, new_data = NULL)
+```
+
+## Summary
+
+The `measure` package provides a complete toolkit for analytical method validation:
+
+| Category | Key Functions |
+|----------|---------------|
+| **Calibration** | `measure_calibration_fit()`, `measure_calibration_predict()`, `measure_calibration_verify()` |
+| **LOD/LOQ** | `measure_lod()`, `measure_loq()`, `measure_lod_loq()` |
+| **Precision** | `measure_repeatability()`, `measure_intermediate_precision()`, `measure_gage_rr()` |
+| **Accuracy** | `measure_accuracy()`, `measure_linearity()`, `measure_carryover()` |
+| **Uncertainty** | `measure_uncertainty_budget()`, `measure_uncertainty()` |
+| **Control Charts** | `measure_control_limits()`, `measure_control_chart()` |
+| **Criteria** | `measure_criteria()`, `measure_assess()`, `criteria_ich_q2()` |
+| **Drift** | `measure_detect_drift()`, `step_measure_drift_qc_loess()` |
+
+All functions follow a consistent design philosophy:
+- **Tidy outputs**: Results are tibbles with `tidy()`, `glance()`, and `autoplot()` methods
+- **Transparent diagnostics**: No hidden decisions; all parameters and flags are visible
+- **Regulatory compatibility**: Designed with ICH, ISO, and FDA guidelines in mind
+- **Provenance tracking**: Audit trails for outlier handling and data modifications
+
+For more details on any function, see the package documentation with `?function_name`.
