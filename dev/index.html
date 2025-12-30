@@ -43,6 +43,7 @@
     <li><a class="dropdown-item" href="articles/preprocessing.html">Preprocessing Techniques</a></li>
     <li><a class="dropdown-item" href="articles/recipes.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="articles/roles-diagnostics.html">Data Organization &amp; Diagnostics</a></li>
+    <li><a class="dropdown-item" href="articles/validation.html">Analytical Validation</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Examples</h6></li>
     <li><a class="dropdown-item" href="articles/baseline.html">Baseline Correction</a></li>
@@ -717,6 +718,189 @@
 </tbody>
 </table>
 </div>
+<div class="section level3">
+<h3 id="drift--batch-correction">Drift &amp; Batch Correction<a class="anchor" aria-label="anchor" href="#drift--batch-correction"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="45%">
+<col width="54%">
+</colgroup>
+<thead><tr class="header">
+<th>Step/Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/step_measure_drift_qc_loess.html">step_measure_drift_qc_loess()</a></code></td>
+<td>QC-RLSC drift correction using LOESS</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_drift_linear.html">step_measure_drift_linear()</a></code></td>
+<td>Linear drift correction</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_drift_spline.html">step_measure_drift_spline()</a></code></td>
+<td>Spline-based drift correction</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/step_measure_qc_bracket.html">step_measure_qc_bracket()</a></code></td>
+<td>QC bracketing interpolation</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/step_measure_batch_reference.html">step_measure_batch_reference()</a></code></td>
+<td>Reference-based batch correction</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/measure_detect_drift.html">measure_detect_drift()</a></code></td>
+<td>Detect significant drift in QC samples</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section level2">
+<h2 id="analytical-validation-functions">Analytical Validation Functions<a class="anchor" aria-label="anchor" href="#analytical-validation-functions"></a>
+</h2>
+<p>measure provides a comprehensive suite of functions for analytical method validation, designed for compatibility with ICH Q2(R2), ISO 17025, and similar regulatory frameworks.</p>
+<div class="section level3">
+<h3 id="calibration--quantitation">Calibration &amp; Quantitation<a class="anchor" aria-label="anchor" href="#calibration--quantitation"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/measure_calibration_fit.html">measure_calibration_fit()</a></code></td>
+<td>Fit weighted calibration curves (linear/quadratic)</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/measure_calibration_predict.html">measure_calibration_predict()</a></code></td>
+<td>Predict concentrations with uncertainty</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/measure_calibration_verify.html">measure_calibration_verify()</a></code></td>
+<td>Continuing calibration verification</td>
+</tr>
+<tr class="even">
+<td>
+<code><a href="reference/measure_lod.html">measure_lod()</a></code> / <code><a href="reference/measure_loq.html">measure_loq()</a></code>
+</td>
+<td>Detection and quantitation limits</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="precision--accuracy">Precision &amp; Accuracy<a class="anchor" aria-label="anchor" href="#precision--accuracy"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/measure_repeatability.html">measure_repeatability()</a></code></td>
+<td>Within-run precision</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/measure_intermediate_precision.html">measure_intermediate_precision()</a></code></td>
+<td>Between-run precision with variance components</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/measure_reproducibility.html">measure_reproducibility()</a></code></td>
+<td>Between-lab precision</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/measure_gage_rr.html">measure_gage_rr()</a></code></td>
+<td>Gage R&amp;R / Measurement System Analysis</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/measure_accuracy.html">measure_accuracy()</a></code></td>
+<td>Bias, recovery, and accuracy assessment</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/measure_linearity.html">measure_linearity()</a></code></td>
+<td>Linearity with lack-of-fit testing</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/measure_carryover.html">measure_carryover()</a></code></td>
+<td>Carryover evaluation</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="uncertainty--quality-control">Uncertainty &amp; Quality Control<a class="anchor" aria-label="anchor" href="#uncertainty--quality-control"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/measure_uncertainty_budget.html">measure_uncertainty_budget()</a></code></td>
+<td>ISO GUM uncertainty budgets</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/measure_uncertainty.html">measure_uncertainty()</a></code></td>
+<td>Combined and expanded uncertainty</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/measure_control_limits.html">measure_control_limits()</a></code></td>
+<td>Shewhart, EWMA, or CUSUM limits</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/measure_control_chart.html">measure_control_chart()</a></code></td>
+<td>Westgard multi-rule control charts</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/measure_system_suitability.html">measure_system_suitability()</a></code></td>
+<td>System suitability testing</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="criteria-system">Criteria System<a class="anchor" aria-label="anchor" href="#criteria-system"></a>
+</h3>
+<table class="table">
+<thead><tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code><a href="reference/measure_criteria.html">measure_criteria()</a></code></td>
+<td>Define acceptance criteria</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/measure_assess.html">measure_assess()</a></code></td>
+<td>Evaluate data against criteria</td>
+</tr>
+<tr class="odd">
+<td><code><a href="reference/criteria_presets.html">criteria_bioanalytical()</a></code></td>
+<td>FDA/EMA bioanalytical presets</td>
+</tr>
+<tr class="even">
+<td><code><a href="reference/criteria_presets.html">criteria_ich_q2()</a></code></td>
+<td>ICH Q2 validation presets</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section level2">
 <h2 id="learning-more">Learning more<a class="anchor" aria-label="anchor" href="#learning-more"></a>
@@ -726,6 +910,8 @@
 <a href="https://jameshwade.github.io/measure/articles/measure.html">Getting Started</a> - A comprehensive introduction to measure</li>
 <li>
 <a href="https://jameshwade.github.io/measure/articles/preprocessing.html">Preprocessing Techniques</a> - Deep dive into available preprocessing methods</li>
+<li>
+<a href="https://jameshwade.github.io/measure/articles/validation.html">Analytical Validation</a> - Calibration, uncertainty, and method validation</li>
 </ul>
 </div>
 <div class="section level2">

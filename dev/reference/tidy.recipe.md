@@ -5,6 +5,15 @@ Tidiers for measure steps
 ## Usage
 
 ``` r
+# S3 method for class 'measure_accuracy'
+tidy(x, ...)
+
+# S3 method for class 'measure_linearity'
+tidy(x, ...)
+
+# S3 method for class 'measure_carryover'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_align_shift'
 tidy(x, ...)
 
@@ -71,16 +80,40 @@ tidy(x, ...)
 # S3 method for class 'step_measure_baseline_rf'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_batch_reference'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_calibrate_x'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_calibrate_y'
 tidy(x, ...)
 
+# S3 method for class 'measure_control_limits'
+tidy(x, ...)
+
+# S3 method for class 'measure_control_chart'
+tidy(x, type = c("data", "violations", "limits"), ...)
+
+# S3 method for class 'measure_sst'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_despike'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_detrend'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_drift_qc_loess'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_drift_linear'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_drift_spline'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_qc_bracket'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_integrals'
@@ -153,6 +186,12 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_peaks_deconvolve'
+tidy(x, ...)
+
+# S3 method for class 'measure_precision'
+tidy(x, ...)
+
+# S3 method for class 'measure_gage_rr'
 tidy(x, ...)
 
 # S3 method for class 'step_measure_qc_snr'

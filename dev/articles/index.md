@@ -13,6 +13,8 @@
   tidymodels](https://jameshwade.github.io/measure/dev/articles/recipes.md):
 - [Data Organization and Diagnostic
   Plots](https://jameshwade.github.io/measure/dev/articles/roles-diagnostics.md):
+- [Analytical Method
+  Validation](https://jameshwade.github.io/measure/dev/articles/validation.md):
 
 ### Examples
 

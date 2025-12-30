@@ -275,6 +275,63 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | [`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md) | Random x-axis shifts for shift invariance  |
 | [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md) | Random intensity scaling                   |
 
+### Drift & Batch Correction
+
+| Step/Function                                                                                                          | Description                            |
+|------------------------------------------------------------------------------------------------------------------------|----------------------------------------|
+| [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md)   | QC-RLSC drift correction using LOESS   |
+| [`step_measure_drift_linear()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_linear.md)       | Linear drift correction                |
+| [`step_measure_drift_spline()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_spline.md)       | Spline-based drift correction          |
+| [`step_measure_qc_bracket()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_bracket.md)           | QC bracketing interpolation            |
+| [`step_measure_batch_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_batch_reference.md) | Reference-based batch correction       |
+| [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md)                 | Detect significant drift in QC samples |
+
+## Analytical Validation Functions
+
+measure provides a comprehensive suite of functions for analytical
+method validation, designed for compatibility with ICH Q2(R2), ISO
+17025, and similar regulatory frameworks.
+
+### Calibration & Quantitation
+
+| Function                                                                                                                                                                    | Description                                        |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
+| [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md)                                                                | Fit weighted calibration curves (linear/quadratic) |
+| [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md)                                                        | Predict concentrations with uncertainty            |
+| [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)                                                          | Continuing calibration verification                |
+| [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md) / [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md) | Detection and quantitation limits                  |
+
+### Precision & Accuracy
+
+| Function                                                                                                                   | Description                                    |
+|----------------------------------------------------------------------------------------------------------------------------|------------------------------------------------|
+| [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md)                   | Within-run precision                           |
+| [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md) | Between-run precision with variance components |
+| [`measure_reproducibility()`](https://jameshwade.github.io/measure/dev/reference/measure_reproducibility.md)               | Between-lab precision                          |
+| [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md)                               | Gage R&R / Measurement System Analysis         |
+| [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md)                             | Bias, recovery, and accuracy assessment        |
+| [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md)                           | Linearity with lack-of-fit testing             |
+| [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)                           | Carryover evaluation                           |
+
+### Uncertainty & Quality Control
+
+| Function                                                                                                           | Description                        |
+|--------------------------------------------------------------------------------------------------------------------|------------------------------------|
+| [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md) | ISO GUM uncertainty budgets        |
+| [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md)               | Combined and expanded uncertainty  |
+| [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md)         | Shewhart, EWMA, or CUSUM limits    |
+| [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md)           | Westgard multi-rule control charts |
+| [`measure_system_suitability()`](https://jameshwade.github.io/measure/dev/reference/measure_system_suitability.md) | System suitability testing         |
+
+### Criteria System
+
+| Function                                                                                             | Description                    |
+|------------------------------------------------------------------------------------------------------|--------------------------------|
+| [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md)       | Define acceptance criteria     |
+| [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md)           | Evaluate data against criteria |
+| [`criteria_bioanalytical()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) | FDA/EMA bioanalytical presets  |
+| [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)        | ICH Q2 validation presets      |
+
 ## Learning more
 
 - [Getting
@@ -283,6 +340,9 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 - [Preprocessing
   Techniques](https://jameshwade.github.io/measure/articles/preprocessing.html) -
   Deep dive into available preprocessing methods
+- [Analytical
+  Validation](https://jameshwade.github.io/measure/articles/validation.html) -
+  Calibration, uncertainty, and method validation
 
 ## Datasets
 

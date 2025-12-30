@@ -275,6 +275,63 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 | [`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md) | Random x-axis shifts for shift invariance  |
 | [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md) | Random intensity scaling                   |
 
+### Drift & Batch Correction
+
+| Step/Function                                                                                                          | Description                            |
+|------------------------------------------------------------------------------------------------------------------------|----------------------------------------|
+| [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md)   | QC-RLSC drift correction using LOESS   |
+| [`step_measure_drift_linear()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_linear.md)       | Linear drift correction                |
+| [`step_measure_drift_spline()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_spline.md)       | Spline-based drift correction          |
+| [`step_measure_qc_bracket()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_bracket.md)           | QC bracketing interpolation            |
+| [`step_measure_batch_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_batch_reference.md) | Reference-based batch correction       |
+| [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md)                 | Detect significant drift in QC samples |
+
+## Analytical Validation Functions
+
+measure provides a comprehensive suite of functions for analytical
+method validation, designed for compatibility with ICH Q2(R2), ISO
+17025, and similar regulatory frameworks.
+
+### Calibration & Quantitation
+
+| Function                                                                                                                                                                    | Description                                        |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
+| [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md)                                                                | Fit weighted calibration curves (linear/quadratic) |
+| [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md)                                                        | Predict concentrations with uncertainty            |
+| [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)                                                          | Continuing calibration verification                |
+| [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md) / [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md) | Detection and quantitation limits                  |
+
+### Precision & Accuracy
+
+| Function                                                                                                                   | Description                                    |
+|----------------------------------------------------------------------------------------------------------------------------|------------------------------------------------|
+| [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md)                   | Within-run precision                           |
+| [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md) | Between-run precision with variance components |
+| [`measure_reproducibility()`](https://jameshwade.github.io/measure/dev/reference/measure_reproducibility.md)               | Between-lab precision                          |
+| [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md)                               | Gage R&R / Measurement System Analysis         |
+| [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md)                             | Bias, recovery, and accuracy assessment        |
+| [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md)                           | Linearity with lack-of-fit testing             |
+| [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)                           | Carryover evaluation                           |
+
+### Uncertainty & Quality Control
+
+| Function                                                                                                           | Description                        |
+|--------------------------------------------------------------------------------------------------------------------|------------------------------------|
+| [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md) | ISO GUM uncertainty budgets        |
+| [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md)               | Combined and expanded uncertainty  |
+| [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md)         | Shewhart, EWMA, or CUSUM limits    |
+| [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md)           | Westgard multi-rule control charts |
+| [`measure_system_suitability()`](https://jameshwade.github.io/measure/dev/reference/measure_system_suitability.md) | System suitability testing         |
+
+### Criteria System
+
+| Function                                                                                             | Description                    |
+|------------------------------------------------------------------------------------------------------|--------------------------------|
+| [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md)       | Define acceptance criteria     |
+| [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md)           | Evaluate data against criteria |
+| [`criteria_bioanalytical()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) | FDA/EMA bioanalytical presets  |
+| [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)        | ICH Q2 validation presets      |
+
 ## Learning more
 
 - [Getting
@@ -283,6 +340,9 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 - [Preprocessing
   Techniques](https://jameshwade.github.io/measure/articles/preprocessing.html) -
   Deep dive into available preprocessing methods
+- [Analytical
+  Validation](https://jameshwade.github.io/measure/articles/validation.html) -
+  Calibration, uncertainty, and method validation
 
 ## Datasets
 
@@ -703,6 +763,132 @@ Training data augmentation for improved model robustness
 - [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md)
   : Random Intensity Scaling
 
+## Drift & Batch Correction
+
+Correct for signal drift and batch effects
+
+- [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md)
+  : QC-Based Drift Correction Using LOESS
+- [`step_measure_drift_linear()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_linear.md)
+  : Linear Drift Correction
+- [`step_measure_drift_spline()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_spline.md)
+  : Spline-Based Drift Correction
+- [`step_measure_qc_bracket()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_bracket.md)
+  : QC Bracketing Interpolation
+- [`step_measure_batch_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_batch_reference.md)
+  : Reference-Based Batch Correction
+- [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md)
+  : Detect Drift in Analytical Data
+
+## Calibration & Quantitation
+
+Calibration curves, LOD/LOQ, and quantitation
+
+- [`measure_calibration`](https://jameshwade.github.io/measure/dev/reference/measure_calibration.md)
+  [`measure_calibration-class`](https://jameshwade.github.io/measure/dev/reference/measure_calibration.md)
+  : Calibration Curve Object
+- [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md)
+  : Fit a Calibration Curve
+- [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md)
+  : Predict Concentrations from Calibration Curve
+- [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)
+  : Verify Calibration Curve Performance
+- [`is_measure_calibration()`](https://jameshwade.github.io/measure/dev/reference/is_measure_calibration.md)
+  : Test if Object is a Calibration Curve
+- [`tidy(`*`<measure_calibration>`*`)`](https://jameshwade.github.io/measure/dev/reference/tidy.measure_calibration.md)
+  [`tidy(`*`<measure_calibration_verify>`*`)`](https://jameshwade.github.io/measure/dev/reference/tidy.measure_calibration.md)
+  : Tidy a Calibration Curve
+- [`glance(`*`<measure_calibration>`*`)`](https://jameshwade.github.io/measure/dev/reference/glance.measure_calibration.md)
+  : Glance at Calibration Curve Summary
+- [`augment(`*`<measure_calibration>`*`)`](https://jameshwade.github.io/measure/dev/reference/augment.measure_calibration.md)
+  : Augment Calibration Data
+- [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md)
+  : Calculate Limit of Detection (LOD)
+- [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md)
+  : Calculate Limit of Quantitation (LOQ)
+- [`measure_lod_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_lod_loq.md)
+  : Calculate LOD and LOQ Together
+- [`tidy(`*`<measure_lod>`*`)`](https://jameshwade.github.io/measure/dev/reference/tidy.measure_lod.md)
+  : Tidy LOD/LOQ Results
+
+## Precision & Accuracy
+
+Method validation for precision and accuracy
+
+- [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md)
+  : Repeatability (Within-Run Precision)
+- [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md)
+  : Intermediate Precision (Between-Run Precision)
+- [`measure_reproducibility()`](https://jameshwade.github.io/measure/dev/reference/measure_reproducibility.md)
+  : Reproducibility (Between-Lab Precision)
+- [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md)
+  : Gage R&R (Measurement System Analysis)
+- [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md)
+  : Accuracy Assessment
+- [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md)
+  : Linearity Assessment
+- [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)
+  : Carryover Assessment
+
+## Uncertainty
+
+ISO GUM uncertainty budgets
+
+- [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md)
+  : Create an Uncertainty Budget
+- [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md)
+  : Quick Uncertainty Calculation
+- [`uncertainty_component()`](https://jameshwade.github.io/measure/dev/reference/uncertainty_component.md)
+  : Create an Uncertainty Component
+- [`uncertainty_type_a()`](https://jameshwade.github.io/measure/dev/reference/uncertainty_type_a.md)
+  : Create Type A Uncertainty from Repeated Measurements
+- [`uncertainty_type_b_rectangular()`](https://jameshwade.github.io/measure/dev/reference/uncertainty_type_b_rectangular.md)
+  : Create Type B Uncertainty from Rectangular Distribution
+- [`uncertainty_type_b_expanded()`](https://jameshwade.github.io/measure/dev/reference/uncertainty_type_b_expanded.md)
+  : Create Type B Uncertainty from Expanded Uncertainty
+- [`tidy(`*`<measure_uncertainty_budget>`*`)`](https://jameshwade.github.io/measure/dev/reference/tidy.measure_uncertainty_budget.md)
+  : Tidy an Uncertainty Budget
+
+## Control Charts & QC
+
+Statistical process control and system suitability
+
+- [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md)
+  : Calculate Control Limits
+- [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md)
+  : Generate Control Chart
+- [`measure_system_suitability()`](https://jameshwade.github.io/measure/dev/reference/measure_system_suitability.md)
+  : System Suitability Check
+
+## Criteria & Assessment
+
+Acceptance criteria and pass/fail evaluation
+
+- [`criterion()`](https://jameshwade.github.io/measure/dev/reference/criterion.md)
+  : Create an Acceptance Criterion
+- [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md)
+  : Create a Set of Acceptance Criteria
+- [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md)
+  : Assess Data Against Acceptance Criteria
+- [`all_pass()`](https://jameshwade.github.io/measure/dev/reference/all_pass.md)
+  : Check if All Criteria Pass
+- [`get_failures()`](https://jameshwade.github.io/measure/dev/reference/get_failures.md)
+  : Extract Failed Criteria
+- [`criteria_bioanalytical()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
+  [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
+  : Preset Acceptance Criteria
+
+## Metadata Validation
+
+Validate analytical metadata columns
+
+- [`measure_validate_metadata()`](https://jameshwade.github.io/measure/dev/reference/measure_validate_metadata.md)
+  : Validate Analytical Metadata
+- [`measure_standardize_sample_type()`](https://jameshwade.github.io/measure/dev/reference/measure_standardize_sample_type.md)
+  : Standardize Sample Type Values
+- [`measure_sample_types`](https://jameshwade.github.io/measure/dev/reference/measure_sample_types.md)
+  : Canonical Sample Types
+
 ## Utilities
 
 Helper functions and utilities
@@ -787,9 +973,19 @@ Plotting and diagnostic functions for measure data
   [`autoplot(`*`<measure_list>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
   [`autoplot(`*`<recipe>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
   : Autoplot Methods for Measure Objects
+- [`autoplot(`*`<measure_calibration>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_calibration.md)
+  : Plot Calibration Curve Diagnostics
+- [`autoplot(`*`<measure_control_chart>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_control_chart.md)
+  : Plot Control Chart
+- [`autoplot(`*`<measure_linearity>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_linearity.md)
+  : Plot Linearity Assessment Results
+- [`autoplot(`*`<measure_uncertainty_budget>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_uncertainty_budget.md)
+  : Plot Uncertainty Budget
 - [`fortify(`*`<measure_tbl>`*`)`](https://jameshwade.github.io/measure/dev/reference/fortify-measure.md)
   [`fortify(`*`<measure_list>`*`)`](https://jameshwade.github.io/measure/dev/reference/fortify-measure.md)
   : Convert Measure Objects to Data Frames for Plotting
+- [`fortify(`*`<measure_calibration>`*`)`](https://jameshwade.github.io/measure/dev/reference/fortify.measure_calibration.md)
+  : Extract Calibration Curve Data
 - [`plot_measure_comparison()`](https://jameshwade.github.io/measure/dev/reference/plot_measure_comparison.md)
   : Compare Multiple Preprocessing Recipes
 - [`measure_plot_summary()`](https://jameshwade.github.io/measure/dev/reference/measure_plot_summary.md)
@@ -810,6 +1006,8 @@ Plotting and diagnostic functions for measure data
   tidymodels](https://jameshwade.github.io/measure/dev/articles/recipes.md):
 - [Data Organization and Diagnostic
   Plots](https://jameshwade.github.io/measure/dev/articles/roles-diagnostics.md):
+- [Analytical Method
+  Validation](https://jameshwade.github.io/measure/dev/articles/validation.md):
 
 ### Examples
 
