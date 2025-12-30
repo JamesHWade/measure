@@ -72,7 +72,25 @@ validation workflows.</p>
 <span>  cv_intermediate <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  recovery_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">98</span>, <span class="fl">102</span><span class="op">)</span>,</span>
 <span>  r_squared <span class="op">=</span> <span class="fl">0.999</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">criteria_bland_altman</span><span class="op">(</span></span>
+<span>  loa_width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bias_max <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  proportional_bias_p <span class="op">=</span> <span class="fl">0.05</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">criteria_method_comparison</span><span class="op">(</span></span>
+<span>  slope_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">1.1</span><span class="op">)</span>,</span>
+<span>  intercept_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  r_squared <span class="op">=</span> <span class="fl">0.95</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">criteria_proficiency_testing</span><span class="op">(</span>max_z_score <span class="op">=</span> <span class="fl">2</span>, pct_satisfactory <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">criteria_matrix_effects</span><span class="op">(</span>me_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">80</span>, <span class="fl">120</span><span class="op">)</span>, me_cv <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">criteria_surrogate_recovery</span><span class="op">(</span>surrogate_recovery <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">70</span>, <span class="fl">130</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -105,6 +123,46 @@ validation workflows.</p>
 
 <dt id="arg-cv-intermediate">cv_intermediate<a class="anchor" aria-label="anchor" href="#arg-cv-intermediate"></a></dt>
 <dd><p>Maximum allowable CV for intermediate precision (default 5%, ICH Q2).</p></dd>
+
+
+<dt id="arg-loa-width">loa_width<a class="anchor" aria-label="anchor" href="#arg-loa-width"></a></dt>
+<dd><p>Maximum acceptable limits of agreement width.</p></dd>
+
+
+<dt id="arg-bias-max">bias_max<a class="anchor" aria-label="anchor" href="#arg-bias-max"></a></dt>
+<dd><p>Maximum acceptable mean bias.</p></dd>
+
+
+<dt id="arg-proportional-bias-p">proportional_bias_p<a class="anchor" aria-label="anchor" href="#arg-proportional-bias-p"></a></dt>
+<dd><p>Significance level for proportional bias test.</p></dd>
+
+
+<dt id="arg-slope-range">slope_range<a class="anchor" aria-label="anchor" href="#arg-slope-range"></a></dt>
+<dd><p>Acceptable range for regression slope (default c(0.9, 1.1)).</p></dd>
+
+
+<dt id="arg-intercept-range">intercept_range<a class="anchor" aria-label="anchor" href="#arg-intercept-range"></a></dt>
+<dd><p>Acceptable range for regression intercept.</p></dd>
+
+
+<dt id="arg-max-z-score">max_z_score<a class="anchor" aria-label="anchor" href="#arg-max-z-score"></a></dt>
+<dd><p>Maximum acceptable absolute z-score.</p></dd>
+
+
+<dt id="arg-pct-satisfactory">pct_satisfactory<a class="anchor" aria-label="anchor" href="#arg-pct-satisfactory"></a></dt>
+<dd><p>Minimum percentage of satisfactory results.</p></dd>
+
+
+<dt id="arg-me-range">me_range<a class="anchor" aria-label="anchor" href="#arg-me-range"></a></dt>
+<dd><p>Acceptable matrix effect range (default c(80, 120)).</p></dd>
+
+
+<dt id="arg-me-cv">me_cv<a class="anchor" aria-label="anchor" href="#arg-me-cv"></a></dt>
+<dd><p>Maximum acceptable CV of matrix effects.</p></dd>
+
+
+<dt id="arg-surrogate-recovery">surrogate_recovery<a class="anchor" aria-label="anchor" href="#arg-surrogate-recovery"></a></dt>
+<dd><p>Acceptable surrogate recovery range.</p></dd>
 
 </dl></div>
     <div class="section level2">

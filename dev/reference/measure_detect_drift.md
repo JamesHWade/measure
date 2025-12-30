@@ -78,6 +78,6 @@ measure_detect_drift(data, c("feature1", "feature2"))
 #> # A tibble: 2 × 5
 #>   feature    slope slope_pvalue percent_change significant
 #>   <chr>      <dbl>        <dbl>          <dbl> <lgl>      
-#> 1 feature1  0.432    0.00000300           7.78 TRUE       
-#> 2 feature2 -0.0309   0.460               -1.17 FALSE      
+#> 1 feature1 0.351       0.000331         6.34   TRUE       
+#> 2 feature2 0.00136     0.973            0.0519 FALSE      
 ```

@@ -19,9 +19,13 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/all_pass.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/augment.measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot-measure.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_bland_altman.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_control_chart.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_deming_regression.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_linearity.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_matrix_effect.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_proficiency_score.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_uncertainty_budget.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/baseline_lambda.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/bin_width.html</loc></url>
@@ -52,6 +56,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_accuracy.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_assess.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_axis_info.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.html</loc></url>
@@ -62,6 +67,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_control_chart.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_control_limits.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_criteria.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_identify_columns.html</loc></url>
@@ -72,7 +78,10 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_loq.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_map.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_map_safely.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_plot_summary.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_quality_summary.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_repeatability.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_reproducibility.html</loc></url>
@@ -127,6 +136,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_despike.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_drift_linear.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_drift_spline.html</loc></url>
@@ -178,8 +188,10 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_median.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_wavelet.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_snv.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/step_measure_trim.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/subtract_rf_baseline.html</loc></url>

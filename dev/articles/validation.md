@@ -580,6 +580,319 @@ all_pass(assessment)
 #> [1] TRUE
 ```
 
+## Method Comparison
+
+When validating a new method, you often need to compare it against a
+reference or existing method. The `measure` package provides several
+approaches for method comparison studies.
+
+### Bland-Altman Analysis
+
+Bland-Altman plots show the agreement between two methods by plotting
+differences against means:
+
+``` r
+# Paired measurements from two methods
+comparison_data <- data.frame(
+  sample_id = 1:30,
+  method_A = rnorm(30, mean = 100, sd = 15),
+  method_B = rnorm(30, mean = 102, sd = 16)
+)
+
+ba <- measure_bland_altman(
+  comparison_data,
+  method1_col = "method_A",
+  method2_col = "method_B",
+  regression = "linear"  # Test for proportional bias
+)
+print(ba)
+#> measure_bland_altman
+#> ──────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> Bias Statistics:
+#>   n = 30 
+#>   Mean bias = 4.083 
+#>   SD of differences = 17.97 
+#>   95% CI for bias: [-2.625, 10.79]
+#> 
+#> Limits of Agreement:
+#>   Lower LOA = -31.13 (95% CI: [ -42.75 ,  -19.51 ])
+#>   Upper LOA = 39.3 (95% CI: [ 27.68 ,  50.92 ])
+#>   LOA Width = 70.43 
+#> 
+#> Proportional Bias Test:
+#>   Slope = 0.2046 
+#>   p-value = 0.57 
+#>   Result: No significant proportional bias
+```
+
+``` r
+autoplot(ba)
+#> `geom_smooth()` using formula = 'y ~ x'
+```
+
+![](validation_files/figure-html/bland-altman-plot-1.png)
+
+### Regression Methods
+
+For method comparison regression, use Deming or Passing-Bablok
+regression which account for error in both methods:
+
+``` r
+# Method comparison with known measurement error
+deming_data <- data.frame(
+  reference = c(5, 10, 25, 50, 100, 200, 400),
+  test_method = c(5.2, 10.3, 25.8, 51.2, 101.5, 203.1, 408.2)
+)
+
+deming <- measure_deming_regression(
+  deming_data,
+  method1_col = "reference",
+  method2_col = "test_method",
+  bootstrap = TRUE,
+  bootstrap_n = 500
+)
+#> Using default error ratio of 1. Provide `error_ratio` or SDs for more accurate
+#> results.
+print(deming)
+#> measure_deming_regression
+#> ──────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> Coefficients:
+#> # A tibble: 2 × 4
+#>   term      estimate ci_lower ci_upper
+#>   <chr>        <dbl>    <dbl>    <dbl>
+#> 1 intercept -0.00414   -0.325    0.437
+#> 2 slope      1.02       1.01     1.02 
+#> 
+#> Statistics:
+#>   n = 7 
+#>   Error ratio = 1 
+#>   RMSE = 0.4087 
+#>   R² = 1 
+#> 
+#> (Fitted using mcr package)
+
+# Check if methods are equivalent
+glance(deming)
+#> # A tibble: 1 × 6
+#>   intercept slope intercept_ci_includes_0 slope_ci_includes_1 r_squared  rmse
+#>       <dbl> <dbl> <lgl>                   <lgl>                   <dbl> <dbl>
+#> 1  -0.00414  1.02 TRUE                    FALSE                   1.000 0.409
+```
+
+For Passing-Bablok regression (non-parametric), install the `mcr`
+package:
+
+``` r
+# Requires: install.packages("mcr")
+pb <- measure_passing_bablok(
+  deming_data,
+  method1_col = "reference",
+  method2_col = "test_method"
+)
+print(pb)
+```
+
+### Proficiency Testing
+
+Evaluate laboratory performance in proficiency testing programs:
+
+``` r
+# PT results from multiple labs
+pt_data <- data.frame(
+  lab_id = paste0("Lab_", 1:10),
+  measured = c(99.2, 100.5, 98.8, 101.2, 97.5, 100.1, 99.8, 102.3, 100.6, 94.0),
+  assigned = rep(100, 10),
+  uncertainty = c(1.5, 2.0, 1.8, 1.6, 2.2, 1.9, 1.7, 2.1, 1.5, 2.0)
+)
+
+# z-scores with known sigma
+z_scores <- measure_proficiency_score(
+  pt_data,
+  measured_col = "measured",
+  reference_col = "assigned",
+  score_type = "z_score",
+  sigma = 2.5
+)
+print(z_scores)
+#> measure_proficiency_score
+#> ──────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> Score Type: z_score 
+#> Sigma: 2.5 
+#> 
+#> Results (n = 10 ):
+#>   Satisfactory (|z| ≤ 2): 9 ( 90 %)
+#>   Questionable (2 < |z| ≤ 3): 1 
+#>   Unsatisfactory (|z| > 3): 0 
+#> 
+#> Score Statistics:
+#>   Mean score: -0.24 
+#>   SD score: 0.925 
+#>   Max |score|: 2.4
+```
+
+``` r
+autoplot(z_scores)
+```
+
+![](validation_files/figure-html/proficiency-plot-1.png)
+
+## Matrix Effects
+
+Matrix effects (ion suppression/enhancement) must be evaluated in
+LC-MS/MS and similar methods.
+
+### Evaluating Matrix Effects
+
+``` r
+# Post-extraction spike experiment
+me_data <- data.frame(
+  sample_type = rep(c("matrix", "neat"), each = 6),
+  matrix_lot = rep(c("Lot1", "Lot2", "Lot3"), 4),
+  concentration = rep(c("low", "high"), each = 3, times = 2),
+  response = c(
+    # Matrix samples (some suppression)
+    9200, 9500, 8900, 47500, 48200, 46800,
+    # Neat samples
+    10000, 10000, 10000, 50000, 50000, 50000
+  )
+)
+
+me <- measure_matrix_effect(
+  me_data,
+  response_col = "response",
+  sample_type_col = "sample_type",
+  matrix_level = "matrix",
+  neat_level = "neat",
+  concentration_col = "concentration"
+)
+print(me)
+#> measure_matrix_effect
+#> ──────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> Overall Matrix Effect Summary:
+#>   Groups evaluated: 2 
+#>   Mean ME: 94 %
+#>   SD ME: 2 %
+#>   CV ME: 2 %
+#>   Range: 92 - 95 %
+#> 
+#> Effect Classification:
+#>   Ion suppression (ME < 100%): 2 
+#>   Ion enhancement (ME > 100%): 0 
+#>   Acceptable (80-120%): 2 / 2
+```
+
+``` r
+autoplot(me, type = "bar")
+```
+
+![](validation_files/figure-html/matrix-effect-plot-1.png)
+
+### Standard Addition Correction
+
+When matrix effects vary between samples, standard addition provides
+sample-specific correction:
+
+``` r
+library(recipes)
+
+# Standard addition data
+sa_data <- data.frame(
+  sample_id = rep(c("Sample1", "Sample2"), each = 4),
+  addition = rep(c(0, 10, 20, 30), 2),
+  response = c(
+    150, 250, 350, 450,  # Sample 1
+    250, 350, 450, 550   # Sample 2
+  )
+)
+
+rec <- recipe(~ ., data = sa_data) |>
+  step_measure_standard_addition(
+    response,
+    addition_col = "addition",
+    sample_id_col = "sample_id"
+  ) |>
+  prep()
+
+# Original concentrations calculated via extrapolation
+bake(rec, new_data = NULL)
+```
+
+## Sample Preparation QC
+
+Recipe steps for quality control during sample preparation.
+
+### Dilution Factor Correction
+
+Back-calculate concentrations for diluted samples:
+
+``` r
+library(recipes)
+
+dilution_data <- data.frame(
+  sample_id = paste0("S", 1:5),
+  dilution_factor = c(1, 2, 5, 10, 1),
+  analyte = c(50, 45, 42, 48, 51)  # Measured after dilution
+)
+
+rec <- recipe(~ ., data = dilution_data) |>
+  update_role(sample_id, new_role = "id") |>
+  step_measure_dilution_correct(
+    analyte,
+    dilution_col = "dilution_factor",
+    operation = "multiply"
+  ) |>
+  prep()
+
+# Back-calculated original concentrations
+bake(rec, new_data = NULL)
+#> # A tibble: 5 × 3
+#>   sample_id dilution_factor analyte
+#>   <chr>               <dbl>   <dbl>
+#> 1 S1                      1      50
+#> 2 S2                      2      90
+#> 3 S3                      5     210
+#> 4 S4                     10     480
+#> 5 S5                      1      51
+```
+
+### Surrogate Recovery
+
+Monitor extraction efficiency with surrogate standards:
+
+``` r
+qc_data <- data.frame(
+  sample_id = paste0("QC", 1:6),
+  surrogate = c(95, 105, 88, 112, 75, 132)  # Expected = 100
+)
+
+rec <- recipe(~ ., data = qc_data) |>
+  update_role(sample_id, new_role = "id") |>
+  step_measure_surrogate_recovery(
+    surrogate,
+    expected_value = 100,
+    action = "flag",
+    min_recovery = 80,
+    max_recovery = 120
+  ) |>
+  prep()
+
+# Flag samples outside recovery limits
+bake(rec, new_data = NULL)
+#> # A tibble: 6 × 3
+#>   sample_id surrogate .surrogate_pass
+#>   <chr>         <dbl> <lgl>          
+#> 1 QC1              95 TRUE           
+#> 2 QC2             105 TRUE           
+#> 3 QC3              88 TRUE           
+#> 4 QC4             112 TRUE           
+#> 5 QC5              75 FALSE          
+#> 6 QC6             132 FALSE
+```
+
 ## Drift Correction
 
 ### Detecting Drift
@@ -601,10 +914,10 @@ drift_result <- measure_detect_drift(
 )
 print(drift_result)
 #> # A tibble: 2 × 5
-#>   feature   slope  slope_pvalue percent_change significant
-#>   <chr>     <dbl>         <dbl>          <dbl> <lgl>      
-#> 1 feature1 0.730  0.00000000258          12.8  TRUE       
-#> 2 feature2 0.0545 0.423                   1.04 FALSE
+#>   feature    slope slope_pvalue percent_change significant
+#>   <chr>      <dbl>        <dbl>          <dbl> <lgl>      
+#> 1 feature1  0.630     0.0000148         11.1   TRUE       
+#> 2 feature2 -0.0351    0.634             -0.662 FALSE
 ```
 
 ### Correcting Drift
@@ -628,16 +941,19 @@ corrected <- bake(rec, new_data = NULL)
 The `measure` package provides a complete toolkit for analytical method
 validation:
 
-| Category           | Key Functions                                                                                                                                                                                                                                                                                                                                          |
-|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Calibration**    | [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md), [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md), [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md) |
-| **LOD/LOQ**        | [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md), [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md), [`measure_lod_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_lod_loq.md)                                                                               |
-| **Precision**      | [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md), [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md), [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md)                     |
-| **Accuracy**       | [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md), [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md), [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)                                                     |
-| **Uncertainty**    | [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md), [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md)                                                                                                                               |
-| **Control Charts** | [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md), [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md)                                                                                                                                   |
-| **Criteria**       | [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md), [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md), [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)                                                              |
-| **Drift**          | [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md), [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md)                                                                                                                           |
+| Category              | Key Functions                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Calibration**       | [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md), [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md), [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)                                                                                                                                                |
+| **LOD/LOQ**           | [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md), [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md), [`measure_lod_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_lod_loq.md)                                                                                                                                                                                                                              |
+| **Precision**         | [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md), [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md), [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md)                                                                                                                                                                    |
+| **Accuracy**          | [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md), [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md), [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)                                                                                                                                                                                                    |
+| **Method Comparison** | [`measure_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.md), [`measure_deming_regression()`](https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.md), [`measure_passing_bablok()`](https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.md), [`measure_proficiency_score()`](https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.md)                                                |
+| **Matrix Effects**    | [`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md), [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md)                                                                                                                                                                                                                                                                  |
+| **Sample Prep QC**    | [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md), [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md)                                                                                                                                                                                                                                                |
+| **Uncertainty**       | [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md), [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md)                                                                                                                                                                                                                                                                              |
+| **Control Charts**    | [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md), [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md)                                                                                                                                                                                                                                                                                  |
+| **Criteria**          | [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md), [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md), [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md), [`criteria_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md), [`criteria_matrix_effects()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) |
+| **Drift**             | [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md), [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md)                                                                                                                                                                                                                                                                          |
 
 All functions follow a consistent design philosophy: - **Tidy outputs**:
 Results are tibbles with

@@ -104,6 +104,9 @@ tidy(x, ...)
 # S3 method for class 'step_measure_detrend'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_dilution_correct'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_drift_qc_loess'
 tidy(x, ...)
 
@@ -134,8 +137,41 @@ tidy(x, ...)
 # S3 method for class 'step_measure_input_wide'
 tidy(x, ...)
 
+# S3 method for class 'measure_matrix_effect'
+tidy(x, ...)
+
+# S3 method for class 'measure_matrix_effect'
+glance(x, ...)
+
+# S3 method for class 'step_measure_standard_addition'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_map'
 tidy(x, ...)
+
+# S3 method for class 'measure_bland_altman'
+tidy(x, ...)
+
+# S3 method for class 'measure_deming_regression'
+tidy(x, ...)
+
+# S3 method for class 'measure_passing_bablok'
+tidy(x, ...)
+
+# S3 method for class 'measure_proficiency_score'
+tidy(x, type = c("scores", "summary"), ...)
+
+# S3 method for class 'measure_bland_altman'
+glance(x, ...)
+
+# S3 method for class 'measure_deming_regression'
+glance(x, ...)
+
+# S3 method for class 'measure_passing_bablok'
+glance(x, ...)
+
+# S3 method for class 'measure_proficiency_score'
+glance(x, ...)
 
 # S3 method for class 'step_measure_msc'
 tidy(x, ...)
@@ -285,6 +321,9 @@ tidy(x, ...)
 tidy(x, ...)
 
 # S3 method for class 'step_measure_derivative_gap'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_surrogate_recovery'
 tidy(x, ...)
 ```
 

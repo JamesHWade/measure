@@ -412,6 +412,33 @@ Statistical process control and system suitability
 - [`measure_system_suitability()`](https://jameshwade.github.io/measure/dev/reference/measure_system_suitability.md)
   : System Suitability Check
 
+## Method Comparison
+
+Compare analytical methods using Bland-Altman, Deming, and
+Passing-Bablok
+
+- [`measure_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.md)
+  : Bland-Altman Method Comparison
+- [`measure_deming_regression()`](https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.md)
+  : Deming Regression for Method Comparison
+- [`measure_passing_bablok()`](https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.md)
+  : Passing-Bablok Regression for Method Comparison
+- [`measure_proficiency_score()`](https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.md)
+  : Proficiency Testing Scores
+
+## Matrix Effects & Sample Prep
+
+Matrix effect quantification, standard addition, and sample prep QC
+
+- [`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md)
+  : Matrix Effect Analysis
+- [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md)
+  : Standard Addition Correction
+- [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md)
+  : Dilution Factor Correction
+- [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md)
+  : Surrogate/Internal Standard Recovery
+
 ## Criteria & Assessment
 
 Acceptance criteria and pass/fail evaluation
@@ -428,6 +455,11 @@ Acceptance criteria and pass/fail evaluation
   : Extract Failed Criteria
 - [`criteria_bioanalytical()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
   [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
+  [`criteria_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
+  [`criteria_method_comparison()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
+  [`criteria_proficiency_testing()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
+  [`criteria_matrix_effects()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
+  [`criteria_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)
   : Preset Acceptance Criteria
 
 ## Metadata Validation
@@ -525,12 +557,21 @@ Plotting and diagnostic functions for measure data
   [`autoplot(`*`<measure_list>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
   [`autoplot(`*`<recipe>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
   : Autoplot Methods for Measure Objects
+- [`autoplot(`*`<measure_bland_altman>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_bland_altman.md)
+  : Plot Bland-Altman Analysis
 - [`autoplot(`*`<measure_calibration>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_calibration.md)
   : Plot Calibration Curve Diagnostics
 - [`autoplot(`*`<measure_control_chart>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_control_chart.md)
   : Plot Control Chart
+- [`autoplot(`*`<measure_deming_regression>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_deming_regression.md)
+  [`autoplot(`*`<measure_passing_bablok>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_deming_regression.md)
+  : Plot Method Comparison Regression
 - [`autoplot(`*`<measure_linearity>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_linearity.md)
   : Plot Linearity Assessment Results
+- [`autoplot(`*`<measure_matrix_effect>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_matrix_effect.md)
+  : Plot Matrix Effects
+- [`autoplot(`*`<measure_proficiency_score>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_proficiency_score.md)
+  : Plot Proficiency Test Scores
 - [`autoplot(`*`<measure_uncertainty_budget>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_uncertainty_budget.md)
   : Plot Uncertainty Budget
 - [`fortify(`*`<measure_tbl>`*`)`](https://jameshwade.github.io/measure/dev/reference/fortify-measure.md)

@@ -1,0 +1,177 @@
+# Surrogate/Internal Standard Recovery
+
+`step_measure_surrogate_recovery()` creates a *specification* of a
+recipe step that calculates recovery percentages for surrogate or
+internal standards. This is essential for quality control in analytical
+workflows where spiked compounds are used to monitor method performance.
+
+## Usage
+
+``` r
+step_measure_surrogate_recovery(
+  recipe,
+  ...,
+  expected_col = NULL,
+  expected_value = NULL,
+  recovery_suffix = "_recovery",
+  action = c("add_column", "flag", "filter"),
+  flag_col = ".surrogate_pass",
+  min_recovery = 70,
+  max_recovery = 130,
+  role = "surrogate",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_surrogate_recovery")
+)
+```
+
+## Arguments
+
+- recipe:
+
+  A recipe object.
+
+- ...:
+
+  One or more selector functions to choose surrogate columns (measured
+  concentrations or responses).
+
+- expected_col:
+
+  Name of a column containing expected concentrations for each sample.
+  Mutually exclusive with `expected_value`.
+
+- expected_value:
+
+  A fixed numeric value for expected concentration. Used when all
+  surrogates have the same expected value. Mutually exclusive with
+  `expected_col`.
+
+- recovery_suffix:
+
+  Suffix appended to column names for recovery output. Default is
+  `"_recovery"`.
+
+- action:
+
+  What to do with recovery calculations:
+
+  - `"add_column"` (default): Add new columns with recovery percentages
+
+  - `"flag"`: Add a boolean column indicating if recovery is within
+    limits
+
+  - `"filter"`: Remove rows where any surrogate is outside limits
+
+- flag_col:
+
+  Name of the flag column when `action = "flag"`. Default is
+  `".surrogate_pass"`.
+
+- min_recovery:
+
+  Minimum acceptable recovery percentage. Default is 70.
+
+- max_recovery:
+
+  Maximum acceptable recovery percentage. Default is 130.
+
+- role:
+
+  Recipe role for new recovery columns. Default is `"surrogate"`.
+
+- trained:
+
+  Logical indicating if the step has been trained.
+
+- skip:
+
+  Logical. Should the step be skipped when baking?
+
+- id:
+
+  Unique step identifier.
+
+## Value
+
+An updated recipe with the new step added.
+
+## Details
+
+### Recovery Calculation
+
+Recovery is calculated as: `recovery_pct = (measured / expected) * 100`
+
+Where:
+
+- `measured` is the observed concentration/response of the surrogate
+
+- `expected` is the known spike amount or theoretical value
+
+### Acceptance Criteria
+
+Typical acceptance limits vary by application:
+
+- **ICH M10 (Bioanalytical)**: 70-130% for surrogates
+
+- **EPA Methods**: Often 50-150% or method-specific
+
+- **FDA Guidance**: Application-specific, often 80-120%
+
+### Use Cases
+
+- Monitor extraction efficiency in sample preparation
+
+- Track instrument performance across runs
+
+- Identify samples with matrix effects or procedural errors
+
+## See also
+
+[`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md),
+[`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md)
+
+Other calibration:
+[`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md),
+[`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md),
+[`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md)
+
+## Examples
+
+``` r
+library(recipes)
+
+# Example: QC data with spiked surrogates
+qc_data <- data.frame(
+  sample_id = paste0("QC", 1:10),
+  surrogate_1 = rnorm(10, mean = 100, sd = 10),
+  surrogate_2 = rnorm(10, mean = 50, sd = 5),
+  analyte = rnorm(10, mean = 75, sd = 8)
+)
+
+# Add recovery columns for surrogates with expected value of 100 and 50
+rec <- recipe(~ ., data = qc_data) |>
+  update_role(sample_id, new_role = "id") |>
+  step_measure_surrogate_recovery(
+    surrogate_1,
+    expected_value = 100,
+    min_recovery = 80,
+    max_recovery = 120
+  ) |>
+  prep()
+
+bake(rec, new_data = NULL)
+#> # A tibble: 10 × 5
+#>    sample_id surrogate_1 surrogate_2 analyte surrogate_1_recovery
+#>    <chr>           <dbl>       <dbl>   <dbl>                <dbl>
+#>  1 QC1             103.         50.3    84.2                103. 
+#>  2 QC2              89.2        53.1    86.5                 89.2
+#>  3 QC3             102.         48.5    71.2                102. 
+#>  4 QC4              87.0        36.6    93.3                 87.0
+#>  5 QC5              96.3        43.8    50.7                 96.3
+#>  6 QC6              93.6        52.9    66.7                 93.6
+#>  7 QC7             111.         55.7    77.0                111. 
+#>  8 QC8             103.         53.5    75.6                103. 
+#>  9 QC9              96.9        51.4    63.1                 96.9
+#> 10 QC10             98.2        40.0    88.1                 98.2
+```

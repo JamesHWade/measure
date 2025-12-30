@@ -313,6 +313,24 @@ method validation, designed for compatibility with ICH Q2(R2), ISO
 | [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md)                           | Linearity with lack-of-fit testing             |
 | [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)                           | Carryover evaluation                           |
 
+### Method Comparison
+
+| Function                                                                                                         | Description                                    |
+|------------------------------------------------------------------------------------------------------------------|------------------------------------------------|
+| [`measure_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.md)           | Bland-Altman analysis with limits of agreement |
+| [`measure_deming_regression()`](https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.md) | Deming regression for method comparison        |
+| [`measure_passing_bablok()`](https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.md)       | Passing-Bablok non-parametric regression       |
+| [`measure_proficiency_score()`](https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.md) | z-scores, En scores, zeta scores for PT        |
+
+### Matrix Effects & Sample Prep QC
+
+| Function/Step                                                                                                                | Description                           |
+|------------------------------------------------------------------------------------------------------------------------------|---------------------------------------|
+| [`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md)                     | Quantify ion suppression/enhancement  |
+| [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md)   | Standard addition correction          |
+| [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md)     | Back-calculate diluted concentrations |
+| [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md) | Surrogate/internal standard recovery  |
+
 ### Uncertainty & Quality Control
 
 | Function                                                                                                           | Description                        |

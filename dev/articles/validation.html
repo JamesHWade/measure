@@ -660,12 +660,310 @@ of Uncertainty in Measurement):</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="method-comparison">Method Comparison<a class="anchor" aria-label="anchor" href="#method-comparison"></a>
+</h2>
+<p>When validating a new method, you often need to compare it against a
+reference or existing method. The <code>measure</code> package provides
+several approaches for method comparison studies.</p>
+<div class="section level3">
+<h3 id="bland-altman-analysis">Bland-Altman Analysis<a class="anchor" aria-label="anchor" href="#bland-altman-analysis"></a>
+</h3>
+<p>Bland-Altman plots show the agreement between two methods by plotting
+differences against means:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Paired measurements from two methods</span></span>
+<span><span class="va">comparison_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  sample_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span>,</span>
+<span>  method_A <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span>, mean <span class="op">=</span> <span class="fl">100</span>, sd <span class="op">=</span> <span class="fl">15</span><span class="op">)</span>,</span>
+<span>  method_B <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span>, mean <span class="op">=</span> <span class="fl">102</span>, sd <span class="op">=</span> <span class="fl">16</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ba</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_bland_altman.html">measure_bland_altman</a></span><span class="op">(</span></span>
+<span>  <span class="va">comparison_data</span>,</span>
+<span>  method1_col <span class="op">=</span> <span class="st">"method_A"</span>,</span>
+<span>  method2_col <span class="op">=</span> <span class="st">"method_B"</span>,</span>
+<span>  regression <span class="op">=</span> <span class="st">"linear"</span>  <span class="co"># Test for proportional bias</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ba</span><span class="op">)</span></span>
+<span><span class="co">#&gt; measure_bland_altman</span></span>
+<span><span class="co">#&gt; ──────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Bias Statistics:</span></span>
+<span><span class="co">#&gt;   n = 30 </span></span>
+<span><span class="co">#&gt;   Mean bias = 4.083 </span></span>
+<span><span class="co">#&gt;   SD of differences = 17.97 </span></span>
+<span><span class="co">#&gt;   95% CI for bias: [-2.625, 10.79]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Limits of Agreement:</span></span>
+<span><span class="co">#&gt;   Lower LOA = -31.13 (95% CI: [ -42.75 ,  -19.51 ])</span></span>
+<span><span class="co">#&gt;   Upper LOA = 39.3 (95% CI: [ 27.68 ,  50.92 ])</span></span>
+<span><span class="co">#&gt;   LOA Width = 70.43 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Proportional Bias Test:</span></span>
+<span><span class="co">#&gt;   Slope = 0.2046 </span></span>
+<span><span class="co">#&gt;   p-value = 0.57 </span></span>
+<span><span class="co">#&gt;   Result: No significant proportional bias</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ba</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
+<p><img src="validation_files/figure-html/bland-altman-plot-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level3">
+<h3 id="regression-methods">Regression Methods<a class="anchor" aria-label="anchor" href="#regression-methods"></a>
+</h3>
+<p>For method comparison regression, use Deming or Passing-Bablok
+regression which account for error in both methods:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Method comparison with known measurement error</span></span>
+<span><span class="va">deming_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">400</span><span class="op">)</span>,</span>
+<span>  test_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5.2</span>, <span class="fl">10.3</span>, <span class="fl">25.8</span>, <span class="fl">51.2</span>, <span class="fl">101.5</span>, <span class="fl">203.1</span>, <span class="fl">408.2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">deming</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_deming_regression.html">measure_deming_regression</a></span><span class="op">(</span></span>
+<span>  <span class="va">deming_data</span>,</span>
+<span>  method1_col <span class="op">=</span> <span class="st">"reference"</span>,</span>
+<span>  method2_col <span class="op">=</span> <span class="st">"test_method"</span>,</span>
+<span>  bootstrap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  bootstrap_n <span class="op">=</span> <span class="fl">500</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Using default error ratio of 1. Provide `error_ratio` or SDs for more accurate</span></span>
+<span><span class="co">#&gt; results.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span></span>
+<span><span class="co">#&gt; measure_deming_regression</span></span>
+<span><span class="co">#&gt; ──────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
+<span><span class="co">#&gt;   term      estimate ci_lower ci_upper</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> intercept -<span style="color: #BB0000;">0.004</span><span style="color: #BB0000; text-decoration: underline;">14</span>   -<span style="color: #BB0000;">0.325</span>    0.437</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> slope      1.02       1.01     1.02 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Statistics:</span></span>
+<span><span class="co">#&gt;   n = 7 </span></span>
+<span><span class="co">#&gt;   Error ratio = 1 </span></span>
+<span><span class="co">#&gt;   RMSE = 0.4087 </span></span>
+<span><span class="co">#&gt;   R² = 1 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (Fitted using mcr package)</span></span>
+<span></span>
+<span><span class="co"># Check if methods are equivalent</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">deming</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 6</span></span></span>
+<span><span class="co">#&gt;   intercept slope intercept_ci_includes_0 slope_ci_includes_1 r_squared  rmse</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  -<span style="color: #BB0000;">0.004</span><span style="color: #BB0000; text-decoration: underline;">14</span>  1.02 TRUE                    FALSE                   1.000 0.409</span></span></code></pre></div>
+<p>For Passing-Bablok regression (non-parametric), install the
+<code>mcr</code> package:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Requires: install.packages("mcr")</span></span>
+<span><span class="va">pb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_passing_bablok.html">measure_passing_bablok</a></span><span class="op">(</span></span>
+<span>  <span class="va">deming_data</span>,</span>
+<span>  method1_col <span class="op">=</span> <span class="st">"reference"</span>,</span>
+<span>  method2_col <span class="op">=</span> <span class="st">"test_method"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pb</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="proficiency-testing">Proficiency Testing<a class="anchor" aria-label="anchor" href="#proficiency-testing"></a>
+</h3>
+<p>Evaluate laboratory performance in proficiency testing programs:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># PT results from multiple labs</span></span>
+<span><span class="va">pt_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  lab_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Lab_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>,</span>
+<span>  measured <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">99.2</span>, <span class="fl">100.5</span>, <span class="fl">98.8</span>, <span class="fl">101.2</span>, <span class="fl">97.5</span>, <span class="fl">100.1</span>, <span class="fl">99.8</span>, <span class="fl">102.3</span>, <span class="fl">100.6</span>, <span class="fl">94.0</span><span class="op">)</span>,</span>
+<span>  assigned <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span>,</span>
+<span>  uncertainty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">1.8</span>, <span class="fl">1.6</span>, <span class="fl">2.2</span>, <span class="fl">1.9</span>, <span class="fl">1.7</span>, <span class="fl">2.1</span>, <span class="fl">1.5</span>, <span class="fl">2.0</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># z-scores with known sigma</span></span>
+<span><span class="va">z_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_proficiency_score.html">measure_proficiency_score</a></span><span class="op">(</span></span>
+<span>  <span class="va">pt_data</span>,</span>
+<span>  measured_col <span class="op">=</span> <span class="st">"measured"</span>,</span>
+<span>  reference_col <span class="op">=</span> <span class="st">"assigned"</span>,</span>
+<span>  score_type <span class="op">=</span> <span class="st">"z_score"</span>,</span>
+<span>  sigma <span class="op">=</span> <span class="fl">2.5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">z_scores</span><span class="op">)</span></span>
+<span><span class="co">#&gt; measure_proficiency_score</span></span>
+<span><span class="co">#&gt; ──────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Score Type: z_score </span></span>
+<span><span class="co">#&gt; Sigma: 2.5 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Results (n = 10 ):</span></span>
+<span><span class="co">#&gt;   Satisfactory (|z| ≤ 2): 9 ( 90 %)</span></span>
+<span><span class="co">#&gt;   Questionable (2 &lt; |z| ≤ 3): 1 </span></span>
+<span><span class="co">#&gt;   Unsatisfactory (|z| &gt; 3): 0 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Score Statistics:</span></span>
+<span><span class="co">#&gt;   Mean score: -0.24 </span></span>
+<span><span class="co">#&gt;   SD score: 0.925 </span></span>
+<span><span class="co">#&gt;   Max |score|: 2.4</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">z_scores</span><span class="op">)</span></span></code></pre></div>
+<p><img src="validation_files/figure-html/proficiency-plot-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="matrix-effects">Matrix Effects<a class="anchor" aria-label="anchor" href="#matrix-effects"></a>
+</h2>
+<p>Matrix effects (ion suppression/enhancement) must be evaluated in
+LC-MS/MS and similar methods.</p>
+<div class="section level3">
+<h3 id="evaluating-matrix-effects">Evaluating Matrix Effects<a class="anchor" aria-label="anchor" href="#evaluating-matrix-effects"></a>
+</h3>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Post-extraction spike experiment</span></span>
+<span><span class="va">me_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  sample_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"matrix"</span>, <span class="st">"neat"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,</span>
+<span>  matrix_lot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Lot1"</span>, <span class="st">"Lot2"</span>, <span class="st">"Lot3"</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  concentration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"low"</span>, <span class="st">"high"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span>, times <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="co"># Matrix samples (some suppression)</span></span>
+<span>    <span class="fl">9200</span>, <span class="fl">9500</span>, <span class="fl">8900</span>, <span class="fl">47500</span>, <span class="fl">48200</span>, <span class="fl">46800</span>,</span>
+<span>    <span class="co"># Neat samples</span></span>
+<span>    <span class="fl">10000</span>, <span class="fl">10000</span>, <span class="fl">10000</span>, <span class="fl">50000</span>, <span class="fl">50000</span>, <span class="fl">50000</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">me</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_matrix_effect.html">measure_matrix_effect</a></span><span class="op">(</span></span>
+<span>  <span class="va">me_data</span>,</span>
+<span>  response_col <span class="op">=</span> <span class="st">"response"</span>,</span>
+<span>  sample_type_col <span class="op">=</span> <span class="st">"sample_type"</span>,</span>
+<span>  matrix_level <span class="op">=</span> <span class="st">"matrix"</span>,</span>
+<span>  neat_level <span class="op">=</span> <span class="st">"neat"</span>,</span>
+<span>  concentration_col <span class="op">=</span> <span class="st">"concentration"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">me</span><span class="op">)</span></span>
+<span><span class="co">#&gt; measure_matrix_effect</span></span>
+<span><span class="co">#&gt; ──────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Overall Matrix Effect Summary:</span></span>
+<span><span class="co">#&gt;   Groups evaluated: 2 </span></span>
+<span><span class="co">#&gt;   Mean ME: 94 %</span></span>
+<span><span class="co">#&gt;   SD ME: 2 %</span></span>
+<span><span class="co">#&gt;   CV ME: 2 %</span></span>
+<span><span class="co">#&gt;   Range: 92 - 95 %</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Effect Classification:</span></span>
+<span><span class="co">#&gt;   Ion suppression (ME &lt; 100%): 2 </span></span>
+<span><span class="co">#&gt;   Ion enhancement (ME &gt; 100%): 0 </span></span>
+<span><span class="co">#&gt;   Acceptable (80-120%): 2 / 2</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">me</span>, type <span class="op">=</span> <span class="st">"bar"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="validation_files/figure-html/matrix-effect-plot-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level3">
+<h3 id="standard-addition-correction">Standard Addition Correction<a class="anchor" aria-label="anchor" href="#standard-addition-correction"></a>
+</h3>
+<p>When matrix effects vary between samples, standard addition provides
+sample-specific correction:</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Standard addition data</span></span>
+<span><span class="va">sa_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sample1"</span>, <span class="st">"Sample2"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>  addition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="fl">150</span>, <span class="fl">250</span>, <span class="fl">350</span>, <span class="fl">450</span>,  <span class="co"># Sample 1</span></span>
+<span>    <span class="fl">250</span>, <span class="fl">350</span>, <span class="fl">450</span>, <span class="fl">550</span>   <span class="co"># Sample 2</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">sa_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_standard_addition.html">step_measure_standard_addition</a></span><span class="op">(</span></span>
+<span>    <span class="va">response</span>,</span>
+<span>    addition_col <span class="op">=</span> <span class="st">"addition"</span>,</span>
+<span>    sample_id_col <span class="op">=</span> <span class="st">"sample_id"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Original concentrations calculated via extrapolation</span></span>
+<span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="sample-preparation-qc">Sample Preparation QC<a class="anchor" aria-label="anchor" href="#sample-preparation-qc"></a>
+</h2>
+<p>Recipe steps for quality control during sample preparation.</p>
+<div class="section level3">
+<h3 id="dilution-factor-correction">Dilution Factor Correction<a class="anchor" aria-label="anchor" href="#dilution-factor-correction"></a>
+</h3>
+<p>Back-calculate concentrations for diluted samples:</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dilution_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
+<span>  dilution_factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  analyte <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">45</span>, <span class="fl">42</span>, <span class="fl">48</span>, <span class="fl">51</span><span class="op">)</span>  <span class="co"># Measured after dilution</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">dilution_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">sample_id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_dilution_correct.html">step_measure_dilution_correct</a></span><span class="op">(</span></span>
+<span>    <span class="va">analyte</span>,</span>
+<span>    dilution_col <span class="op">=</span> <span class="st">"dilution_factor"</span>,</span>
+<span>    operation <span class="op">=</span> <span class="st">"multiply"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Back-calculated original concentrations</span></span>
+<span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
+<span><span class="co">#&gt;   sample_id dilution_factor analyte</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> S1                      1      50</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> S2                      2      90</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> S3                      5     210</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> S4                     10     480</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> S5                      1      51</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="surrogate-recovery">Surrogate Recovery<a class="anchor" aria-label="anchor" href="#surrogate-recovery"></a>
+</h3>
+<p>Monitor extraction efficiency with surrogate standards:</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">qc_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"QC"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>,</span>
+<span>  surrogate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">95</span>, <span class="fl">105</span>, <span class="fl">88</span>, <span class="fl">112</span>, <span class="fl">75</span>, <span class="fl">132</span><span class="op">)</span>  <span class="co"># Expected = 100</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">qc_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">sample_id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_surrogate_recovery.html">step_measure_surrogate_recovery</a></span><span class="op">(</span></span>
+<span>    <span class="va">surrogate</span>,</span>
+<span>    expected_value <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>    action <span class="op">=</span> <span class="st">"flag"</span>,</span>
+<span>    min_recovery <span class="op">=</span> <span class="fl">80</span>,</span>
+<span>    max_recovery <span class="op">=</span> <span class="fl">120</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Flag samples outside recovery limits</span></span>
+<span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
+<span><span class="co">#&gt;   sample_id surrogate .surrogate_pass</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> QC1              95 TRUE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> QC2             105 TRUE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> QC3              88 TRUE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> QC4             112 TRUE           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> QC5              75 FALSE          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> QC6             132 FALSE</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
 <h2 id="drift-correction">Drift Correction<a class="anchor" aria-label="anchor" href="#drift-correction"></a>
 </h2>
 <div class="section level3">
 <h3 id="detecting-drift">Detecting Drift<a class="anchor" aria-label="anchor" href="#detecting-drift"></a>
 </h3>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Data with drift</span></span>
 <span><span class="va">drift_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sample_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"qc"</span>, <span class="fl">20</span><span class="op">)</span>,</span>
@@ -682,15 +980,15 @@ of Uncertainty in Measurement):</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">drift_result</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
-<span><span class="co">#&gt;   feature   slope  slope_pvalue percent_change significant</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> feature1 0.730  0.000<span style="text-decoration: underline;">000</span>002<span style="text-decoration: underline;">58</span>          12.8  TRUE       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> feature2 0.054<span style="text-decoration: underline;">5</span> 0.423                   1.04 FALSE</span></span></code></pre></div>
+<span><span class="co">#&gt;   feature    slope slope_pvalue percent_change significant</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> feature1  0.630     0.000<span style="text-decoration: underline;">014</span>8         11.1   TRUE       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> feature2 -<span style="color: #BB0000;">0.035</span><span style="color: #BB0000; text-decoration: underline;">1</span>    0.634             -<span style="color: #BB0000;">0.662</span> FALSE</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="correcting-drift">Correcting Drift<a class="anchor" aria-label="anchor" href="#correcting-drift"></a>
 </h3>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Using QC-LOESS correction in a recipe</span></span>
@@ -750,27 +1048,51 @@ analytical method validation:</p>
 </td>
 </tr>
 <tr class="odd">
+<td><strong>Method Comparison</strong></td>
+<td>
+<code><a href="../reference/measure_bland_altman.html">measure_bland_altman()</a></code>,
+<code><a href="../reference/measure_deming_regression.html">measure_deming_regression()</a></code>,
+<code><a href="../reference/measure_passing_bablok.html">measure_passing_bablok()</a></code>,
+<code><a href="../reference/measure_proficiency_score.html">measure_proficiency_score()</a></code>
+</td>
+</tr>
+<tr class="even">
+<td><strong>Matrix Effects</strong></td>
+<td>
+<code><a href="../reference/measure_matrix_effect.html">measure_matrix_effect()</a></code>,
+<code><a href="../reference/step_measure_standard_addition.html">step_measure_standard_addition()</a></code>
+</td>
+</tr>
+<tr class="odd">
+<td><strong>Sample Prep QC</strong></td>
+<td>
+<code><a href="../reference/step_measure_dilution_correct.html">step_measure_dilution_correct()</a></code>,
+<code><a href="../reference/step_measure_surrogate_recovery.html">step_measure_surrogate_recovery()</a></code>
+</td>
+</tr>
+<tr class="even">
 <td><strong>Uncertainty</strong></td>
 <td>
 <code><a href="../reference/measure_uncertainty_budget.html">measure_uncertainty_budget()</a></code>,
 <code><a href="../reference/measure_uncertainty.html">measure_uncertainty()</a></code>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>Control Charts</strong></td>
 <td>
 <code><a href="../reference/measure_control_limits.html">measure_control_limits()</a></code>,
 <code><a href="../reference/measure_control_chart.html">measure_control_chart()</a></code>
 </td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>Criteria</strong></td>
 <td>
 <code><a href="../reference/measure_criteria.html">measure_criteria()</a></code>, <code><a href="../reference/measure_assess.html">measure_assess()</a></code>,
-<code><a href="../reference/criteria_presets.html">criteria_ich_q2()</a></code>
+<code><a href="../reference/criteria_presets.html">criteria_ich_q2()</a></code>, <code><a href="../reference/criteria_presets.html">criteria_bland_altman()</a></code>,
+<code><a href="../reference/criteria_presets.html">criteria_matrix_effects()</a></code>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>Drift</strong></td>
 <td>
 <code><a href="../reference/measure_detect_drift.html">measure_detect_drift()</a></code>,

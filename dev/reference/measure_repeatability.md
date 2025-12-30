@@ -76,10 +76,10 @@ measure_repeatability(data, "concentration")
 #> measure_precision: repeatability 
 #> ──────────────────────────────────────────────────────────────────────────────── 
 #>   n = 10 
-#>   Mean = 100.4 
-#>   SD = 1.989 
-#>   CV = 2 %
-#>   95% CI: [99.03, 101.9]
+#>   Mean = 99.59 
+#>   SD = 1.778 
+#>   CV = 1.8 %
+#>   95% CI: [98.32, 100.9]
 
 # Repeatability at multiple concentration levels
 data <- data.frame(
@@ -96,22 +96,22 @@ measure_repeatability(data, "concentration", group_col = "level")
 #> 
 #> Group: low 
 #>   n = 6 
-#>   Mean = 10.03 
-#>   SD = 0.4887 
-#>   CV = 4.9 %
-#>   95% CI: [9.515, 10.54]
+#>   Mean = 9.942 
+#>   SD = 0.5638 
+#>   CV = 5.7 %
+#>   95% CI: [9.351, 10.53]
 #> 
 #> Group: mid 
 #>   n = 6 
-#>   Mean = 48.78 
-#>   SD = 1.271 
+#>   Mean = 49.79 
+#>   SD = 1.308 
 #>   CV = 2.6 %
-#>   95% CI: [47.45, 50.11]
+#>   95% CI: [48.41, 51.16]
 #> 
 #> Group: high 
 #>   n = 6 
-#>   Mean = 97.95 
-#>   SD = 5.177 
-#>   CV = 5.3 %
-#>   95% CI: [92.52, 103.4]
+#>   Mean = 98.46 
+#>   SD = 6.087 
+#>   CV = 6.2 %
+#>   95% CI: [92.08, 104.9]
 ```
