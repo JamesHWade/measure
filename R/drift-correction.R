@@ -291,8 +291,20 @@ bake.step_measure_drift_qc_loess <- function(object, new_data, ...) {
       # Predict QC response at each run order
       predicted <- stats::predict(loess_fit, newdata = run_order)
 
-      # Calculate correction factors
-      correction_factors <- qc_median / predicted
+      # Calculate correction factors (guard against zero predicted values)
+      correction_factors <- ifelse(
+        predicted == 0 | is.na(predicted),
+        1,  # No correction if predicted is zero or NA
+        qc_median / predicted
+      )
+
+      # Warn if any zero predictions occurred
+      n_zero <- sum(predicted == 0, na.rm = TRUE)
+      if (n_zero > 0) {
+        cli::cli_warn(
+          "Drift correction skipped for {n_zero} sample{?s} with zero predicted values."
+        )
+      }
 
       # Apply correction only to specified samples
       corrected <- new_data[[col]]
@@ -397,8 +409,13 @@ tidy.step_measure_drift_qc_loess <- function(x, ...) {
 
       if (loc_str %in% names(models)) {
         predicted <- stats::predict(models[[loc_str]], newdata = run_order[i])
-        correction <- medians[[loc_str]] / predicted
-        m$value[j] * correction
+        # Guard against zero predicted values
+        if (is.na(predicted) || predicted == 0) {
+          m$value[j]  # No correction if predicted is zero or NA
+        } else {
+          correction <- medians[[loc_str]] / predicted
+          m$value[j] * correction
+        }
       } else {
         m$value[j]  # No correction if no model for this location
       }
@@ -727,8 +744,20 @@ bake.step_measure_drift_linear <- function(object, new_data, ...) {
     # Predict at each run order
     predicted <- stats::predict(lm_fit, newdata = data.frame(qc_run_order = run_order))
 
-    # Calculate correction factors
-    correction_factors <- qc_median / predicted
+    # Calculate correction factors (guard against zero predicted values)
+    correction_factors <- ifelse(
+      predicted == 0 | is.na(predicted),
+      1,  # No correction if predicted is zero or NA
+      qc_median / predicted
+    )
+
+    # Warn if any zero predictions occurred
+    n_zero <- sum(predicted == 0, na.rm = TRUE)
+    if (n_zero > 0) {
+      cli::cli_warn(
+        "Drift correction skipped for {n_zero} sample{?s} with zero predicted values."
+      )
+    }
 
     # Apply correction
     corrected <- new_data[[col]]
@@ -998,8 +1027,20 @@ bake.step_measure_drift_spline <- function(object, new_data, ...) {
     # Predict at each run order
     predicted <- stats::predict(spline_fit, x = run_order)$y
 
-    # Calculate correction factors
-    correction_factors <- qc_median / predicted
+    # Calculate correction factors (guard against zero predicted values)
+    correction_factors <- ifelse(
+      predicted == 0 | is.na(predicted),
+      1,  # No correction if predicted is zero or NA
+      qc_median / predicted
+    )
+
+    # Warn if any zero predictions occurred
+    n_zero <- sum(predicted == 0, na.rm = TRUE)
+    if (n_zero > 0) {
+      cli::cli_warn(
+        "Drift correction skipped for {n_zero} sample{?s} with zero predicted values."
+      )
+    }
 
     # Apply correction
     corrected <- new_data[[col]]

@@ -403,25 +403,52 @@ calculate_accuracy_stats <- function(measured, reference, conf_level, group) {
     cli::cli_abort("At least 2 observations required to calculate accuracy.")
   }
 
-  # Calculate recovery for each pair
-  recovery <- 100 * measured / reference
+  # Check for zero reference values (would cause division by zero)
+  if (any(reference == 0)) {
+    cli::cli_warn(
+      "Reference values contain zeros; recovery cannot be calculated for those pairs."
+    )
+  }
+
+  # Calculate recovery for each pair (handle zeros gracefully)
+  recovery <- ifelse(reference == 0, NA_real_, 100 * measured / reference)
 
   # Summary statistics
   mean_measured <- mean(measured)
   mean_reference <- mean(reference)
-  mean_recovery <- mean(recovery)
-  sd_recovery <- sd(recovery)
+
+  # Handle case where all recovery values are NA
+  if (all(is.na(recovery))) {
+    mean_recovery <- NA_real_
+    sd_recovery <- NA_real_
+  } else {
+    mean_recovery <- mean(recovery, na.rm = TRUE)
+    sd_recovery <- sd(recovery, na.rm = TRUE)
+  }
 
   # Bias
   bias <- mean_measured - mean_reference
-  bias_pct <- 100 * bias / mean_reference
+  bias_pct <- if (mean_reference == 0) NA_real_ else 100 * bias / mean_reference
 
   # Confidence interval for recovery
   alpha <- 1 - conf_level
-  t_crit <- stats::qt(1 - alpha / 2, df = n - 1)
-  se_recovery <- sd_recovery / sqrt(n)
-  recovery_ci_lower <- mean_recovery - t_crit * se_recovery
-  recovery_ci_upper <- mean_recovery + t_crit * se_recovery
+  n_valid <- sum(!is.na(recovery))
+  if (n_valid >= 2 && !is.na(sd_recovery)) {
+    t_crit <- stats::qt(1 - alpha / 2, df = n_valid - 1)
+    se_recovery <- sd_recovery / sqrt(n_valid)
+    recovery_ci_lower <- mean_recovery - t_crit * se_recovery
+    recovery_ci_upper <- mean_recovery + t_crit * se_recovery
+  } else {
+    recovery_ci_lower <- NA_real_
+    recovery_ci_upper <- NA_real_
+  }
+
+  # CV calculation (guard against zero mean_recovery)
+  cv_recovery <- if (is.na(mean_recovery) || mean_recovery == 0) {
+    NA_real_
+  } else {
+    100 * sd_recovery / mean_recovery
+  }
 
   tibble::tibble(
     group = group,
@@ -432,7 +459,7 @@ calculate_accuracy_stats <- function(measured, reference, conf_level, group) {
     bias_pct = bias_pct,
     mean_recovery = mean_recovery,
     sd_recovery = sd_recovery,
-    cv_recovery = 100 * sd_recovery / mean_recovery,
+    cv_recovery = cv_recovery,
     recovery_ci_lower = recovery_ci_lower,
     recovery_ci_upper = recovery_ci_upper
   )

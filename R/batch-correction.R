@@ -222,7 +222,16 @@ prep.step_measure_batch_reference <- function(x, training, info = NULL, ...) {
     # Calculate correction factors
     for (batch in batches) {
       if (grepl("ratio", x$method)) {
-        batch_factors[[batch]] <- target_ref / ref_summaries[[batch]]
+        # Guard against division by zero
+        if (is.na(ref_summaries[[batch]]) || ref_summaries[[batch]] == 0) {
+          cli::cli_warn(
+            c("Batch {.val {batch}} has zero or NA reference summary for {.field {col}}.",
+              "i" = "No correction will be applied to this batch.")
+          )
+          batch_factors[[batch]] <- 1  # No correction
+        } else {
+          batch_factors[[batch]] <- target_ref / ref_summaries[[batch]]
+        }
       } else {
         batch_factors[[batch]] <- target_ref - ref_summaries[[batch]]
       }
@@ -255,6 +264,19 @@ prep.step_measure_batch_reference <- function(x, training, info = NULL, ...) {
 bake.step_measure_batch_reference <- function(object, new_data, ...) {
 
   batches <- new_data[[object$batch_col]]
+  unique_batches <- unique(batches)
+
+  # Check for unknown batches and warn
+  if (length(object$correction_factors) > 0) {
+    known_batches <- names(object$correction_factors[[1]]$batch_factors)
+    unknown_batches <- setdiff(unique_batches, known_batches)
+    if (length(unknown_batches) > 0) {
+      cli::cli_warn(
+        c("Unknown batch{?es} found in new data: {.val {unknown_batches}}.",
+          "i" = "No correction will be applied to samples in these batches.")
+      )
+    }
+  }
 
   for (col in names(object$correction_factors)) {
     factors <- object$correction_factors[[col]]

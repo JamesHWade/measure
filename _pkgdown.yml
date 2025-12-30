@@ -210,13 +210,18 @@ reference:
 - title: Calibration & Quantitation
   desc: Calibration curves, LOD/LOQ, and quantitation
   contents:
+  - measure_calibration
   - measure_calibration_fit
   - measure_calibration_predict
   - measure_calibration_verify
+  - is_measure_calibration
+  - tidy.measure_calibration
+  - glance.measure_calibration
+  - augment.measure_calibration
   - measure_lod
   - measure_loq
   - measure_lod_loq
-  - is_measure_calibration
+  - tidy.measure_lod
 - title: Precision & Accuracy
   desc: Method validation for precision and accuracy
   contents:
@@ -236,6 +241,7 @@ reference:
   - uncertainty_type_a
   - uncertainty_type_b_rectangular
   - uncertainty_type_b_expanded
+  - tidy.measure_uncertainty_budget
 - title: Control Charts & QC
   desc: Statistical process control and system suitability
   contents:

@@ -464,15 +464,23 @@ tidy.measure_lod_loq <- function(x, ...) {
 }
 
 .lod_precision <- function(data, response_col, conc_col, sample_type_col, cv_threshold = 33, ...) {
+
   # Calculate CV at each concentration level
   cv_by_conc <- data |>
     dplyr::group_by(.data[[conc_col]]) |>
     dplyr::summarize(
       mean_response = mean(.data[[response_col]], na.rm = TRUE),
       sd_response = stats::sd(.data[[response_col]], na.rm = TRUE),
-      cv = 100 * .data$sd_response / .data$mean_response,
       n = dplyr::n(),
       .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      # Calculate CV after summarize (can't reference columns in same summarize call)
+      cv = dplyr::if_else(
+        .data$mean_response == 0,
+        NA_real_,
+        100 * .data$sd_response / .data$mean_response
+      )
     ) |>
     dplyr::filter(!is.na(.data$cv))
 

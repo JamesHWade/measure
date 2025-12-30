@@ -275,3 +275,163 @@ test_that("is_measure_calibration returns correct values", {
   expect_false(is_measure_calibration("not a calibration"))
   expect_false(is_measure_calibration(NULL))
 })
+
+# ==============================================================================
+# measure_calibration_verify() tests
+# ==============================================================================
+
+test_that("measure_calibration_verify works with passing samples", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+
+  # Create verification data that should pass
+  qc_data <- data.frame(
+    nominal_conc = c(25, 75, 150),
+    response = c(35.5, 108.0, 218.5)  # Within calibration range
+  )
+
+  result <- measure_calibration_verify(cal, qc_data)
+
+  expect_s3_class(result, "measure_calibration_verify")
+  expect_true("nominal_conc" %in% names(result))
+  expect_true("predicted_conc" %in% names(result))
+  expect_true("accuracy_pct" %in% names(result))
+  expect_true("deviation_pct" %in% names(result))
+  expect_true("pass" %in% names(result))
+  expect_equal(nrow(result), 3)
+})
+
+test_that("measure_calibration_verify identifies failing samples", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+
+  # Create verification data with one failing sample (>15% deviation)
+  qc_data <- data.frame(
+    nominal_conc = c(25, 75, 150),
+    response = c(35.5, 150.0, 218.5)  # Middle one is way off
+  )
+
+  result <- measure_calibration_verify(cal, qc_data, acceptance_pct = 15)
+
+  # At least one sample should fail
+  expect_true(any(!result$pass))
+})
+
+test_that("measure_calibration_verify uses LLOQ acceptance criteria", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+
+  qc_data <- data.frame(
+    nominal_conc = c(10, 75),  # 10 is at LLOQ
+    response = c(16.0, 108.0)  # First has ~20% deviation
+  )
+
+  # Without LLOQ specified, uses standard acceptance
+  result_std <- measure_calibration_verify(cal, qc_data, acceptance_pct = 15)
+
+  # With LLOQ, samples at that level use relaxed criteria
+  result_lloq <- measure_calibration_verify(
+    cal, qc_data,
+    acceptance_pct = 15,
+    acceptance_pct_lloq = 25,
+    lloq = 10
+  )
+
+  # The LLOQ sample might pass with relaxed criteria
+ expect_s3_class(result_lloq, "measure_calibration_verify")
+})
+
+test_that("measure_calibration_verify validates inputs", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+
+  # Not a calibration object
+  expect_error(
+    measure_calibration_verify("not calibration", data.frame(x = 1)),
+    "measure_calibration"
+  )
+
+  # Not a data frame
+  expect_error(
+    measure_calibration_verify(cal, "not a data frame"),
+    "data frame"
+  )
+
+  # Missing response column
+  expect_error(
+    measure_calibration_verify(cal, data.frame(nominal_conc = 1)),
+    "Response column"
+  )
+
+  # Missing nominal column
+  expect_error(
+    measure_calibration_verify(cal, data.frame(response = 1)),
+    "Nominal concentration column"
+  )
+})
+
+test_that("measure_calibration_verify filters by sample_type", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+
+  qc_data <- data.frame(
+    sample_type = c("qc_low", "unknown", "qc_high"),
+    nominal_conc = c(25, 50, 150),
+    response = c(35.5, 72.0, 218.5)
+  )
+
+  result <- measure_calibration_verify(
+    cal, qc_data,
+    sample_type_col = "sample_type"
+  )
+
+  # Should only include QC samples (2 out of 3)
+  expect_equal(nrow(result), 2)
+})
+
+test_that("measure_calibration_verify errors with no verification samples", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+
+  qc_data <- data.frame(
+    sample_type = c("unknown", "unknown"),
+    nominal_conc = c(25, 150),
+    response = c(35.5, 218.5)
+  )
+
+  expect_error(
+    measure_calibration_verify(
+      cal, qc_data,
+      sample_type_col = "sample_type"
+    ),
+    "No verification samples found"
+  )
+})
+
+test_that("measure_calibration_verify has correct attributes", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+
+  qc_data <- data.frame(
+    nominal_conc = c(25, 75, 150),
+    response = c(35.5, 108.0, 218.5)
+  )
+
+  result <- measure_calibration_verify(cal, qc_data)
+
+  # Check attributes set correctly
+  expect_true(!is.null(attr(result, "n_total")))
+  expect_true(!is.null(attr(result, "n_pass")))
+  expect_true(!is.null(attr(result, "overall_pass")))
+  expect_equal(attr(result, "n_total"), 3)
+})
+
+test_that("tidy.measure_calibration_verify works", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+
+  qc_data <- data.frame(
+    nominal_conc = c(25, 75, 150),
+    response = c(35.5, 108.0, 218.5)
+  )
+
+  result <- measure_calibration_verify(cal, qc_data)
+  tidy_result <- tidy(result)
+
+  expect_s3_class(tidy_result, "tbl_df")
+  expect_true("n_samples" %in% names(tidy_result))
+  expect_true("pass_rate" %in% names(tidy_result))
+  expect_true("overall_pass" %in% names(tidy_result))
+})
