@@ -248,6 +248,20 @@ reference:
   - measure_control_limits
   - measure_control_chart
   - measure_system_suitability
+- title: Method Comparison
+  desc: Compare analytical methods using Bland-Altman, Deming, and Passing-Bablok
+  contents:
+  - measure_bland_altman
+  - measure_deming_regression
+  - measure_passing_bablok
+  - measure_proficiency_score
+- title: Matrix Effects & Sample Prep
+  desc: Matrix effect quantification, standard addition, and sample prep QC
+  contents:
+  - measure_matrix_effect
+  - step_measure_standard_addition
+  - step_measure_dilution_correct
+  - step_measure_surrogate_recovery
 - title: Criteria & Assessment
   desc: Acceptance criteria and pass/fail evaluation
   contents:
@@ -258,6 +272,11 @@ reference:
   - get_failures
   - criteria_bioanalytical
   - criteria_ich_q2
+  - criteria_bland_altman
+  - criteria_method_comparison
+  - criteria_proficiency_testing
+  - criteria_matrix_effects
+  - criteria_surrogate_recovery
 - title: Metadata Validation
   desc: Validate analytical metadata columns
   contents:
