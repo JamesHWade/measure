@@ -294,10 +294,14 @@ measure_deming_regression <- function(
 
   if (use_mcr) {
     mcr_fit <- mcr::mcreg(x, y, method.reg = "Deming", error.ratio = lambda)
-    intercept <- mcr_fit@para["Intercept"]
-    slope <- mcr_fit@para["Slope"]
-    intercept_ci <- mcr_fit@para.ci["Intercept", ]
-    slope_ci <- mcr_fit@para.ci["Slope", ]
+
+    # Use getCoefficients method (works across mcr versions)
+    coefs <- mcr::getCoefficients(mcr_fit)
+    intercept <- coefs["Intercept", "EST"]
+    slope <- coefs["Slope", "EST"]
+    intercept_ci <- c(coefs["Intercept", "LCI"], coefs["Intercept", "UCI"])
+    slope_ci <- c(coefs["Slope", "LCI"], coefs["Slope", "UCI"])
+
     residuals <- y - (intercept + slope * x)
     rmse <- sqrt(mean(residuals^2))
     r_squared <- stats::cor(x, y)^2
@@ -305,8 +309,8 @@ measure_deming_regression <- function(
     coef_tibble <- tibble::tibble(
       term = c("intercept", "slope"),
       estimate = c(intercept, slope),
-      ci_lower = c(intercept_ci["CI.low"], slope_ci["CI.low"]),
-      ci_upper = c(intercept_ci["CI.up"], slope_ci["CI.up"])
+      ci_lower = c(intercept_ci[1], slope_ci[1]),
+      ci_upper = c(intercept_ci[2], slope_ci[2])
     )
 
     bootstrap_result <- NULL
@@ -492,17 +496,18 @@ measure_passing_bablok <- function(
   # Fit Passing-Bablok regression using mcr
   pb_fit <- mcr::mcreg(x, y, method.reg = "PaBa", alpha = 1 - conf_level)
 
-  # Extract coefficients
-  intercept <- pb_fit@para["Intercept"]
-  slope <- pb_fit@para["Slope"]
-  intercept_ci <- pb_fit@para.ci["Intercept", ]
-  slope_ci <- pb_fit@para.ci["Slope", ]
+  # Extract coefficients using getCoefficients method (works across mcr versions)
+  coefs <- mcr::getCoefficients(pb_fit)
+  intercept <- coefs["Intercept", "EST"]
+  slope <- coefs["Slope", "EST"]
+  intercept_ci <- c(coefs["Intercept", "LCI"], coefs["Intercept", "UCI"])
+  slope_ci <- c(coefs["Slope", "LCI"], coefs["Slope", "UCI"])
 
   coef_tibble <- tibble::tibble(
     term = c("intercept", "slope"),
     estimate = c(intercept, slope),
-    ci_lower = c(intercept_ci["CI.low"], slope_ci["CI.low"]),
-    ci_upper = c(intercept_ci["CI.up"], slope_ci["CI.up"])
+    ci_lower = c(intercept_ci[1], slope_ci[1]),
+    ci_upper = c(intercept_ci[2], slope_ci[2])
   )
 
   # CUSUM linearity test
