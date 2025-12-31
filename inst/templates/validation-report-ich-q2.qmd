@@ -1,0 +1,713 @@
+---
+title: "Analytical Method Validation Report"
+subtitle: "ICH Q2(R2) Analytical Procedure Validation Report"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    number-sections: true
+    code-fold: true
+    code-summary: "Show code"
+    theme: cosmo
+    embed-resources: true
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+  docx:
+    toc: true
+    number-sections: true
+params:
+  report_data_path: ""
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| include: false
+library(measure)
+library(ggplot2)
+library(knitr)
+
+# Load report data
+report_data <- readRDS(params$report_data_path)
+report <- report_data$report
+include_plots <- report_data$include_plots
+include_raw_data <- report_data$include_raw_data
+
+# Helper function for tables
+make_table <- function(df, caption = NULL) {
+  if (is.null(df) || nrow(df) == 0) return(invisible(NULL))
+  knitr::kable(df, caption = caption, digits = 4)
+}
+
+# Helper to check section existence
+has_section <- function(name) {
+  has_validation_section(report, name)
+}
+
+# Helper to get section
+get_section <- function(name) {
+  get_validation_section(report, name)
+}
+```
+
+```{r title-block}
+#| results: asis
+#| echo: false
+cat(sprintf("# %s {.unnumbered}\n\n", report$metadata$title))
+cat("*ICH Q2(R2) Analytical Procedure Validation Report*\n\n")
+if (!is.null(report$metadata$analyst)) {
+  cat(sprintf("**Author:** %s\n\n", report$metadata$analyst))
+}
+cat(sprintf("**Date:** %s\n\n", format(report$metadata$date, "%B %d, %Y")))
+cat("---\n\n")
+```
+
+# Executive Summary
+
+::: {.callout-note}
+## Report Information
+
+| Field | Value |
+|-------|-------|
+| **Method Name** | `r report$metadata$method_name %||% "Not specified"` |
+| **Laboratory** | `r report$metadata$lab %||% "Not specified"` |
+| **Analyst** | `r report$metadata$analyst %||% "Not specified"` |
+| **Reviewer** | `r report$metadata$reviewer %||% "Not specified"` |
+| **Date** | `r format(report$metadata$date, "%Y-%m-%d")` |
+| **Instrument** | `r report$metadata$instrument %||% "Not specified"` |
+
+:::
+
+```{r method-description}
+#| results: asis
+if (!is.null(report$metadata$method_description)) {
+  cat("## Method Description\n\n")
+  cat(report$metadata$method_description, "\n\n")
+}
+```
+
+## Validation Summary
+
+```{r validation-summary}
+#| results: asis
+# Build summary table directly (avoid summary() method which has print side effects)
+sections <- report$sections
+section_names <- setdiff(names(sections), c("conclusions", "references", "appendices"))
+
+if (length(section_names) > 0) {
+  # Helper to get section label
+  get_label <- function(sec) {
+    labels <- c(
+      calibration = "Calibration", lod_loq = "LOD/LOQ", accuracy = "Accuracy",
+      precision = "Precision", linearity = "Linearity", range = "Range",
+      specificity = "Specificity/Selectivity", robustness = "Robustness",
+      carryover = "Carryover", system_suitability = "System Suitability",
+      stability = "Stability", uncertainty = "Measurement Uncertainty",
+      method_comparison = "Method Comparison"
+    )
+    if (sec %in% names(labels)) labels[[sec]] else tools::toTitleCase(gsub("_", " ", sec))
+  }
+
+  summary_tbl <- do.call(rbind, lapply(section_names, function(sec) {
+    sec_data <- sections[[sec]]
+    data <- sec_data$data
+
+    # Count results
+    n_results <- NA_integer_
+    if (is.data.frame(data)) {
+      n_results <- nrow(data)
+    } else if (is.list(data)) {
+      if (!is.null(data$data) && is.data.frame(data$data)) n_results <- nrow(data$data)
+      else if (!is.null(data$results) && is.data.frame(data$results)) n_results <- nrow(data$results)
+    }
+
+    # Get notes
+    notes <- ""
+    if (is.list(data) && "method" %in% names(data)) {
+      notes <- paste("Method:", data[["method"]])
+    }
+
+    tibble::tibble(
+      Section = get_label(sec),
+      Status = "info",
+      `N Results` = n_results,
+      Notes = notes
+    )
+  }))
+  print(make_table(summary_tbl, caption = "Validation Results Overview"))
+}
+```
+
+```{r conclusions-executive}
+#| results: asis
+if (has_section("conclusions")) {
+  conclusions <- get_section("conclusions")
+  cat("## Conclusions\n\n")
+  if (is.character(conclusions)) {
+    cat(conclusions, "\n\n")
+  } else if (is.list(conclusions) && !is.null(conclusions$summary)) {
+    cat(conclusions$summary, "\n\n")
+  }
+}
+```
+
+---
+
+# Validation Characteristics
+
+This report follows the ICH Q2(R2) guideline structure for analytical procedure validation. Each characteristic is evaluated against predefined acceptance criteria.
+
+```{r specificity-section}
+#| results: asis
+if (has_section("specificity")) {
+  cat("## Specificity/Selectivity\n\n")
+  cat("*The ability of the analytical procedure to measure the analyte unequivocally in the presence of components that may be expected to be present.*\n\n")
+
+  specificity <- get_section("specificity")
+
+  if (is.character(specificity)) {
+    cat(specificity, "\n\n")
+  } else if (is.data.frame(specificity)) {
+    print(make_table(specificity, caption = "Specificity Study Results"))
+  } else if (is.list(specificity)) {
+    if (!is.null(specificity$description)) {
+      cat(specificity$description, "\n\n")
+    }
+    if (!is.null(specificity$results) && is.data.frame(specificity$results)) {
+      print(make_table(specificity$results, caption = "Interference Study Results"))
+    }
+    if (!is.null(specificity$conclusion)) {
+      cat("\n**Conclusion:**", specificity$conclusion, "\n\n")
+    }
+  }
+}
+```
+
+```{r calibration-section}
+#| results: asis
+if (has_section("calibration")) {
+  cat("## Calibration Model\n\n")
+
+  cal <- get_section("calibration")
+
+  # Model summary
+  if (inherits(cal, "measure_calibration")) {
+    cat("### Model Parameters\n\n")
+
+    # Get coefficients
+    coef_tbl <- tryCatch(tidy(cal), error = function(e) NULL)
+    if (!is.null(coef_tbl)) {
+      print(make_table(coef_tbl, caption = "Calibration Coefficients"))
+    }
+
+    # Glance summary
+    glance_tbl <- tryCatch(glance(cal), error = function(e) NULL)
+    if (!is.null(glance_tbl)) {
+      cat("\n### Model Statistics\n\n")
+      print(make_table(glance_tbl, caption = "Model Summary Statistics"))
+    }
+  }
+}
+```
+
+```{r calibration-plot}
+#| fig-cap: "Calibration Curve with Confidence Interval"
+#| fig-height: 5
+#| fig-width: 7
+if (has_section("calibration") && include_plots) {
+  cal <- get_section("calibration")
+  if (inherits(cal, "measure_calibration")) {
+    tryCatch(
+      print(autoplot(cal)),
+      error = function(e) NULL
+    )
+  }
+}
+```
+
+```{r linearity-section}
+#| results: asis
+if (has_section("linearity")) {
+  cat("## Linearity\n\n")
+  cat("*The ability of the analytical procedure to obtain results that are directly proportional to the concentration of analyte in the sample within a given range.*\n\n")
+
+  lin <- get_section("linearity")
+
+  if (inherits(lin, "measure_linearity")) {
+    # Tidy output
+    lin_tbl <- tryCatch(tidy(lin), error = function(e) NULL)
+    if (!is.null(lin_tbl)) {
+      print(make_table(lin_tbl, caption = "Linearity Assessment"))
+    }
+
+    # Glance summary
+    glance_tbl <- tryCatch(glance(lin), error = function(e) NULL)
+    if (!is.null(glance_tbl)) {
+      cat("\n### Summary Statistics\n\n")
+      print(make_table(glance_tbl, caption = "Linearity Summary"))
+    }
+  }
+}
+```
+
+```{r range-section}
+#| results: asis
+if (has_section("range")) {
+  cat("## Range\n\n")
+  cat("*The interval between the upper and lower concentrations for which the analytical procedure has suitable precision, accuracy, and linearity.*\n\n")
+
+  range_data <- get_section("range")
+
+  if (is.list(range_data)) {
+    if (!is.null(range_data$lower) && !is.null(range_data$upper)) {
+      cat(sprintf("**Validated Range:** %.4g to %.4g\n\n",
+                  range_data$lower, range_data$upper))
+    }
+    if (!is.null(range_data$units)) {
+      cat(sprintf("**Units:** %s\n\n", range_data$units))
+    }
+    if (!is.null(range_data$justification)) {
+      cat("**Justification:**", range_data$justification, "\n\n")
+    }
+  }
+}
+```
+
+```{r accuracy-section}
+#| results: asis
+if (has_section("accuracy")) {
+  cat("## Accuracy\n\n")
+  cat("*The closeness of agreement between the value found and the value that is accepted as a reference value (trueness).*\n\n")
+
+  acc <- get_section("accuracy")
+
+  if (inherits(acc, "measure_accuracy")) {
+    # Results table
+    acc_tbl <- tryCatch(tidy(acc), error = function(e) NULL)
+    if (!is.null(acc_tbl)) {
+      print(make_table(acc_tbl, caption = "Accuracy Results by Level"))
+    }
+
+    # Summary
+    glance_tbl <- tryCatch(glance(acc), error = function(e) NULL)
+    if (!is.null(glance_tbl)) {
+      cat("\n### Summary\n\n")
+      print(make_table(glance_tbl, caption = "Overall Accuracy Summary"))
+    }
+  }
+}
+```
+
+```{r precision-section}
+#| results: asis
+if (has_section("precision")) {
+  cat("## Precision\n\n")
+  cat("*The closeness of agreement between a series of measurements obtained from multiple sampling of the same homogeneous sample under prescribed conditions.*\n\n")
+
+  prec <- get_section("precision")
+
+  if (is.list(prec)) {
+    # Repeatability
+    if (!is.null(prec$repeatability)) {
+      cat("### Repeatability (Intra-assay Precision)\n\n")
+      cat("*Precision under the same operating conditions over a short time interval.*\n\n")
+
+      rep_data <- prec$repeatability
+      if (inherits(rep_data, "measure_precision")) {
+        rep_tbl <- tryCatch(tidy(rep_data), error = function(e) NULL)
+        if (!is.null(rep_tbl)) {
+          print(make_table(rep_tbl, caption = "Repeatability Results"))
+        }
+      }
+    }
+
+    # Intermediate Precision
+    if (!is.null(prec$intermediate)) {
+      cat("\n### Intermediate Precision\n\n")
+      cat("*Precision within the same laboratory over different days, analysts, or equipment.*\n\n")
+
+      int_data <- prec$intermediate
+      if (inherits(int_data, "measure_precision")) {
+        int_tbl <- tryCatch(tidy(int_data), error = function(e) NULL)
+        if (!is.null(int_tbl)) {
+          print(make_table(int_tbl, caption = "Intermediate Precision Results"))
+        }
+      }
+    }
+
+    # Reproducibility
+    if (!is.null(prec$reproducibility)) {
+      cat("\n### Reproducibility\n\n")
+      cat("*Precision between different laboratories.*\n\n")
+
+      repro_data <- prec$reproducibility
+      if (inherits(repro_data, "measure_precision")) {
+        repro_tbl <- tryCatch(tidy(repro_data), error = function(e) NULL)
+        if (!is.null(repro_tbl)) {
+          print(make_table(repro_tbl, caption = "Reproducibility Results"))
+        }
+      }
+    }
+  }
+}
+```
+
+```{r lod-loq-section}
+#| results: asis
+if (has_section("lod_loq")) {
+  cat("## Detection and Quantitation Limits\n\n")
+
+  lod_loq <- get_section("lod_loq")
+
+  cat("### Limit of Detection (LOD)\n\n")
+  cat("*The lowest amount of analyte that can be detected but not necessarily quantitated.*\n\n")
+
+  cat("### Limit of Quantitation (LOQ)\n\n")
+  cat("*The lowest amount of analyte that can be quantitatively determined with suitable precision and accuracy.*\n\n")
+
+  if (inherits(lod_loq, c("measure_lod", "measure_loq", "measure_lod_loq"))) {
+    lod_tbl <- tryCatch(tidy(lod_loq), error = function(e) NULL)
+    if (!is.null(lod_tbl)) {
+      print(make_table(lod_tbl, caption = "LOD/LOQ Results"))
+    }
+  } else if (is.list(lod_loq)) {
+    # Handle multiple LOD/LOQ objects
+    for (name in names(lod_loq)) {
+      obj <- lod_loq[[name]]
+      if (inherits(obj, c("measure_lod", "measure_loq"))) {
+        cat(sprintf("\n**%s:**\n\n", tools::toTitleCase(name)))
+        obj_tbl <- tryCatch(tidy(obj), error = function(e) NULL)
+        if (!is.null(obj_tbl)) {
+          print(make_table(obj_tbl))
+        }
+      }
+    }
+  }
+}
+```
+
+```{r robustness-section}
+#| results: asis
+if (has_section("robustness")) {
+  cat("## Robustness\n\n")
+  cat("*The capacity of the analytical procedure to remain unaffected by small but deliberate variations in method parameters.*\n\n")
+
+  robust <- get_section("robustness")
+
+  if (is.character(robust)) {
+    cat(robust, "\n\n")
+  } else if (is.data.frame(robust)) {
+    print(make_table(robust, caption = "Robustness Study Results"))
+  } else if (is.list(robust)) {
+    if (!is.null(robust$factors)) {
+      cat("**Factors Evaluated:**\n\n")
+      for (f in robust$factors) {
+        cat(sprintf("- %s\n", f))
+      }
+      cat("\n")
+    }
+    if (!is.null(robust$results) && is.data.frame(robust$results)) {
+      print(make_table(robust$results, caption = "Robustness Evaluation"))
+    }
+    if (!is.null(robust$conclusion)) {
+      cat("\n**Conclusion:**", robust$conclusion, "\n\n")
+    }
+  }
+}
+```
+
+---
+
+# Additional Studies
+
+```{r carryover-section}
+#| results: asis
+if (has_section("carryover")) {
+  cat("## Carryover\n\n")
+
+  carry <- get_section("carryover")
+
+  if (inherits(carry, "measure_carryover")) {
+    carry_tbl <- tryCatch(tidy(carry), error = function(e) NULL)
+    if (!is.null(carry_tbl)) {
+      print(make_table(carry_tbl, caption = "Carryover Assessment"))
+    }
+
+    glance_tbl <- tryCatch(glance(carry), error = function(e) NULL)
+    if (!is.null(glance_tbl)) {
+      cat("\n### Summary\n\n")
+      print(make_table(glance_tbl, caption = "Carryover Summary"))
+    }
+  }
+}
+```
+
+```{r sst-section}
+#| results: asis
+if (has_section("system_suitability")) {
+  cat("## System Suitability\n\n")
+
+  sst <- get_section("system_suitability")
+
+  if (inherits(sst, "measure_system_suitability")) {
+    sst_tbl <- tryCatch(tidy(sst), error = function(e) NULL)
+    if (!is.null(sst_tbl)) {
+      print(make_table(sst_tbl, caption = "System Suitability Results"))
+    }
+  }
+}
+```
+
+```{r stability-section}
+#| results: asis
+if (has_section("stability")) {
+  cat("## Stability\n\n")
+
+  stab <- get_section("stability")
+
+  if (is.character(stab)) {
+    cat(stab, "\n\n")
+  } else if (is.data.frame(stab)) {
+    print(make_table(stab, caption = "Stability Study Results"))
+  } else if (is.list(stab)) {
+    if (!is.null(stab$solution_stability)) {
+      cat("### Solution Stability\n\n")
+      if (is.data.frame(stab$solution_stability)) {
+        print(make_table(stab$solution_stability, caption = "Solution Stability"))
+      } else {
+        cat(stab$solution_stability, "\n\n")
+      }
+    }
+    if (!is.null(stab$freeze_thaw)) {
+      cat("### Freeze-Thaw Stability\n\n")
+      if (is.data.frame(stab$freeze_thaw)) {
+        print(make_table(stab$freeze_thaw, caption = "Freeze-Thaw Stability"))
+      } else {
+        cat(stab$freeze_thaw, "\n\n")
+      }
+    }
+  }
+}
+```
+
+```{r uncertainty-section}
+#| results: asis
+if (has_section("uncertainty")) {
+  cat("## Measurement Uncertainty\n\n")
+  cat("*Estimation of measurement uncertainty following ISO GUM principles.*\n\n")
+
+  unc <- get_section("uncertainty")
+
+  if (inherits(unc, "measure_uncertainty_budget")) {
+    # Budget table
+    unc_tbl <- tryCatch(tidy(unc), error = function(e) NULL)
+    if (!is.null(unc_tbl)) {
+      print(make_table(unc_tbl, caption = "Uncertainty Budget"))
+    }
+
+    # Summary
+    glance_tbl <- tryCatch(glance(unc), error = function(e) NULL)
+    if (!is.null(glance_tbl)) {
+      cat("\n### Combined and Expanded Uncertainty\n\n")
+      print(make_table(glance_tbl, caption = "Uncertainty Summary"))
+    }
+  }
+}
+```
+
+```{r uncertainty-plot}
+#| fig-cap: "Uncertainty Budget - Contribution of Components"
+#| fig-height: 5
+#| fig-width: 7
+if (has_section("uncertainty") && include_plots) {
+  unc <- get_section("uncertainty")
+  if (inherits(unc, "measure_uncertainty_budget")) {
+    tryCatch(
+      print(autoplot(unc)),
+      error = function(e) NULL
+    )
+  }
+}
+```
+
+```{r method-comparison-section}
+#| results: asis
+if (has_section("method_comparison")) {
+  cat("## Method Comparison\n\n")
+
+  mc <- get_section("method_comparison")
+
+  if (inherits(mc, "measure_bland_altman")) {
+    cat("### Bland-Altman Analysis\n\n")
+
+    ba_tbl <- tryCatch(tidy(mc), error = function(e) NULL)
+    if (!is.null(ba_tbl)) {
+      print(make_table(ba_tbl, caption = "Bland-Altman Statistics"))
+    }
+  }
+
+  if (inherits(mc, "measure_deming_regression")) {
+    cat("### Deming Regression\n\n")
+
+    dem_tbl <- tryCatch(tidy(mc), error = function(e) NULL)
+    if (!is.null(dem_tbl)) {
+      print(make_table(dem_tbl, caption = "Deming Regression Coefficients"))
+    }
+  }
+
+  if (inherits(mc, "measure_passing_bablok")) {
+    cat("### Passing-Bablok Regression\n\n")
+
+    pb_tbl <- tryCatch(tidy(mc), error = function(e) NULL)
+    if (!is.null(pb_tbl)) {
+      print(make_table(pb_tbl, caption = "Passing-Bablok Coefficients"))
+    }
+  }
+
+  # Handle list of method comparison objects
+  if (is.list(mc) && !inherits(mc, c("measure_bland_altman", "measure_deming_regression", "measure_passing_bablok"))) {
+    for (name in names(mc)) {
+      obj <- mc[[name]]
+      cat(sprintf("\n### %s\n\n", tools::toTitleCase(gsub("_", " ", name))))
+      obj_tbl <- tryCatch(tidy(obj), error = function(e) NULL)
+      if (!is.null(obj_tbl)) {
+        print(make_table(obj_tbl))
+      }
+    }
+  }
+}
+```
+
+```{r method-comparison-plot}
+#| fig-cap: "Method Comparison Plot"
+#| fig-height: 5
+#| fig-width: 7
+if (has_section("method_comparison") && include_plots) {
+  mc <- get_section("method_comparison")
+  if (inherits(mc, c("measure_bland_altman", "measure_deming_regression", "measure_passing_bablok"))) {
+    tryCatch(
+      print(autoplot(mc)),
+      error = function(e) NULL
+    )
+  }
+}
+```
+
+---
+
+# Conclusions and Recommendations
+
+```{r conclusions-section}
+#| results: asis
+if (has_section("conclusions")) {
+  conclusions <- get_section("conclusions")
+
+  if (is.character(conclusions)) {
+    cat(conclusions, "\n\n")
+  } else if (is.list(conclusions)) {
+    if (!is.null(conclusions$summary)) {
+      cat("## Summary\n\n")
+      cat(conclusions$summary, "\n\n")
+    }
+    if (!is.null(conclusions$recommendations)) {
+      cat("## Recommendations\n\n")
+      if (is.character(conclusions$recommendations)) {
+        cat(conclusions$recommendations, "\n\n")
+      } else if (is.list(conclusions$recommendations)) {
+        for (rec in conclusions$recommendations) {
+          cat(sprintf("- %s\n", rec))
+        }
+        cat("\n")
+      }
+    }
+    if (!is.null(conclusions$limitations)) {
+      cat("## Limitations\n\n")
+      cat(conclusions$limitations, "\n\n")
+    }
+  }
+} else {
+  cat("*No conclusions provided.*\n\n")
+}
+```
+
+---
+
+# References
+
+```{r references-section}
+#| results: asis
+if (!is.null(report$sections$references)) {
+  refs <- report$sections$references
+  if (is.character(refs)) {
+    for (i in seq_along(refs)) {
+      cat(sprintf("%d. %s\n", i, refs[i]))
+    }
+    cat("\n")
+  }
+} else {
+  cat("1. ICH Q2(R2): Validation of Analytical Procedures (2023)\n")
+  cat("2. ICH Q14: Analytical Procedure Development (2023)\n")
+  cat("3. JCGM 100:2008 (GUM): Guide to the Expression of Uncertainty in Measurement\n\n")
+}
+```
+
+---
+
+# Appendix: Data Provenance
+
+```{r provenance-section}
+#| results: asis
+cat("## Computational Environment\n\n")
+cat(sprintf("- **R Version:** %s\n", report$provenance$r_version))
+cat(sprintf("- **measure Package Version:** %s\n", report$provenance$measure_version))
+cat(sprintf("- **Platform:** %s\n", report$provenance$platform))
+cat(sprintf("- **Report Generated:** %s\n\n", format(report$provenance$timestamp, "%Y-%m-%d %H:%M:%S")))
+
+if (length(report$provenance$section_calls) > 0) {
+  cat("## Analysis Calls\n\n")
+  cat("The following function calls were used to generate validation results:\n\n")
+  cat("```r\n")
+  for (sc in report$provenance$section_calls) {
+    cat(sprintf("# %s\n%s\n\n", sc$section, sc$call))
+  }
+  cat("```\n\n")
+}
+```
+
+```{r appendices-section}
+#| results: asis
+if (!is.null(report$sections$appendices)) {
+  cat("## Additional Appendices\n\n")
+
+  appendices <- report$sections$appendices
+
+  for (name in names(appendices)) {
+    cat(sprintf("### %s\n\n", tools::toTitleCase(gsub("_", " ", name))))
+
+    app <- appendices[[name]]
+    if (is.character(app)) {
+      cat(app, "\n\n")
+    } else if (is.data.frame(app)) {
+      print(make_table(app))
+      cat("\n")
+    }
+  }
+}
+```
+
+---
+
+::: {.callout-important}
+## Regulatory Disclaimer
+
+This report was generated using the `measure` R package. The computational results and statistical analyses are provided as tools to support analytical method validation. Final regulatory decisions and interpretations should be made by qualified personnel in accordance with applicable guidelines and regulations.
+:::
+
+---
+
+*Report generated with measure `r packageVersion("measure")` on `r format(Sys.time(), "%Y-%m-%d %H:%M:%S")`*

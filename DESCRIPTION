@@ -6,12 +6,14 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-9740-1905")),
     person("Max", "Kuhn", , "max@posit.co", role = "ctb",
            comment = c(ORCID = "0000-0003-2402-136X"))
-    )
+  )
 Description: Provides preprocessing steps for analytical measurement data
-    such as spectroscopy and chromatography within the 'tidymodels' framework.
-    Extends 'recipes' with steps for common spectral preprocessing techniques.
+    such as spectroscopy and chromatography within the 'tidymodels'
+    framework.  Extends 'recipes' with steps for common spectral
+    preprocessing techniques.
 License: MIT + file LICENSE
-URL: https://jameshwade.github.io/measure/, https://github.com/JamesHWade/measure
+URL: https://jameshwade.github.io/measure/,
+    https://github.com/JamesHWade/measure
 BugReports: https://github.com/JamesHWade/measure/issues
 Depends:
     R (>= 4.1.0),
@@ -42,6 +44,7 @@ Suggests:
     patchwork,
     prospectr,
     ptw,
+    quarto,
     reticulate,
     rmarkdown,
     roxygen2,
@@ -51,14 +54,10 @@ Suggests:
     wavethresh,
     withr,
     workflows
-Config/reticulate:
-    list(
-        packages = list(
-            list(package = "pybaselines")
-        )
-    )
 VignetteBuilder:
     knitr
+Config/reticulate:list( packages = list( list(package = "pybaselines") )
+    )
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
