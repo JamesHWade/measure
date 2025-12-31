@@ -120,8 +120,7 @@ prep.step_measure_despike <- function(x, training, info = NULL, ...) {
 
   window <- as.integer(x$window)
   if (window %% 2 == 0) {
-    window <- window + 1L
-    cli::cli_warn("{.arg window} must be odd. Increased to {window}.")
+    cli::cli_abort("{.arg window} must be an odd number.")
   }
 
   # Validate threshold

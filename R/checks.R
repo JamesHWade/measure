@@ -4,7 +4,7 @@ check_missing_measures <- function(.data, loc) {
   }
   has_na <- !all(vctrs::vec_detect_complete(.data))
   if (has_na) {
-    rlang::abort(
+    cli::cli_abort(
       "Missing data are only allowed when the wave number is supplied."
     )
   }
@@ -13,15 +13,10 @@ check_missing_measures <- function(.data, loc) {
 
 check_single_selector <- function(res, arg) {
   if (length(res) != 1) {
-    msg <- paste0(
-      "The selection for `",
-      arg,
-      "` should only select a single ",
-      "column (",
-      length(res),
-      " columns were selected)."
+    cli::cli_abort(
+      "The selection for {.arg {arg}} should only select a single column
+       ({length(res)} columns were selected)."
     )
-    rlang::abort(msg)
   }
 }
 

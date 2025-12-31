@@ -45,8 +45,8 @@ test_that("step_measure_smooth_ma reduces noise", {
   expect_lt(smooth_diff_var, orig_diff_var)
 })
 
-test_that("step_measure_smooth_ma enforces odd window", {
-  expect_warning(
+test_that("step_measure_smooth_ma errors on even window", {
+  expect_error(
     recipe(water + fat + protein ~ ., data = meats_long) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>

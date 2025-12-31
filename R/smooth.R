@@ -107,8 +107,7 @@ prep.step_measure_smooth_ma <- function(x, training, info = NULL, ...) {
   # Ensure window is odd
   window <- as.integer(x$window)
   if (window %% 2 == 0) {
-    window <- window + 1L
-    cli::cli_warn("{.arg window} must be odd. Increased to {window}.")
+    cli::cli_abort("{.arg window} must be an odd number.")
   }
 
   if (is.null(x$measures)) {
@@ -279,8 +278,7 @@ prep.step_measure_smooth_median <- function(x, training, info = NULL, ...) {
 
   window <- as.integer(x$window)
   if (window %% 2 == 0) {
-    window <- window + 1L
-    cli::cli_warn("{.arg window} must be odd. Increased to {window}.")
+    cli::cli_abort("{.arg window} must be an odd number.")
   }
 
   if (is.null(x$measures)) {
@@ -472,8 +470,7 @@ prep.step_measure_smooth_gaussian <- function(x, training, info = NULL, ...) {
   } else {
     window <- as.integer(window)
     if (window %% 2 == 0) {
-      window <- window + 1L
-      cli::cli_warn("{.arg window} must be odd. Increased to {window}.")
+      cli::cli_abort("{.arg window} must be an odd number.")
     }
   }
 

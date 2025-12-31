@@ -13,7 +13,7 @@
 #' rules and optionally EWMA or CUSUM statistics.
 #'
 #' @param data A data frame containing QC measurements.
-#' @param value_col Name of the column containing QC values.
+#' @param response_col Name of the column containing QC values.
 #' @param group_col Optional grouping column (e.g., for different QC levels).
 #' @param type Type of control chart: `"shewhart"` (default), `"ewma"`, or `"cusum"`.
 #' @param n_sigma Number of standard deviations for control limits. Default is 3.
@@ -66,7 +66,7 @@
 #' limits_ewma <- measure_control_limits(qc_data, "qc_value", type = "ewma")
 measure_control_limits <- function(
     data,
-    value_col,
+    response_col,
     group_col = NULL,
     type = c("shewhart", "ewma", "cusum"),
     n_sigma = 3,
@@ -78,8 +78,8 @@ measure_control_limits <- function(
   type <- match.arg(type)
 
   # Validate inputs
-  if (!value_col %in% names(data)) {
-    cli::cli_abort("Column {.field {value_col}} not found in data.")
+  if (!response_col %in% names(data)) {
+    cli::cli_abort("Column {.field {response_col}} not found in data.")
   }
 
   if (!is.null(group_col) && !group_col %in% names(data)) {
@@ -89,14 +89,14 @@ measure_control_limits <- function(
   # Calculate limits
   if (is.null(group_col)) {
     result <- calculate_limits_single(
-      data[[value_col]], type, n_sigma, target, lambda, k, h
+      data[[response_col]], type, n_sigma, target, lambda, k, h
     )
     result$group <- "all"
     result <- tibble::as_tibble(result)
   } else {
     groups <- unique(data[[group_col]])
     results <- lapply(groups, function(g) {
-      values <- data[[value_col]][data[[group_col]] == g]
+      values <- data[[response_col]][data[[group_col]] == g]
       res <- calculate_limits_single(values, type, n_sigma, target, lambda, k, h)
       res$group <- g
       res
@@ -120,7 +120,7 @@ measure_control_limits <- function(
 #' Creates a control chart with optional multi-rule (Westgard) violation detection.
 #'
 #' @param data A data frame containing QC measurements.
-#' @param value_col Name of the column containing QC values.
+#' @param response_col Name of the column containing QC values.
 #' @param order_col Name of the column containing run order/sequence.
 #' @param limits Optional `measure_control_limits` object. If NULL, calculated
 #'   from the data.
@@ -165,14 +165,14 @@ measure_control_limits <- function(
 #' print(chart)
 measure_control_chart <- function(
     data,
-    value_col,
+    response_col,
     order_col,
     limits = NULL,
     rules = c("1_3s", "2_2s", "R_4s", "4_1s", "10x"),
     group_col = NULL) {
 
   # Validate inputs
-  for (col in c(value_col, order_col)) {
+  for (col in c(response_col, order_col)) {
     if (!col %in% names(data)) {
       cli::cli_abort("Column {.field {col}} not found in data.")
     }
@@ -183,20 +183,20 @@ measure_control_chart <- function(
 
   # Calculate limits if not provided
   if (is.null(limits)) {
-    limits <- measure_control_limits(data, value_col, group_col)
+    limits <- measure_control_limits(data, response_col, group_col)
   }
 
   # Apply rules and detect violations
   if (is.null(group_col)) {
     result <- apply_westgard_rules(
-      data, value_col, limits, rules
+      data, response_col, limits, rules
     )
   } else {
     groups <- unique(data[[group_col]])
     results <- lapply(groups, function(g) {
       sub_data <- data[data[[group_col]] == g, ]
       group_limits <- limits[limits$group == g, ]
-      apply_westgard_rules(sub_data, value_col, group_limits, rules)
+      apply_westgard_rules(sub_data, response_col, group_limits, rules)
     })
     result <- list(
       data = dplyr::bind_rows(lapply(results, `[[`, "data")),
@@ -400,8 +400,8 @@ calculate_limits_single <- function(
 
 #' Apply Westgard rules to detect violations
 #' @noRd
-apply_westgard_rules <- function(data, value_col, limits, rules) {
-  values <- data[[value_col]]
+apply_westgard_rules <- function(data, response_col, limits, rules) {
+  values <- data[[response_col]]
   n <- length(values)
 
   center <- limits$center[1]
@@ -473,7 +473,7 @@ apply_westgard_rules <- function(data, value_col, limits, rules) {
   data$has_violation <- nchar(violations) > 0
 
   # Summary of violations
-  violation_summary <- data[data$has_violation, c(names(data)[1], value_col, "violation")]
+  violation_summary <- data[data$has_violation, c(names(data)[1], response_col, "violation")]
 
   list(
     data = data,
@@ -610,11 +610,11 @@ autoplot.measure_control_chart <- function(object, ...) {
   # Find the order column (first non-value column before violation)
   cols <- names(data)
   order_col <- cols[1]
-  value_col <- cols[2]
+  response_col <- cols[2]
 
   p <- ggplot2::ggplot(data, ggplot2::aes(
     x = .data[[order_col]],
-    y = .data[[value_col]]
+    y = .data[[response_col]]
   )) +
     # Control limits
     ggplot2::geom_hline(
