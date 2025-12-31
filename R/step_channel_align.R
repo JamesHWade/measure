@@ -281,12 +281,25 @@ tidy.step_measure_channel_align <- function(x, ...) {
   })
   names(all_grids) <- measure_cols
 
-  switch(
+  result <- switch(
     method,
     "union" = sort(unique(unlist(all_grids))),
     "intersection" = Reduce(intersect, all_grids),
     "reference" = all_grids[[ref_col]]
   )
+
+  # Check for empty grid (especially relevant for intersection method)
+  if (length(result) == 0) {
+    cli::cli_abort(
+      c(
+        "Channel alignment produced an empty grid.",
+        "i" = "With method = {.val {method}}, no common locations were found.",
+        "i" = "Try using method = {.val union} or check channel grids for overlap."
+      )
+    )
+  }
+
+  result
 }
 
 .align_to_grid <- function(m, target_grid, interpolation) {

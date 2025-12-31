@@ -289,7 +289,7 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
 
   if (is_trained(x)) {
     tibble::tibble(
-      terms = x$measure_cols,
+      terms = unname(x$measure_cols),
       ranks = list(x$ranks),
       center = x$center,
       scale = x$scale,
@@ -317,9 +317,12 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
   grid_info <- array_result$grid_info
 
   n_samples <- dim(X)[1]
-  ndim <- length(dim(X)) - 1 # Exclude sample dimension
+  n_modes <- length(dim(X)) # Total modes including samples
+  ndim <- n_modes - 1 # Content dimensions (excluding samples)
 
-  # Expand ranks if single value
+  # Expand ranks if single value - user specifies for content dimensions,
+
+  # we prepend a rank for the sample dimension
   if (length(ranks) == 1) {
     ranks <- rep(ranks, ndim)
   }
@@ -329,6 +332,11 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
       "Length of {.arg ranks} ({length(ranks)}) must match number of dimensions ({ndim})."
     )
   }
+
+  # multiway::tucker expects nfac for ALL modes including samples
+  # Prepend sample dimension rank (we use min(n_samples, max(ranks)) as a reasonable default)
+  sample_rank <- min(n_samples, max(ranks))
+  full_ranks <- c(sample_rank, ranks)
 
   # Center and scale along sample dimension
   center_values <- NULL
@@ -352,7 +360,7 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
   # Fit Tucker using multiway
   fit <- multiway::tucker(
     X,
-    nfac = ranks,
+    nfac = full_ranks,
     nstart = 10,
     maxit = max_iter,
     ctol = tol

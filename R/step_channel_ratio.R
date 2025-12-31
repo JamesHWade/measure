@@ -290,7 +290,9 @@ tidy.step_measure_channel_ratio <- function(x, ...) {
 
 .compute_ratio <- function(num_m, den_m, epsilon, log_transform) {
   # Handle mismatched grids by using numerator's grid
+  interpolated <- FALSE
   if (!identical(num_m$location, den_m$location)) {
+    interpolated <- TRUE
     # Interpolate denominator to numerator's grid
     den_values <- stats::approx(
       den_m$location,
@@ -307,6 +309,17 @@ tidy.step_measure_channel_ratio <- function(x, ...) {
 
   if (log_transform) {
     # Handle negative values before log
+    n_negative <- sum(ratio_values <= 0, na.rm = TRUE)
+    if (n_negative > 0) {
+      cli::cli_warn(
+        c(
+          "{n_negative} ratio value{?s} {?is/are} non-positive and will become NA after log transform.",
+          "i" = "This may indicate issues with the underlying data."
+        ),
+        .frequency = "once",
+        .frequency_id = "ratio_log_negative"
+      )
+    }
     ratio_values <- ifelse(ratio_values > 0, log(ratio_values), NA_real_)
   }
 

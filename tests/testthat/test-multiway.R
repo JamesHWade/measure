@@ -470,7 +470,8 @@ test_that("multi-way steps fail gracefully without nD data", {
   rec <- recipes::recipe(y ~ ., data = simple_data) |>
     step_measure_parafac(n_components = 2)
 
-  expect_error(recipes::prep(rec), "No nD measure columns")
+  # Without any measure columns, check_for_measure will fail first
+  expect_error(recipes::prep(rec), "should be in the data")
 })
 
 test_that("multi-way steps handle new data projection correctly", {

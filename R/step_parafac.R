@@ -282,7 +282,7 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
   # Default: return parameters
   if (is_trained(x)) {
     tibble::tibble(
-      terms = x$measure_cols,
+      terms = unname(x$measure_cols),
       n_components = x$n_components,
       center = x$center,
       scale = x$scale,
@@ -398,8 +398,13 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
     for (r in seq_len(n_components)) {
       # Compute score as inner product
       outer_r <- outer(loadings[[2]][, r], loadings[[3]][, r])
-      scores[i, r] <- sum(Xi * outer_r, na.rm = TRUE) /
-        sum(outer_r^2, na.rm = TRUE)
+      denom <- sum(outer_r^2, na.rm = TRUE)
+      # Protect against division by zero (degenerate loadings)
+      if (denom < .Machine$double.eps) {
+        scores[i, r] <- 0
+      } else {
+        scores[i, r] <- sum(Xi * outer_r, na.rm = TRUE) / denom
+      }
     }
   }
 
@@ -446,7 +451,31 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
         idx[d] <- match(loc_val, grid_info[[loc_cols[d]]])
       }
       # Build index expression: arr[i, idx[1], idx[2], ...]
-      arr[cbind(i, matrix(idx, nrow = 1))] <- m$value[j]
+      # Use matrix with one row containing all indices for proper nD indexing
+      arr[matrix(c(i, idx), nrow = 1)] <- m$value[j]
+    }
+  }
+
+  # Warn about missing values
+
+  na_count <- sum(is.na(arr))
+  if (na_count > 0) {
+    pct_missing <- 100 * na_count / length(arr)
+    if (pct_missing > 10) {
+      cli::cli_abort(
+        c(
+          "Array has {.val {sprintf('%.1f%%', pct_missing)}} missing values.",
+          "i" = "All samples must have the same regular grid.",
+          "i" = "Use {.fn step_measure_channel_align} to align grids first."
+        )
+      )
+    } else if (pct_missing > 0) {
+      cli::cli_warn(
+        c(
+          "Array has {.val {na_count}} missing values ({.val {sprintf('%.1f%%', pct_missing)}}).",
+          "i" = "These will propagate through the decomposition."
+        )
+      )
     }
   }
 

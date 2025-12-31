@@ -51,7 +51,6 @@
 #'
 #' @note
 #' This is an **experimental** feature. The implementation uses a simple
-
 #' ALS algorithm without advanced constraints. For production use, consider
 #' using dedicated MCR-ALS packages.
 #'
@@ -278,7 +277,7 @@ tidy.step_measure_mcr_als <- function(x, type = "parameters", ...) {
 
   if (is_trained(x)) {
     tibble::tibble(
-      terms = x$measure_cols,
+      terms = unname(x$measure_cols),
       n_components = x$n_components,
       non_negativity = x$non_negativity,
       unimodality = x$unimodality,
@@ -335,18 +334,42 @@ tidy.step_measure_mcr_als <- function(x, type = "parameters", ...) {
 
   # ALS iterations
   C <- NULL
+  converged <- FALSE
+  final_iter <- max_iter
+
   for (iter in seq_len(max_iter)) {
     # Update concentrations: D = C * S'
-    C_new <- D %*% S %*% solve(t(S) %*% S + diag(1e-10, n_components))
+    # Use tryCatch for matrix inversion in case regularization is insufficient
+    StS <- t(S) %*% S + diag(1e-10, n_components)
+    C_new <- tryCatch(
+      D %*% S %*% solve(StS),
+      error = function(e) {
+        cli::cli_abort(
+          c(
+            "MCR-ALS concentration update failed due to singular matrix.",
+            "i" = "Try reducing {.arg n_components} or check data quality."
+          )
+        )
+      }
+    )
 
     if (non_negativity) {
       C_new <- pmax(C_new, 0)
     }
 
     # Update spectra: D' = S * C'
-    S_new <- t(D) %*%
-      C_new %*%
-      solve(t(C_new) %*% C_new + diag(1e-10, n_components))
+    CtC <- t(C_new) %*% C_new + diag(1e-10, n_components)
+    S_new <- tryCatch(
+      t(D) %*% C_new %*% solve(CtC),
+      error = function(e) {
+        cli::cli_abort(
+          c(
+            "MCR-ALS spectra update failed due to singular matrix.",
+            "i" = "Try reducing {.arg n_components} or check data quality."
+          )
+        )
+      }
+    )
 
     if (non_negativity) {
       S_new <- pmax(S_new, 0)
@@ -356,12 +379,25 @@ tidy.step_measure_mcr_als <- function(x, type = "parameters", ...) {
     if (!is.null(C)) {
       diff <- sum((C_new - C)^2) / (sum(C^2) + 1e-10)
       if (diff < tol) {
+        converged <- TRUE
+        final_iter <- iter
         break
       }
     }
 
     C <- C_new
     S <- S_new
+  }
+
+  # Warn if algorithm did not converge
+
+  if (!converged) {
+    cli::cli_warn(
+      c(
+        "MCR-ALS did not converge after {max_iter} iterations.",
+        "i" = "Consider increasing {.arg max_iter} or {.arg tol}."
+      )
+    )
   }
 
   # Extract per-sample concentration profiles
@@ -393,14 +429,26 @@ tidy.step_measure_mcr_als <- function(x, type = "parameters", ...) {
   # For each sample, solve D_i = C_i * S' for C_i
   scores <- matrix(0, nrow = n_samples, ncol = n_components)
 
+  # Pre-compute spectra projection matrix
+  StS <- t(spectra) %*% spectra + diag(1e-10, n_components)
+  StS_inv <- tryCatch(
+    solve(StS),
+    error = function(e) {
+      cli::cli_abort(
+        c(
+          "MCR-ALS projection failed due to singular spectra matrix.",
+          "i" = "The trained model may have degenerate components."
+        )
+      )
+    }
+  )
+
   for (i in seq_len(n_samples)) {
     Di <- matrix(X[i, , ], nrow = n_rows, ncol = n_cols)
 
     # Solve for concentrations: Di = Ci * S'
     # Ci = Di * S * (S' * S)^-1
-    Ci <- Di %*%
-      spectra %*%
-      solve(t(spectra) %*% spectra + diag(1e-10, n_components))
+    Ci <- Di %*% spectra %*% StS_inv
 
     # Summarize concentration profiles to single scores (e.g., sum or max)
     scores[i, ] <- colSums(Ci)

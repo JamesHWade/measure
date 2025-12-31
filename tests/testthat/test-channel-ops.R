@@ -112,10 +112,23 @@ test_that("step_measure_channel_align aligns two channels with union method", {
 
 test_that("step_measure_channel_align works with intersection method", {
   set.seed(42)
-  df <- test_df_wide_misaligned()
+  # Use grids with overlapping values for intersection
+  uv_locs <- seq(0, 9, by = 1)
+  ri_locs <- seq(2, 11, by = 1) # Overlap at 2-9
 
-  uv_locs <- 0:9
-  ri_locs <- seq(0.5, 9.5, by = 1)
+  # Create test data with overlapping grids
+  df <- tibble::tibble(
+    id = rep(1:3, each = 10),
+    concentration = rep(c(10, 25, 50), each = 10)
+  )
+  # Add UV columns (0-9)
+  for (i in seq_along(uv_locs)) {
+    df[[paste0("uv_", i)]] <- rnorm(30, 100, 10)
+  }
+  # Add RI columns (2-11)
+  for (i in seq_along(ri_locs)) {
+    df[[paste0("ri_", i)]] <- rnorm(30, 50, 5)
+  }
 
   rec <- recipes::recipe(concentration ~ ., data = df) |>
     recipes::update_role(id, new_role = "id") |>
@@ -139,8 +152,9 @@ test_that("step_measure_channel_align works with intersection method", {
   grid_ri <- result$ri[[1]]$location
   expect_equal(grid_uv, grid_ri)
 
-  # Intersection has no common points (0.5 offset) - should be empty
-  expect_equal(length(grid_uv), 0)
+  # Intersection of 0:9 and 2:11 should be 2:9 (8 values)
+  expect_equal(length(grid_uv), 8)
+  expect_equal(grid_uv, 2:9)
 })
 
 
