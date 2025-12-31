@@ -9,7 +9,7 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/JamesHWade/measure/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/JamesHWade/measure/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
-coverage](https://codecov.io/gh/JamesHWade/measure/branch/main/graph/badge.svg)](https://app.codecov.io/gh/JamesHWade/measure?branch=main)
+coverage](https://codecov.io/gh/JamesHWade/measure/graph/badge.svg)](https://app.codecov.io/gh/JamesHWade/measure)
 <!-- badges: end -->
 
 ## Overview
@@ -28,6 +28,10 @@ measure helps you:
   and normalization
 - **Transform** data back to wide or long format for modeling or
   visualization
+- **Handle multi-dimensional data** like LC-DAD, EEM fluorescence, and
+  2D NMR with native nD support
+- **Decompose** complex signals using PARAFAC, Tucker, and MCR-ALS
+  methods
 
 ## Installation
 

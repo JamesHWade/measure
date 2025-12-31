@@ -10,7 +10,8 @@
 %   R/precision.R, R/qc.R, R/reference-subtract.R, R/region-operations.R,
 %   R/savitzky_golay.R, R/scale-variable.R, R/scatter-extended.R,
 %   R/smooth-wavelet.R, R/smooth.R, R/snv.R, R/spectral-math.R,
-%   R/surrogate-recovery.R
+%   R/step_channel_align.R, R/step_channel_combine.R, R/step_channel_ratio.R,
+%   R/step_mcr_als.R, R/step_parafac.R, R/step_tucker.R, R/surrogate-recovery.R
 \name{tidy.measure_accuracy}
 \alias{tidy.measure_accuracy}
 \alias{tidy.measure_linearity}
@@ -118,6 +119,12 @@
 \alias{tidy.step_measure_kubelka_munk}
 \alias{tidy.step_measure_derivative}
 \alias{tidy.step_measure_derivative_gap}
+\alias{tidy.step_measure_channel_align}
+\alias{tidy.step_measure_channel_combine}
+\alias{tidy.step_measure_channel_ratio}
+\alias{tidy.step_measure_mcr_als}
+\alias{tidy.step_measure_parafac}
+\alias{tidy.step_measure_tucker}
 \alias{tidy.step_measure_surrogate_recovery}
 \title{Tidiers for measure steps}
 \usage{
@@ -333,12 +340,26 @@
 
 \method{tidy}{step_measure_derivative_gap}(x, ...)
 
+\method{tidy}{step_measure_channel_align}(x, ...)
+
+\method{tidy}{step_measure_channel_combine}(x, ...)
+
+\method{tidy}{step_measure_channel_ratio}(x, ...)
+
+\method{tidy}{step_measure_mcr_als}(x, type = "parameters", ...)
+
+\method{tidy}{step_measure_parafac}(x, type = "parameters", ...)
+
+\method{tidy}{step_measure_tucker}(x, type = "parameters", ...)
+
 \method{tidy}{step_measure_surrogate_recovery}(x, ...)
 }
 \arguments{
 \item{x}{A step object.}
 
 \item{...}{Not used.}
+
+\item{type}{For PARAFAC steps, either \code{"loadings"} or \code{"parameters"}.}
 }
 \description{
 Tidiers for measure steps

@@ -20,6 +20,8 @@ navbar:
       - text: Guides
       - text: Preprocessing Techniques
         href: articles/preprocessing.html
+      - text: Multi-Dimensional Data
+        href: articles/multidimensional.html
       - text: Integrating with tidymodels
         href: articles/recipes.html
       - text: Data Organization & Diagnostics
@@ -44,6 +46,7 @@ articles:
 - title: In-depth Guides
   contents:
   - preprocessing
+  - multidimensional
   - recipes
   - roles-diagnostics
   - validation
@@ -66,6 +69,12 @@ reference:
   - step_measure_snv
   - step_measure_msc
   - step_measure_map
+- title: Multi-Channel Operations
+  desc: Align, combine, and compute ratios between measurement channels
+  contents:
+  - step_measure_channel_align
+  - step_measure_channel_combine
+  - step_measure_channel_ratio
 - title: Spectral Math
   desc: Mathematical transformations for spectral data
   contents:
@@ -283,6 +292,31 @@ reference:
   - measure_validate_metadata
   - measure_standardize_sample_type
   - measure_sample_types
+- title: Multi-Way Analysis
+  desc: PARAFAC, Tucker, and MCR-ALS decomposition for multi-dimensional data
+  contents:
+  - step_measure_parafac
+  - step_measure_tucker
+  - step_measure_mcr_als
+- title: Multi-Dimensional Data
+  desc: Support for 2D and higher-dimensional measurement data (LC-DAD, EEM, 2D NMR)
+  contents:
+  - new_measure_nd_tbl
+  - new_measure_nd_list
+  - is_measure_nd_tbl
+  - is_measure_nd_list
+  - measure_ndim
+  - measure_dim_names
+  - measure_dim_units
+  - measure_is_regular
+  - measure_grid_info
+  - measure_apply
+  - measure_unfold
+  - measure_fold
+  - measure_slice
+  - measure_project
+  - find_measure_nd_cols
+  - get_measure_col_ndim
 - title: Utilities
   desc: Helper functions and utilities
   contents:

@@ -25,3 +25,5 @@ docs
 ^CLAUDE\.MD$
 ^\.venv$
 ^data-raw$
+^doc$
+^Meta$

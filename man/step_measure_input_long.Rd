@@ -9,6 +9,8 @@ step_measure_input_long(
   ...,
   location,
   col_name = ".measures",
+  dim_names = NULL,
+  dim_units = NULL,
   pad = FALSE,
   role = "measure",
   trained = FALSE,
@@ -25,13 +27,23 @@ operations for this recipe.}
 contains the analytical measurements. The selection should be in the order
 of the measurement's profile.}
 
-\item{location}{One or more selector functions to choose which \emph{single}
-column has the locations of the analytical values.}
+\item{location}{One or more selector functions to choose which column(s)
+have the locations of the analytical values. For 1D data (spectra,
+chromatograms), select a single location column. For 2D or higher
+dimensional data (LC-DAD, 2D NMR, EEM), select multiple location columns.
+Columns will be renamed to \code{location_1}, \code{location_2}, etc. in order.}
 
 \item{col_name}{A single character string specifying the name of the output
 column that will contain the measure data. Defaults to \code{".measures"}. Use
 different names when creating multiple measure columns (e.g., \code{".uv_spectrum"}
 and \code{".ms_spectrum"}).}
+
+\item{dim_names}{Optional character vector of semantic names for each
+dimension (e.g., \code{c("retention_time", "wavelength")}). Only used for
+multi-dimensional data.}
+
+\item{dim_units}{Optional character vector of units for each dimension
+(e.g., \code{c("min", "nm")}). Only used for multi-dimensional data.}
 
 \item{pad}{Whether to pad the measurements to ensure that they all have the
 same number of values. This is useful when there are missing values in the
@@ -55,13 +67,14 @@ may affect the computations for subsequent operations.}
 \description{
 \code{step_measure_input_long} creates a \emph{specification} of a recipe
 step that converts measures organized in a column for the analytical results
-(and an option column of numeric indices) into an internal format used by
+(and one or more columns of numeric indices) into an internal format used by
 the package.
 }
 \details{
 This step is designed for data in a format where there is a column
-for the analytical measurement (e.g., absorption, etc.) and another with the
-location of the value (e.g., wave number, etc.).
+for the analytical measurement (e.g., absorption, etc.) and one or more
+columns with the location of the value (e.g., wave number, retention time,
+wavelength, etc.).
 
 \code{step_measure_input_long()} will collect those data and put them into a
 format used internally by this package. The data structure has a row for
@@ -77,6 +90,21 @@ measure and 7 samples, the input data (in long format) should have 1,400
 rows. We advise having a column with 7 unique values indicating which of the
 rows correspond to each sample.
 }
+\section{Multi-Dimensional Data}{
+For 2D or higher dimensional data, provide multiple location columns:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{# LC-DAD data with retention time and wavelength
+step_measure_input_long(
+  absorbance,
+  location = vars(retention_time, wavelength),
+  dim_names = c("time", "wavelength"),
+  dim_units = c("min", "nm")
+)
+}\if{html}{\out{</div>}}
+
+The result will be a \code{measure_nd_list} column instead of a \code{measure_list}.
+}
+
 \section{Missing Data}{
 Currently, \pkg{measure} assumes that there are equal numbers of values
 within a sample. If there are missing values in the measurements, you'll
@@ -89,6 +117,18 @@ When you \code{\link[recipes:tidy.recipe]{tidy()}} this step, a tibble indicatin
 the original columns were used to reformat the data.
 }
 
+\examples{
+library(recipes)
+
+# 1D data (traditional usage)
+rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(transmittance, location = vars(channel)) |>
+  prep()
+
+bake(rec, new_data = NULL)
+
+}
 \seealso{
 Other input/output steps: 
 \code{\link{step_measure_input_wide}()},

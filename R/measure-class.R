@@ -354,8 +354,56 @@ find_measure_cols <- function(data) {
     cli::cli_abort("{.arg data} must be a data frame.")
   }
 
+  # Note: This also detects measure_nd_list columns since they inherit
+  # from measure_list. Use find_measure_nd_cols() for nD-only detection.
   is_meas <- vapply(data, is_measure_list, logical(1))
   names(data)[is_meas]
+}
+
+
+#' Get the dimensionality of a measure column
+#'
+#' Returns the number of dimensions (1 for `measure_list`, 2+ for
+#' `measure_nd_list`) of a measure column in a data frame.
+#'
+#' @param data A data frame.
+#' @param col Character string naming the measure column.
+#'
+#' @return Integer indicating the number of dimensions.
+#'
+#' @examples
+#' library(recipes)
+#'
+#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+#'   update_role(id, new_role = "id") |>
+#'   step_measure_input_long(transmittance, location = vars(channel)) |>
+#'   prep()
+#'
+#' result <- bake(rec, new_data = NULL)
+#' get_measure_col_ndim(result, ".measures")  # 1
+#'
+#' @export
+get_measure_col_ndim <- function(data, col) {
+  if (!col %in% names(data)) {
+    cli::cli_abort("Column {.field {col}} not found in data.")
+  }
+
+  x <- data[[col]]
+
+  if (!is_measure_list(x)) {
+    cli::cli_abort("Column {.field {col}} is not a measure column.")
+  }
+
+  # Check if it's an nD list (has measure_nd_list class)
+  if (inherits(x, "measure_nd_list")) {
+    if (length(x) == 0) {
+      return(2L) # Default for empty nD list
+    }
+    return(attr(x[[1]], "ndim") %||% 2L)
+  }
+
+  # Regular 1D measure_list
+  1L
 }
 
 #' Check if data frame has measure column(s)

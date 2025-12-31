@@ -40,6 +40,7 @@ Suggests:
     knitr,
     mcr,
     modeldata,
+    multiway,
     parsnip,
     patchwork,
     prospectr,
