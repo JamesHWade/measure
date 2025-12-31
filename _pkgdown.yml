@@ -323,6 +323,9 @@ reference:
   - has_validation_section
   - get_validation_section
   - add_validation_section
+  - print.measure_validation_report
+  - summary.measure_validation_report
+  - tidy.measure_validation_report
 - title: Visualization & Diagnostics
   desc: Plotting and diagnostic functions for measure data
   contents:
