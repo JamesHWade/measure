@@ -8,7 +8,7 @@ rules and optionally EWMA or CUSUM statistics.
 ``` r
 measure_control_limits(
   data,
-  value_col,
+  response_col,
   group_col = NULL,
   type = c("shewhart", "ewma", "cusum"),
   n_sigma = 3,
@@ -25,7 +25,7 @@ measure_control_limits(
 
   A data frame containing QC measurements.
 
-- value_col:
+- response_col:
 
   Name of the column containing QC values.
 
