@@ -312,13 +312,13 @@ if (has_section("accuracy")) {
 
     acc_tbl <- tryCatch(tidy(acc), error = function(e) NULL)
     if (!is.null(acc_tbl)) {
-      print(make_table(acc_tbl, caption = "Accuracy/Recovery Results")
+      print(make_table(acc_tbl, caption = "Accuracy/Recovery Results"))
     }
 
     glance_tbl <- tryCatch(glance(acc), error = function(e) NULL)
     if (!is.null(glance_tbl)) {
       cat("\n### Summary Statistics\n\n")
-      print(make_table(glance_tbl, caption = "Overall Accuracy Summary")
+      print(make_table(glance_tbl, caption = "Overall Accuracy Summary"))
     }
   }
 } else {
@@ -447,7 +447,7 @@ if (has_section("robustness")) {
   if (is.character(robust)) {
     cat(robust, "\n\n")
   } else if (is.data.frame(robust)) {
-    print(make_table(robust, caption = "Robustness Evaluation")
+    print(make_table(robust, caption = "Robustness Evaluation"))
   } else if (is.list(robust)) {
     if (!is.null(robust$factors)) {
       cat("**Parameters Evaluated:**\n\n")
@@ -465,7 +465,7 @@ if (has_section("robustness")) {
       cat("\n")
     }
     if (!is.null(robust$results) && is.data.frame(robust$results)) {
-      print(make_table(robust$results, caption = "Robustness Results")
+      print(make_table(robust$results, caption = "Robustness Results"))
     }
     if (!is.null(robust$conclusion)) {
       cat("\n**Conclusion:**", robust$conclusion, "\n\n")
@@ -492,7 +492,7 @@ if (has_section("carryover")) {
   if (inherits(carry, "measure_carryover")) {
     carry_tbl <- tryCatch(tidy(carry), error = function(e) NULL)
     if (!is.null(carry_tbl)) {
-      print(make_table(carry_tbl, caption = "Carryover Study Results")
+      print(make_table(carry_tbl, caption = "Carryover Study Results"))
     }
   }
 }
@@ -508,7 +508,7 @@ if (has_section("stability")) {
   if (is.character(stab)) {
     cat(stab, "\n\n")
   } else if (is.data.frame(stab)) {
-    print(make_table(stab, caption = "Stability Data")
+    print(make_table(stab, caption = "Stability Data"))
   } else if (is.list(stab)) {
     for (type in names(stab)) {
       cat(sprintf("### %s\n\n", tools::toTitleCase(gsub("_", " ", type))))
@@ -533,13 +533,13 @@ if (has_section("uncertainty")) {
   if (inherits(unc, "measure_uncertainty_budget")) {
     unc_tbl <- tryCatch(tidy(unc), error = function(e) NULL)
     if (!is.null(unc_tbl)) {
-      print(make_table(unc_tbl, caption = "Uncertainty Components")
+      print(make_table(unc_tbl, caption = "Uncertainty Components"))
     }
 
     glance_tbl <- tryCatch(glance(unc), error = function(e) NULL)
     if (!is.null(glance_tbl)) {
       cat("\n### Combined Uncertainty\n\n")
-      print(make_table(glance_tbl, caption = "Combined and Expanded Uncertainty")
+      print(make_table(glance_tbl, caption = "Combined and Expanded Uncertainty"))
     }
   }
 }
@@ -571,7 +571,7 @@ if (has_section("method_comparison")) {
     cat("### Bland-Altman Analysis\n\n")
     ba_tbl <- tryCatch(tidy(mc), error = function(e) NULL)
     if (!is.null(ba_tbl)) {
-      print(make_table(ba_tbl, caption = "Bias and Limits of Agreement")
+      print(make_table(ba_tbl, caption = "Bias and Limits of Agreement"))
     }
   }
 
@@ -579,7 +579,7 @@ if (has_section("method_comparison")) {
     cat("### Regression Analysis\n\n")
     reg_tbl <- tryCatch(tidy(mc), error = function(e) NULL)
     if (!is.null(reg_tbl)) {
-      print(make_table(reg_tbl, caption = "Regression Coefficients")
+      print(make_table(reg_tbl, caption = "Regression Coefficients"))
     }
   }
 

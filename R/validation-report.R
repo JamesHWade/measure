@@ -10,7 +10,6 @@
 #'
 #' @description
 #' Creates a structured validation report object that collects results from
-
 #' various validation studies (calibration, precision, accuracy, etc.) and can
 #' be rendered to HTML, PDF, or Word formats using standardized templates.
 #'
@@ -69,8 +68,7 @@
 #' @details
 #' ## Workflow
 #'
-#' 1
-#' . Run individual validation studies using measure functions
+#' 1. Run individual validation studies using measure functions
 #' 2. Collect results into a validation report object
 #' 3. Render to desired format using [render_validation_report()]
 #'
@@ -80,7 +78,6 @@
 #'   interferences
 #' - **Linearity**: Proportional response over concentration range
 #' - **Range**: Validated concentration interval
-
 #' - **Accuracy**: Closeness to true value (trueness)
 #' - **Precision**: Repeatability, intermediate precision, reproducibility
 #' - **Detection Limit (LOD)**: Lowest detectable amount
@@ -93,8 +90,7 @@
 #' The report automatically captures:
 #' - R version and package versions
 #' - Date/time of report generation
-#' - Parameter settings for each analysis
-#' - Any outliers flagged or removed
+#' - Function calls used to generate each section
 #'
 #' @seealso
 #' [render_validation_report()] to generate the final report document.
@@ -417,6 +413,16 @@ rlang::check_installed("quarto", reason = "to render validation reports")
     safe_title <- tolower(safe_title)
     ext <- switch(output_format, html = "html", pdf = "pdf", docx = "docx")
     output_file <- paste0(safe_title, ".", ext)
+  } else {
+    # Validate output_file doesn't contain path separators (path traversal protection)
+    if (grepl("[/\\\\]", output_file) || grepl("\\.\\.", output_file)) {
+      cli::cli_abort(
+        c(
+          "{.arg output_file} must be a filename, not a path.",
+          "i" = "Use {.arg output_dir} to specify the output directory."
+        )
+      )
+    }
   }
 
   # Resolve output directory
@@ -464,8 +470,23 @@ rlang::check_installed("quarto", reason = "to render validation reports")
 
   # Move rendered file to output directory
   rendered_file <- file.path(temp_dir, output_file)
-  if (file.exists(rendered_file)) {
-    file.copy(rendered_file, output_path, overwrite = TRUE)
+  if (!file.exists(rendered_file)) {
+    cli::cli_abort(
+      c(
+        "Rendering failed: output file was not created.",
+        "i" = "Check Quarto output for errors."
+      )
+    )
+  }
+
+  copy_success <- file.copy(rendered_file, output_path, overwrite = TRUE)
+  if (!copy_success) {
+    cli::cli_abort(
+      c(
+        "Failed to copy rendered file to {.path {output_path}}.",
+        "i" = "Check disk space and file permissions."
+      )
+    )
   }
 
   if (!quiet) {
@@ -484,7 +505,25 @@ rlang::check_installed("quarto", reason = "to render validation reports")
 # print method
 # ==============================================================================
 
+#' Print a Validation Report
+#'
+#' @description
+#' Displays a formatted summary of a validation report object, including
+#' metadata, section status, conclusions, and provenance information.
+#'
+#' @param x A `measure_validation_report` object.
+#' @param ... Additional arguments (currently ignored).
+#'
+#' @return Invisibly returns the input object.
+#'
 #' @export
+#' @examples
+#' report <- measure_validation_report(
+#'   title = "Test Report",
+#'   method_name = "HPLC Assay",
+#'   analyst = "J. Smith"
+#' )
+#' print(report)
 print.measure_validation_report <- function(x, ...) {
   cli::cli_h1("Validation Report")
 
@@ -555,7 +594,31 @@ print.measure_validation_report <- function(x, ...) {
 # summary method
 # ==============================================================================
 
+#' Summarize a Validation Report
+#'
+#' @description
+#' Creates a summary table of all validation sections in the report,
+#' showing section status, result counts, and notes.
+#'
+#' @param object A `measure_validation_report` object.
+#' @param ... Additional arguments (currently ignored).
+#'
+#' @return A tibble with columns:
+#'   - `section`: Section name
+#'   - `status`: Pass/fail/info status
+#'   - `n_results`: Number of results in section
+#'   - `notes`: Additional notes
+#'
+#'   Returns `NULL` invisibly if the report has no validation sections.
+#'
 #' @export
+#' @examples
+#' # Create a report with some sections
+#' report <- measure_validation_report(
+#'   title = "Test Report",
+#'   specificity = "No interference observed"
+#' )
+#' summary(report)
 summary.measure_validation_report <- function(object, ...) {
   # Build summary table
   sections <- object$sections
@@ -608,8 +671,39 @@ summary.measure_validation_report <- function(object, ...) {
 # tidy method
 # ==============================================================================
 
+#' Tidy a Validation Report
+#'
+#' @description
+#' Extracts key parameters and statistics from all validation sections
+#' into a tidy tibble format suitable for further analysis or reporting.
+#'
+#' @param x A `measure_validation_report` object.
+#' @param ... Additional arguments (currently ignored).
+#'
+#' @return A tibble with columns:
+#'   - `section`: Section name
+#'   - `parameter`: Parameter name
+#'   - `value`: Parameter value
+#'   - `unit`: Unit of measurement (if available)
+#'   - `status`: Pass/fail status (if available)
+#'
+#'   Returns an empty tibble if no sections contain tidy-able data.
+#'
 #' @export
 #' @importFrom generics tidy
+#' @examples
+#' # Create sample data
+#' blank_data <- data.frame(
+#'   response = rnorm(10, mean = 50, sd = 15),
+#'   sample_type = "blank"
+#' )
+#' lod_result <- measure_lod(blank_data, response_col = "response")
+#'
+#' report <- measure_validation_report(
+#'   title = "Test Report",
+#'   lod_loq = lod_result
+#' )
+#' tidy(report)
 tidy.measure_validation_report <- function(x, ...) {
   sections <- x$sections
   section_names <- names(sections)

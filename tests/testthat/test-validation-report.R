@@ -523,3 +523,71 @@ test_that("measure_validation_report preserves extra metadata via ...", {
   expect_equal(report$metadata$project_code, "PROJ-001")
   expect_equal(report$metadata$study_number, "STUDY-123")
 })
+
+# ==============================================================================
+# Error path tests
+# ==============================================================================
+
+test_that("measure_validation_report errors when precision is not a list", {
+  # Passing a non-list value (e.g., a data.frame or vector) should error
+  expect_error(
+    measure_validation_report(
+      title = "Precision Error Test",
+      precision = "not a list"
+    ),
+    "precision.*must be a list"
+  )
+
+  expect_error(
+    measure_validation_report(
+      title = "Precision Error Test",
+      precision = 1:10
+    ),
+    "precision.*must be a list"
+  )
+})
+
+test_that("summary.measure_validation_report returns NULL for empty report", {
+  report <- measure_validation_report(title = "Empty Summary Test")
+
+  # Should return NULL invisibly (cli::cli_alert_warning prints message, not R warning)
+  result <- suppressMessages(summary(report))
+
+  expect_null(result)
+})
+
+test_that("render_validation_report errors on invalid template", {
+  skip_if_not_installed("quarto")
+
+  report <- measure_validation_report(title = "Template Error Test")
+
+  # Invalid template should error with match.arg
+  expect_error(
+    render_validation_report(report, template = "nonexistent_template"),
+    "should be one of"
+  )
+})
+
+test_that("render_validation_report errors on path traversal in output_file", {
+  skip_if_not_installed("quarto")
+
+  report <- measure_validation_report(title = "Path Traversal Test")
+
+  # Path with directory separator should error
+  expect_error(
+    render_validation_report(report, output_file = "../malicious.html"),
+    "output_file.*must be a filename"
+  )
+
+  # Path with backslash should error
+  expect_error(
+    render_validation_report(report, output_file = "..\\malicious.html"),
+    "output_file.*must be a filename"
+  )
+
+  # Path with .. should error
+  expect_error(
+    render_validation_report(report, output_file = "..report.html"),
+    "output_file.*must be a filename"
+  )
+})

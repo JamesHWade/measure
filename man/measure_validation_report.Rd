@@ -126,11 +126,11 @@ This function supports two major validation frameworks:
 }
 \details{
 \subsection{Workflow}{
-
-1
-. Run individual validation studies using measure functions
-2. Collect results into a validation report object
-3. Render to desired format using \code{\link[=render_validation_report]{render_validation_report()}}
+\enumerate{
+\item Run individual validation studies using measure functions
+\item Collect results into a validation report object
+\item Render to desired format using \code{\link[=render_validation_report]{render_validation_report()}}
+}
 }
 
 \subsection{Supported Validation Characteristics (ICH Q2)}{
@@ -154,8 +154,7 @@ The report automatically captures:
 \itemize{
 \item R version and package versions
 \item Date/time of report generation
-\item Parameter settings for each analysis
-\item Any outliers flagged or removed
+\item Function calls used to generate each section
 }
 }
 }
