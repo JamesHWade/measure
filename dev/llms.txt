@@ -16,6 +16,10 @@ measure helps you:
   and normalization
 - **Transform** data back to wide or long format for modeling or
   visualization
+- **Handle multi-dimensional data** like LC-DAD, EEM fluorescence, and
+  2D NMR with native nD support
+- **Decompose** complex signals using PARAFAC, Tucker, and MCR-ALS
+  methods
 
 ## Installation
 
@@ -488,6 +492,17 @@ Apply spectral preprocessing transformations
 - [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
   : Apply a Custom Function to Measurements
 
+## Multi-Channel Operations
+
+Align, combine, and compute ratios between measurement channels
+
+- [`step_measure_channel_align()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_align.md)
+  : Align Multiple Channels to a Common Grid
+- [`step_measure_channel_combine()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_combine.md)
+  : Combine Multiple Channels
+- [`step_measure_channel_ratio()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_ratio.md)
+  : Compute Ratios Between Channels
+
 ## Spectral Math
 
 Mathematical transformations for spectral data
@@ -579,7 +594,7 @@ Convert internal format back to modeling-ready data
 - [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)
   : Reorganize Measurements to Separate Columns
 - [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md)
-  : Reorganize Measurements to Two Columns
+  : Reorganize Measurements to Long Format
 
 ## Peak Operations
 
@@ -939,6 +954,55 @@ Validate analytical metadata columns
 - [`measure_sample_types`](https://jameshwade.github.io/measure/dev/reference/measure_sample_types.md)
   : Canonical Sample Types
 
+## Multi-Way Analysis
+
+PARAFAC, Tucker, and MCR-ALS decomposition for multi-dimensional data
+
+- [`step_measure_parafac()`](https://jameshwade.github.io/measure/dev/reference/step_measure_parafac.md)
+  : PARAFAC Decomposition for Multi-Dimensional Data
+- [`step_measure_tucker()`](https://jameshwade.github.io/measure/dev/reference/step_measure_tucker.md)
+  : Tucker Decomposition for Multi-Dimensional Data
+- [`step_measure_mcr_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mcr_als.md)
+  : MCR-ALS Decomposition for Multi-Dimensional Data
+
+## Multi-Dimensional Data
+
+Support for 2D and higher-dimensional measurement data (LC-DAD, EEM, 2D
+NMR)
+
+- [`new_measure_nd_tbl()`](https://jameshwade.github.io/measure/dev/reference/new_measure_nd_tbl.md)
+  : Create a new n-dimensional measure tibble
+- [`new_measure_nd_list()`](https://jameshwade.github.io/measure/dev/reference/new_measure_nd_list.md)
+  : Create a new n-dimensional measure list
+- [`is_measure_nd_tbl()`](https://jameshwade.github.io/measure/dev/reference/is_measure_nd_tbl.md)
+  : Test if object is an n-dimensional measure tibble
+- [`is_measure_nd_list()`](https://jameshwade.github.io/measure/dev/reference/is_measure_nd_list.md)
+  : Test if object is an n-dimensional measure list
+- [`measure_ndim()`](https://jameshwade.github.io/measure/dev/reference/measure_ndim.md)
+  : Get the number of dimensions of a measurement
+- [`measure_dim_names()`](https://jameshwade.github.io/measure/dev/reference/measure_dim_names.md)
+  : Get dimension names of an n-dimensional measurement
+- [`measure_dim_units()`](https://jameshwade.github.io/measure/dev/reference/measure_dim_units.md)
+  : Get dimension units of an n-dimensional measurement
+- [`measure_is_regular()`](https://jameshwade.github.io/measure/dev/reference/measure_is_regular.md)
+  : Check if an n-dimensional measurement has a regular grid
+- [`measure_grid_info()`](https://jameshwade.github.io/measure/dev/reference/measure_grid_info.md)
+  : Get grid information for an n-dimensional measurement
+- [`measure_apply()`](https://jameshwade.github.io/measure/dev/reference/measure_apply.md)
+  : Apply a function to measurement data along dimensions
+- [`measure_unfold()`](https://jameshwade.github.io/measure/dev/reference/measure_unfold.md)
+  : Unfold n-dimensional measurement to 1D
+- [`measure_fold()`](https://jameshwade.github.io/measure/dev/reference/measure_fold.md)
+  : Fold 1D measurement back to n-dimensional
+- [`measure_slice()`](https://jameshwade.github.io/measure/dev/reference/measure_slice.md)
+  : Extract slices from n-dimensional measurement
+- [`measure_project()`](https://jameshwade.github.io/measure/dev/reference/measure_project.md)
+  : Project n-dimensional measurement by aggregating across dimensions
+- [`find_measure_nd_cols()`](https://jameshwade.github.io/measure/dev/reference/find_measure_nd_cols.md)
+  : Find n-dimensional measure columns in a data frame
+- [`get_measure_col_ndim()`](https://jameshwade.github.io/measure/dev/reference/get_measure_col_ndim.md)
+  : Get the dimensionality of a measure column
+
 ## Utilities
 
 Helper functions and utilities
@@ -1082,6 +1146,8 @@ Plotting and diagnostic functions for measure data
 
 - [Preprocessing
   Techniques](https://jameshwade.github.io/measure/dev/articles/preprocessing.md):
+- [Multi-Dimensional
+  Measurements](https://jameshwade.github.io/measure/dev/articles/multidimensional.md):
 - [Integrating with
   tidymodels](https://jameshwade.github.io/measure/dev/articles/recipes.md):
 - [Data Organization and Diagnostic

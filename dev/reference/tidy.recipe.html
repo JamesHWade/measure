@@ -23,6 +23,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
+    <li><a class="dropdown-item" href="../articles/multidimensional.html">Multi-Dimensional Data</a></li>
     <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/roles-diagnostics.html">Data Organization &amp; Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Analytical Validation</a></li>
@@ -46,7 +47,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Tidiers for measure steps</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JamesHWade/measure/blob/main/R/accuracy.R" class="external-link"><code>R/accuracy.R</code></a>, <a href="https://github.com/JamesHWade/measure/blob/main/R/align.R" class="external-link"><code>R/align.R</code></a>, <a href="https://github.com/JamesHWade/measure/blob/main/R/augmentation.R" class="external-link"><code>R/augmentation.R</code></a>, and 38 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/JamesHWade/measure/blob/main/R/accuracy.R" class="external-link"><code>R/accuracy.R</code></a>, <a href="https://github.com/JamesHWade/measure/blob/main/R/align.R" class="external-link"><code>R/align.R</code></a>, <a href="https://github.com/JamesHWade/measure/blob/main/R/augmentation.R" class="external-link"><code>R/augmentation.R</code></a>, and 44 more</small>
       <div class="d-none name"><code>tidy.recipe.Rd</code></div>
     </div>
 
@@ -374,6 +375,24 @@
 <span><span class="co"># S3 method for class 'step_measure_derivative_gap'</span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S3 method for class 'step_measure_channel_align'</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'step_measure_channel_combine'</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'step_measure_channel_ratio'</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'step_measure_mcr_als'</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"parameters"</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'step_measure_parafac'</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"parameters"</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'step_measure_tucker'</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"parameters"</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S3 method for class 'step_measure_surrogate_recovery'</span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -388,6 +407,10 @@
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Not used.</p></dd>
+
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>For PARAFAC steps, either <code>"loadings"</code> or <code>"parameters"</code>.</p></dd>
 
 </dl></div>
 

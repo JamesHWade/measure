@@ -9,6 +9,8 @@
 
 - [Preprocessing
   Techniques](https://jameshwade.github.io/measure/dev/articles/preprocessing.md):
+- [Multi-Dimensional
+  Measurements](https://jameshwade.github.io/measure/dev/articles/multidimensional.md):
 - [Integrating with
   tidymodels](https://jameshwade.github.io/measure/dev/articles/recipes.md):
 - [Data Organization and Diagnostic

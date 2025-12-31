@@ -23,6 +23,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
+    <li><a class="dropdown-item" href="../articles/multidimensional.html">Multi-Dimensional Data</a></li>
     <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/roles-diagnostics.html">Data Organization &amp; Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Analytical Validation</a></li>
@@ -46,7 +47,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>vctrs methods for measure classes</h1>
-      <small class="dont-index">Source: <a href="https://github.com/JamesHWade/measure/blob/main/R/measure-class.R" class="external-link"><code>R/measure-class.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/JamesHWade/measure/blob/main/R/measure-class.R" class="external-link"><code>R/measure-class.R</code></a>, <a href="https://github.com/JamesHWade/measure/blob/main/R/nd_class.R" class="external-link"><code>R/nd_class.R</code></a></small>
       <div class="d-none name"><code>vctrs-methods.Rd</code></div>
     </div>
 
@@ -84,6 +85,36 @@
 <span><span class="va">x</span><span class="op">[[</span><span class="va">i</span>, <span class="va">...</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'measure_list'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_tbl'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, n <span class="op">=</span> <span class="cn">NULL</span>, width <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_tbl'</span></span>
+<span><span class="fu">vec_ptype_abbr</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_list'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_list'</span></span>
+<span><span class="fu">vec_ptype_abbr</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_list'</span></span>
+<span><span class="fu">vec_ptype_full</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_list'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_list'</span></span>
+<span><span class="fu">obj_print_data</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_list'</span></span>
+<span><span class="va">x</span><span class="op">[</span><span class="va">i</span>, <span class="va">...</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_list'</span></span>
+<span><span class="va">x</span><span class="op">[[</span><span class="va">i</span>, <span class="va">...</span><span class="op">]</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'measure_nd_list'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 

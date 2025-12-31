@@ -23,6 +23,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
+    <li><a class="dropdown-item" href="../articles/multidimensional.html">Multi-Dimensional Data</a></li>
     <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/roles-diagnostics.html">Data Organization &amp; Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Analytical Validation</a></li>
@@ -108,6 +109,36 @@
 
         </dt>
         <dd>Apply a Custom Function to Measurements</dd>
+      </dl></div><div class="section level2">
+      <h2 id="multi-channel-operations">Multi-Channel Operations<a class="anchor" aria-label="anchor" href="#multi-channel-operations"></a></h2>
+
+      <div class="section-desc"><p>Align, combine, and compute ratios between measurement channels</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_channel_align.html">step_measure_channel_align()</a></code>
+
+        </dt>
+        <dd>Align Multiple Channels to a Common Grid</dd>
+
+        <dt>
+
+          <code><a href="step_measure_channel_combine.html">step_measure_channel_combine()</a></code>
+
+        </dt>
+        <dd>Combine Multiple Channels</dd>
+
+        <dt>
+
+          <code><a href="step_measure_channel_ratio.html">step_measure_channel_ratio()</a></code>
+
+        </dt>
+        <dd>Compute Ratios Between Channels</dd>
       </dl></div><div class="section level2">
       <h2 id="spectral-math">Spectral Math<a class="anchor" aria-label="anchor" href="#spectral-math"></a></h2>
 
@@ -373,7 +404,7 @@
           <code><a href="step_measure_output_long.html">step_measure_output_long()</a></code>
 
         </dt>
-        <dd>Reorganize Measurements to Two Columns</dd>
+        <dd>Reorganize Measurements to Long Format</dd>
       </dl></div><div class="section level2">
       <h2 id="peak-operations">Peak Operations<a class="anchor" aria-label="anchor" href="#peak-operations"></a></h2>
 
@@ -1366,6 +1397,157 @@
 
         </dt>
         <dd>Canonical Sample Types</dd>
+      </dl></div><div class="section level2">
+      <h2 id="multi-way-analysis">Multi-Way Analysis<a class="anchor" aria-label="anchor" href="#multi-way-analysis"></a></h2>
+
+      <div class="section-desc"><p>PARAFAC, Tucker, and MCR-ALS decomposition for multi-dimensional data</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="step_measure_parafac.html">step_measure_parafac()</a></code>
+
+        </dt>
+        <dd>PARAFAC Decomposition for Multi-Dimensional Data</dd>
+
+        <dt>
+
+          <code><a href="step_measure_tucker.html">step_measure_tucker()</a></code>
+
+        </dt>
+        <dd>Tucker Decomposition for Multi-Dimensional Data</dd>
+
+        <dt>
+
+          <code><a href="step_measure_mcr_als.html">step_measure_mcr_als()</a></code>
+
+        </dt>
+        <dd>MCR-ALS Decomposition for Multi-Dimensional Data</dd>
+      </dl></div><div class="section level2">
+      <h2 id="multi-dimensional-data">Multi-Dimensional Data<a class="anchor" aria-label="anchor" href="#multi-dimensional-data"></a></h2>
+
+      <div class="section-desc"><p>Support for 2D and higher-dimensional measurement data (LC-DAD, EEM, 2D NMR)</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="new_measure_nd_tbl.html">new_measure_nd_tbl()</a></code>
+
+        </dt>
+        <dd>Create a new n-dimensional measure tibble</dd>
+
+        <dt>
+
+          <code><a href="new_measure_nd_list.html">new_measure_nd_list()</a></code>
+
+        </dt>
+        <dd>Create a new n-dimensional measure list</dd>
+
+        <dt>
+
+          <code><a href="is_measure_nd_tbl.html">is_measure_nd_tbl()</a></code>
+
+        </dt>
+        <dd>Test if object is an n-dimensional measure tibble</dd>
+
+        <dt>
+
+          <code><a href="is_measure_nd_list.html">is_measure_nd_list()</a></code>
+
+        </dt>
+        <dd>Test if object is an n-dimensional measure list</dd>
+
+        <dt>
+
+          <code><a href="measure_ndim.html">measure_ndim()</a></code>
+
+        </dt>
+        <dd>Get the number of dimensions of a measurement</dd>
+
+        <dt>
+
+          <code><a href="measure_dim_names.html">measure_dim_names()</a></code>
+
+        </dt>
+        <dd>Get dimension names of an n-dimensional measurement</dd>
+
+        <dt>
+
+          <code><a href="measure_dim_units.html">measure_dim_units()</a></code>
+
+        </dt>
+        <dd>Get dimension units of an n-dimensional measurement</dd>
+
+        <dt>
+
+          <code><a href="measure_is_regular.html">measure_is_regular()</a></code>
+
+        </dt>
+        <dd>Check if an n-dimensional measurement has a regular grid</dd>
+
+        <dt>
+
+          <code><a href="measure_grid_info.html">measure_grid_info()</a></code>
+
+        </dt>
+        <dd>Get grid information for an n-dimensional measurement</dd>
+
+        <dt>
+
+          <code><a href="measure_apply.html">measure_apply()</a></code>
+
+        </dt>
+        <dd>Apply a function to measurement data along dimensions</dd>
+
+        <dt>
+
+          <code><a href="measure_unfold.html">measure_unfold()</a></code>
+
+        </dt>
+        <dd>Unfold n-dimensional measurement to 1D</dd>
+
+        <dt>
+
+          <code><a href="measure_fold.html">measure_fold()</a></code>
+
+        </dt>
+        <dd>Fold 1D measurement back to n-dimensional</dd>
+
+        <dt>
+
+          <code><a href="measure_slice.html">measure_slice()</a></code>
+
+        </dt>
+        <dd>Extract slices from n-dimensional measurement</dd>
+
+        <dt>
+
+          <code><a href="measure_project.html">measure_project()</a></code>
+
+        </dt>
+        <dd>Project n-dimensional measurement by aggregating across dimensions</dd>
+
+        <dt>
+
+          <code><a href="find_measure_nd_cols.html">find_measure_nd_cols()</a></code>
+
+        </dt>
+        <dd>Find n-dimensional measure columns in a data frame</dd>
+
+        <dt>
+
+          <code><a href="get_measure_col_ndim.html">get_measure_col_ndim()</a></code>
+
+        </dt>
+        <dd>Get the dimensionality of a measure column</dd>
       </dl></div><div class="section level2">
       <h2 id="utilities">Utilities<a class="anchor" aria-label="anchor" href="#utilities"></a></h2>
 

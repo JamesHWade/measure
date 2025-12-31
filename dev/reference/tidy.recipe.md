@@ -323,6 +323,24 @@ tidy(x, ...)
 # S3 method for class 'step_measure_derivative_gap'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_channel_align'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_channel_combine'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_channel_ratio'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_mcr_als'
+tidy(x, type = "parameters", ...)
+
+# S3 method for class 'step_measure_parafac'
+tidy(x, type = "parameters", ...)
+
+# S3 method for class 'step_measure_tucker'
+tidy(x, type = "parameters", ...)
+
 # S3 method for class 'step_measure_surrogate_recovery'
 tidy(x, ...)
 ```
@@ -336,3 +354,7 @@ tidy(x, ...)
 - ...:
 
   Not used.
+
+- type:
+
+  For PARAFAC steps, either `"loadings"` or `"parameters"`.

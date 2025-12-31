@@ -39,6 +39,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/preprocessing.html">Preprocessing Techniques</a></li>
+    <li><a class="dropdown-item" href="../articles/multidimensional.html">Multi-Dimensional Data</a></li>
     <li><a class="dropdown-item" href="../articles/recipes.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/roles-diagnostics.html">Data Organization &amp; Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Analytical Validation</a></li>
@@ -412,9 +413,9 @@ effects:</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">rec</span>, n_samples <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Could not extract 'before' data for comparison.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Showing processed data only.</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #00BBBB;">ℹ</span> In argument: `dplyr::all_of(res)`. <span style="font-weight: bold;">Caused by error in `dplyr::all_of()`:</span> <span style="color: #BBBB00;">!</span></span></span>
-<span><span class="co">#&gt;   Can't subset elements that don't exist. <span style="color: #BB0000;">✖</span> Elements `transmittance` and</span></span>
-<span><span class="co">#&gt;   `channel` don't exist.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #00BBBB;">ℹ</span> In argument: `dplyr::all_of(rename_map)`. <span style="font-weight: bold;">Caused by error in</span></span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">`dplyr::all_of()`:</span> <span style="color: #BBBB00;">!</span> Can't subset elements that don't exist. <span style="color: #BB0000;">✖</span> Elements</span></span>
+<span><span class="co">#&gt;   `transmittance` and `channel` don't exist.</span></span></code></pre></div>
 <p><img src="roles-diagnostics_files/figure-html/autoplot-recipe-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">

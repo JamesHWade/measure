@@ -1,4 +1,4 @@
-# Reorganize Measurements to Two Columns
+# Reorganize Measurements to Long Format
 
 `step_measure_output_long` creates a *specification* of a recipe
 
@@ -31,8 +31,10 @@ step_measure_output_long(
 
 - location_to:
 
-  A single character string for the column containing the location of
-  the measurement (e.g. wavenumber or index).
+  A single character string for the column name prefix for location
+  columns. For 1D data, this becomes the column name (default:
+  `.location`). For nD data, this becomes a prefix with dimension
+  suffixes (e.g., `.location_1`, `.location_2`).
 
 - measures:
 
@@ -72,7 +74,15 @@ step that converts measures to a format with columns for the measurement
 and the corresponding location (i.e., "long" format).
 
 This step is designed convert analytical measurements from their
-internal data structure to a two column format.
+internal data structure to a long format with explicit location columns.
+
+For 1D data, the output has two columns: the measurement value and a
+single location column.
+
+For n-dimensional data (2D, 3D, etc.), the output has n+1 columns: the
+measurement value and n location columns named with the `location_to`
+prefix followed by dimension numbers (e.g., `.location_1`,
+`.location_2`).
 
 ## See also
 

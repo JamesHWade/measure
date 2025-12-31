@@ -16,6 +16,10 @@ measure helps you:
   and normalization
 - **Transform** data back to wide or long format for modeling or
   visualization
+- **Handle multi-dimensional data** like LC-DAD, EEM fluorescence, and
+  2D NMR with native nD support
+- **Decompose** complex signals using PARAFAC, Tucker, and MCR-ALS
+  methods
 
 ## Installation
 
