@@ -14,17 +14,27 @@ test_df_wide_aligned <- function() {
   tibble::tibble(
     id = 1:n_samples,
     # UV measurements at each time point
-    uv_0 = rnorm(n_samples, 100, 10), uv_1 = rnorm(n_samples, 100, 10),
-    uv_2 = rnorm(n_samples, 100, 10), uv_3 = rnorm(n_samples, 100, 10),
-    uv_4 = rnorm(n_samples, 100, 10), uv_5 = rnorm(n_samples, 100, 10),
-    uv_6 = rnorm(n_samples, 100, 10), uv_7 = rnorm(n_samples, 100, 10),
-    uv_8 = rnorm(n_samples, 100, 10), uv_9 = rnorm(n_samples, 100, 10),
+    uv_0 = rnorm(n_samples, 100, 10),
+    uv_1 = rnorm(n_samples, 100, 10),
+    uv_2 = rnorm(n_samples, 100, 10),
+    uv_3 = rnorm(n_samples, 100, 10),
+    uv_4 = rnorm(n_samples, 100, 10),
+    uv_5 = rnorm(n_samples, 100, 10),
+    uv_6 = rnorm(n_samples, 100, 10),
+    uv_7 = rnorm(n_samples, 100, 10),
+    uv_8 = rnorm(n_samples, 100, 10),
+    uv_9 = rnorm(n_samples, 100, 10),
     # RI measurements at each time point (same grid)
-    ri_0 = rnorm(n_samples, 50, 5), ri_1 = rnorm(n_samples, 50, 5),
-    ri_2 = rnorm(n_samples, 50, 5), ri_3 = rnorm(n_samples, 50, 5),
-    ri_4 = rnorm(n_samples, 50, 5), ri_5 = rnorm(n_samples, 50, 5),
-    ri_6 = rnorm(n_samples, 50, 5), ri_7 = rnorm(n_samples, 50, 5),
-    ri_8 = rnorm(n_samples, 50, 5), ri_9 = rnorm(n_samples, 50, 5),
+    ri_0 = rnorm(n_samples, 50, 5),
+    ri_1 = rnorm(n_samples, 50, 5),
+    ri_2 = rnorm(n_samples, 50, 5),
+    ri_3 = rnorm(n_samples, 50, 5),
+    ri_4 = rnorm(n_samples, 50, 5),
+    ri_5 = rnorm(n_samples, 50, 5),
+    ri_6 = rnorm(n_samples, 50, 5),
+    ri_7 = rnorm(n_samples, 50, 5),
+    ri_8 = rnorm(n_samples, 50, 5),
+    ri_9 = rnorm(n_samples, 50, 5),
     concentration = c(10, 25, 50)
   )
 }
@@ -36,17 +46,27 @@ test_df_wide_misaligned <- function() {
   tibble::tibble(
     id = 1:n_samples,
     # UV at times 0, 1, 2, ..., 9
-    uv_0 = rnorm(n_samples, 100, 10), uv_1 = rnorm(n_samples, 100, 10),
-    uv_2 = rnorm(n_samples, 100, 10), uv_3 = rnorm(n_samples, 100, 10),
-    uv_4 = rnorm(n_samples, 100, 10), uv_5 = rnorm(n_samples, 100, 10),
-    uv_6 = rnorm(n_samples, 100, 10), uv_7 = rnorm(n_samples, 100, 10),
-    uv_8 = rnorm(n_samples, 100, 10), uv_9 = rnorm(n_samples, 100, 10),
+    uv_0 = rnorm(n_samples, 100, 10),
+    uv_1 = rnorm(n_samples, 100, 10),
+    uv_2 = rnorm(n_samples, 100, 10),
+    uv_3 = rnorm(n_samples, 100, 10),
+    uv_4 = rnorm(n_samples, 100, 10),
+    uv_5 = rnorm(n_samples, 100, 10),
+    uv_6 = rnorm(n_samples, 100, 10),
+    uv_7 = rnorm(n_samples, 100, 10),
+    uv_8 = rnorm(n_samples, 100, 10),
+    uv_9 = rnorm(n_samples, 100, 10),
     # RI at times 0.5, 1.5, 2.5, ..., 9.5 (offset by 0.5)
-    `ri_0.5` = rnorm(n_samples, 50, 5), `ri_1.5` = rnorm(n_samples, 50, 5),
-    `ri_2.5` = rnorm(n_samples, 50, 5), `ri_3.5` = rnorm(n_samples, 50, 5),
-    `ri_4.5` = rnorm(n_samples, 50, 5), `ri_5.5` = rnorm(n_samples, 50, 5),
-    `ri_6.5` = rnorm(n_samples, 50, 5), `ri_7.5` = rnorm(n_samples, 50, 5),
-    `ri_8.5` = rnorm(n_samples, 50, 5), `ri_9.5` = rnorm(n_samples, 50, 5),
+    `ri_0.5` = rnorm(n_samples, 50, 5),
+    `ri_1.5` = rnorm(n_samples, 50, 5),
+    `ri_2.5` = rnorm(n_samples, 50, 5),
+    `ri_3.5` = rnorm(n_samples, 50, 5),
+    `ri_4.5` = rnorm(n_samples, 50, 5),
+    `ri_5.5` = rnorm(n_samples, 50, 5),
+    `ri_6.5` = rnorm(n_samples, 50, 5),
+    `ri_7.5` = rnorm(n_samples, 50, 5),
+    `ri_8.5` = rnorm(n_samples, 50, 5),
+    `ri_9.5` = rnorm(n_samples, 50, 5),
     concentration = c(10, 25, 50)
   )
 }
@@ -99,8 +119,16 @@ test_that("step_measure_channel_align works with intersection method", {
 
   rec <- recipes::recipe(concentration ~ ., data = df) |>
     recipes::update_role(id, new_role = "id") |>
-    step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv", location_values = uv_locs) |>
-    step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri", location_values = ri_locs) |>
+    step_measure_input_wide(
+      dplyr::starts_with("uv_"),
+      col_name = "uv",
+      location_values = uv_locs
+    ) |>
+    step_measure_input_wide(
+      dplyr::starts_with("ri_"),
+      col_name = "ri",
+      location_values = ri_locs
+    ) |>
     step_measure_channel_align(method = "intersection") |>
     recipes::prep()
 
@@ -125,8 +153,16 @@ test_that("step_measure_channel_align works with reference method", {
 
   rec <- recipes::recipe(concentration ~ ., data = df) |>
     recipes::update_role(id, new_role = "id") |>
-    step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv", location_values = uv_locs) |>
-    step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri", location_values = ri_locs) |>
+    step_measure_input_wide(
+      dplyr::starts_with("uv_"),
+      col_name = "uv",
+      location_values = uv_locs
+    ) |>
+    step_measure_input_wide(
+      dplyr::starts_with("ri_"),
+      col_name = "ri",
+      location_values = ri_locs
+    ) |>
     step_measure_channel_align(method = "reference", reference = 1L) |>
     recipes::prep()
 
@@ -148,9 +184,20 @@ test_that("step_measure_channel_align supports different interpolation methods",
   for (interp in c("linear", "spline", "constant")) {
     rec <- recipes::recipe(concentration ~ ., data = df) |>
       recipes::update_role(id, new_role = "id") |>
-      step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv", location_values = uv_locs) |>
-      step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri", location_values = ri_locs) |>
-      step_measure_channel_align(method = "reference", interpolation = interp) |>
+      step_measure_input_wide(
+        dplyr::starts_with("uv_"),
+        col_name = "uv",
+        location_values = uv_locs
+      ) |>
+      step_measure_input_wide(
+        dplyr::starts_with("ri_"),
+        col_name = "ri",
+        location_values = ri_locs
+      ) |>
+      step_measure_channel_align(
+        method = "reference",
+        interpolation = interp
+      ) |>
       recipes::prep()
 
     result <- recipes::bake(rec, new_data = NULL)
@@ -181,8 +228,16 @@ test_that("step_measure_channel_align tidy method works", {
 
   rec <- recipes::recipe(concentration ~ ., data = df) |>
     recipes::update_role(id, new_role = "id") |>
-    step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv", location_values = uv_locs) |>
-    step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri", location_values = ri_locs) |>
+    step_measure_input_wide(
+      dplyr::starts_with("uv_"),
+      col_name = "uv",
+      location_values = uv_locs
+    ) |>
+    step_measure_input_wide(
+      dplyr::starts_with("ri_"),
+      col_name = "ri",
+      location_values = ri_locs
+    ) |>
     step_measure_channel_align() |>
     recipes::prep()
 
@@ -202,8 +257,16 @@ test_that("step_measure_channel_align print method works", {
 
   rec <- recipes::recipe(concentration ~ ., data = df) |>
     recipes::update_role(id, new_role = "id") |>
-    step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv", location_values = uv_locs) |>
-    step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri", location_values = ri_locs) |>
+    step_measure_input_wide(
+      dplyr::starts_with("uv_"),
+      col_name = "uv",
+      location_values = uv_locs
+    ) |>
+    step_measure_input_wide(
+      dplyr::starts_with("ri_"),
+      col_name = "ri",
+      location_values = ri_locs
+    ) |>
     step_measure_channel_align() |>
     recipes::prep()
 
@@ -231,7 +294,7 @@ test_that("step_measure_channel_combine stacks channels into nD", {
 
   # Should have a single .measures column
   expect_true(".measures" %in% names(result))
-  expect_false("uv" %in% names(result))  # Original removed
+  expect_false("uv" %in% names(result)) # Original removed
   expect_false("ri" %in% names(result))
 
   # Should be nD
@@ -255,7 +318,7 @@ test_that("step_measure_channel_combine concatenates channels", {
 
   # Should have 1D measure with doubled length
   expect_s3_class(result$.measures, "measure_list")
-  expect_equal(nrow(result$.measures[[1]]), 20)  # 10 + 10
+  expect_equal(nrow(result$.measures[[1]]), 20) # 10 + 10
 })
 
 
@@ -267,7 +330,10 @@ test_that("step_measure_channel_combine computes weighted sum", {
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv") |>
     step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri") |>
-    step_measure_channel_combine(strategy = "weighted_sum", weights = c(0.7, 0.3)) |>
+    step_measure_channel_combine(
+      strategy = "weighted_sum",
+      weights = c(0.7, 0.3)
+    ) |>
     recipes::prep()
 
   result <- recipes::bake(rec, new_data = NULL)
@@ -341,7 +407,10 @@ test_that("step_measure_channel_combine errors with mismatched weights", {
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv") |>
     step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri") |>
-    step_measure_channel_combine(strategy = "weighted_sum", weights = c(0.5, 0.3, 0.2))
+    step_measure_channel_combine(
+      strategy = "weighted_sum",
+      weights = c(0.5, 0.3, 0.2)
+    )
 
   expect_error(recipes::prep(rec), "Weights length")
 })
@@ -479,14 +548,20 @@ test_that("step_measure_channel_ratio handles multiple pairs", {
   n_samples <- 3
   df <- tibble::tibble(
     id = 1:n_samples,
-    ch1_0 = rnorm(n_samples, 100, 10), ch1_1 = rnorm(n_samples, 100, 10),
-    ch1_2 = rnorm(n_samples, 100, 10), ch1_3 = rnorm(n_samples, 100, 10),
+    ch1_0 = rnorm(n_samples, 100, 10),
+    ch1_1 = rnorm(n_samples, 100, 10),
+    ch1_2 = rnorm(n_samples, 100, 10),
+    ch1_3 = rnorm(n_samples, 100, 10),
     ch1_4 = rnorm(n_samples, 100, 10),
-    ch2_0 = rnorm(n_samples, 50, 5), ch2_1 = rnorm(n_samples, 50, 5),
-    ch2_2 = rnorm(n_samples, 50, 5), ch2_3 = rnorm(n_samples, 50, 5),
+    ch2_0 = rnorm(n_samples, 50, 5),
+    ch2_1 = rnorm(n_samples, 50, 5),
+    ch2_2 = rnorm(n_samples, 50, 5),
+    ch2_3 = rnorm(n_samples, 50, 5),
     ch2_4 = rnorm(n_samples, 50, 5),
-    ch3_0 = rnorm(n_samples, 75, 7), ch3_1 = rnorm(n_samples, 75, 7),
-    ch3_2 = rnorm(n_samples, 75, 7), ch3_3 = rnorm(n_samples, 75, 7),
+    ch3_0 = rnorm(n_samples, 75, 7),
+    ch3_1 = rnorm(n_samples, 75, 7),
+    ch3_2 = rnorm(n_samples, 75, 7),
+    ch3_3 = rnorm(n_samples, 75, 7),
     ch3_4 = rnorm(n_samples, 75, 7),
     outcome = c(1, 2, 3)
   )
@@ -526,9 +601,17 @@ test_that("step_measure_channel_ratio handles division by near-zero", {
   n_samples <- 1
   df <- tibble::tibble(
     id = 1,
-    uv_0 = 100, uv_1 = 100, uv_2 = 100, uv_3 = 100, uv_4 = 100,
+    uv_0 = 100,
+    uv_1 = 100,
+    uv_2 = 100,
+    uv_3 = 100,
+    uv_4 = 100,
     # Near-zero RI values
-    ri_0 = 1e-15, ri_1 = 1e-15, ri_2 = 1e-15, ri_3 = 50, ri_4 = 50,
+    ri_0 = 1e-15,
+    ri_1 = 1e-15,
+    ri_2 = 1e-15,
+    ri_3 = 50,
+    ri_4 = 50,
     outcome = 1
   )
 
@@ -603,8 +686,16 @@ test_that("full channel workflow: align -> combine", {
 
   rec <- recipes::recipe(concentration ~ ., data = df) |>
     recipes::update_role(id, new_role = "id") |>
-    step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv", location_values = uv_locs) |>
-    step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri", location_values = ri_locs) |>
+    step_measure_input_wide(
+      dplyr::starts_with("uv_"),
+      col_name = "uv",
+      location_values = uv_locs
+    ) |>
+    step_measure_input_wide(
+      dplyr::starts_with("ri_"),
+      col_name = "ri",
+      location_values = ri_locs
+    ) |>
     step_measure_channel_align(method = "union") |>
     step_measure_channel_combine(strategy = "stack") |>
     recipes::prep()
@@ -625,8 +716,16 @@ test_that("full channel workflow: align -> ratio", {
 
   rec <- recipes::recipe(concentration ~ ., data = df) |>
     recipes::update_role(id, new_role = "id") |>
-    step_measure_input_wide(dplyr::starts_with("uv_"), col_name = "uv", location_values = uv_locs) |>
-    step_measure_input_wide(dplyr::starts_with("ri_"), col_name = "ri", location_values = ri_locs) |>
+    step_measure_input_wide(
+      dplyr::starts_with("uv_"),
+      col_name = "uv",
+      location_values = uv_locs
+    ) |>
+    step_measure_input_wide(
+      dplyr::starts_with("ri_"),
+      col_name = "ri",
+      location_values = ri_locs
+    ) |>
     step_measure_channel_align(method = "reference") |>
     step_measure_channel_ratio(numerator = "uv", denominator = "ri") |>
     recipes::prep()

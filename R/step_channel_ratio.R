@@ -161,7 +161,9 @@ prep.step_measure_channel_ratio <- function(x, training, info = NULL, ...) {
   # Generate output column names
   output_cols <- paste0(
     x$output_prefix,
-    x$numerator, "_", x$denominator
+    x$numerator,
+    "_",
+    x$denominator
   )
 
   # Check for conflicts
@@ -216,7 +218,8 @@ bake.step_measure_channel_ratio <- function(object, new_data, ...) {
       den_m <- new_data[[den_col]][[j]]
 
       result[[j]] <- .compute_ratio(
-        num_m, den_m,
+        num_m,
+        den_m,
         object$epsilon,
         object$log_transform
       )
@@ -228,7 +231,10 @@ bake.step_measure_channel_ratio <- function(object, new_data, ...) {
   # Remove original columns if requested
   if (object$remove_original) {
     cols_to_remove <- unique(c(object$numerator, object$denominator))
-    new_data <- new_data[, setdiff(names(new_data), cols_to_remove), drop = FALSE]
+    new_data <- new_data[,
+      setdiff(names(new_data), cols_to_remove),
+      drop = FALSE
+    ]
   }
 
   tibble::as_tibble(new_data)
@@ -287,7 +293,8 @@ tidy.step_measure_channel_ratio <- function(x, ...) {
   if (!identical(num_m$location, den_m$location)) {
     # Interpolate denominator to numerator's grid
     den_values <- stats::approx(
-      den_m$location, den_m$value,
+      den_m$location,
+      den_m$value,
       xout = num_m$location,
       rule = 2
     )$y

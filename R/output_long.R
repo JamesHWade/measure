@@ -134,7 +134,7 @@ prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_output_long <- function(object, new_data, ...) {
- col <- object$measures
+  col <- object$measures
 
   # Detect if this is an nD measure column
   ndim <- get_measure_col_ndim(new_data, col)
@@ -149,8 +149,14 @@ bake.step_measure_output_long <- function(object, new_data, ...) {
   } else {
     # nD case: unnest and rename location_1, location_2, etc.
     # Build rename map for nD columns
-    old_names <- c(paste0(col, ".value"), paste0(col, ".location_", seq_len(ndim)))
-    new_names <- c(object$values_to, paste0(object$location_to, "_", seq_len(ndim)))
+    old_names <- c(
+      paste0(col, ".value"),
+      paste0(col, ".location_", seq_len(ndim))
+    )
+    new_names <- c(
+      object$values_to,
+      paste0(object$location_to, "_", seq_len(ndim))
+    )
     rnm <- stats::setNames(old_names, new_names)
 
     new_data |>

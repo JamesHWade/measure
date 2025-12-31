@@ -58,7 +58,7 @@ new_measure_nd_tbl <- function(
 ) {
   dots <- rlang::list2(...)
 
- # Extract location vectors from dots
+  # Extract location vectors from dots
   loc_names <- names(dots)
   if (is.null(loc_names) || any(loc_names == "")) {
     cli::cli_abort(
@@ -66,7 +66,7 @@ new_measure_nd_tbl <- function(
     )
   }
 
- # Validate location naming pattern
+  # Validate location naming pattern
   loc_pattern <- "^location_[0-9]+$"
   invalid_names <- loc_names[!grepl(loc_pattern, loc_names)]
   if (length(invalid_names) > 0) {
@@ -76,7 +76,7 @@ new_measure_nd_tbl <- function(
     )
   }
 
- # Determine ndim and validate
+  # Determine ndim and validate
   ndim <- length(dots)
   if (ndim < 2) {
     cli::cli_abort(
@@ -85,7 +85,7 @@ new_measure_nd_tbl <- function(
     )
   }
 
- # Validate all location vectors are numeric
+  # Validate all location vectors are numeric
   for (nm in loc_names) {
     if (!is.numeric(dots[[nm]])) {
       cli::cli_abort(
@@ -94,15 +94,15 @@ new_measure_nd_tbl <- function(
     }
   }
 
- # Validate value is numeric
+  # Validate value is numeric
   if (!is.numeric(value)) {
     cli::cli_abort(
       "{.arg value} must be numeric, not {.obj_type_friendly {value}}."
     )
   }
 
- # Validate all vectors have the same length
-  lengths <- c(vapply(dots, length, integer(1)), length(value))
+  # Validate all vectors have the same length
+  lengths <- c(lengths(dots), length(value))
   if (length(unique(lengths)) != 1) {
     len_str <- paste(c(loc_names, "value"), "=", lengths, collapse = ", ")
     cli::cli_abort(
@@ -111,31 +111,31 @@ new_measure_nd_tbl <- function(
     )
   }
 
- # Sort location columns by dimension number for consistent ordering
-  dim_nums <- as.integer(sub("location_", "", loc_names))
+  # Sort location columns by dimension number for consistent ordering
+  dim_nums <- as.integer(sub("location_", "", loc_names, fixed = TRUE))
   sorted_idx <- order(dim_nums)
   dots <- dots[sorted_idx]
   loc_names <- loc_names[sorted_idx]
 
- # Validate dim_names length
+  # Validate dim_names length
   if (!is.null(dim_names) && length(dim_names) != ndim) {
     cli::cli_abort(
       "{.arg dim_names} must have length {ndim} (one per dimension), not {length(dim_names)}."
     )
   }
 
- # Validate dim_units length
+  # Validate dim_units length
   if (!is.null(dim_units) && length(dim_units) != ndim) {
     cli::cli_abort(
       "{.arg dim_units} must have length {ndim} (one per dimension), not {length(dim_units)}."
     )
   }
 
- # Build the tibble
+  # Build the tibble
   data <- c(dots, list(value = value))
   x <- tibble::as_tibble(data)
 
- # Add class and attributes
+  # Add class and attributes
   class(x) <- c("measure_nd_tbl", "measure_tbl", class(x))
   attr(x, "ndim") <- ndim
   attr(x, "dim_names") <- dim_names
@@ -168,7 +168,7 @@ as_measure_nd_tbl <- function(x, dim_names = NULL, dim_units = NULL) {
     )
   }
 
- # Find location columns
+  # Find location columns
   loc_cols <- grep("^location_[0-9]+$", names(x), value = TRUE)
   if (length(loc_cols) < 2) {
     cli::cli_abort(
@@ -181,12 +181,12 @@ as_measure_nd_tbl <- function(x, dim_names = NULL, dim_units = NULL) {
     cli::cli_abort("{.arg x} must have a {.code value} column.")
   }
 
- # Extract data in correct order
-  dim_nums <- as.integer(sub("location_", "", loc_cols))
+  # Extract data in correct order
+  dim_nums <- as.integer(sub("location_", "", loc_cols, fixed = TRUE))
   sorted_idx <- order(dim_nums)
   loc_cols <- loc_cols[sorted_idx]
 
- # Build args for new_measure_nd_tbl
+  # Build args for new_measure_nd_tbl
   args <- stats::setNames(lapply(loc_cols, function(col) x[[col]]), loc_cols)
   args$value <- x[["value"]]
   args$dim_names <- dim_names %||% attr(x, "dim_names")
@@ -232,8 +232,17 @@ print.measure_nd_tbl <- function(x, ..., n = NULL, width = NULL) {
     dim_str <- paste0(ndim, "D")
   }
 
-  cat("<measure_nd_tbl [", nrow(x), " x ", ncol(x), "] ", dim_str, ">\n", sep = "")
- # Use tibble's print for the content
+  cat(
+    "<measure_nd_tbl [",
+    nrow(x),
+    " x ",
+    ncol(x),
+    "] ",
+    dim_str,
+    ">\n",
+    sep = ""
+  )
+  # Use tibble's print for the content
   NextMethod()
 }
 
@@ -300,7 +309,7 @@ new_measure_nd_list <- function(x = list()) {
     ))
   }
 
- # Coerce each element to measure_nd_tbl if it isn't already
+  # Coerce each element to measure_nd_tbl if it isn't already
   x <- lapply(x, function(el) {
     if (is_measure_nd_tbl(el)) {
       el
@@ -314,7 +323,7 @@ new_measure_nd_list <- function(x = list()) {
     }
   })
 
- # Validate all elements have the same ndim
+  # Validate all elements have the same ndim
   ndims <- vapply(x, function(el) attr(el, "ndim") %||% 2L, integer(1))
   if (length(unique(ndims)) > 1) {
     cli::cli_abort(
@@ -323,7 +332,7 @@ new_measure_nd_list <- function(x = list()) {
     )
   }
 
- # Use the first element as prototype for vctrs
+  # Use the first element as prototype for vctrs
   ptype <- new_measure_nd_tbl(
     location_1 = double(),
     location_2 = double(),
@@ -332,7 +341,7 @@ new_measure_nd_list <- function(x = list()) {
   # Copy ndim attribute to match elements
   attr(ptype, "ndim") <- ndims[1]
 
- # Add location columns for higher dimensions if needed
+  # Add location columns for higher dimensions if needed
   if (ndims[1] > 2) {
     for (i in 3:ndims[1]) {
       ptype[[paste0("location_", i)]] <- double()
@@ -342,7 +351,7 @@ new_measure_nd_list <- function(x = list()) {
     ptype <- ptype[c(loc_cols, "value")]
   }
 
- # Use vctrs for proper list-column behavior
+  # Use vctrs for proper list-column behavior
   x <- vctrs::new_list_of(
     x,
     ptype = ptype,
@@ -477,7 +486,7 @@ obj_print_data.measure_nd_list <- function(x, ...) {
 #' @rdname vctrs-methods
 #' @export
 `[[.measure_nd_list` <- function(x, i, ...) {
- # Single element extraction returns the measure_nd_tbl
+  # Single element extraction returns the measure_nd_tbl
   NextMethod()
 }
 
@@ -535,7 +544,7 @@ measure_ndim.measure_nd_tbl <- function(x) {
 #' @export
 measure_ndim.measure_nd_list <- function(x) {
   if (length(x) == 0) {
-    return(2L)  # Default for empty list
+    return(2L) # Default for empty list
   }
   attr(x[[1]], "ndim") %||% 2L
 }

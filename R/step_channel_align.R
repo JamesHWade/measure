@@ -207,8 +207,11 @@ print.step_measure_channel_align <- function(
   ...
 ) {
   title <- paste0(
-    "Channel alignment (method = ", x$method,
-    ", interp = ", x$interpolation, ") on "
+    "Channel alignment (method = ",
+    x$method,
+    ", interp = ",
+    x$interpolation,
+    ") on "
   )
   if (x$trained) {
     cat(title, paste(x$measure_cols, collapse = ", "), sep = "")
@@ -302,7 +305,9 @@ tidy.step_measure_channel_align <- function(x, ...) {
     interpolation,
     "linear" = function(x, y, xout) stats::approx(x, y, xout, rule = 2)$y,
     "spline" = function(x, y, xout) stats::spline(x, y, xout = xout)$y,
-    "constant" = function(x, y, xout) stats::approx(x, y, xout, method = "constant", rule = 2)$y
+    "constant" = function(x, y, xout) {
+      stats::approx(x, y, xout, method = "constant", rule = 2)$y
+    }
   )
 
   new_values <- interp_fn(m$location, m$value, target_grid)

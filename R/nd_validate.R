@@ -124,7 +124,7 @@ measure_grid_info.measure_nd_tbl <- function(x) {
   names(unique_values) <- paste0("dim_", seq_len(ndim))
 
   # Shape is the count of unique values per dimension
-  shape <- vapply(unique_values, length, integer(1))
+  shape <- lengths(unique_values)
   names(shape) <- paste0("dim_", seq_len(ndim))
 
   list(
@@ -135,7 +135,7 @@ measure_grid_info.measure_nd_tbl <- function(x) {
     shape = shape,
     n_points = nrow(x),
     is_regular = measure_is_regular(x),
-    has_na = any(is.na(x$value))
+    has_na = anyNA(x$value)
   )
 }
 
@@ -200,7 +200,7 @@ validate_measure_nd <- function(
   call = rlang::caller_env()
 ) {
   # Check class
- if (!is_measure_nd_tbl(x) && !is_measure_nd_list(x)) {
+  if (!is_measure_nd_tbl(x) && !is_measure_nd_list(x)) {
     cli::cli_abort(
       "{.arg x} must be a {.cls measure_nd_tbl} or {.cls measure_nd_list},
        not {.obj_type_friendly {x}}.",
@@ -240,9 +240,9 @@ validate_measure_nd <- function(
   # Check for NA values
   if (require_no_na) {
     has_na <- if (is_measure_nd_tbl(x)) {
-      any(is.na(x$value))
+      anyNA(x$value)
     } else {
-      any(vapply(x, function(el) any(is.na(el$value)), logical(1)))
+      any(vapply(x, function(el) anyNA(el$value), logical(1)))
     }
 
     if (has_na) {
@@ -269,8 +269,11 @@ validate_measure_nd <- function(
 #' @return Invisibly returns the number of dimensions.
 #'
 #' @noRd
-check_measure_nd_dims <- function(x, col = ".measures", call = rlang
-::caller_env()) {
+check_measure_nd_dims <- function(
+  x,
+  col = ".measures",
+  call = rlang::caller_env()
+) {
   if (!is_measure_nd_list(x)) {
     cli::cli_abort(
       "Column {.field {col}} must be a {.cls measure_nd_list}.",

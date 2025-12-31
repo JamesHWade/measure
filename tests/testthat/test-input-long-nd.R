@@ -31,7 +31,7 @@ create_3d_test_data <- function() {
 create_irregular_test_data <- function() {
   tibble::tibble(
     sample_id = rep(1:2, c(5, 6)),
-    time = c(0, 1, 2, 3, 4, 0, 2, 4, 6, 8, 10),  # Different grid sizes
+    time = c(0, 1, 2, 3, 4, 0, 2, 4, 6, 8, 10), # Different grid sizes
     wavelength = c(rep(254, 5), rep(280, 6)),
     intensity = rnorm(11),
     concentration = rep(c(1, 2), c(5, 6))
@@ -57,7 +57,7 @@ test_that("step_measure_input_long creates 2D measure_nd_list", {
   result <- recipes::bake(rec, new_data = NULL)
 
   expect_s3_class(result$.measures, "measure_nd_list")
-  expect_length(result$.measures, 2)  # 2 samples
+  expect_length(result$.measures, 2) # 2 samples
   expect_s3_class(result$.measures[[1]], "measure_nd_tbl")
   expect_equal(measure_ndim(result$.measures[[1]]), 2L)
 })
@@ -78,10 +78,10 @@ test_that("2D input preserves data values correctly", {
 
   # Check first sample
   m1 <- result$.measures[[1]]
-  expect_equal(nrow(m1), 12)  # 3 times x 4 wavelengths
+  expect_equal(nrow(m1), 12) # 3 times x 4 wavelengths
   expect_equal(names(m1), c("location_1", "location_2", "value"))
-  expect_equal(sort(unique(m1$location_1)), c(0, 5, 10))  # times
-  expect_equal(sort(unique(m1$location_2)), c(254, 280, 320, 350))  # wavelengths
+  expect_equal(sort(unique(m1$location_1)), c(0, 5, 10)) # times
+  expect_equal(sort(unique(m1$location_2)), c(254, 280, 320, 350)) # wavelengths
 })
 
 
@@ -115,7 +115,7 @@ test_that("2D input validates dim_names length", {
       step_measure_input_long(
         absorbance,
         location = dplyr::vars(time, wavelength),
-        dim_names = c("only_one")  # Wrong length
+        dim_names = c("only_one") # Wrong length
       ) |>
       recipes::prep(),
     "dim_names"
@@ -132,7 +132,7 @@ test_that("2D input validates dim_units length", {
       step_measure_input_long(
         absorbance,
         location = dplyr::vars(time, wavelength),
-        dim_units = c("min", "nm", "extra")  # Wrong length
+        dim_units = c("min", "nm", "extra") # Wrong length
       ) |>
       recipes::prep(),
     "dim_units"
@@ -160,7 +160,7 @@ test_that("step_measure_input_long creates 3D measure_nd_list", {
   expect_s3_class(result$.measures, "measure_nd_list")
   expect_length(result$.measures, 2)
   expect_equal(measure_ndim(result$.measures[[1]]), 3L)
-  expect_equal(nrow(result$.measures[[1]]), 12)  # 2 x 3 x 2
+  expect_equal(nrow(result$.measures[[1]]), 12) # 2 x 3 x 2
 })
 
 
@@ -257,7 +257,7 @@ test_that("irregular grid is detected correctly", {
   # Create data with missing combinations
   data <- tibble::tibble(
     sample_id = rep(1, 5),
-    time = c(0, 0, 5, 5, 10),  # Missing (10, 254)
+    time = c(0, 0, 5, 5, 10), # Missing (10, 254)
     wavelength = c(254, 280, 254, 280, 280),
     intensity = rnorm(5),
     outcome = 1
@@ -367,7 +367,6 @@ test_that("tidy works for 2D input step", {
 # ------------------------------------------------------------------------------
 
 test_that("print works for 2D input step", {
-
   data <- create_2d_test_data()
 
   rec <- recipes::recipe(concentration ~ ., data = data) |>
@@ -380,7 +379,7 @@ test_that("print works for 2D input step", {
 
   # Verify the step has proper columns stored indicating 2D
   step <- rec$steps[[1]]
-  expect_equal(length(step$columns), 3)  # absorbance, time, wavelength
+  expect_equal(length(step$columns), 3) # absorbance, time, wavelength
   expect_equal(step$columns[1], "absorbance")
   expect_true("time" %in% step$columns)
   expect_true("wavelength" %in% step$columns)
@@ -409,7 +408,7 @@ test_that("2D input handles NA values in measurements", {
   result <- recipes::bake(rec, new_data = NULL)
 
   # Should contain the NA
-  expect_true(any(is.na(result$.measures[[1]]$value)))
+  expect_true(anyNA(result$.measures[[1]]$value))
 
   # Grid info should report NA
   info <- measure_grid_info(result$.measures[[1]])
@@ -420,7 +419,7 @@ test_that("2D input handles NA values in measurements", {
 test_that("2D input rejects non-numeric location columns", {
   data <- tibble::tibble(
     sample_id = rep(1:2, each = 4),
-    time = rep(c("early", "late"), 4),  # Character, not numeric
+    time = rep(c("early", "late"), 4), # Character, not numeric
     wavelength = rep(1:2, 4),
     intensity = rnorm(8),
     outcome = rep(1:2, each = 4)

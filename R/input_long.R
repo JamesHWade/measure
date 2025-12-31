@@ -326,7 +326,10 @@ rename_long_cols_nd <- function(.data, value_col, loc_cols) {
   } else {
     # nD: rename to location_1, location_2, etc.
     loc_new_names <- paste0("location_", seq_len(ndim))
-    rename_map <- stats::setNames(c(value_col, loc_cols), c("value", loc_new_names))
+    rename_map <- stats::setNames(
+      c(value_col, loc_cols),
+      c("value", loc_new_names)
+    )
   }
 
   dplyr::rename(.data, dplyr::all_of(rename_map))
@@ -340,7 +343,10 @@ wrap_as_measure_nd_list <- function(nested_data, ndim, dim_names, dim_units) {
   result <- lapply(nested_data, function(tbl) {
     # Build the args for new_measure_nd_tbl
     loc_cols <- paste0("location_", seq_len(ndim))
-    args <- stats::setNames(lapply(loc_cols, function(col) tbl[[col]]), loc_cols)
+    args <- stats::setNames(
+      lapply(loc_cols, function(col) tbl[[col]]),
+      loc_cols
+    )
     args$value <- tbl[["value"]]
     args$dim_names <- dim_names
     args$dim_units <- dim_units

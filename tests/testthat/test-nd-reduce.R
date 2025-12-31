@@ -32,7 +32,7 @@ test_that("measure_unfold preserves values", {
   m1d <- measure_unfold(m2d)
 
   # All original values should be present
- expect_setequal(m1d$value, c(10, 20, 30, 40, 50, 60))
+  expect_setequal(m1d$value, c(10, 20, 30, 40, 50, 60))
 })
 
 
@@ -206,7 +206,7 @@ test_that("measure_slice extracts at single value", {
   result <- measure_slice(m2d, dim_1 = 2)
 
   expect_s3_class(result, "measure_tbl")
-  expect_false(is_measure_nd_tbl(result))  # Dropped to 1D
+  expect_false(is_measure_nd_tbl(result)) # Dropped to 1D
   expect_equal(nrow(result), 4)
   expect_equal(result$value, 5:8)
 })
@@ -354,7 +354,7 @@ test_that("measure_project with sum function", {
 
   result <- measure_project(m2d, along = 2, fn = sum)
 
-  expect_equal(result$value, c(3, 3))  # Sum of 3 ones for each loc_1
+  expect_equal(result$value, c(3, 3)) # Sum of 3 ones for each loc_1
 })
 
 
@@ -402,7 +402,7 @@ test_that("measure_project on 3D data", {
 
   expect_s3_class(result, "measure_nd_tbl")
   expect_equal(measure_ndim(result), 2L)
-  expect_equal(nrow(result), 4)  # 2 samples x 2 times
+  expect_equal(nrow(result), 4) # 2 samples x 2 times
 })
 
 

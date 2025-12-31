@@ -60,8 +60,8 @@ test_that("measure_apply errors when fn returns wrong type", {
 test_that("measure_apply works on 2D data along dimension 1", {
   # 3 time points x 4 wavelengths
   m2d <- new_measure_nd_tbl(
-    location_1 = rep(1:3, each = 4),   # time
-    location_2 = rep(1:4, times = 3),  # wavelength
+    location_1 = rep(1:3, each = 4), # time
+    location_2 = rep(1:4, times = 3), # wavelength
     value = as.double(1:12)
   )
 
@@ -106,8 +106,8 @@ test_that("measure_apply preserves dimension metadata", {
 test_that("measure_apply along dimension trims correctly", {
   # Create 5 time points x 3 wavelengths
   m2d <- new_measure_nd_tbl(
-    location_1 = rep(1:5, each = 3),   # time: 1, 2, 3, 4, 5
-    location_2 = rep(1:3, times = 5),  # wavelength
+    location_1 = rep(1:5, each = 3), # time: 1, 2, 3, 4, 5
+    location_2 = rep(1:3, times = 5), # wavelength
     value = as.double(1:15)
   )
 
@@ -245,12 +245,14 @@ test_that("measure_apply along dimension 2 with diff-like operation", {
   m2d <- new_measure_nd_tbl(
     location_1 = rep(1:3, each = 5),
     location_2 = rep(1:5, times = 3),
-    value = rep(1:5, 3)  # Each time slice has values 1,2,3,4,5
+    value = rep(1:5, 3) # Each time slice has values 1,2,3,4,5
   )
 
   # Compute difference along wavelength dimension
   diff_fn <- function(x) {
-    if (nrow(x) < 2) return(x)
+    if (nrow(x) < 2) {
+      return(x)
+    }
     new_measure_tbl(
       location = x$location[-1],
       value = diff(x$value)
@@ -262,8 +264,8 @@ test_that("measure_apply along dimension 2 with diff-like operation", {
   # Each time slice had values 1,2,3,4,5 -> diff = 1,1,1,1
   # Result should have 4 wavelength points per time slice = 12 total
   expect_s3_class(result, "measure_nd_tbl")
-  expect_equal(nrow(result), 12)  # 3 time points x 4 diff values
-  expect_equal(unique(result$value), 1)  # All diffs are 1
+  expect_equal(nrow(result), 12) # 3 time points x 4 diff values
+  expect_equal(unique(result$value), 1) # All diffs are 1
 })
 
 
@@ -276,7 +278,7 @@ test_that("measure_apply handles empty result from fn", {
 
   # Function that removes all data
   empty_fn <- function(x) {
-    x[x$location > 100, ]  # No points match
+    x[x$location > 100, ] # No points match
   }
 
   result <- measure_apply(m1d, empty_fn)

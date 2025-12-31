@@ -355,7 +355,7 @@ find_measure_cols <- function(data) {
   }
 
   # Note: This also detects measure_nd_list columns since they inherit
- # from measure_list. Use find_measure_nd_cols() for nD-only detection.
+  # from measure_list. Use find_measure_nd_cols() for nD-only detection.
   is_meas <- vapply(data, is_measure_list, logical(1))
   names(data)[is_meas]
 }
@@ -397,7 +397,7 @@ get_measure_col_ndim <- function(data, col) {
   # Check if it's an nD list (has measure_nd_list class)
   if (inherits(x, "measure_nd_list")) {
     if (length(x) == 0) {
-      return(2L)  # Default for empty nD list
+      return(2L) # Default for empty nD list
     }
     return(attr(x[[1]], "ndim") %||% 2L)
   }

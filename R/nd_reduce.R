@@ -59,7 +59,7 @@
 #'
 #' @export
 measure_unfold <- function(x, order = NULL) {
- UseMethod("measure_unfold")
+  UseMethod("measure_unfold")
 }
 
 
@@ -72,7 +72,7 @@ measure_unfold.measure_nd_tbl <- function(x, order = NULL) {
   }
 
   # Validate order
- if (length(order) != ndim || !setequal(order, seq_len(ndim))) {
+  if (length(order) != ndim || !setequal(order, seq_len(ndim))) {
     cli::cli_abort(
       "{.arg order} must be a permutation of 1:{ndim}, got {.val {order}}."
     )
@@ -154,7 +154,7 @@ measure_unfold.measure_nd_list <- function(x, order = NULL) {
 #'
 #' @export
 measure_fold <- function(x) {
- UseMethod("measure_fold")
+  UseMethod("measure_fold")
 }
 
 
@@ -322,7 +322,12 @@ measure_slice.measure_nd_tbl <- function(x, ..., drop = TRUE) {
       ))
     } else {
       # nD result with fewer dimensions
-      return(renumber_dims(filtered, remaining_dims, dim_names, measure_dim_units(x)))
+      return(renumber_dims(
+        filtered,
+        remaining_dims,
+        dim_names,
+        measure_dim_units(x)
+      ))
     }
   }
 
@@ -396,7 +401,13 @@ measure_project <- function(x, along, fn = mean, na_rm = TRUE, ...) {
 
 
 #' @export
-measure_project.measure_nd_tbl <- function(x, along, fn = mean, na_rm = TRUE, ...) {
+measure_project.measure_nd_tbl <- function(
+  x,
+  along,
+  fn = mean,
+  na_rm = TRUE,
+  ...
+) {
   ndim <- measure_ndim(x)
   dim_names_orig <- measure_dim_names(x)
   dim_units_orig <- measure_dim_units(x)
@@ -454,7 +465,13 @@ measure_project.measure_nd_tbl <- function(x, along, fn = mean, na_rm = TRUE, ..
 
 
 #' @export
-measure_project.measure_nd_list <- function(x, along, fn = mean, na_rm = TRUE, ...) {
+measure_project.measure_nd_list <- function(
+  x,
+  along,
+  fn = mean,
+  na_rm = TRUE,
+  ...
+) {
   results <- lapply(x, function(m) {
     measure_project(m, along = along, fn = fn, na_rm = na_rm, ...)
   })
@@ -488,7 +505,7 @@ resolve_dim_conditions <- function(conditions, ndim, dim_names) {
   for (name in names(conditions)) {
     # Try to match as dim_N format
     if (grepl("^dim_[0-9]+$", name)) {
-      dim_num <- as.integer(sub("dim_", "", name))
+      dim_num <- as.integer(sub("dim_", "", name, fixed = TRUE))
     } else if (!is.null(dim_names) && name %in% dim_names) {
       # Match by semantic name
       dim_num <- which(dim_names == name)
@@ -525,7 +542,7 @@ resolve_dim_ref <- function(ref, ndim, dim_names) {
   if (is.character(ref)) {
     if (!is.null(dim_names)) {
       matches <- match(ref, dim_names)
-      if (any(is.na(matches))) {
+      if (anyNA(matches)) {
         cli::cli_abort(
           "Unknown dimension name(s): {.val {ref[is.na(matches)]}}."
         )
@@ -546,7 +563,12 @@ resolve_dim_ref <- function(ref, ndim, dim_names) {
 
 #' Renumber dimensions after dropping some
 #' @noRd
-renumber_dims <- function(data, remaining_dims, dim_names_orig, dim_units_orig) {
+renumber_dims <- function(
+  data,
+  remaining_dims,
+  dim_names_orig,
+  dim_units_orig
+) {
   n_new <- length(remaining_dims)
   old_cols <- paste0("location_", remaining_dims)
   new_cols <- paste0("location_", seq_len(n_new))

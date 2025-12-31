@@ -210,9 +210,17 @@ bake.step_measure_channel_combine <- function(object, new_data, ...) {
 
   combined <- switch(
     object$strategy,
-    "stack" = .combine_stack(new_data, object$measure_cols, object$channel_names),
+    "stack" = .combine_stack(
+      new_data,
+      object$measure_cols,
+      object$channel_names
+    ),
     "concat" = .combine_concat(new_data, object$measure_cols),
-    "weighted_sum" = .combine_weighted(new_data, object$measure_cols, object$weights),
+    "weighted_sum" = .combine_weighted(
+      new_data,
+      object$measure_cols,
+      object$weights
+    ),
     "mean" = .combine_weighted(new_data, object$measure_cols, object$weights)
   )
 
@@ -221,7 +229,10 @@ bake.step_measure_channel_combine <- function(object, new_data, ...) {
 
   # Remove original columns if requested
   if (object$remove_original) {
-    new_data <- new_data[, setdiff(names(new_data), object$measure_cols), drop = FALSE]
+    new_data <- new_data[,
+      setdiff(names(new_data), object$measure_cols),
+      drop = FALSE
+    ]
   }
 
   tibble::as_tibble(new_data)
@@ -235,8 +246,14 @@ print.step_measure_channel_combine <- function(
 ) {
   title <- paste0("Channel combination (strategy = ", x$strategy, ") ")
   if (x$trained) {
-    cat(title, "from ", paste(x$measure_cols, collapse = ", "),
-        " to ", x$output_col, sep = "")
+    cat(
+      title,
+      "from ",
+      paste(x$measure_cols, collapse = ", "),
+      " to ",
+      x$output_col,
+      sep = ""
+    )
   } else {
     cat(title, "<pending>", sep = "")
   }

@@ -14,7 +14,7 @@ test_that("new_measure_nd_tbl creates valid 2D objects", {
   )
 
   expect_s3_class(m2d, "measure_nd_tbl")
-  expect_s3_class(m2d, "measure_tbl")  # Inherits from 1D
+  expect_s3_class(m2d, "measure_tbl") # Inherits from 1D
   expect_s3_class(m2d, "tbl_df")
 
   expect_equal(nrow(m2d), 6)
@@ -71,13 +71,21 @@ test_that("new_measure_nd_tbl validates inputs", {
 
   # Non-numeric locations
   expect_error(
-    new_measure_nd_tbl(location_1 = letters[1:3], location_2 = 1:3, value = 1:3),
+    new_measure_nd_tbl(
+      location_1 = letters[1:3],
+      location_2 = 1:3,
+      value = 1:3
+    ),
     "must be numeric"
   )
 
   # Non-numeric value
   expect_error(
-    new_measure_nd_tbl(location_1 = 1:3, location_2 = 1:3, value = letters[1:3]),
+    new_measure_nd_tbl(
+      location_1 = 1:3,
+      location_2 = 1:3,
+      value = letters[1:3]
+    ),
     "must be numeric"
   )
 
@@ -96,7 +104,9 @@ test_that("new_measure_nd_tbl validates inputs", {
   # Wrong dim_names length
   expect_error(
     new_measure_nd_tbl(
-      location_1 = 1:3, location_2 = 1:3, value = 1:3,
+      location_1 = 1:3,
+      location_2 = 1:3,
+      value = 1:3,
       dim_names = c("only_one")
     ),
     "dim_names.*must have length 2"
@@ -196,8 +206,8 @@ test_that("print.measure_nd_tbl works", {
   )
 
   output <- capture.output(print(m2d))
-  expect_true(any(grepl("measure_nd_tbl", output)))
-  expect_true(any(grepl("time x wavelength", output)))
+  expect_true(any(grepl("measure_nd_tbl", output, fixed = TRUE)))
+  expect_true(any(grepl("time x wavelength", output, fixed = TRUE)))
 })
 
 
@@ -220,7 +230,7 @@ test_that("new_measure_nd_list creates valid objects", {
   ml <- new_measure_nd_list(list(m1, m2))
 
   expect_s3_class(ml, "measure_nd_list")
-  expect_s3_class(ml, "measure_list")  # Inherits from 1D
+  expect_s3_class(ml, "measure_list") # Inherits from 1D
   expect_length(ml, 2)
 })
 
@@ -328,9 +338,9 @@ test_that("print.measure_nd_list works", {
   ml <- new_measure_nd_list(list(m, m, m))
 
   output <- capture.output(print(ml))
-  expect_true(any(grepl("measure_nd_list", output)))
-  expect_true(any(grepl("3 measurements", output)))
-  expect_true(any(grepl("2D", output)))
+  expect_true(any(grepl("measure_nd_list", output, fixed = TRUE)))
+  expect_true(any(grepl("3 measurements", output, fixed = TRUE)))
+  expect_true(any(grepl("2D", output, fixed = TRUE)))
 })
 
 
@@ -339,7 +349,7 @@ test_that("format.measure_nd_list produces correct abbreviations", {
   ml <- new_measure_nd_list(list(m))
 
   formatted <- format(ml)
-  expect_true(grepl("meas2d", formatted))
+  expect_true(grepl("meas2d", formatted, fixed = TRUE))
   expect_true(grepl("\\[5\\]", formatted))
 })
 

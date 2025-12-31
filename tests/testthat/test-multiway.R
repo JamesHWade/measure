@@ -38,7 +38,8 @@ create_nd_test_data <- function(n_samples = 10, n_time = 5, n_wavelength = 4) {
     concentrations[i, ] <- conc
 
     # Build 2D measurement (time x wavelength)
-    signal <- conc[1] * outer(C1_time, C1_wave) +
+    signal <- conc[1] *
+      outer(C1_time, C1_wave) +
       conc[2] * outer(C2_time, C2_wave) +
       conc[3] * outer(C3_time, C3_wave) +
       matrix(rnorm(n_time * n_wavelength, 0, 0.01), n_time, n_wavelength)
@@ -100,7 +101,6 @@ test_that("step_measure_parafac constructor works", {
 test_that("step_measure_parafac prep extracts components", {
   skip_if_not_installed("multiway")
 
-
   test_data <- create_nd_test_data(n_samples = 8)
 
   suppressWarnings({
@@ -149,11 +149,21 @@ test_that("step_measure_parafac works with centering/scaling options", {
 
   suppressWarnings({
     rec_centered <- recipes::recipe(outcome ~ ., data = test_data) |>
-      step_measure_parafac(spectrum, n_components = 2, center = TRUE, scale = FALSE) |>
+      step_measure_parafac(
+        spectrum,
+        n_components = 2,
+        center = TRUE,
+        scale = FALSE
+      ) |>
       recipes::prep()
 
     rec_scaled <- recipes::recipe(outcome ~ ., data = test_data) |>
-      step_measure_parafac(spectrum, n_components = 2, center = TRUE, scale = TRUE) |>
+      step_measure_parafac(
+        spectrum,
+        n_components = 2,
+        center = TRUE,
+        scale = TRUE
+      ) |>
       recipes::prep()
   })
 
@@ -166,10 +176,12 @@ test_that("step_measure_parafac works with centering/scaling options", {
 
   # Scores should differ between centered and scaled versions
   # (not identical, but structure should be similar)
-  expect_true(!identical(
-    baked_centered$parafac_spectrum_1,
-    baked_scaled$parafac_spectrum_1
-  ))
+  expect_true(
+    !identical(
+      baked_centered$parafac_spectrum_1,
+      baked_scaled$parafac_spectrum_1
+    )
+  )
 })
 
 test_that("step_measure_parafac tidy returns parameters", {
@@ -423,27 +435,28 @@ test_that("step_measure_mcr_als tidy returns parameters and spectra", {
 # Integration Tests
 # ==============================================================================
 
-test_that("multi-way steps work in pipeline with other steps",
-  {
-    skip_if_not_installed("multiway")
+test_that("multi-way steps work in pipeline with other steps", {
+  skip_if_not_installed("multiway")
 
-    test_data <- create_nd_test_data(n_samples = 10)
+  test_data <- create_nd_test_data(n_samples = 10)
 
-    # PARAFAC in a pipeline
-    suppressWarnings({
-      rec <- recipes::recipe(outcome ~ ., data = test_data) |>
-        recipes::step_rm(conc_1, conc_2, conc_3) |>
-        step_measure_parafac(spectrum, n_components = 2) |>
-        recipes::prep()
-    })
+  # PARAFAC in a pipeline
+  suppressWarnings({
+    rec <- recipes::recipe(outcome ~ ., data = test_data) |>
+      recipes::step_rm(conc_1, conc_2, conc_3) |>
+      step_measure_parafac(spectrum, n_components = 2) |>
+      recipes::prep()
+  })
 
-    baked <- recipes::bake(rec, new_data = NULL)
+  baked <- recipes::bake(rec, new_data = NULL)
 
-    # Should have: id, parafac_spectrum_1, parafac_spectrum_2, outcome
-    expect_true(all(c("id", "parafac_spectrum_1", "parafac_spectrum_2", "outcome") %in% names(baked)))
-    expect_false("spectrum" %in% names(baked))
-  }
-)
+  # Should have: id, parafac_spectrum_1, parafac_spectrum_2, outcome
+  expect_true(all(
+    c("id", "parafac_spectrum_1", "parafac_spectrum_2", "outcome") %in%
+      names(baked)
+  ))
+  expect_false("spectrum" %in% names(baked))
+})
 
 test_that("multi-way steps fail gracefully without nD data", {
   skip_if_not_installed("multiway")
