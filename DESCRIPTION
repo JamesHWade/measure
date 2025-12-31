@@ -42,6 +42,7 @@ Suggests:
     patchwork,
     prospectr,
     ptw,
+    quarto,
     reticulate,
     rmarkdown,
     roxygen2,

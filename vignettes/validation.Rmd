@@ -628,6 +628,141 @@ rec <- recipe(~ ., data = drift_data) |>
 corrected <- bake(rec, new_data = NULL)
 ```
 
+## Validation Reports
+
+Once you've completed your validation studies, you can compile all results into a reproducible validation report using `measure_validation_report()`. The package provides templates following regulatory frameworks like ICH Q2(R2) and USP <1225>.
+### Creating a Validation Report
+
+```{r validation-report}
+# Gather validation results (using objects from above)
+report <- measure_validation_report(
+  # Metadata
+  title = "HPLC-UV Method Validation Report",
+  method_name = "Compound X Assay",
+  method_description = "Reversed-phase HPLC with UV detection at 254 nm",
+  analyst = "J. Smith",
+  reviewer = "A. Jones",
+  lab = "Analytical Development",
+  instrument = "Agilent 1260 Infinity II",
+
+
+  # Validation sections (results from earlier in this vignette)
+  calibration = cal,
+  lod_loq = lod_loq,
+  accuracy = accuracy,
+  precision = list(repeatability = repeatability, intermediate = ip_result),
+  linearity = linearity,
+  range = list(lower = 1, upper = 500, units = "ng/mL"),
+  uncertainty = budget,
+
+  # Text sections
+  specificity = "No interfering peaks observed at the analyte retention time when analyzing blank matrix samples.",
+  robustness = list(
+    factors = c("Flow rate (±0.1 mL/min)", "Column temperature (±5°C)", "Mobile phase pH (±0.2)"),
+    conclusion = "Method showed acceptable robustness within tested parameter ranges."
+  ),
+
+  # Conclusions
+  conclusions = list(
+    summary = "The analytical method meets all acceptance criteria for precision, accuracy, and linearity.",
+    recommendations = c(
+      "Method is suitable for intended use",
+      "Revalidate if significant changes are made to instrumentation or reagents"
+    )
+  ),
+
+  # References
+  references = c(
+    "ICH Q2(R2) Validation of Analytical Procedures (2023)",
+    "USP <1225> Validation of Compendial Procedures"
+  )
+)
+
+print(report)
+```
+
+### Inspecting Report Sections
+
+```{r report-sections}
+# Check which sections are included
+summary(report)
+
+# Access specific sections
+has_validation_section(report, "calibration")
+has_validation_section(report, "stability")  # Not included
+
+# Get section data
+get_validation_section(report, "range")
+```
+
+### Adding Custom Sections
+
+You can add additional sections after report creation:
+
+```{r add-section}
+# Add a stability section later
+report <- add_validation_section(
+  report,
+  "stability",
+  list(
+    description = "Short-term stability at room temperature",
+    results = data.frame(
+      timepoint = c("0h", "4h", "8h", "24h"),
+      recovery_pct = c(100, 99.5, 98.8, 97.2)
+    ),
+    conclusion = "Sample is stable for 24 hours at room temperature."
+  )
+)
+
+has_validation_section(report, "stability")
+```
+
+### Tidy Output
+
+Extract all results as a tidy tibble for further analysis:
+
+```{r tidy-report}
+tidy(report)
+```
+
+### Rendering Reports
+
+To render a validation report to HTML or PDF, use `render_validation_report()`. Two templates are provided:
+
+- **ICH Q2(R2)**: Organized by validation characteristics (specificity, linearity, range, accuracy, precision, etc.)
+- **USP <1225>**: Organized by procedure category (I, II, III, IV)
+
+```{r render-report, eval = FALSE}
+# Render to HTML using ICH Q2 template (default)
+render_validation_report(
+  report,
+  output_file = "validation_report.html",
+  template = "ich_q2"
+)
+
+# Render to PDF using USP <1225> template
+render_validation_report(
+  report,
+  output_file = "validation_report.pdf",
+  output_format = "pdf",
+  template = "usp_1225"
+)
+
+# Use a custom Quarto template
+render_validation_report(
+  report,
+  output_file = "custom_report.html",
+  template_path = "path/to/custom_template.qmd"
+)
+```
+
+The rendered report includes:
+
+- **Header**: Method name, date, analyst, reviewer, lab, instrument
+- **Table of Contents**: Auto-generated from sections
+- **Validation Sections**: Each with formatted tables and plots
+- **Provenance**: R version, package versions, timestamp for reproducibility
+
 ## Summary
 
 The `measure` package provides a complete toolkit for analytical method validation:
@@ -645,6 +780,7 @@ The `measure` package provides a complete toolkit for analytical method validati
 | **Control Charts** | `measure_control_limits()`, `measure_control_chart()` |
 | **Criteria** | `measure_criteria()`, `measure_assess()`, `criteria_ich_q2()`, `criteria_bland_altman()`, `criteria_matrix_effects()` |
 | **Drift** | `measure_detect_drift()`, `step_measure_drift_qc_loess()` |
+| **Validation Reports** | `measure_validation_report()`, `render_validation_report()` |
 
 All functions follow a consistent design philosophy:
 - **Tidy outputs**: Results are tibbles with `tidy()`, `glance()`, and `autoplot()` methods

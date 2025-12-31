@@ -315,6 +315,14 @@ reference:
   - infer_axis_type
   - check_axis_consistency
   - measure_quality_summary
+- title: Validation Reporting
+  desc: Generate reproducible analytical method validation reports
+  contents:
+  - measure_validation_report
+  - render_validation_report
+  - has_validation_section
+  - get_validation_section
+  - add_validation_section
 - title: Visualization & Diagnostics
   desc: Plotting and diagnostic functions for measure data
   contents:
