@@ -2,7 +2,7 @@
 % Please edit documentation in R/output_long.R
 \name{step_measure_output_long}
 \alias{step_measure_output_long}
-\title{Reorganize Measurements to Two Columns}
+\title{Reorganize Measurements to Long Format}
 \usage{
 step_measure_output_long(
   recipe,
@@ -22,8 +22,10 @@ operations for this recipe.}
 \item{values_to}{A single character string for the column containing the
 analytical measurement.}
 
-\item{location_to}{A single character string for the column containing the
-location of the measurement (e.g. wavenumber or index).}
+\item{location_to}{A single character string for the column name prefix for
+location columns. For 1D data, this becomes the column name (default:
+\code{.location}). For nD data, this becomes a prefix with dimension suffixes
+(e.g., \code{.location_1}, \code{.location_2}).}
 
 \item{measures}{An optional single character string specifying which measure
 column to output. If \code{NULL} (the default) and only one measure column
@@ -52,7 +54,14 @@ step that converts measures to a format with columns for the measurement and
 the corresponding location (i.e., "long" format).
 
 This step is designed convert analytical measurements from their internal
-data structure to a two column format.
+data structure to a long format with explicit location columns.
+
+For 1D data, the output has two columns: the measurement value and a single
+location column.
+
+For n-dimensional data (2D, 3D, etc.), the output has n+1 columns: the
+measurement value and n location columns named with the \code{location_to} prefix
+followed by dimension numbers (e.g., \code{.location_1}, \code{.location_2}).
 }
 \examples{
 library(dplyr)

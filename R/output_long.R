@@ -1,4 +1,4 @@
-#' Reorganize Measurements to Two Columns
+#' Reorganize Measurements to Long Format
 #'
 #' `step_measure_output_long` creates a *specification* of a recipe
 #'
@@ -13,12 +13,21 @@
 #'   `measures` is `NULL`, an error will be thrown prompting you to specify
 #'   which column to output.
 #' @param values_to A single character string for the column containing the
-#' analytical measurement.
-#' @param location_to A single character string for the column containing the
-#' location of the measurement (e.g. wavenumber or index).
+#'   analytical measurement.
+#' @param location_to A single character string for the column name prefix for
+#'   location columns. For 1D data, this becomes the column name (default:
+#'   `.location`). For nD data, this becomes a prefix with dimension suffixes
+#'   (e.g., `.location_1`, `.location_2`).
 #' @details
 #' This step is designed convert analytical measurements from their internal
-#' data structure to a two column format.
+#' data structure to a long format with explicit location columns.
+#'
+#' For 1D data, the output has two columns: the measurement value and a single
+#' location column.
+#'
+#' For n-dimensional data (2D, 3D, etc.), the output has n+1 columns: the
+#' measurement value and n location columns named with the `location_to` prefix
+#' followed by dimension numbers (e.g., `.location_1`, `.location_2`).
 #' @examples
 #' library(dplyr)
 #'
@@ -125,12 +134,29 @@ prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_output_long <- function(object, new_data, ...) {
-  col <- object$measures
-  rnm <- c(paste0(col, ".value"), paste0(col, ".location"))
-  names(rnm) <- c(object$values_to, object$location_to)
-  new_data |>
-    tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") |>
-    dplyr::rename(!!rnm)
+ col <- object$measures
+
+  # Detect if this is an nD measure column
+  ndim <- get_measure_col_ndim(new_data, col)
+
+  if (ndim == 1L) {
+    # 1D case: original behavior
+    rnm <- c(paste0(col, ".value"), paste0(col, ".location"))
+    names(rnm) <- c(object$values_to, object$location_to)
+    new_data |>
+      tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") |>
+      dplyr::rename(!!rnm)
+  } else {
+    # nD case: unnest and rename location_1, location_2, etc.
+    # Build rename map for nD columns
+    old_names <- c(paste0(col, ".value"), paste0(col, ".location_", seq_len(ndim)))
+    new_names <- c(object$values_to, paste0(object$location_to, "_", seq_len(ndim)))
+    rnm <- stats::setNames(old_names, new_names)
+
+    new_data |>
+      tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") |>
+      dplyr::rename(dplyr::all_of(rnm))
+  }
 }
 
 #' @export

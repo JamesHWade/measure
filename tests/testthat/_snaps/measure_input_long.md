@@ -119,6 +119,7 @@
       absorp, location = vars(dplyr::everything())))
     Condition
       Error in `step_measure_input_long()`:
-      Caused by error in `check_single_selector()`:
-      ! The selection for `location` should only select a single column (6 columns were selected).
+      Caused by error in `prep()`:
+      ! Value and location columns must not overlap.
+      x Column absorp selected for both.
 
