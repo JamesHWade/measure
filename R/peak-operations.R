@@ -25,12 +25,13 @@
 #' @return A tibble with class `peaks_tbl`.
 #' @noRd
 new_peaks_tbl <- function(
-    peak_id = integer(),
-    location = double(),
-    height = double(),
-    left_base = double(),
-    right_base = double(),
-    area = double()) {
+  peak_id = integer(),
+  location = double(),
+  height = double(),
+  left_base = double(),
+  right_base = double(),
+  area = double()
+) {
   x <- tibble::tibble(
     peak_id = peak_id,
     location = location,
@@ -54,8 +55,7 @@ new_peaks_list <- function(x = list()) {
   }
   # Use vctrs for proper list-column behavior
   x <- vctrs::new_list_of(
-
-x,
+    x,
     ptype = new_peaks_tbl(),
     class = "peaks_list"
   )
@@ -67,12 +67,14 @@ x,
 #' @return Logical.
 #' @export
 is_peaks_list <- function(x) {
- inherits(x, "peaks_list")
+  inherits(x, "peaks_list")
 }
 
 #' @export
 format.peaks_list <- function(x, ...) {
-  if (length(x) == 0) return(character())
+  if (length(x) == 0) {
+    return(character())
+  }
   n_peaks <- vapply(x, nrow, integer(1))
   paste0("<peaks [", n_peaks, "]>")
 }
@@ -95,8 +97,12 @@ find_peaks_cols <- function(data) {
 
 #' Detect peaks using derivative method
 #' @noRd
-.detect_peaks_derivative <- function(location, value, min_height = 0,
-                                      min_distance = 0) {
+.detect_peaks_derivative <- function(
+  location,
+  value,
+  min_height = 0,
+  min_distance = 0
+) {
   n <- length(value)
   if (n < 3) {
     return(new_peaks_tbl())
@@ -128,7 +134,7 @@ find_peaks_cols <- function(data) {
     sorted_idx <- peaks_idx[height_order]
 
     keep <- logical(length(sorted_idx))
-    keep[1] <- TRUE  # Always keep the highest peak
+    keep[1] <- TRUE # Always keep the highest peak
 
     for (i in seq_along(sorted_idx)[-1]) {
       current_loc <- location[sorted_idx[i]]
@@ -182,16 +188,25 @@ find_peaks_cols <- function(data) {
 
 #' Detect peaks using prominence method
 #' @noRd
-.detect_peaks_prominence <- function(location, value, min_prominence = 0,
-                                      min_height = 0, min_distance = 0) {
+.detect_peaks_prominence <- function(
+  location,
+  value,
+  min_prominence = 0,
+  min_height = 0,
+  min_distance = 0
+) {
   n <- length(value)
   if (n < 3) {
     return(new_peaks_tbl())
   }
 
   # Find all local maxima
-  is_peak <- c(FALSE, value[-c(1, n)] > value[-c(n - 1, n)] &
-                 value[-c(1, n)] > value[-c(1, 2)], FALSE)
+  is_peak <- c(
+    FALSE,
+    value[-c(1, n)] > value[-c(n - 1, n)] &
+      value[-c(1, n)] > value[-c(1, 2)],
+    FALSE
+  )
   peaks_idx <- which(is_peak)
 
   if (length(peaks_idx) == 0) {
@@ -211,7 +226,9 @@ find_peaks_cols <- function(data) {
     left_idx <- pk
     left_min <- pk_val
     for (j in (pk - 1):1) {
-      if (value[j] > pk_val) break
+      if (value[j] > pk_val) {
+        break
+      }
       if (value[j] < left_min) {
         left_min <- value[j]
         left_idx <- j
@@ -223,7 +240,9 @@ find_peaks_cols <- function(data) {
     right_idx <- pk
     right_min <- pk_val
     for (j in (pk + 1):n) {
-      if (value[j] > pk_val) break
+      if (value[j] > pk_val) {
+        break
+      }
       if (value[j] < right_min) {
         right_min <- value[j]
         right_idx <- j
@@ -268,7 +287,7 @@ find_peaks_cols <- function(data) {
     prom_order <- order(prominences, decreasing = TRUE)
 
     keep <- logical(length(prom_order))
-    keep[1] <- TRUE  # Always keep the most prominent peak
+    keep[1] <- TRUE # Always keep the most prominent peak
 
     for (i in seq_along(prom_order)[-1]) {
       current_loc <- location[peaks_idx[prom_order[i]]]
@@ -364,28 +383,33 @@ find_peaks_cols <- function(data) {
 #' result <- bake(rec, new_data = NULL)
 #' # Result now has .peaks column alongside .measures
 step_measure_peaks_detect <- function(
-    recipe,
-    method = c("prominence", "derivative"),
-    min_height = 0,
-    min_distance = 0,
-    min_prominence = 0,
-    snr_threshold = FALSE,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_peaks_detect")) {
+  recipe,
+  method = c("prominence", "derivative"),
+  min_height = 0,
+  min_distance = 0,
+  min_prominence = 0,
+  snr_threshold = FALSE,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_peaks_detect")
+) {
   method <- rlang::arg_match(method)
 
   if (!is.numeric(min_height) || length(min_height) != 1 || min_height < 0) {
     cli::cli_abort("{.arg min_height} must be a non-negative number.")
   }
-  if (!is.numeric(min_distance) || length(min_distance) != 1 ||
-      min_distance < 0) {
+  if (
+    !is.numeric(min_distance) || length(min_distance) != 1 || min_distance < 0
+  ) {
     cli::cli_abort("{.arg min_distance} must be a non-negative number.")
   }
-  if (!is.numeric(min_prominence) || length(min_prominence) != 1 ||
-      min_prominence < 0) {
+  if (
+    !is.numeric(min_prominence) ||
+      length(min_prominence) != 1 ||
+      min_prominence < 0
+  ) {
     cli::cli_abort("{.arg min_prominence} must be a non-negative number.")
   }
 
@@ -407,8 +431,17 @@ step_measure_peaks_detect <- function(
 }
 
 step_measure_peaks_detect_new <- function(
-    method, min_height, min_distance, min_prominence, snr_threshold,
-    measures, role, trained, skip, id) {
+  method,
+  min_height,
+  min_distance,
+  min_prominence,
+  snr_threshold,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_peaks_detect",
     method = method,
@@ -479,8 +512,13 @@ bake.step_measure_peaks_detect <- function(object, new_data, ...) {
       if (method == "derivative") {
         .detect_peaks_derivative(loc, val, height_thresh, min_distance)
       } else {
-        .detect_peaks_prominence(loc, val, min_prominence, height_thresh,
-                                  min_distance)
+        .detect_peaks_prominence(
+          loc,
+          val,
+          min_prominence,
+          height_thresh,
+          min_distance
+        )
       }
     })
 
@@ -491,7 +529,11 @@ bake.step_measure_peaks_detect <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_peaks_detect <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_peaks_detect <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Peak detection (", x$method, ")")
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
@@ -576,14 +618,15 @@ tidy.step_measure_peaks_detect <- function(x, ...) {
 #'
 #' result <- bake(rec, new_data = NULL)
 step_measure_peaks_integrate <- function(
-    recipe,
-    method = c("trapezoid", "simpson"),
-    baseline = c("local", "none", "global"),
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_peaks_integrate")) {
+  recipe,
+  method = c("trapezoid", "simpson"),
+  baseline = c("local", "none", "global"),
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_peaks_integrate")
+) {
   method <- rlang::arg_match(method)
   baseline <- rlang::arg_match(baseline)
 
@@ -602,7 +645,14 @@ step_measure_peaks_integrate <- function(
 }
 
 step_measure_peaks_integrate_new <- function(
-    method, baseline, measures, role, trained, skip, id) {
+  method,
+  baseline,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_peaks_integrate",
     method = method,
@@ -645,11 +695,19 @@ prep.step_measure_peaks_integrate <- function(x, training, info = NULL, ...) {
 
 #' Integrate a single peak
 #' @noRd
-.integrate_peak <- function(location, value, left_base, right_base,
-                             method = "trapezoid", baseline_type = "local") {
+.integrate_peak <- function(
+  location,
+  value,
+  left_base,
+  right_base,
+  method = "trapezoid",
+  baseline_type = "local"
+) {
   # Find indices within peak range
   idx <- which(location >= left_base & location <= right_base)
-  if (length(idx) < 2) return(NA_real_)
+  if (length(idx) < 2) {
+    return(NA_real_)
+  }
 
   x <- location[idx]
   y <- value[idx]
@@ -659,8 +717,8 @@ prep.step_measure_peaks_integrate <- function(x, training, info = NULL, ...) {
     # Linear baseline from left to right base
     y_left <- value[which.min(abs(location - left_base))]
     y_right <- value[which.min(abs(location - right_base))]
-    baseline_y <- y_left + (y_right - y_left) * (x - left_base) /
-      (right_base - left_base)
+    baseline_y <- y_left +
+      (y_right - y_left) * (x - left_base) / (right_base - left_base)
     y <- y - baseline_y
   } else if (baseline_type == "global") {
     y <- y - min(y)
@@ -681,13 +739,21 @@ prep.step_measure_peaks_integrate <- function(x, training, info = NULL, ...) {
     } else if ((n - 1) %% 2 == 0) {
       # Even number of intervals - standard Simpson's
       h <- (x[n] - x[1]) / (n - 1)
-      area <- h / 3 * (y[1] + 4 * sum(y[seq(2, n - 1, 2)]) +
-                         2 * sum(y[seq(3, n - 2, 2)]) + y[n])
+      area <- h /
+        3 *
+        (y[1] +
+          4 * sum(y[seq(2, n - 1, 2)]) +
+          2 * sum(y[seq(3, n - 2, 2)]) +
+          y[n])
     } else {
       # Odd number of intervals - use Simpson's 3/8 for last segment
       h <- (x[n - 1] - x[1]) / (n - 2)
-      area <- h / 3 * (y[1] + 4 * sum(y[seq(2, n - 2, 2)]) +
-                         2 * sum(y[seq(3, n - 3, 2)]) + y[n - 1])
+      area <- h /
+        3 *
+        (y[1] +
+          4 * sum(y[seq(2, n - 2, 2)]) +
+          2 * sum(y[seq(3, n - 3, 2)]) +
+          y[n - 1])
       # Add last segment with trapezoidal
       area <- area + (x[n] - x[n - 1]) * (y[n] + y[n - 1]) / 2
     }
@@ -712,14 +778,19 @@ bake.step_measure_peaks_integrate <- function(object, new_data, ...) {
       new_data[[peaks_col]],
       new_data[[measure_col]],
       function(peaks, measures) {
-        if (nrow(peaks) == 0) return(peaks)
+        if (nrow(peaks) == 0) {
+          return(peaks)
+        }
 
         areas <- numeric(nrow(peaks))
         for (j in seq_len(nrow(peaks))) {
           areas[j] <- .integrate_peak(
-            measures$location, measures$value,
-            peaks$left_base[j], peaks$right_base[j],
-            method, baseline
+            measures$location,
+            measures$value,
+            peaks$left_base[j],
+            peaks$right_base[j],
+            method,
+            baseline
           )
         }
         peaks$area <- areas
@@ -734,8 +805,18 @@ bake.step_measure_peaks_integrate <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_peaks_integrate <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- paste0("Peak integration (", x$method, ", ", x$baseline, " baseline)")
+print.step_measure_peaks_integrate <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  title <- paste0(
+    "Peak integration (",
+    x$method,
+    ", ",
+    x$baseline,
+    " baseline)"
+  )
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
   } else {
@@ -800,16 +881,17 @@ tidy.step_measure_peaks_integrate <- function(x, ...) {
 #'
 #' result <- bake(rec, new_data = NULL)
 step_measure_peaks_filter <- function(
-    recipe,
-    min_height = NULL,
-    min_area = NULL,
-    min_area_pct = NULL,
-    min_prominence = NULL,
-    max_peaks = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_peaks_filter")) {
+  recipe,
+  min_height = NULL,
+  min_area = NULL,
+  min_area_pct = NULL,
+  min_prominence = NULL,
+  max_peaks = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_peaks_filter")
+) {
   recipes::add_step(
     recipe,
     step_measure_peaks_filter_new(
@@ -827,8 +909,16 @@ step_measure_peaks_filter <- function(
 }
 
 step_measure_peaks_filter_new <- function(
-    min_height, min_area, min_area_pct, min_prominence, max_peaks,
-    role, trained, skip, id) {
+  min_height,
+  min_area,
+  min_area_pct,
+  min_prominence,
+  max_peaks,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_peaks_filter",
     min_height = min_height,
@@ -872,7 +962,9 @@ bake.step_measure_peaks_filter <- function(object, new_data, ...) {
 
   for (col in peaks_cols) {
     new_peaks <- purrr::map(new_data[[col]], function(peaks) {
-      if (nrow(peaks) == 0) return(peaks)
+      if (nrow(peaks) == 0) {
+        return(peaks)
+      }
 
       keep <- rep(TRUE, nrow(peaks))
 
@@ -900,7 +992,7 @@ bake.step_measure_peaks_filter <- function(object, new_data, ...) {
       # Limit number of peaks (keep largest)
       if (!is.null(object$max_peaks) && nrow(peaks) > object$max_peaks) {
         # Sort by area if available, otherwise height
-        if (all(!is.na(peaks$area))) {
+        if (!anyNA(peaks$area)) {
           ord <- order(peaks$area, decreasing = TRUE)
         } else {
           ord <- order(peaks$height, decreasing = TRUE)
@@ -922,12 +1014,24 @@ bake.step_measure_peaks_filter <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_peaks_filter <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_peaks_filter <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   filters <- character()
-  if (!is.null(x$min_height)) filters <- c(filters, paste0("height>=", x$min_height))
-  if (!is.null(x$min_area)) filters <- c(filters, paste0("area>=", x$min_area))
-  if (!is.null(x$min_area_pct)) filters <- c(filters, paste0("area>=", x$min_area_pct, "%"))
-  if (!is.null(x$max_peaks)) filters <- c(filters, paste0("max ", x$max_peaks))
+  if (!is.null(x$min_height)) {
+    filters <- c(filters, paste0("height>=", x$min_height))
+  }
+  if (!is.null(x$min_area)) {
+    filters <- c(filters, paste0("area>=", x$min_area))
+  }
+  if (!is.null(x$min_area_pct)) {
+    filters <- c(filters, paste0("area>=", x$min_area_pct, "%"))
+  }
+  if (!is.null(x$max_peaks)) {
+    filters <- c(filters, paste0("max ", x$max_peaks))
+  }
 
   title <- paste0("Peak filtering (", paste(filters, collapse = ", "), ")")
   if (x$trained) {
@@ -998,14 +1102,15 @@ tidy.step_measure_peaks_filter <- function(x, ...) {
 #'
 #' result <- bake(rec, new_data = NULL)
 step_measure_peaks_to_table <- function(
-    recipe,
-    prefix = "peak_",
-    properties = c("location", "height", "area"),
-    max_peaks = 10,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_peaks_to_table")) {
+  recipe,
+  prefix = "peak_",
+  properties = c("location", "height", "area"),
+  max_peaks = 10,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_peaks_to_table")
+) {
   if (!is.character(prefix) || length(prefix) != 1) {
     cli::cli_abort("{.arg prefix} must be a single string.")
   }
@@ -1028,7 +1133,14 @@ step_measure_peaks_to_table <- function(
 }
 
 step_measure_peaks_to_table_new <- function(
-    prefix, properties, max_peaks, role, trained, skip, id) {
+  prefix,
+  properties,
+  max_peaks,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_peaks_to_table",
     prefix = prefix,
@@ -1108,14 +1220,20 @@ bake.step_measure_peaks_to_table <- function(object, new_data, ...) {
   new_data <- dplyr::bind_cols(new_data, result_df)
 
   # Remove peaks and measures columns
-  new_data <- new_data[, !(names(new_data) %in% c(peaks_cols, measure_cols)),
-                        drop = FALSE]
+  new_data <- new_data[,
+    !(names(new_data) %in% c(peaks_cols, measure_cols)),
+    drop = FALSE
+  ]
 
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_peaks_to_table <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_peaks_to_table <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Convert peaks to table (max ", x$max_peaks, " peaks)")
   if (x$trained) {
     cat(title, sep = "")
@@ -1130,7 +1248,6 @@ print.step_measure_peaks_to_table <- function(x, width = max(20, options()$width
 #' @export
 #' @keywords internal
 tidy.step_measure_peaks_to_table <- function(x, ...) {
-
   tibble::tibble(
     prefix = x$prefix,
     max_peaks = x$max_peaks,
@@ -1192,17 +1309,17 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' #   step_measure_peaks_deconvolve(model = "gaussian") |>
 #' #   prep()
 step_measure_peaks_deconvolve <- function(
-    recipe,
-    model = c("gaussian", "emg", "bigaussian"),
-    max_iter = 100L,
-    tol = 1e-6,
-    peaks_col = ".peaks",
-    measures_col = ".measures",
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_peaks_deconvolve")) {
-
+  recipe,
+  model = c("gaussian", "emg", "bigaussian"),
+  max_iter = 100L,
+  tol = 1e-6,
+  peaks_col = ".peaks",
+  measures_col = ".measures",
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_peaks_deconvolve")
+) {
   model <- rlang::arg_match(model)
 
   if (!is.numeric(max_iter) || max_iter < 1) {
@@ -1226,7 +1343,16 @@ step_measure_peaks_deconvolve <- function(
 }
 
 step_measure_peaks_deconvolve_new <- function(
-    model, max_iter, tol, peaks_col, measures_col, role, trained, skip, id) {
+  model,
+  max_iter,
+  tol,
+  peaks_col,
+  measures_col,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_peaks_deconvolve",
     model = model,
@@ -1292,18 +1418,27 @@ prep.step_measure_peaks_deconvolve <- function(x, training, info = NULL, ...) {
 #' Exponentially Modified Gaussian
 #' @noRd
 .emg_peak <- function(x, height, center, sigma, tau) {
-
-  if (tau <= 0) tau <- 0.001
+  if (tau <= 0) {
+    tau <- 0.001
+  }
   z <- (x - center) / sigma - sigma / tau
   # Use pnorm-based error function: erf(x) = 2 * pnorm(x * sqrt(2)) - 1
   # For erf(z / sqrt(2)): 2 * pnorm(z) - 1
   erf_val <- 2 * stats::pnorm(z) - 1
-  result <- height * sigma / tau * sqrt(pi / 2) *
+  result <- height *
+    sigma /
+    tau *
+    sqrt(pi / 2) *
     exp(0.5 * (sigma / tau)^2 - (x - center) / tau) *
-    (1 + erf_val) / 2
+    (1 + erf_val) /
+    2
   # Fallback to Gaussian if tau is very small
-  result[!is.finite(result)] <- .gaussian_peak(x[!is.finite(result)],
-                                                 height, center, sigma)
+  result[!is.finite(result)] <- .gaussian_peak(
+    x[!is.finite(result)],
+    height,
+    center,
+    sigma
+  )
   result
 }
 
@@ -1343,7 +1478,9 @@ prep.step_measure_peaks_deconvolve <- function(x, training, info = NULL, ...) {
     # Ensure positive heights and sigmas
     for (i in seq_len(n_peaks)) {
       idx <- (i - 1) * 3
-      if (params[idx + 1] < 0) params[idx + 1] <- 0.001
+      if (params[idx + 1] < 0) {
+        params[idx + 1] <- 0.001
+      }
       if (params[idx + 3] < 0) params[idx + 3] <- 0.001
     }
     fitted <- .sum_gaussians(x, params)
@@ -1351,18 +1488,21 @@ prep.step_measure_peaks_deconvolve <- function(x, training, info = NULL, ...) {
   }
 
   # Optimize
-  result <- tryCatch({
-    stats::optim(
-      init_params,
-      objective,
-      method = "L-BFGS-B",
-      lower = rep(c(0, min(x), 0.001), n_peaks),
-      upper = rep(c(max(y) * 2, max(x), diff(range(x))), n_peaks),
-      control = list(maxit = max_iter, factr = tol / .Machine$double.eps)
-    )
-  }, error = function(e) {
-    list(par = init_params)
-  })
+  result <- tryCatch(
+    {
+      stats::optim(
+        init_params,
+        objective,
+        method = "L-BFGS-B",
+        lower = rep(c(0, min(x), 0.001), n_peaks),
+        upper = rep(c(max(y) * 2, max(x), diff(range(x))), n_peaks),
+        control = list(maxit = max_iter, factr = tol / .Machine$double.eps)
+      )
+    },
+    error = function(e) {
+      list(par = init_params)
+    }
+  )
 
   # Update peaks with fitted parameters
   fitted_params <- result$par
@@ -1394,7 +1534,11 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
     if (nrow(peaks) > 0) {
       if (model == "gaussian") {
         peaks <- .fit_gaussians(
-          measures$location, measures$value, peaks, max_iter, tol
+          measures$location,
+          measures$value,
+          peaks,
+          max_iter,
+          tol
         )
       }
       # EMG and bigaussian would be similar but more complex
@@ -1410,7 +1554,11 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_peaks_deconvolve <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_peaks_deconvolve <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Deconvolve peaks (", x$model, " model)")
   if (x$trained) {
     cat(title, sep = "")

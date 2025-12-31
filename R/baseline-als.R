@@ -187,7 +187,7 @@ print.step_measure_baseline_als <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  title <- "ALS baseline correction on "
+  title <- paste0("ALS baseline correction (lambda = ", x$lambda, ") on ")
 
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")

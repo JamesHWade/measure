@@ -6,8 +6,7 @@
 set.seed(42)
 lod_data <- data.frame(
   sample_type = c(rep("blank", 10), rep("standard", 5)),
-  response = c(rnorm(10, mean = 0.5, sd = 0.1),
-               c(5, 15, 35, 70, 150)),
+  response = c(rnorm(10, mean = 0.5, sd = 0.1), c(5, 15, 35, 70, 150)),
   nominal_conc = c(rep(0, 10), c(10, 25, 50, 100, 200))
 )
 
@@ -28,10 +27,10 @@ test_that("measure_lod blank_sd returns expected value", {
   # Create controlled data
   blank_data <- data.frame(
     sample_type = rep("blank", 10),
-    response = rep(1.0, 10)  # SD = 0, mean = 1
+    response = rep(1.0, 10) # SD = 0, mean = 1
   )
   blank_data$response[1] <- 0.9
-  blank_data$response[2] <- 1.1  # Now SD > 0
+  blank_data$response[2] <- 1.1 # Now SD > 0
 
   lod <- measure_lod(blank_data, "response", method = "blank_sd")
 
@@ -45,7 +44,12 @@ test_that("measure_lod calibration method works", {
   cal_data <- lod_data[lod_data$sample_type == "standard", ]
   cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
 
-  lod <- measure_lod(lod_data, "response", method = "calibration", calibration = cal)
+  lod <- measure_lod(
+    lod_data,
+    "response",
+    method = "calibration",
+    calibration = cal
+  )
 
   expect_s3_class(lod, "measure_lod")
   expect_true(!is.na(lod$value))
@@ -112,7 +116,12 @@ test_that("measure_loq calibration method works", {
   cal_data <- lod_data[lod_data$sample_type == "standard", ]
   cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
 
-  loq <- measure_loq(lod_data, "response", method = "calibration", calibration = cal)
+  loq <- measure_loq(
+    lod_data,
+    "response",
+    method = "calibration",
+    calibration = cal
+  )
 
   expect_s3_class(loq, "measure_loq")
   expect_true(!is.na(loq$value))
@@ -211,7 +220,7 @@ test_that("measure_lod handles NA values in blanks", {
 
   lod <- measure_lod(data_with_na, "response", method = "blank_sd")
   expect_true(!is.na(lod$value))
-  expect_equal(lod$parameters$n_blanks, 9)  # One NA excluded
+  expect_equal(lod$parameters$n_blanks, 9) # One NA excluded
 })
 
 test_that("measure_lod works with factor sample_type", {

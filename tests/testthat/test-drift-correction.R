@@ -23,7 +23,7 @@ create_drift_data <- function(n = 20, drift_slope = 0.5, noise_sd = 2) {
 test_that("step_measure_drift_qc_loess creates a recipe step", {
   data <- create_drift_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, feature2)
 
@@ -35,7 +35,7 @@ test_that("step_measure_drift_qc_loess creates a recipe step", {
 test_that("step_measure_drift_qc_loess preps successfully", {
   data <- create_drift_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, feature2) |>
     prep()
@@ -48,7 +48,7 @@ test_that("step_measure_drift_qc_loess preps successfully", {
 test_that("step_measure_drift_qc_loess corrects drift", {
   data <- create_drift_data(n = 25, drift_slope = 2, noise_sd = 0.5)
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1) |>
     prep()
@@ -73,7 +73,7 @@ test_that("step_measure_drift_qc_loess requires sufficient QC samples", {
     feature1 = rnorm(10)
   )
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     step_measure_drift_qc_loess(feature1, min_qc = 5)
 
   expect_error(prep(rec), "Insufficient QC samples")
@@ -85,7 +85,7 @@ test_that("step_measure_drift_qc_loess validates required columns", {
     feature1 = rnorm(10)
   )
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     step_measure_drift_qc_loess(feature1)
 
   expect_error(prep(rec), "run_order")
@@ -95,7 +95,7 @@ test_that("step_measure_drift_qc_loess apply_to parameter works", {
   data <- create_drift_data()
 
   # apply_to = "all" (default)
-  rec_all <- recipe(~ ., data = data) |>
+  rec_all <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, apply_to = "all") |>
     prep()
@@ -103,7 +103,7 @@ test_that("step_measure_drift_qc_loess apply_to parameter works", {
   corrected_all <- bake(rec_all, new_data = NULL)
 
   # apply_to = "unknown"
-  rec_unknown <- recipe(~ ., data = data) |>
+  rec_unknown <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, apply_to = "unknown") |>
     prep()
@@ -121,7 +121,7 @@ test_that("step_measure_drift_qc_loess apply_to parameter works", {
 test_that("step_measure_drift_qc_loess tidy method works", {
   data <- create_drift_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, feature2) |>
     prep()
@@ -137,7 +137,7 @@ test_that("step_measure_drift_qc_loess tidy method works", {
 test_that("step_measure_drift_qc_loess print method works", {
   data <- create_drift_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, feature2)
 
@@ -151,7 +151,7 @@ test_that("step_measure_drift_qc_loess works with custom qc_type", {
   data <- create_drift_data()
   data$sample_type <- ifelse(data$sample_type == "qc", "pool", data$sample_type)
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, qc_type = "pool") |>
     prep()
@@ -165,17 +165,17 @@ test_that("step_measure_drift_qc_loess span parameter affects smoothness", {
   # Create data with more QC samples for flexible span test
   data <- data.frame(
     sample_id = paste0("S", 1:50),
-    sample_type = rep(c("qc", "unknown"), 25),  # Every other sample is QC
+    sample_type = rep(c("qc", "unknown"), 25), # Every other sample is QC
     run_order = 1:50,
     feature1 = 100 + (1:50) * 0.5 + rnorm(50, sd = 2)
   )
 
-  rec_smooth <- recipe(~ ., data = data) |>
+  rec_smooth <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, span = 1.0) |>
     prep()
 
-  rec_flexible <- recipe(~ ., data = data) |>
+  rec_flexible <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_drift_qc_loess(feature1, span = 0.5) |>
     prep()
@@ -243,7 +243,7 @@ test_that("measure_detect_drift calculates percent change correctly", {
   data <- data.frame(
     sample_type = rep("qc", 20),
     run_order = 1:20,
-    feature1 = 100 + 1:20 + rnorm(20, 0, 0.01)  # Minimal noise
+    feature1 = 100 + 1:20 + rnorm(20, 0, 0.01) # Minimal noise
   )
 
   result <- measure_detect_drift(data, "feature1")

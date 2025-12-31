@@ -20,8 +20,8 @@ test_that("step_measure_despike removes spikes", {
   # Create data with spikes
   n_points <- 100
   values <- rep(10, n_points)
-  values[30] <- 100  # Large positive spike
-  values[70] <- -80  # Large negative spike
+  values[30] <- 100 # Large positive spike
+  values[70] <- -80 # Large negative spike
 
   synthetic_data <- tibble::tibble(
     id = rep(1, n_points),
@@ -48,7 +48,7 @@ test_that("step_measure_despike respects max_width", {
   # Create data with wide anomaly (not a spike)
   n_points <- 100
   values <- rep(10, n_points)
-  values[45:55] <- 50  # Wide peak, not a spike
+  values[45:55] <- 50 # Wide peak, not a spike
 
   synthetic_data <- tibble::tibble(
     id = rep(1, n_points),

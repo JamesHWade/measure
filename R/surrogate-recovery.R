@@ -89,20 +89,20 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_surrogate_recovery <- function(
-    recipe,
-    ...,
-    expected_col = NULL,
-    expected_value = NULL,
-    recovery_suffix = "_recovery",
-    action = c("add_column", "flag", "filter"),
-    flag_col = ".surrogate_pass",
-    min_recovery = 70,
-    max_recovery = 130,
-    role = "surrogate",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_surrogate_recovery")) {
-
+  recipe,
+  ...,
+  expected_col = NULL,
+  expected_value = NULL,
+  recovery_suffix = "_recovery",
+  action = c("add_column", "flag", "filter"),
+  flag_col = ".surrogate_pass",
+  min_recovery = 70,
+  max_recovery = 130,
+  role = "surrogate",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_surrogate_recovery")
+) {
   action <- match.arg(action)
 
   # Validate that exactly one of expected_col or expected_value is provided
@@ -147,20 +147,20 @@ step_measure_surrogate_recovery <- function(
 #' Internal constructor
 #' @noRd
 step_measure_surrogate_recovery_new <- function(
-    terms,
-    expected_col,
-    expected_value,
-    recovery_suffix,
-    action,
-    flag_col,
-    min_recovery,
-    max_recovery,
-    role,
-    trained,
-    col_names,
-    skip,
-    id) {
-
+  terms,
+  expected_col,
+  expected_value,
+  recovery_suffix,
+  action,
+  flag_col,
+  min_recovery,
+  max_recovery,
+  role,
+  trained,
+  col_names,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_surrogate_recovery",
     terms = terms,
@@ -180,8 +180,12 @@ step_measure_surrogate_recovery_new <- function(
 }
 
 #' @export
-prep.step_measure_surrogate_recovery <- function(x, training, info = NULL, ...) {
-
+prep.step_measure_surrogate_recovery <- function(
+  x,
+  training,
+  info = NULL,
+  ...
+) {
   # Validate expected_col if provided
   if (!is.null(x$expected_col)) {
     if (!x$expected_col %in% names(training)) {
@@ -233,7 +237,6 @@ prep.step_measure_surrogate_recovery <- function(x, training, info = NULL, ...) 
 
 #' @export
 bake.step_measure_surrogate_recovery <- function(object, new_data, ...) {
-
   # Get expected values
   if (!is.null(object$expected_col)) {
     if (!object$expected_col %in% names(new_data)) {
@@ -276,7 +279,7 @@ bake.step_measure_surrogate_recovery <- function(object, new_data, ...) {
 
     # Check if within limits
     within_limits <- recovery_pct >= object$min_recovery &
-                     recovery_pct <= object$max_recovery
+      recovery_pct <= object$max_recovery
     within_limits[is.na(within_limits)] <- FALSE
 
     # Update overall pass flag
@@ -313,10 +316,10 @@ bake.step_measure_surrogate_recovery <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_surrogate_recovery <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
-
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Surrogate recovery calculation"
 
   if (x$trained) {

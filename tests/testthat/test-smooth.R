@@ -45,8 +45,8 @@ test_that("step_measure_smooth_ma reduces noise", {
   expect_lt(smooth_diff_var, orig_diff_var)
 })
 
-test_that("step_measure_smooth_ma enforces odd window", {
-  expect_warning(
+test_that("step_measure_smooth_ma errors on even window", {
+  expect_error(
     recipe(water + fat + protein ~ ., data = meats_long) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -103,7 +103,7 @@ test_that("step_measure_smooth_median removes spikes", {
   # Create data with a spike
   n_points <- 100
   values <- rep(10, n_points)
-  values[50] <- 100  # Spike
+  values[50] <- 100 # Spike
 
   synthetic_data <- tibble::tibble(
     id = rep(1, n_points),
@@ -163,7 +163,7 @@ test_that("step_measure_smooth_gaussian auto-calculates window", {
 
   # Window should be set based on 6-sigma rule
   tidy_result <- tidy(rec, number = 2)
-  expect_true(tidy_result$window >= 17)  # 6*3 = 18, rounded to odd
+  expect_true(tidy_result$window >= 17) # 6*3 = 18, rounded to odd
 })
 
 

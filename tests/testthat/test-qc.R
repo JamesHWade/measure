@@ -84,7 +84,7 @@ test_that("step_measure_qc_saturated detects saturation", {
   # Create data with saturation
   n_points <- 100
   values <- seq(1, 100)
-  values[90:100] <- 100  # Saturated at max
+  values[90:100] <- 100 # Saturated at max
 
   synthetic_data <- tibble::tibble(
     id = rep(1, n_points),
@@ -157,7 +157,7 @@ test_that("step_measure_impute fills NA values", {
   imputed <- result$.measures[[1]]$value
 
   # No NAs should remain
- expect_false(anyNA(imputed))
+  expect_false(anyNA(imputed))
 
   # Imputed values should be reasonable (near linear trend)
   expect_lt(abs(imputed[10] - 10), 1)
@@ -189,7 +189,7 @@ test_that("step_measure_impute methods work", {
     imputed <- result$.measures[[1]]$value
 
     expect_false(is.na(imputed[25]))
-    expect_equal(imputed[25], 10)  # All methods should give ~10
+    expect_equal(imputed[25], 10) # All methods should give ~10
   }
 })
 
@@ -197,7 +197,7 @@ test_that("step_measure_impute respects max_gap", {
   # Create data with large gap
   n_points <- 50
   values <- rep(10, n_points)
-  values[20:30] <- NA  # 11-point gap
+  values[20:30] <- NA # 11-point gap
 
   synthetic_data <- tibble::tibble(
     id = rep(1, n_points),
@@ -270,7 +270,10 @@ test_that("step_measure_qc_outlier custom column names work", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
-    step_measure_qc_outlier(new_col = "is_outlier", new_col_score = "outlier_dist") |>
+    step_measure_qc_outlier(
+      new_col = "is_outlier",
+      new_col_score = "outlier_dist"
+    ) |>
     prep()
 
   result <- bake(rec, new_data = NULL)

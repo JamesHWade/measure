@@ -74,16 +74,16 @@
 #' # Noise only applied to training data
 #' bake(rec, new_data = NULL)
 step_measure_augment_noise <- function(
-    recipe,
-    sd = 0.01,
-    distribution = c("gaussian", "uniform"),
-    relative = TRUE,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = TRUE,
-    id = recipes::rand_id("measure_augment_noise")) {
-
+  recipe,
+  sd = 0.01,
+  distribution = c("gaussian", "uniform"),
+  relative = TRUE,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = TRUE,
+  id = recipes::rand_id("measure_augment_noise")
+) {
   distribution <- rlang::arg_match(distribution)
 
   if (!is.numeric(sd) || length(sd) != 1 || sd < 0) {
@@ -106,7 +106,15 @@ step_measure_augment_noise <- function(
 }
 
 step_measure_augment_noise_new <- function(
-    sd, distribution, relative, measures, role, trained, skip, id) {
+  sd,
+  distribution,
+  relative,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_augment_noise",
     sd = sd,
@@ -163,7 +171,9 @@ prep.step_measure_augment_noise <- function(x, training, info = NULL, ...) {
   # Calculate actual noise SD
   if (relative) {
     value_range <- diff(range(values, na.rm = TRUE))
-    if (value_range < .Machine$double.eps) value_range <- 1
+    if (value_range < .Machine$double.eps) {
+      value_range <- 1
+    }
     noise_sd <- sd * value_range
   } else {
     noise_sd <- sd
@@ -174,7 +184,11 @@ prep.step_measure_augment_noise <- function(x, training, info = NULL, ...) {
     noise <- stats::rnorm(n, mean = 0, sd = noise_sd)
   } else {
     # Uniform in [-noise_sd, noise_sd] (same variance as Gaussian would need sqrt(3)*sd)
-    noise <- stats::runif(n, min = -noise_sd * sqrt(3), max = noise_sd * sqrt(3))
+    noise <- stats::runif(
+      n,
+      min = -noise_sd * sqrt(3),
+      max = noise_sd * sqrt(3)
+    )
   }
 
   m$value <- values + noise
@@ -198,7 +212,11 @@ bake.step_measure_augment_noise <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_augment_noise <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_augment_noise <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   rel_str <- if (x$relative) " (relative)" else ""
   title <- paste0("Add ", x$distribution, " noise (sd=", x$sd, rel_str, ")")
   if (x$trained) {
@@ -279,14 +297,14 @@ required_pkgs.step_measure_augment_noise <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_augment_shift <- function(
-    recipe,
-    max_shift = 1,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = TRUE,
-    id = recipes::rand_id("measure_augment_shift")) {
-
+  recipe,
+  max_shift = 1,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = TRUE,
+  id = recipes::rand_id("measure_augment_shift")
+) {
   if (!is.numeric(max_shift) || length(max_shift) != 1 || max_shift < 0) {
     cli::cli_abort("{.arg max_shift} must be a non-negative number.")
   }
@@ -305,7 +323,13 @@ step_measure_augment_shift <- function(
 }
 
 step_measure_augment_shift_new <- function(
-    max_shift, measures, role, trained, skip, id) {
+  max_shift,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_augment_shift",
     max_shift = max_shift,
@@ -366,7 +390,7 @@ prep.step_measure_augment_shift <- function(x, training, info = NULL, ...) {
     x = shifted_location,
     y = values,
     xout = location,
-    rule = 2  # Use boundary values for extrapolation
+    rule = 2 # Use boundary values for extrapolation
   )$y
 
   m$value <- new_values
@@ -388,7 +412,11 @@ bake.step_measure_augment_shift <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_augment_shift <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_augment_shift <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Random x-shift (max=", x$max_shift, ")")
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
@@ -468,14 +496,14 @@ required_pkgs.step_measure_augment_shift <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_augment_scale <- function(
-    recipe,
-    range = c(0.9, 1.1),
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = TRUE,
-    id = recipes::rand_id("measure_augment_scale")) {
-
+  recipe,
+  range = c(0.9, 1.1),
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = TRUE,
+  id = recipes::rand_id("measure_augment_scale")
+) {
   if (!is.numeric(range) || length(range) != 2) {
     cli::cli_abort("{.arg range} must be a numeric vector of length 2.")
   }
@@ -502,7 +530,13 @@ step_measure_augment_scale <- function(
 }
 
 step_measure_augment_scale_new <- function(
-    range, measures, role, trained, skip, id) {
+  range,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_augment_scale",
     range = range,
@@ -573,7 +607,11 @@ bake.step_measure_augment_scale <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_augment_scale <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_augment_scale <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Random scaling [", x$range[1], ", ", x$range[2], "]")
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")

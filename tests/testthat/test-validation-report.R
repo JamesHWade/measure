@@ -12,7 +12,10 @@ test_that("measure_validation_report creates basic report object", {
   )
 
   expect_s3_class(report, "measure_validation_report")
-  expect_named(report, c("metadata", "sections", "criteria", "provenance", "call"))
+  expect_named(
+    report,
+    c("metadata", "sections", "criteria", "provenance", "call")
+  )
 
   # Check metadata
   expect_equal(report$metadata$title, "Test Validation Report")
@@ -40,7 +43,10 @@ test_that("measure_validation_report accepts calibration results", {
   )
 
   expect_true(has_validation_section(report, "calibration"))
-  expect_s3_class(get_validation_section(report, "calibration"), "measure_calibration")
+  expect_s3_class(
+    get_validation_section(report, "calibration"),
+    "measure_calibration"
+  )
 })
 
 test_that("measure_validation_report accepts precision results", {
@@ -159,7 +165,10 @@ test_that("measure_validation_report handles list-based sections", {
     ),
     conclusions = list(
       summary = "Method validated successfully.",
-      recommendations = c("Use within validated range", "Monitor system suitability")
+      recommendations = c(
+        "Use within validated range",
+        "Monitor system suitability"
+      )
     )
   )
 
@@ -383,10 +392,16 @@ test_that("measure_validation_report creates comprehensive report", {
   # Calibration
   cal_data <- data.frame(
     nominal_conc = rep(c(1, 5, 10, 25, 50, 100), each = 3),
-    response = rep(c(1, 5, 10, 25, 50, 100), each = 3) * 1000 + rnorm(18, sd = 50),
+    response = rep(c(1, 5, 10, 25, 50, 100), each = 3) *
+      1000 +
+      rnorm(18, sd = 50),
     sample_type = "standard"
   )
-  cal_fit <- measure_calibration_fit(cal_data, response ~ nominal_conc, weights = "1/x")
+  cal_fit <- measure_calibration_fit(
+    cal_data,
+    response ~ nominal_conc,
+    weights = "1/x"
+  )
 
   # LOD
   blank_data <- data.frame(
@@ -430,7 +445,7 @@ test_that("measure_validation_report creates comprehensive report", {
     lod_loq = lod_result,
     accuracy = acc_result,
     precision = list(repeatability = rep_result),
-    linearity = NULL,  # Would come from measure_linearity()
+    linearity = NULL, # Would come from measure_linearity()
     range = list(lower = 1, upper = 100, units = "ng/mL"),
     specificity = "No interference observed from matrix components.",
     robustness = list(
@@ -507,7 +522,7 @@ test_that("measure_validation_report warns on non-standard input types", {
   expect_warning(
     report <- measure_validation_report(
       title = "Warning Test",
-      calibration = data.frame(x = 1:3)  # Not a measure_calibration object
+      calibration = data.frame(x = 1:3) # Not a measure_calibration object
     ),
     "measure_calibration"
   )

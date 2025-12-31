@@ -90,16 +90,16 @@
 #' print(me)
 #' tidy(me)
 measure_matrix_effect <- function(
-    data,
-    response_col,
-    sample_type_col,
-    matrix_level,
-    neat_level,
-    concentration_col = NULL,
-    analyte_col = NULL,
-    group_cols = NULL,
-    conf_level = 0.95) {
-
+  data,
+  response_col,
+  sample_type_col,
+  matrix_level,
+  neat_level,
+  concentration_col = NULL,
+  analyte_col = NULL,
+  group_cols = NULL,
+  conf_level = 0.95
+) {
   # Validate inputs
   if (!is.data.frame(data)) {
     cli::cli_abort("{.arg data} must be a data frame.")
@@ -155,11 +155,18 @@ measure_matrix_effect <- function(
   # Calculate matrix effects per group
   if (length(grouping_cols) > 0) {
     results <- .calculate_me_grouped(
-      matrix_data, neat_data, response_col, grouping_cols, conf_level
+      matrix_data,
+      neat_data,
+      response_col,
+      grouping_cols,
+      conf_level
     )
   } else {
     results <- .calculate_me_simple(
-      matrix_data, neat_data, response_col, conf_level
+      matrix_data,
+      neat_data,
+      response_col,
+      conf_level
     )
   }
 
@@ -208,7 +215,12 @@ measure_matrix_effect <- function(
 
 #' Calculate matrix effect for simple (ungrouped) case
 #' @noRd
-.calculate_me_simple <- function(matrix_data, neat_data, response_col, conf_level) {
+.calculate_me_simple <- function(
+  matrix_data,
+  neat_data,
+  response_col,
+  conf_level
+) {
   matrix_responses <- matrix_data[[response_col]]
   neat_responses <- neat_data[[response_col]]
 
@@ -219,7 +231,9 @@ measure_matrix_effect <- function(
   # Check for empty vectors after NA removal
 
   if (length(matrix_responses) == 0) {
-    cli::cli_abort("All matrix responses are NA; cannot calculate matrix effect.")
+    cli::cli_abort(
+      "All matrix responses are NA; cannot calculate matrix effect."
+    )
   }
   if (length(neat_responses) == 0) {
     cli::cli_abort("All neat responses are NA; cannot calculate matrix effect.")
@@ -256,7 +270,8 @@ measure_matrix_effect <- function(
     se_neat <- sd(neat_responses) / sqrt(n_neat)
 
     # Approximation for ratio SE
-    se_ratio <- me_pct * sqrt((se_matrix/mean_matrix)^2 + (se_neat/mean_neat)^2)
+    se_ratio <- me_pct *
+      sqrt((se_matrix / mean_matrix)^2 + (se_neat / mean_neat)^2)
     t_crit <- stats::qt((1 + conf_level) / 2, df = min_n - 1)
   }
 
@@ -280,9 +295,13 @@ measure_matrix_effect <- function(
 
 #' Calculate matrix effect by groups
 #' @noRd
-.calculate_me_grouped <- function(matrix_data, neat_data, response_col,
-                                   grouping_cols, conf_level) {
-
+.calculate_me_grouped <- function(
+  matrix_data,
+  neat_data,
+  response_col,
+  grouping_cols,
+  conf_level
+) {
   # Get unique groups from both datasets
   matrix_groups <- unique(matrix_data[, grouping_cols, drop = FALSE])
   neat_groups <- unique(neat_data[, grouping_cols, drop = FALSE])
@@ -304,14 +323,27 @@ measure_matrix_effect <- function(
 
   for (key in common_keys) {
     # Find rows matching this key
-    matrix_mask <- do.call(paste, c(matrix_data[, grouping_cols, drop = FALSE], sep = "_")) == key
-    neat_mask <- do.call(paste, c(neat_data[, grouping_cols, drop = FALSE], sep = "_")) == key
+    matrix_mask <- do.call(
+      paste,
+      c(matrix_data[, grouping_cols, drop = FALSE], sep = "_")
+    ) ==
+      key
+    neat_mask <- do.call(
+      paste,
+      c(neat_data[, grouping_cols, drop = FALSE], sep = "_")
+    ) ==
+      key
 
     group_matrix <- matrix_data[matrix_mask, ]
     group_neat <- neat_data[neat_mask, ]
 
     # Calculate ME for this group
-    group_result <- .calculate_me_simple(group_matrix, group_neat, response_col, conf_level)
+    group_result <- .calculate_me_simple(
+      group_matrix,
+      group_neat,
+      response_col,
+      conf_level
+    )
 
     # Add grouping information
     group_info <- group_matrix[1, grouping_cols, drop = FALSE]
@@ -333,8 +365,13 @@ print.measure_matrix_effect <- function(x, ...) {
   cat("  Mean ME:", format(stats$mean_me, digits = 1), "%\n")
   cat("  SD ME:", format(stats$sd_me, digits = 1), "%\n")
   cat("  CV ME:", format(stats$cv_me, digits = 1), "%\n")
-  cat("  Range:", format(stats$min_me, digits = 1), "-",
-      format(stats$max_me, digits = 1), "%\n\n")
+  cat(
+    "  Range:",
+    format(stats$min_me, digits = 1),
+    "-",
+    format(stats$max_me, digits = 1),
+    "%\n\n"
+  )
 
   cat("Effect Classification:\n")
   cat("  Ion suppression (ME < 100%):", stats$n_suppression, "\n")
@@ -379,8 +416,12 @@ glance.measure_matrix_effect <- function(x, ...) {
 #'
 #' @importFrom ggplot2 autoplot
 #' @export
-autoplot.measure_matrix_effect <- function(object, type = c("bar", "point", "forest"),
-                                            show_limits = TRUE, ...) {
+autoplot.measure_matrix_effect <- function(
+  object,
+  type = c("bar", "point", "forest"),
+  show_limits = TRUE,
+  ...
+) {
   type <- match.arg(type)
   results <- object$results
 
@@ -399,29 +440,37 @@ autoplot.measure_matrix_effect <- function(object, type = c("bar", "point", "for
   )
 
   if (type == "bar") {
-    p <- ggplot2::ggplot(results, ggplot2::aes(
-      x = factor(.data$group),
-      y = .data$matrix_effect_pct,
-      fill = .data$interpretation
-    )) +
+    p <- ggplot2::ggplot(
+      results,
+      ggplot2::aes(
+        x = factor(.data$group),
+        y = .data$matrix_effect_pct,
+        fill = .data$interpretation
+      )
+    ) +
       ggplot2::geom_col(width = 0.7) +
       ggplot2::scale_fill_manual(values = interp_colors, name = "Effect")
-
   } else if (type == "point") {
-    p <- ggplot2::ggplot(results, ggplot2::aes(
-      x = factor(.data$group),
-      y = .data$matrix_effect_pct,
-      color = .data$interpretation
-    )) +
+    p <- ggplot2::ggplot(
+      results,
+      ggplot2::aes(
+        x = factor(.data$group),
+        y = .data$matrix_effect_pct,
+        color = .data$interpretation
+      )
+    ) +
       ggplot2::geom_point(size = 3) +
       ggplot2::scale_color_manual(values = interp_colors, name = "Effect")
-
-  } else {  # forest
-    p <- ggplot2::ggplot(results, ggplot2::aes(
-      x = .data$matrix_effect_pct,
-      y = factor(.data$group),
-      color = .data$interpretation
-    )) +
+  } else {
+    # forest
+    p <- ggplot2::ggplot(
+      results,
+      ggplot2::aes(
+        x = .data$matrix_effect_pct,
+        y = factor(.data$group),
+        color = .data$interpretation
+      )
+    ) +
       ggplot2::geom_point(size = 3) +
       ggplot2::geom_errorbar(
         ggplot2::aes(xmin = .data$me_ci_lower, xmax = .data$me_ci_upper),
@@ -429,20 +478,30 @@ autoplot.measure_matrix_effect <- function(object, type = c("bar", "point", "for
         orientation = "y"
       ) +
       ggplot2::scale_color_manual(values = interp_colors, name = "Effect") +
-      ggplot2::geom_vline(xintercept = 100, linetype = "solid", color = "gray50")
+      ggplot2::geom_vline(
+        xintercept = 100,
+        linetype = "solid",
+        color = "gray50"
+      )
   }
 
   if (show_limits) {
     if (type == "forest") {
       p <- p +
-        ggplot2::geom_vline(xintercept = c(80, 120), linetype = "dashed",
-                            color = "#FEE08B", linewidth = 0.8)
+        ggplot2::geom_vline(
+          xintercept = c(80, 120),
+          linetype = "dashed",
+          color = "#FEE08B",
+          linewidth = 0.8
+        )
     } else {
       p <- p +
-        ggplot2::geom_hline(yintercept = c(80, 100, 120),
-                            linetype = c("dashed", "solid", "dashed"),
-                            color = c("#FEE08B", "gray50", "#FEE08B"),
-                            linewidth = 0.8)
+        ggplot2::geom_hline(
+          yintercept = c(80, 100, 120),
+          linetype = c("dashed", "solid", "dashed"),
+          color = c("#FEE08B", "gray50", "#FEE08B"),
+          linewidth = 0.8
+        )
     }
   }
 
@@ -551,18 +610,18 @@ autoplot.measure_matrix_effect <- function(object, type = c("bar", "point", "for
 #'
 #' bake(rec, new_data = NULL)
 step_measure_standard_addition <- function(
-    recipe,
-    ...,
-    addition_col = "addition",
-    sample_id_col,
-    min_points = 3,
-    output_suffix = "_corrected",
-    diagnostics = TRUE,
-    role = "outcome",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_standard_addition")) {
-
+  recipe,
+  ...,
+  addition_col = "addition",
+  sample_id_col,
+  min_points = 3,
+  output_suffix = "_corrected",
+  diagnostics = TRUE,
+  role = "outcome",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_standard_addition")
+) {
   if (missing(sample_id_col)) {
     cli::cli_abort(
       "{.arg sample_id_col} must be provided to identify unique samples."
@@ -597,19 +656,19 @@ step_measure_standard_addition <- function(
 #' Internal constructor
 #' @noRd
 step_measure_standard_addition_new <- function(
-    terms,
-    addition_col,
-    sample_id_col,
-    min_points,
-    output_suffix,
-    diagnostics,
-    role,
-    trained,
-    col_names,
-    calibrations,
-    skip,
-    id) {
-
+  terms,
+  addition_col,
+  sample_id_col,
+  min_points,
+  output_suffix,
+  diagnostics,
+  role,
+  trained,
+  col_names,
+  calibrations,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_standard_addition",
     terms = terms,
@@ -629,7 +688,6 @@ step_measure_standard_addition_new <- function(
 
 #' @export
 prep.step_measure_standard_addition <- function(x, training, info = NULL, ...) {
-
   # Validate required columns
   if (!x$addition_col %in% names(training)) {
     cli::cli_abort(
@@ -693,9 +751,13 @@ prep.step_measure_standard_addition <- function(x, training, info = NULL, ...) {
 
 #' Fit standard addition calibrations
 #' @noRd
-.fit_standard_additions <- function(data, response_cols, addition_col,
-                                     sample_id_col, min_points) {
-
+.fit_standard_additions <- function(
+  data,
+  response_cols,
+  addition_col,
+  sample_id_col,
+  min_points
+) {
   samples <- unique(data[[sample_id_col]])
   calibrations <- list()
 
@@ -722,17 +784,20 @@ prep.step_measure_standard_addition <- function(x, training, info = NULL, ...) {
         next
       }
 
-      fit <- tryCatch({
-        stats::lm(responses ~ additions)
-      }, error = function(e) {
-        cli::cli_warn(
-          c(
-            "Failed to fit standard addition for sample {.val {sample}}, {.field {resp_col}}.",
-            "i" = "Error: {e$message}"
+      fit <- tryCatch(
+        {
+          stats::lm(responses ~ additions)
+        },
+        error = function(e) {
+          cli::cli_warn(
+            c(
+              "Failed to fit standard addition for sample {.val {sample}}, {.field {resp_col}}.",
+              "i" = "Error: {e$message}"
+            )
           )
-        )
-        NULL
-      })
+          NULL
+        }
+      )
 
       if (is.null(fit)) {
         next
@@ -776,10 +841,9 @@ prep.step_measure_standard_addition <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_standard_addition <- function(object, new_data, ...) {
-
   # For standard addition, we typically work with training data only
 
-# (the calibration IS the result)
+  # (the calibration IS the result)
 
   # Get unique samples from new_data
   samples <- unique(new_data[[object$sample_id_col]])
@@ -813,8 +877,12 @@ bake.step_measure_standard_addition <- function(object, new_data, ...) {
 
       if (object$diagnostics) {
         new_data[[paste0(resp_col, "_sa_slope")]][sample_mask] <- cal$slope
-        new_data[[paste0(resp_col, "_sa_intercept")]][sample_mask] <- cal$intercept
-        new_data[[paste0(resp_col, "_sa_rsquared")]][sample_mask] <- cal$r_squared
+        new_data[[paste0(resp_col, "_sa_intercept")]][
+          sample_mask
+        ] <- cal$intercept
+        new_data[[paste0(resp_col, "_sa_rsquared")]][
+          sample_mask
+        ] <- cal$r_squared
       }
     }
   }
@@ -824,14 +892,19 @@ bake.step_measure_standard_addition <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_standard_addition <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
-
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Standard addition correction"
 
   if (x$trained) {
-    n_samples <- length(unique(vapply(x$calibrations, `[[`, character(1), "sample")))
+    n_samples <- length(unique(vapply(
+      x$calibrations,
+      `[[`,
+      character(1),
+      "sample"
+    )))
     n_cols <- length(x$col_names)
     desc <- glue::glue(
       "{n_cols} response{?s} for {n_samples} sample{?s}"
@@ -848,17 +921,20 @@ print.step_measure_standard_addition <- function(
 #' @export
 tidy.step_measure_standard_addition <- function(x, ...) {
   if (x$trained) {
-    calibrations_df <- do.call(rbind, lapply(x$calibrations, function(cal) {
-      tibble::tibble(
-        sample = cal$sample,
-        response = cal$response,
-        original_concentration = cal$original_concentration,
-        slope = cal$slope,
-        intercept = cal$intercept,
-        r_squared = cal$r_squared,
-        n_points = cal$n_points
-      )
-    }))
+    calibrations_df <- do.call(
+      rbind,
+      lapply(x$calibrations, function(cal) {
+        tibble::tibble(
+          sample = cal$sample,
+          response = cal$response,
+          original_concentration = cal$original_concentration,
+          slope = cal$slope,
+          intercept = cal$intercept,
+          r_squared = cal$r_squared,
+          n_points = cal$n_points
+        )
+      })
+    )
     calibrations_df$id <- x$id
     calibrations_df
   } else {

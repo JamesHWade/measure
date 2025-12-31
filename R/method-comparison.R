@@ -72,13 +72,13 @@
 #' # Visualize
 #' ggplot2::autoplot(ba)
 measure_bland_altman <- function(
-    data,
-    method1_col,
-    method2_col,
-    id_col = NULL,
-    conf_level = 0.95,
-    regression = c("none", "linear", "quadratic")) {
-
+  data,
+  method1_col,
+  method2_col,
+  id_col = NULL,
+  conf_level = 0.95,
+  regression = c("none", "linear", "quadratic")
+) {
   regression <- match.arg(regression)
 
   # Validate inputs
@@ -143,7 +143,11 @@ measure_bland_altman <- function(
   # Test for proportional bias if requested
   regression_result <- NULL
   if (regression != "none") {
-    regression_result <- .test_proportional_bias(mean_vals, diff_vals, regression)
+    regression_result <- .test_proportional_bias(
+      mean_vals,
+      diff_vals,
+      regression
+    )
   }
 
   structure(
@@ -234,16 +238,16 @@ measure_bland_altman <- function(
 #' print(result)
 #' tidy(result)
 measure_deming_regression <- function(
-    data,
-    method1_col,
-    method2_col,
-    error_ratio = NULL,
-    method1_sd = NULL,
-    method2_sd = NULL,
-    bootstrap = FALSE,
-    bootstrap_n = 1000,
-    conf_level = 0.95) {
-
+  data,
+  method1_col,
+  method2_col,
+  error_ratio = NULL,
+  method1_sd = NULL,
+  method2_sd = NULL,
+  bootstrap = FALSE,
+  bootstrap_n = 1000,
+  conf_level = 0.95
+) {
   # Validate inputs
   if (!is.data.frame(data)) {
     cli::cli_abort("{.arg data} must be a data frame.")
@@ -351,7 +355,14 @@ measure_deming_regression <- function(
 
   # Data summary
   data_summary <- tibble::tibble(
-    statistic = c("n", "method1_mean", "method1_sd", "method2_mean", "method2_sd", "correlation"),
+    statistic = c(
+      "n",
+      "method1_mean",
+      "method1_sd",
+      "method2_mean",
+      "method2_sd",
+      "correlation"
+    ),
     value = c(n, mean(x), sd(x), mean(y), sd(y), stats::cor(x, y))
   )
 
@@ -442,12 +453,12 @@ measure_deming_regression <- function(
 #' print(result)
 #' }
 measure_passing_bablok <- function(
-    data,
-    method1_col,
-    method2_col,
-    conf_level = 0.95,
-    alpha = 0.05) {
-
+  data,
+  method1_col,
+  method2_col,
+  conf_level = 0.95,
+  alpha = 0.05
+) {
   # Check for mcr package - required for Passing-Bablok
   if (!requireNamespace("mcr", quietly = TRUE)) {
     cli::cli_abort(
@@ -512,14 +523,17 @@ measure_passing_bablok <- function(
 
   # CUSUM linearity test
   # mcr provides this in the object
-  cusum_test <- tryCatch({
-    list(
-      p_value = pb_fit@cinfo[4],  # CUSUM p-value
-      linear = pb_fit@cinfo[4] > alpha
-    )
-  }, error = function(e) {
-    list(p_value = NA, linear = NA)
-  })
+  cusum_test <- tryCatch(
+    {
+      list(
+        p_value = pb_fit@cinfo[4], # CUSUM p-value
+        linear = pb_fit@cinfo[4] > alpha
+      )
+    },
+    error = function(e) {
+      list(p_value = NA, linear = NA)
+    }
+  )
 
   # Calculate residuals and RMSE
   fitted <- intercept + slope * x
@@ -626,15 +640,15 @@ measure_passing_bablok <- function(
 #'
 #' print(en_result)
 measure_proficiency_score <- function(
-    data,
-    measured_col,
-    reference_col,
-    uncertainty_col = NULL,
-    reference_uncertainty_col = NULL,
-    score_type = c("z_score", "en_score", "zeta_score"),
-    sigma = NULL,
-    group_col = NULL) {
-
+  data,
+  measured_col,
+  reference_col,
+  uncertainty_col = NULL,
+  reference_uncertainty_col = NULL,
+  score_type = c("z_score", "en_score", "zeta_score"),
+  sigma = NULL,
+  group_col = NULL
+) {
   score_type <- match.arg(score_type)
 
   # Validate inputs
@@ -659,7 +673,9 @@ measure_proficiency_score <- function(
       )
     }
     if (!uncertainty_col %in% names(data)) {
-      cli::cli_abort("Uncertainty column {.field {uncertainty_col}} not found in data.")
+      cli::cli_abort(
+        "Uncertainty column {.field {uncertainty_col}} not found in data."
+      )
     }
   }
 
@@ -683,7 +699,7 @@ measure_proficiency_score <- function(
         )
       }
 
-      sigma <- iqr_val / 1.349  # Robust estimate
+      sigma <- iqr_val / 1.349 # Robust estimate
       cli::cli_inform(
         "Estimated sigma = {format(sigma, digits = 3)} from IQR of differences."
       )
@@ -700,7 +716,10 @@ measure_proficiency_score <- function(
     u_measured <- data[[uncertainty_col]]
 
     # Reference uncertainty (default to 0 if not provided)
-    if (!is.null(reference_uncertainty_col) && reference_uncertainty_col %in% names(data)) {
+    if (
+      !is.null(reference_uncertainty_col) &&
+        reference_uncertainty_col %in% names(data)
+    ) {
       u_reference <- data[[reference_uncertainty_col]]
     } else {
       u_reference <- 0
@@ -747,7 +766,7 @@ measure_proficiency_score <- function(
     mean_score = mean(scores, na.rm = TRUE),
     sd_score = sd(scores, na.rm = TRUE),
     max_abs_score = max(abs(scores), na.rm = TRUE),
-    sigma = sigma  # NULL for En/zeta scores
+    sigma = sigma # NULL for En/zeta scores
   )
 
   structure(
@@ -778,16 +797,36 @@ print.measure_bland_altman <- function(x, ...) {
   cat("  n =", stats$n, "\n")
   cat("  Mean bias =", format(stats$mean_bias, digits = 4), "\n")
   cat("  SD of differences =", format(stats$sd_diff, digits = 4), "\n")
-  cat("  95% CI for bias: [", format(stats$bias_ci_lower, digits = 4),
-      ", ", format(stats$bias_ci_upper, digits = 4), "]\n\n", sep = "")
+  cat(
+    "  95% CI for bias: [",
+    format(stats$bias_ci_lower, digits = 4),
+    ", ",
+    format(stats$bias_ci_upper, digits = 4),
+    "]\n\n",
+    sep = ""
+  )
 
   cat("Limits of Agreement:\n")
-  cat("  Lower LOA =", format(stats$lower_loa, digits = 4),
-      "(95% CI: [", format(stats$loa_lower_ci[1], digits = 4), ", ",
-      format(stats$loa_lower_ci[2], digits = 4), "])\n", sep = " ")
-  cat("  Upper LOA =", format(stats$upper_loa, digits = 4),
-      "(95% CI: [", format(stats$loa_upper_ci[1], digits = 4), ", ",
-      format(stats$loa_upper_ci[2], digits = 4), "])\n", sep = " ")
+  cat(
+    "  Lower LOA =",
+    format(stats$lower_loa, digits = 4),
+    "(95% CI: [",
+    format(stats$loa_lower_ci[1], digits = 4),
+    ", ",
+    format(stats$loa_lower_ci[2], digits = 4),
+    "])\n",
+    sep = " "
+  )
+  cat(
+    "  Upper LOA =",
+    format(stats$upper_loa, digits = 4),
+    "(95% CI: [",
+    format(stats$loa_upper_ci[1], digits = 4),
+    ", ",
+    format(stats$loa_upper_ci[2], digits = 4),
+    "])\n",
+    sep = " "
+  )
   cat("  LOA Width =", format(stats$loa_width, digits = 4), "\n\n")
 
   if (!is.null(x$regression)) {
@@ -872,8 +911,13 @@ print.measure_proficiency_score <- function(x, ...) {
   cat("\n")
 
   cat("Results (n =", stats$n_valid, "):\n")
-  cat("  Satisfactory (|z| \u2264 2):", stats$n_satisfactory,
-      "(", format(stats$pct_satisfactory, digits = 1), "%)\n")
+  cat(
+    "  Satisfactory (|z| \u2264 2):",
+    stats$n_satisfactory,
+    "(",
+    format(stats$pct_satisfactory, digits = 1),
+    "%)\n"
+  )
   cat("  Questionable (2 < |z| \u2264 3):", stats$n_questionable, "\n")
   cat("  Unsatisfactory (|z| > 3):", stats$n_unsatisfactory, "\n\n")
 
@@ -895,11 +939,26 @@ tidy.measure_bland_altman <- function(x, ...) {
   stats <- x$statistics
 
   tibble::tibble(
-    statistic = c("n", "mean_bias", "sd_diff", "lower_loa", "upper_loa",
-                  "loa_width", "bias_ci_lower", "bias_ci_upper"),
-    value = c(stats$n, stats$mean_bias, stats$sd_diff, stats$lower_loa,
-              stats$upper_loa, stats$loa_width, stats$bias_ci_lower,
-              stats$bias_ci_upper)
+    statistic = c(
+      "n",
+      "mean_bias",
+      "sd_diff",
+      "lower_loa",
+      "upper_loa",
+      "loa_width",
+      "bias_ci_lower",
+      "bias_ci_upper"
+    ),
+    value = c(
+      stats$n,
+      stats$mean_bias,
+      stats$sd_diff,
+      stats$lower_loa,
+      stats$upper_loa,
+      stats$loa_width,
+      stats$bias_ci_lower,
+      stats$bias_ci_upper
+    )
   )
 }
 
@@ -917,7 +976,11 @@ tidy.measure_passing_bablok <- function(x, ...) {
 
 #' @rdname tidy.recipe
 #' @export
-tidy.measure_proficiency_score <- function(x, type = c("scores", "summary"), ...) {
+tidy.measure_proficiency_score <- function(
+  x,
+  type = c("scores", "summary"),
+  ...
+) {
   type <- match.arg(type)
 
   if (type == "scores") {
@@ -925,11 +988,26 @@ tidy.measure_proficiency_score <- function(x, type = c("scores", "summary"), ...
   } else {
     stats <- x$statistics
     tibble::tibble(
-      statistic = c("n", "n_satisfactory", "n_questionable", "n_unsatisfactory",
-                    "pct_satisfactory", "mean_score", "sd_score", "max_abs_score"),
-      value = c(stats$n, stats$n_satisfactory, stats$n_questionable,
-                stats$n_unsatisfactory, stats$pct_satisfactory,
-                stats$mean_score, stats$sd_score, stats$max_abs_score)
+      statistic = c(
+        "n",
+        "n_satisfactory",
+        "n_questionable",
+        "n_unsatisfactory",
+        "pct_satisfactory",
+        "mean_score",
+        "sd_score",
+        "max_abs_score"
+      ),
+      value = c(
+        stats$n,
+        stats$n_satisfactory,
+        stats$n_questionable,
+        stats$n_unsatisfactory,
+        stats$pct_satisfactory,
+        stats$mean_score,
+        stats$sd_score,
+        stats$max_abs_score
+      )
     )
   }
 }
@@ -959,10 +1037,14 @@ glance.measure_deming_regression <- function(x, ...) {
   coefs <- x$coefficients
 
   # Safe CI checks that handle NA values
-  int_ci_check <- !is.na(coefs$ci_lower[1]) && !is.na(coefs$ci_upper[1]) &&
-    coefs$ci_lower[1] <= 0 && coefs$ci_upper[1] >= 0
-  slope_ci_check <- !is.na(coefs$ci_lower[2]) && !is.na(coefs$ci_upper[2]) &&
-    coefs$ci_lower[2] <= 1 && coefs$ci_upper[2] >= 1
+  int_ci_check <- !is.na(coefs$ci_lower[1]) &&
+    !is.na(coefs$ci_upper[1]) &&
+    coefs$ci_lower[1] <= 0 &&
+    coefs$ci_upper[1] >= 0
+  slope_ci_check <- !is.na(coefs$ci_lower[2]) &&
+    !is.na(coefs$ci_upper[2]) &&
+    coefs$ci_lower[2] <= 1 &&
+    coefs$ci_upper[2] >= 1
 
   tibble::tibble(
     intercept = coefs$estimate[1],
@@ -980,10 +1062,14 @@ glance.measure_passing_bablok <- function(x, ...) {
   coefs <- x$coefficients
 
   # Safe CI checks that handle NA values
-  int_ci_check <- !is.na(coefs$ci_lower[1]) && !is.na(coefs$ci_upper[1]) &&
-    coefs$ci_lower[1] <= 0 && coefs$ci_upper[1] >= 0
-  slope_ci_check <- !is.na(coefs$ci_lower[2]) && !is.na(coefs$ci_upper[2]) &&
-    coefs$ci_lower[2] <= 1 && coefs$ci_upper[2] >= 1
+  int_ci_check <- !is.na(coefs$ci_lower[1]) &&
+    !is.na(coefs$ci_upper[1]) &&
+    coefs$ci_lower[1] <= 0 &&
+    coefs$ci_upper[1] >= 0
+  slope_ci_check <- !is.na(coefs$ci_lower[2]) &&
+    !is.na(coefs$ci_upper[2]) &&
+    coefs$ci_lower[2] <= 1 &&
+    coefs$ci_upper[2] >= 1
 
   tibble::tibble(
     intercept = coefs$estimate[1],
@@ -1026,13 +1112,25 @@ glance.measure_proficiency_score <- function(x, ...) {
 #'
 #' @importFrom ggplot2 autoplot
 #' @export
-autoplot.measure_bland_altman <- function(object, show_loa = TRUE, show_ci = FALSE, ...) {
+autoplot.measure_bland_altman <- function(
+  object,
+  show_loa = TRUE,
+  show_ci = FALSE,
+  ...
+) {
   data <- object$data
   stats <- object$statistics
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$mean, y = .data$difference)) +
+  p <- ggplot2::ggplot(
+    data,
+    ggplot2::aes(x = .data$mean, y = .data$difference)
+  ) +
     ggplot2::geom_point(alpha = 0.7, size = 2) +
-    ggplot2::geom_hline(yintercept = stats$mean_bias, color = "#2166AC", linewidth = 0.8) +
+    ggplot2::geom_hline(
+      yintercept = stats$mean_bias,
+      color = "#2166AC",
+      linewidth = 0.8
+    ) +
     ggplot2::labs(
       title = "Bland-Altman Plot",
       x = "Mean of Methods",
@@ -1042,31 +1140,56 @@ autoplot.measure_bland_altman <- function(object, show_loa = TRUE, show_ci = FAL
 
   if (show_loa) {
     p <- p +
-      ggplot2::geom_hline(yintercept = stats$lower_loa, color = "#B2182B",
-                          linetype = "dashed", linewidth = 0.8) +
-      ggplot2::geom_hline(yintercept = stats$upper_loa, color = "#B2182B",
-                          linetype = "dashed", linewidth = 0.8)
+      ggplot2::geom_hline(
+        yintercept = stats$lower_loa,
+        color = "#B2182B",
+        linetype = "dashed",
+        linewidth = 0.8
+      ) +
+      ggplot2::geom_hline(
+        yintercept = stats$upper_loa,
+        color = "#B2182B",
+        linetype = "dashed",
+        linewidth = 0.8
+      )
   }
 
   if (show_ci) {
     p <- p +
       ggplot2::geom_rect(
-        ggplot2::aes(xmin = -Inf, xmax = Inf,
-                     ymin = stats$loa_lower_ci[1], ymax = stats$loa_lower_ci[2]),
-        fill = "#B2182B", alpha = 0.1, inherit.aes = FALSE
+        ggplot2::aes(
+          xmin = -Inf,
+          xmax = Inf,
+          ymin = stats$loa_lower_ci[1],
+          ymax = stats$loa_lower_ci[2]
+        ),
+        fill = "#B2182B",
+        alpha = 0.1,
+        inherit.aes = FALSE
       ) +
       ggplot2::geom_rect(
-        ggplot2::aes(xmin = -Inf, xmax = Inf,
-                     ymin = stats$loa_upper_ci[1], ymax = stats$loa_upper_ci[2]),
-        fill = "#B2182B", alpha = 0.1, inherit.aes = FALSE
+        ggplot2::aes(
+          xmin = -Inf,
+          xmax = Inf,
+          ymin = stats$loa_upper_ci[1],
+          ymax = stats$loa_upper_ci[2]
+        ),
+        fill = "#B2182B",
+        alpha = 0.1,
+        inherit.aes = FALSE
       )
   }
 
   # Add regression line if proportional bias was tested
   if (!is.null(object$regression)) {
     p <- p +
-      ggplot2::geom_smooth(method = "lm", se = FALSE, color = "#762A83",
-                           linetype = "dotted", linewidth = 0.8)
+      ggplot2::geom_smooth(
+        method = "lm",
+        se = FALSE,
+        color = "#762A83",
+        linetype = "dotted",
+        linewidth = 0.8
+      )
   }
 
   p
@@ -1084,7 +1207,11 @@ autoplot.measure_bland_altman <- function(object, show_loa = TRUE, show_ci = FAL
 #'
 #' @importFrom ggplot2 autoplot
 #' @export
-autoplot.measure_deming_regression <- function(object, show_identity = TRUE, ...) {
+autoplot.measure_deming_regression <- function(
+  object,
+  show_identity = TRUE,
+  ...
+) {
   coefs <- object$coefficients
   intercept <- coefs$estimate[1]
   slope <- coefs$estimate[2]
@@ -1095,11 +1222,18 @@ autoplot.measure_deming_regression <- function(object, show_identity = TRUE, ...
   n <- data_summary$value[data_summary$statistic == "n"]
 
   # Create a simple range for the line
-  x_range <- c(0, data_summary$value[data_summary$statistic == "method1_mean"] * 2)
+  x_range <- c(
+    0,
+    data_summary$value[data_summary$statistic == "method1_mean"] * 2
+  )
 
   p <- ggplot2::ggplot() +
-    ggplot2::geom_abline(intercept = intercept, slope = slope,
-                         color = "#2166AC", linewidth = 1) +
+    ggplot2::geom_abline(
+      intercept = intercept,
+      slope = slope,
+      color = "#2166AC",
+      linewidth = 1
+    ) +
     ggplot2::labs(
       title = "Deming Regression",
       subtitle = sprintf("y = %.3f + %.3fx", intercept, slope),
@@ -1110,8 +1244,13 @@ autoplot.measure_deming_regression <- function(object, show_identity = TRUE, ...
 
   if (show_identity) {
     p <- p +
-      ggplot2::geom_abline(intercept = 0, slope = 1,
-                           color = "gray50", linetype = "dashed", linewidth = 0.8)
+      ggplot2::geom_abline(
+        intercept = 0,
+        slope = 1,
+        color = "gray50",
+        linetype = "dashed",
+        linewidth = 0.8
+      )
   }
 
   p
@@ -1125,8 +1264,12 @@ autoplot.measure_passing_bablok <- function(object, show_identity = TRUE, ...) {
   slope <- coefs$estimate[2]
 
   p <- ggplot2::ggplot() +
-    ggplot2::geom_abline(intercept = intercept, slope = slope,
-                         color = "#2166AC", linewidth = 1) +
+    ggplot2::geom_abline(
+      intercept = intercept,
+      slope = slope,
+      color = "#2166AC",
+      linewidth = 1
+    ) +
     ggplot2::labs(
       title = "Passing-Bablok Regression",
       subtitle = sprintf("y = %.3f + %.3fx", intercept, slope),
@@ -1137,8 +1280,13 @@ autoplot.measure_passing_bablok <- function(object, show_identity = TRUE, ...) {
 
   if (show_identity) {
     p <- p +
-      ggplot2::geom_abline(intercept = 0, slope = 1,
-                           color = "gray50", linetype = "dashed", linewidth = 0.8)
+      ggplot2::geom_abline(
+        intercept = 0,
+        slope = 1,
+        color = "gray50",
+        linetype = "dashed",
+        linewidth = 0.8
+      )
   }
 
   p
@@ -1156,7 +1304,11 @@ autoplot.measure_passing_bablok <- function(object, show_identity = TRUE, ...) {
 #'
 #' @importFrom ggplot2 autoplot
 #' @export
-autoplot.measure_proficiency_score <- function(object, type = c("bar", "point"), ...) {
+autoplot.measure_proficiency_score <- function(
+  object,
+  type = c("bar", "point"),
+  ...
+) {
   type <- match.arg(type)
   scores <- object$scores
 
@@ -1168,20 +1320,28 @@ autoplot.measure_proficiency_score <- function(object, type = c("bar", "point"),
   )
 
   if (type == "bar") {
-    p <- ggplot2::ggplot(scores, ggplot2::aes(x = .data$row, y = .data$score, fill = .data$flag)) +
+    p <- ggplot2::ggplot(
+      scores,
+      ggplot2::aes(x = .data$row, y = .data$score, fill = .data$flag)
+    ) +
       ggplot2::geom_col(width = 0.7) +
       ggplot2::scale_fill_manual(values = flag_colors, name = "Status")
   } else {
-    p <- ggplot2::ggplot(scores, ggplot2::aes(x = .data$row, y = .data$score, color = .data$flag)) +
+    p <- ggplot2::ggplot(
+      scores,
+      ggplot2::aes(x = .data$row, y = .data$score, color = .data$flag)
+    ) +
       ggplot2::geom_point(size = 3) +
       ggplot2::scale_color_manual(values = flag_colors, name = "Status")
   }
 
   p +
-    ggplot2::geom_hline(yintercept = c(-3, -2, 0, 2, 3),
-                        linetype = c("dashed", "dotted", "solid", "dotted", "dashed"),
-                        color = c("#D73027", "#FEE08B", "gray50", "#FEE08B", "#D73027"),
-                        linewidth = 0.5) +
+    ggplot2::geom_hline(
+      yintercept = c(-3, -2, 0, 2, 3),
+      linetype = c("dashed", "dotted", "solid", "dotted", "dashed"),
+      color = c("#D73027", "#FEE08B", "gray50", "#FEE08B", "#D73027"),
+      linewidth = 0.5
+    ) +
     ggplot2::labs(
       title = "Proficiency Test Scores",
       subtitle = object$statistics$score_type,

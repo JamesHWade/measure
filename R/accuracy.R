@@ -58,12 +58,12 @@
 #' result <- measure_accuracy(data, "measured", "nominal", group_col = "level")
 #' print(result)
 measure_accuracy <- function(
-    data,
-    measured_col,
-    reference_col,
-    group_col = NULL,
-    conf_level = 0.95) {
-
+  data,
+  measured_col,
+  reference_col,
+  group_col = NULL,
+  conf_level = 0.95
+) {
   # Validate inputs
   for (col in c(measured_col, reference_col)) {
     if (!col %in% names(data)) {
@@ -160,12 +160,12 @@ measure_accuracy <- function(
 #' result <- measure_linearity(data, "concentration", "response")
 #' print(result)
 measure_linearity <- function(
-    data,
-    conc_col,
-    response_col,
-    method = c("regression", "residual"),
-    conf_level = 0.95) {
-
+  data,
+  conc_col,
+  response_col,
+  method = c("regression", "residual"),
+  conf_level = 0.95
+) {
   method <- match.arg(method)
 
   # Validate inputs
@@ -302,15 +302,15 @@ measure_linearity <- function(
 #' )
 #' print(result)
 measure_carryover <- function(
-    data,
-    response_col,
-    sample_type_col,
-    run_order_col,
-    blank_type = "blank",
-    high_type = "high",
-    threshold = 20,
-    lloq = NULL) {
-
+  data,
+  response_col,
+  sample_type_col,
+  run_order_col,
+  blank_type = "blank",
+  high_type = "high",
+  threshold = 20,
+  lloq = NULL
+) {
   # Validate inputs
   for (col in c(response_col, sample_type_col, run_order_col)) {
     if (!col %in% names(data)) {
@@ -331,9 +331,9 @@ measure_carryover <- function(
   high_before_blank <- numeric(n)
 
   for (i in 2:n) {
-    if (sample_types[i] == blank_type && sample_types[i-1] == high_type) {
+    if (sample_types[i] == blank_type && sample_types[i - 1] == high_type) {
       blanks_after_high[i] <- TRUE
-      high_before_blank[i] <- responses[i-1]
+      high_before_blank[i] <- responses[i - 1]
     }
   }
 
@@ -479,7 +479,8 @@ lack_of_fit_test <- function(conc, response, fit) {
   for (lev in levels_vec) {
     group_response <- response[conc_factor == lev]
     if (length(group_response) > 1) {
-      ss_pure_error <- ss_pure_error + sum((group_response - mean(group_response))^2)
+      ss_pure_error <- ss_pure_error +
+        sum((group_response - mean(group_response))^2)
       df_pure_error <- df_pure_error + length(group_response) - 1
     }
   }
@@ -496,7 +497,7 @@ lack_of_fit_test <- function(conc, response, fit) {
   # Calculate lack of fit SS
   ss_residual <- sum(stats::residuals(fit)^2)
   ss_lack_of_fit <- ss_residual - ss_pure_error
-  df_lack_of_fit <- length(levels_vec) - 2  # number of levels - 2 (intercept + slope)
+  df_lack_of_fit <- length(levels_vec) - 2 # number of levels - 2 (intercept + slope)
 
   if (df_lack_of_fit <= 0) {
     return(list(
@@ -511,7 +512,12 @@ lack_of_fit_test <- function(conc, response, fit) {
   ms_lack_of_fit <- ss_lack_of_fit / df_lack_of_fit
   ms_pure_error <- ss_pure_error / df_pure_error
   f_stat <- ms_lack_of_fit / ms_pure_error
-  p_value <- stats::pf(f_stat, df_lack_of_fit, df_pure_error, lower.tail = FALSE)
+  p_value <- stats::pf(
+    f_stat,
+    df_lack_of_fit,
+    df_pure_error,
+    lower.tail = FALSE
+  )
 
   list(
     f_statistic = f_stat,
@@ -538,12 +544,22 @@ print.measure_accuracy <- function(x, ...) {
     cat("  n =", x$n[i], "\n")
     cat("  Mean measured =", format(x$mean_measured[i], digits = 4), "\n")
     cat("  Mean reference =", format(x$mean_reference[i], digits = 4), "\n")
-    cat("  Bias =", format(x$bias[i], digits = 4),
-        "(", format(x$bias_pct[i], digits = 2), "%)\n")
+    cat(
+      "  Bias =",
+      format(x$bias[i], digits = 4),
+      "(",
+      format(x$bias_pct[i], digits = 2),
+      "%)\n"
+    )
     cat("  Recovery =", format(x$mean_recovery[i], digits = 2), "%\n")
-    cat("  Recovery 95% CI: [",
-        format(x$recovery_ci_lower[i], digits = 2), "%, ",
-        format(x$recovery_ci_upper[i], digits = 2), "%]\n", sep = "")
+    cat(
+      "  Recovery 95% CI: [",
+      format(x$recovery_ci_lower[i], digits = 2),
+      "%, ",
+      format(x$recovery_ci_upper[i], digits = 2),
+      "%]\n",
+      sep = ""
+    )
     cat("\n")
   }
 
@@ -561,12 +577,23 @@ print.measure_linearity <- function(x, ...) {
 
   cat("Regression:\n")
   cat("  Slope =", format(x$slope, digits = 4), "\n")
-  cat("    95% CI: [", format(x$slope_ci_lower, digits = 4), ", ",
-      format(x$slope_ci_upper, digits = 4), "]\n", sep = "")
+  cat(
+    "    95% CI: [",
+    format(x$slope_ci_lower, digits = 4),
+    ", ",
+    format(x$slope_ci_upper, digits = 4),
+    "]\n",
+    sep = ""
+  )
   cat("  Intercept =", format(x$intercept, digits = 4), "\n")
-  cat("    95% CI: [", format(x$intercept_ci_lower, digits = 4), ", ",
-      format(x$intercept_ci_upper, digits = 4), "]\n\n", sep = "")
-
+  cat(
+    "    95% CI: [",
+    format(x$intercept_ci_lower, digits = 4),
+    ", ",
+    format(x$intercept_ci_upper, digits = 4),
+    "]\n\n",
+    sep = ""
+  )
 
   cat("Fit Quality:\n")
   cat("  R-squared =", format(x$r_squared, digits = 5), "\n")
@@ -605,8 +632,21 @@ print.measure_carryover <- function(x, ...) {
   cat("  Max blank response:", format(x$max_blank, digits = 4), "\n\n")
 
   cat("Carryover:\n")
-  cat("  Reference (", x$reference_type, "):", format(x$reference_value, digits = 4), "\n", sep = "")
-  cat("  Carryover:", format(x$carryover_pct, digits = 2), "% of", x$reference_type, "\n")
+  cat(
+    "  Reference (",
+    x$reference_type,
+    "):",
+    format(x$reference_value, digits = 4),
+    "\n",
+    sep = ""
+  )
+  cat(
+    "  Carryover:",
+    format(x$carryover_pct, digits = 2),
+    "% of",
+    x$reference_type,
+    "\n"
+  )
   cat("  Threshold:", x$threshold, "%\n\n")
 
   if (x$pass) {
@@ -646,9 +686,17 @@ tidy.measure_linearity <- function(x, ...) {
     adj_r_squared = x$adj_r_squared,
     residual_sd = x$residual_sd,
     residual_cv = x$residual_cv,
-    lof_f = if (!is.null(x$lack_of_fit)) x$lack_of_fit$f_statistic else NA_real_,
+    lof_f = if (!is.null(x$lack_of_fit)) {
+      x$lack_of_fit$f_statistic
+    } else {
+      NA_real_
+    },
     lof_p = if (!is.null(x$lack_of_fit)) x$lack_of_fit$p_value else NA_real_,
-    lof_significant = if (!is.null(x$lack_of_fit)) x$lack_of_fit$significant else NA
+    lof_significant = if (!is.null(x$lack_of_fit)) {
+      x$lack_of_fit$significant
+    } else {
+      NA
+    }
   )
 }
 
@@ -684,7 +732,11 @@ tidy.measure_carryover <- function(x, ...) {
 #'
 #' @importFrom ggplot2 autoplot
 #' @export
-autoplot.measure_linearity <- function(object, type = c("fit", "residuals"), ...) {
+autoplot.measure_linearity <- function(
+  object,
+  type = c("fit", "residuals"),
+  ...
+) {
   type <- match.arg(type)
   fit <- object$model
 
@@ -713,7 +765,10 @@ autoplot.measure_linearity <- function(object, type = c("fit", "residuals"), ...
       residuals = stats::residuals(fit)
     )
 
-    p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$fitted, y = .data$residuals)) +
+    p <- ggplot2::ggplot(
+      data,
+      ggplot2::aes(x = .data$fitted, y = .data$residuals)
+    ) +
       ggplot2::geom_point(size = 2) +
       ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
       ggplot2::labs(

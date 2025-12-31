@@ -53,14 +53,15 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_baseline_rolling <- function(
-    recipe,
-    measures = NULL,
-    window_size = 100,
-    smoothing = 50,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_rolling")) {
+  recipe,
+  measures = NULL,
+  window_size = 100,
+  smoothing = 50,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_rolling")
+) {
   if (!is.numeric(window_size) || window_size < 3) {
     cli::cli_abort("{.arg window_size} must be a number >= 3.")
   }
@@ -83,7 +84,14 @@ step_measure_baseline_rolling <- function(
 }
 
 step_measure_baseline_rolling_new <- function(
-    measures, window_size, smoothing, role, trained, skip, id) {
+  measures,
+  window_size,
+  smoothing,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_rolling",
     measures = measures,
@@ -166,7 +174,11 @@ bake.step_measure_baseline_rolling <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_baseline_rolling <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_baseline_rolling <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Rolling ball baseline (window=", x$window_size, ")")
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
@@ -240,15 +252,16 @@ tidy.step_measure_baseline_rolling <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_baseline_airpls <- function(
-    recipe,
-    measures = NULL,
-    lambda = 1e5,
-    max_iter = 50L,
-    tol = 1e-3,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_airpls")) {
+  recipe,
+  measures = NULL,
+  lambda = 1e5,
+  max_iter = 50L,
+  tol = 1e-3,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_airpls")
+) {
   if (!is.numeric(lambda) || lambda <= 0) {
     cli::cli_abort("{.arg lambda} must be a positive number.")
   }
@@ -269,7 +282,15 @@ step_measure_baseline_airpls <- function(
 }
 
 step_measure_baseline_airpls_new <- function(
-    measures, lambda, max_iter, tol, role, trained, skip, id) {
+  measures,
+  lambda,
+  max_iter,
+  tol,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_airpls",
     measures = measures,
@@ -352,7 +373,9 @@ prep.step_measure_baseline_airpls <- function(x, training, info = NULL, ...) {
     # Update weights using airPLS formula
     # Points below baseline get weight 0, above get exponentially decaying weight
     d_neg <- d[d < 0]
-    if (length(d_neg) == 0) break
+    if (length(d_neg) == 0) {
+      break
+    }
 
     m <- mean(abs(d_neg))
     w_new <- numeric(n)
@@ -360,10 +383,12 @@ prep.step_measure_baseline_airpls <- function(x, training, info = NULL, ...) {
     w_new[d < 0] <- exp(iter * d[d < 0] / (2 * m))
 
     # Check convergence
-    if (sum(abs(w_new - w)) / sum(w) < tol) break
+    if (sum(abs(w_new - w)) / sum(w) < tol) {
+      break
+    }
 
     w <- w_new
-    w[w < 1e-6] <- 1e-6  # Prevent zero weights
+    w[w < 1e-6] <- 1e-6 # Prevent zero weights
   }
 
   z
@@ -390,8 +415,16 @@ bake.step_measure_baseline_airpls <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_baseline_airpls <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- paste0("airPLS baseline (lambda=", format(x$lambda, scientific = TRUE), ")")
+print.step_measure_baseline_airpls <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  title <- paste0(
+    "airPLS baseline (lambda=",
+    format(x$lambda, scientific = TRUE),
+    ")"
+  )
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
   } else {
@@ -478,14 +511,15 @@ tunable.step_measure_baseline_airpls <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_baseline_snip <- function(
-    recipe,
-    measures = NULL,
-    iterations = 40L,
-    decreasing = TRUE,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_snip")) {
+  recipe,
+  measures = NULL,
+  iterations = 40L,
+  decreasing = TRUE,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_snip")
+) {
   if (!is.numeric(iterations) || iterations < 1) {
     cli::cli_abort("{.arg iterations} must be a positive integer.")
   }
@@ -505,7 +539,14 @@ step_measure_baseline_snip <- function(
 }
 
 step_measure_baseline_snip_new <- function(
-    measures, iterations, decreasing, role, trained, skip, id) {
+  measures,
+  iterations,
+  decreasing,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_snip",
     measures = measures,
@@ -583,7 +624,11 @@ bake.step_measure_baseline_snip <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_baseline_snip <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_baseline_snip <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("SNIP baseline (iterations=", x$iterations, ")")
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
@@ -648,17 +693,17 @@ tidy.step_measure_baseline_snip <- function(x, ...) {
 #'   step_measure_baseline_arpls(lambda = 1e5) |>
 #'   prep()
 step_measure_baseline_arpls <- function(
-    recipe,
-    measures = NULL,
-    lambda = 1e5,
-    ratio = 0.001,
-    max_iter = 50L,
-    tol = 1e-3,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_arpls")) {
-
+  recipe,
+  measures = NULL,
+  lambda = 1e5,
+  ratio = 0.001,
+  max_iter = 50L,
+  tol = 1e-3,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_arpls")
+) {
   if (!is.numeric(lambda) || length(lambda) != 1 || lambda <= 0) {
     cli::cli_abort("{.arg lambda} must be a positive number.")
   }
@@ -683,7 +728,16 @@ step_measure_baseline_arpls <- function(
 }
 
 step_measure_baseline_arpls_new <- function(
-    measures, lambda, ratio, max_iter, tol, role, trained, skip, id) {
+  measures,
+  lambda,
+  ratio,
+  max_iter,
+  tol,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_arpls",
     measures = measures,
@@ -756,11 +810,11 @@ prep.step_measure_baseline_arpls <- function(x, training, info = NULL, ...) {
     dn <- d[d < 0]
     m <- mean(dn)
     s <- stats::sd(dn)
-    if (is.na(s) || s == 0) s <- 1
+    if (is.na(s) || s == 0) {
+      s <- 1
+    }
 
-    w <- ifelse(d < 0,
-                ratio,
-                ratio * exp(-(d - m)^2 / (2 * s^2)))
+    w <- ifelse(d < 0, ratio, ratio * exp(-(d - m)^2 / (2 * s^2)))
   }
 
   z
@@ -786,8 +840,16 @@ bake.step_measure_baseline_arpls <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_baseline_arpls <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- paste0("arPLS baseline (lambda=", format(x$lambda, scientific = TRUE), ")")
+print.step_measure_baseline_arpls <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  title <- paste0(
+    "arPLS baseline (lambda=",
+    format(x$lambda, scientific = TRUE),
+    ")"
+  )
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
   } else {
@@ -860,14 +922,14 @@ tunable.step_measure_baseline_arpls <- function(x, ...) {
 #'   step_measure_baseline_tophat(half_window = 30) |>
 #'   prep()
 step_measure_baseline_tophat <- function(
-    recipe,
-    measures = NULL,
-    half_window = 50L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_tophat")) {
-
+  recipe,
+  measures = NULL,
+  half_window = 50L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_tophat")
+) {
   if (!is.numeric(half_window) || length(half_window) != 1 || half_window < 1) {
     cli::cli_abort("{.arg half_window} must be a positive integer.")
   }
@@ -886,7 +948,13 @@ step_measure_baseline_tophat <- function(
 }
 
 step_measure_baseline_tophat_new <- function(
-    measures, half_window, role, trained, skip, id) {
+  measures,
+  half_window,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_tophat",
     measures = measures,
@@ -968,7 +1036,11 @@ bake.step_measure_baseline_tophat <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_baseline_tophat <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_baseline_tophat <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Top-hat baseline (half_window=", x$half_window, ")")
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
@@ -1028,15 +1100,15 @@ tidy.step_measure_baseline_tophat <- function(x, ...) {
 #'   step_measure_baseline_morph(half_window = 30, iterations = 5) |>
 #'   prep()
 step_measure_baseline_morph <- function(
-    recipe,
-    measures = NULL,
-    half_window = 50L,
-    iterations = 10L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_morph")) {
-
+  recipe,
+  measures = NULL,
+  half_window = 50L,
+  iterations = 10L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_morph")
+) {
   if (!is.numeric(half_window) || length(half_window) != 1 || half_window < 1) {
     cli::cli_abort("{.arg half_window} must be a positive integer.")
   }
@@ -1059,7 +1131,14 @@ step_measure_baseline_morph <- function(
 }
 
 step_measure_baseline_morph_new <- function(
-    measures, half_window, iterations, role, trained, skip, id) {
+  measures,
+  half_window,
+  iterations,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_morph",
     measures = measures,
@@ -1114,9 +1193,18 @@ bake.step_measure_baseline_morph <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_baseline_morph <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- paste0("Morphological baseline (half_window=", x$half_window,
-                  ", iterations=", x$iterations, ")")
+print.step_measure_baseline_morph <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  title <- paste0(
+    "Morphological baseline (half_window=",
+    x$half_window,
+    ", iterations=",
+    x$iterations,
+    ")"
+  )
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
   } else {
@@ -1175,15 +1263,15 @@ tidy.step_measure_baseline_morph <- function(x, ...) {
 #'   step_measure_baseline_minima(window_size = 30, method = "spline") |>
 #'   prep()
 step_measure_baseline_minima <- function(
-    recipe,
-    measures = NULL,
-    window_size = 50L,
-    method = c("spline", "linear"),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_minima")) {
-
+  recipe,
+  measures = NULL,
+  window_size = 50L,
+  method = c("spline", "linear"),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_minima")
+) {
   method <- rlang::arg_match(method)
 
   if (!is.numeric(window_size) || length(window_size) != 1 || window_size < 3) {
@@ -1205,7 +1293,14 @@ step_measure_baseline_minima <- function(
 }
 
 step_measure_baseline_minima_new <- function(
-    measures, window_size, method, role, trained, skip, id) {
+  measures,
+  window_size,
+  method,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_minima",
     measures = measures,
@@ -1287,9 +1382,18 @@ bake.step_measure_baseline_minima <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_baseline_minima <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- paste0("Local minima baseline (window=", x$window_size,
-                  ", method=", x$method, ")")
+print.step_measure_baseline_minima <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  title <- paste0(
+    "Local minima baseline (window=",
+    x$window_size,
+    ", method=",
+    x$method,
+    ")"
+  )
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
   } else {
@@ -1357,16 +1461,24 @@ tidy.step_measure_baseline_minima <- function(x, ...) {
 #'   step_measure_baseline_auto() |>
 #'   prep()
 step_measure_baseline_auto <- function(
-    recipe,
-    measures = NULL,
-    methods = c("rolling", "airpls", "snip", "tophat", "minima"),
-    role = NA,
-    trained = FALSE,
-    selected_method = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_baseline_auto")) {
-
-  valid_methods <- c("rolling", "airpls", "arpls", "snip", "tophat", "morph", "minima")
+  recipe,
+  measures = NULL,
+  methods = c("rolling", "airpls", "snip", "tophat", "minima"),
+  role = NA,
+  trained = FALSE,
+  selected_method = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_baseline_auto")
+) {
+  valid_methods <- c(
+    "rolling",
+    "airpls",
+    "arpls",
+    "snip",
+    "tophat",
+    "morph",
+    "minima"
+  )
   if (!all(methods %in% valid_methods)) {
     invalid <- setdiff(methods, valid_methods)
     cli::cli_abort("Invalid methods: {.val {invalid}}")
@@ -1387,7 +1499,14 @@ step_measure_baseline_auto <- function(
 }
 
 step_measure_baseline_auto_new <- function(
-    measures, methods, role, trained, selected_method, skip, id) {
+  measures,
+  methods,
+  role,
+  trained,
+  selected_method,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_baseline_auto",
     measures = measures,
@@ -1408,24 +1527,36 @@ step_measure_baseline_auto_new <- function(
   sample_data <- measures_list[seq_len(n_samples)]
 
   # Compute signal characteristics
-  avg_noise <- mean(vapply(sample_data, function(m) {
-    # Estimate noise from high-frequency component
-    d2 <- diff(diff(m$value))
-    stats::mad(d2, na.rm = TRUE)
-  }, numeric(1)))
+  avg_noise <- mean(vapply(
+    sample_data,
+    function(m) {
+      # Estimate noise from high-frequency component
+      d2 <- diff(diff(m$value))
+      stats::mad(d2, na.rm = TRUE)
+    },
+    numeric(1)
+  ))
 
-  avg_range <- mean(vapply(sample_data, function(m) {
-    diff(range(m$value, na.rm = TRUE))
-  }, numeric(1)))
+  avg_range <- mean(vapply(
+    sample_data,
+    function(m) {
+      diff(range(m$value, na.rm = TRUE))
+    },
+    numeric(1)
+  ))
 
   # Estimate baseline curvature
-  avg_curvature <- mean(vapply(sample_data, function(m) {
-    n <- length(m$value)
-    # Fit low-order polynomial and measure deviation
-    x <- seq_len(n)
-    fit <- stats::lm(m$value ~ poly(x, 2))
-    stats::sd(stats::residuals(fit))
-  }, numeric(1)))
+  avg_curvature <- mean(vapply(
+    sample_data,
+    function(m) {
+      n <- length(m$value)
+      # Fit low-order polynomial and measure deviation
+      x <- seq_len(n)
+      fit <- stats::lm(m$value ~ poly(x, 2))
+      stats::sd(stats::residuals(fit))
+    },
+    numeric(1)
+  ))
 
   # Compute signal-to-noise ratio
 
@@ -1434,25 +1565,35 @@ step_measure_baseline_auto_new <- function(
   # Decision logic
   if (snr < 5) {
     # Low SNR: use smooth methods
-    if ("rolling" %in% candidate_methods) return("rolling")
+    if ("rolling" %in% candidate_methods) {
+      return("rolling")
+    }
     if ("airpls" %in% candidate_methods) return("airpls")
   }
 
   if (avg_curvature > avg_range * 0.3) {
     # High curvature: use adaptive methods
-    if ("airpls" %in% candidate_methods) return("airpls")
+    if ("airpls" %in% candidate_methods) {
+      return("airpls")
+    }
     if ("arpls" %in% candidate_methods) return("arpls")
   }
 
   if (snr > 20) {
     # High SNR with sharp peaks: morphological
-    if ("tophat" %in% candidate_methods) return("tophat")
+    if ("tophat" %in% candidate_methods) {
+      return("tophat")
+    }
     if ("snip" %in% candidate_methods) return("snip")
   }
 
   # Default: minima interpolation or rolling
-  if ("minima" %in% candidate_methods) return("minima")
-  if ("rolling" %in% candidate_methods) return("rolling")
+  if ("minima" %in% candidate_methods) {
+    return("minima")
+  }
+  if ("rolling" %in% candidate_methods) {
+    return("rolling")
+  }
 
   # Fallback
   candidate_methods[1]
@@ -1488,7 +1629,8 @@ bake.step_measure_baseline_auto <- function(object, new_data, ...) {
 
   for (col in object$measures) {
     new_data[[col]] <- purrr::map(new_data[[col]], function(m) {
-      baseline <- switch(method,
+      baseline <- switch(
+        method,
         "rolling" = .rolling_ball_baseline(m$value, 100, 50),
         "airpls" = .airpls_baseline(m$value, 1e5, 50, 1e-3),
         "arpls" = .arpls_baseline(m$value, 1e5, 0.001, 50, 1e-3),
@@ -1496,7 +1638,9 @@ bake.step_measure_baseline_auto <- function(object, new_data, ...) {
         "tophat" = .morph_open(m$value, 50),
         "morph" = {
           b <- m$value
-          for (i in 1:10) b <- .morph_open(b, 50)
+          for (i in 1:10) {
+            b <- .morph_open(b, 50)
+          }
           b
         },
         "minima" = {
@@ -1514,12 +1658,21 @@ bake.step_measure_baseline_auto <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_baseline_auto <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_baseline_auto <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   if (x$trained) {
     title <- paste0("Auto baseline (selected: ", x$selected_method, ")")
     cat(title, " on <internal measurements>", sep = "")
   } else {
-    cat("Auto baseline (methods: ", paste(x$methods, collapse = ", "), ")", sep = "")
+    cat(
+      "Auto baseline (methods: ",
+      paste(x$methods, collapse = ", "),
+      ")",
+      sep = ""
+    )
   }
   cat("\n")
   invisible(x)

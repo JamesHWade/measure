@@ -11,7 +11,7 @@ test_that("step_measure_dilution_correct multiplies correctly", {
     analyte = c(50, 45, 42, 48, 51)
   )
 
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     recipes::update_role(sample_id, new_role = "id") |>
     step_measure_dilution_correct(
       analyte,
@@ -35,7 +35,7 @@ test_that("step_measure_dilution_correct divides correctly", {
     concentration = c(100, 200)
   )
 
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     step_measure_dilution_correct(
       concentration,
       dilution_col = "dilution_factor",
@@ -56,7 +56,7 @@ test_that("step_measure_dilution_correct handles zero with error", {
 
   # Error occurs during prep (bake is called on training data)
   expect_error(
-    recipes::recipe(~ ., data = data) |>
+    recipes::recipe(~., data = data) |>
       step_measure_dilution_correct(
         analyte,
         dilution_col = "dilution_factor",
@@ -75,7 +75,7 @@ test_that("step_measure_dilution_correct handles zero with warn", {
 
   # Warning occurs during prep (bake is called on training data)
   expect_warning(
-    rec <- recipes::recipe(~ ., data = data) |>
+    rec <- recipes::recipe(~., data = data) |>
       step_measure_dilution_correct(
         analyte,
         dilution_col = "dilution_factor",
@@ -99,7 +99,7 @@ test_that("step_measure_dilution_correct handles NA factors", {
 
   # Warning occurs during prep (bake is called on training data)
   expect_warning(
-    rec <- recipes::recipe(~ ., data = data) |>
+    rec <- recipes::recipe(~., data = data) |>
       step_measure_dilution_correct(
         analyte,
         dilution_col = "dilution_factor"
@@ -120,7 +120,7 @@ test_that("step_measure_dilution_correct validates dilution column", {
   )
 
   expect_error(
-    recipes::recipe(~ ., data = data) |>
+    recipes::recipe(~., data = data) |>
       step_measure_dilution_correct(
         analyte,
         dilution_col = "dilution_factor"
@@ -137,9 +137,10 @@ test_that("tidy.step_measure_dilution_correct returns expected format", {
     analyte2 = c(50, 50)
   )
 
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     step_measure_dilution_correct(
-      analyte1, analyte2,
+      analyte1,
+      analyte2,
       dilution_col = "dilution_factor"
     ) |>
     recipes::prep()
@@ -147,7 +148,7 @@ test_that("tidy.step_measure_dilution_correct returns expected format", {
   tidy_dc <- tidy(rec, number = 1)
 
   expect_s3_class(tidy_dc, "tbl_df")
-  expect_equal(nrow(tidy_dc), 2)  # 2 analytes
+  expect_equal(nrow(tidy_dc), 2) # 2 analytes
   expect_true("feature" %in% names(tidy_dc))
   expect_true("operation" %in% names(tidy_dc))
 })
@@ -159,10 +160,10 @@ test_that("tidy.step_measure_dilution_correct returns expected format", {
 test_that("step_measure_surrogate_recovery calculates recovery", {
   data <- data.frame(
     sample_id = paste0("QC", 1:5),
-    surrogate = c(95, 105, 90, 110, 100)  # Expected = 100
+    surrogate = c(95, 105, 90, 110, 100) # Expected = 100
   )
 
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     recipes::update_role(sample_id, new_role = "id") |>
     step_measure_surrogate_recovery(
       surrogate,
@@ -182,7 +183,7 @@ test_that("step_measure_surrogate_recovery uses expected_col", {
     expected = c(50, 100, 150)
   )
 
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     step_measure_surrogate_recovery(
       surrogate,
       expected_col = "expected"
@@ -191,15 +192,15 @@ test_that("step_measure_surrogate_recovery uses expected_col", {
 
   result <- recipes::bake(rec, new_data = NULL)
 
-  expect_equal(result$surrogate_recovery, c(90, 95, 140/1.5))
+  expect_equal(result$surrogate_recovery, c(90, 95, 140 / 1.5))
 })
 
 test_that("step_measure_surrogate_recovery adds flag", {
   data <- data.frame(
-    surrogate = c(75, 100, 135)  # first and last outside 70-130
+    surrogate = c(75, 100, 135) # first and last outside 70-130
   )
 
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     step_measure_surrogate_recovery(
       surrogate,
       expected_value = 100,
@@ -222,7 +223,7 @@ test_that("step_measure_surrogate_recovery filters rows", {
 
   # Message occurs during prep (bake is called on training data)
   expect_message(
-    rec <- recipes::recipe(~ ., data = data) |>
+    rec <- recipes::recipe(~., data = data) |>
       step_measure_surrogate_recovery(
         surrogate,
         expected_value = 100,
@@ -244,7 +245,7 @@ test_that("step_measure_surrogate_recovery validates expected inputs", {
 
   # Neither expected_col nor expected_value
   expect_error(
-    recipes::recipe(~ ., data = data) |>
+    recipes::recipe(~., data = data) |>
       step_measure_surrogate_recovery(surrogate) |>
       recipes::prep(),
     "expected_col.*expected_value"
@@ -252,7 +253,7 @@ test_that("step_measure_surrogate_recovery validates expected inputs", {
 
   # Both provided
   expect_error(
-    recipes::recipe(~ ., data = data) |>
+    recipes::recipe(~., data = data) |>
       step_measure_surrogate_recovery(
         surrogate,
         expected_col = "expected",
@@ -266,7 +267,7 @@ test_that("step_measure_surrogate_recovery validates recovery limits", {
   data <- data.frame(surrogate = c(95, 100))
 
   expect_error(
-    recipes::recipe(~ ., data = data) |>
+    recipes::recipe(~., data = data) |>
       step_measure_surrogate_recovery(
         surrogate,
         expected_value = 100,
@@ -280,12 +281,12 @@ test_that("step_measure_surrogate_recovery validates recovery limits", {
 test_that("step_measure_surrogate_recovery handles zero expected", {
   data <- data.frame(
     surrogate = c(100, 100),
-    expected = c(100, 0)  # Second is zero
+    expected = c(100, 0) # Second is zero
   )
 
   # Error occurs during prep (bake is called on training data)
   expect_error(
-    recipes::recipe(~ ., data = data) |>
+    recipes::recipe(~., data = data) |>
       step_measure_surrogate_recovery(
         surrogate,
         expected_col = "expected"
@@ -302,7 +303,7 @@ test_that("step_measure_surrogate_recovery handles multiple surrogates", {
   )
 
   # This is a simplified case - in practice you'd need different expected values
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     step_measure_surrogate_recovery(
       surrogate_1,
       expected_value = 100
@@ -312,7 +313,7 @@ test_that("step_measure_surrogate_recovery handles multiple surrogates", {
   result <- recipes::bake(rec, new_data = NULL)
 
   expect_true("surrogate_1_recovery" %in% names(result))
-  expect_true("surrogate_2" %in% names(result))  # Unchanged
+  expect_true("surrogate_2" %in% names(result)) # Unchanged
 })
 
 test_that("tidy.step_measure_surrogate_recovery returns expected format", {
@@ -321,9 +322,10 @@ test_that("tidy.step_measure_surrogate_recovery returns expected format", {
     surrogate_2 = c(48, 52)
   )
 
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     step_measure_surrogate_recovery(
-      surrogate_1, surrogate_2,
+      surrogate_1,
+      surrogate_2,
       expected_value = 100,
       min_recovery = 70,
       max_recovery = 130
@@ -333,7 +335,7 @@ test_that("tidy.step_measure_surrogate_recovery returns expected format", {
   tidy_sr <- tidy(rec, number = 1)
 
   expect_s3_class(tidy_sr, "tbl_df")
-  expect_equal(nrow(tidy_sr), 2)  # 2 surrogates
+  expect_equal(nrow(tidy_sr), 2) # 2 surrogates
   expect_true("surrogate" %in% names(tidy_sr))
   expect_true("min_recovery" %in% names(tidy_sr))
   expect_true("max_recovery" %in% names(tidy_sr))
@@ -342,7 +344,7 @@ test_that("tidy.step_measure_surrogate_recovery returns expected format", {
 test_that("print.step_measure_surrogate_recovery works", {
   data <- data.frame(surrogate = c(95, 100, 105))
 
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     step_measure_surrogate_recovery(
       surrogate,
       expected_value = 100
@@ -364,7 +366,10 @@ test_that("criteria_bland_altman creates valid criteria", {
 })
 
 test_that("criteria_method_comparison creates valid criteria", {
-  crit <- criteria_method_comparison(slope_range = c(0.9, 1.1), r_squared = 0.95)
+  crit <- criteria_method_comparison(
+    slope_range = c(0.9, 1.1),
+    r_squared = 0.95
+  )
 
   expect_s3_class(crit, "measure_criteria")
   expect_true("slope" %in% names(crit))
@@ -405,7 +410,7 @@ test_that("step_measure_dilution_correct handle_zero='skip' continues silently",
   )
 
   # No warning or error expected with skip mode
-  rec <- recipes::recipe(~ ., data = data) |>
+  rec <- recipes::recipe(~., data = data) |>
     step_measure_dilution_correct(
       analyte,
       dilution_col = "dilution_factor",
@@ -416,7 +421,7 @@ test_that("step_measure_dilution_correct handle_zero='skip' continues silently",
   result <- recipes::bake(rec, new_data = NULL)
 
   expect_equal(result$analyte[1], 100)
-  expect_equal(result$analyte[2], 0)  # Zero * 100 = 0 (multiply mode default)
+  expect_equal(result$analyte[2], 0) # Zero * 100 = 0 (multiply mode default)
   expect_equal(result$analyte[3], 200)
 })
 
@@ -427,7 +432,7 @@ test_that("step_measure_dilution_correct errors on negative factors", {
   )
 
   expect_error(
-    recipes::recipe(~ ., data = data) |>
+    recipes::recipe(~., data = data) |>
       step_measure_dilution_correct(
         analyte,
         dilution_col = "dilution_factor"
@@ -444,7 +449,7 @@ test_that("step_measure_dilution_correct divide with zero handled", {
   )
 
   expect_warning(
-    rec <- recipes::recipe(~ ., data = data) |>
+    rec <- recipes::recipe(~., data = data) |>
       step_measure_dilution_correct(
         analyte,
         dilution_col = "dilution_factor",
@@ -457,7 +462,7 @@ test_that("step_measure_dilution_correct divide with zero handled", {
 
   result <- recipes::bake(rec, new_data = NULL)
 
-  expect_equal(result$analyte[1], 50)   # 100 / 2
+  expect_equal(result$analyte[1], 50) # 100 / 2
   expect_true(is.na(result$analyte[2])) # 100 / 0 = NA (warned)
-  expect_equal(result$analyte[3], 25)   # 100 / 4
+  expect_equal(result$analyte[3], 25) # 100 / 4
 })

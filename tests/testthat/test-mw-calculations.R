@@ -28,8 +28,9 @@ create_bimodal_gpc_data <- function() {
   log_mw <- seq(6, 2, length.out = 100)
 
   # Two peaks at log10(MW) = 5 and 3
-  signal <- 0.6 * exp(-((log_mw - 5)^2) / 0.3) +
-            0.4 * exp(-((log_mw - 3)^2) / 0.2)
+  signal <- 0.6 *
+    exp(-((log_mw - 5)^2) / 0.3) +
+    0.4 * exp(-((log_mw - 3)^2) / 0.2)
 
   tibble::tibble(
     id = "sample1",
@@ -190,9 +191,9 @@ test_that("step_measure_mw_averages handles multiple samples", {
     id = rep(c("s1", "s2", "s3"), each = 100),
     log_mw = rep(seq(6, 2, length.out = 100), 3),
     signal = c(
-      exp(-((seq(6, 2, length.out = 100) - 4)^2) / 0.5),    # centered at 4
-      exp(-((seq(6, 2, length.out = 100) - 4.5)^2) / 0.5),  # centered at 4.5
-      exp(-((seq(6, 2, length.out = 100) - 3.5)^2) / 0.5)   # centered at 3.5
+      exp(-((seq(6, 2, length.out = 100) - 4)^2) / 0.5), # centered at 4
+      exp(-((seq(6, 2, length.out = 100) - 4.5)^2) / 0.5), # centered at 4.5
+      exp(-((seq(6, 2, length.out = 100) - 3.5)^2) / 0.5) # centered at 3.5
     )
   )
 

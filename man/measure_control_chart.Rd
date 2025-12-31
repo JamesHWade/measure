@@ -6,7 +6,7 @@
 \usage{
 measure_control_chart(
   data,
-  value_col,
+  response_col,
   order_col,
   limits = NULL,
   rules = c("1_3s", "2_2s", "R_4s", "4_1s", "10x"),
@@ -16,7 +16,7 @@ measure_control_chart(
 \arguments{
 \item{data}{A data frame containing QC measurements.}
 
-\item{value_col}{Name of the column containing QC values.}
+\item{response_col}{Name of the column containing QC values.}
 
 \item{order_col}{Name of the column containing run order/sequence.}
 

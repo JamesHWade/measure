@@ -53,17 +53,17 @@ NULL
 #' @keywords internal
 #' @noRd
 new_measure_calibration <- function(
-    model,
-    model_type,
-    weights_type,
-    formula,
-    data,
-    response_col,
-    conc_col,
-    diagnostics = list(),
-    outliers = NULL,
-    call = NULL) {
-
+  model,
+  model_type,
+  weights_type,
+  formula,
+  data,
+  response_col,
+  conc_col,
+  diagnostics = list(),
+  outliers = NULL,
+  call = NULL
+) {
   structure(
     list(
       model = model,
@@ -110,7 +110,12 @@ print.measure_calibration <- function(x, ...) {
   cat("  N points: ", nrow(x$data), "\n", sep = "")
 
   if (!is.null(x$diagnostics$r_squared)) {
-    cat("  R\u00b2: ", format(x$diagnostics$r_squared, digits = 5), "\n", sep = "")
+    cat(
+      "  R\u00b2: ",
+      format(x$diagnostics$r_squared, digits = 5),
+      "\n",
+      sep = ""
+    )
   }
 
   if (!is.null(x$outliers) && nrow(x$outliers) > 0) {
@@ -224,7 +229,11 @@ glance.measure_calibration <- function(x, ...) {
 #'
 #' @importFrom ggplot2 autoplot
 #' @export
-autoplot.measure_calibration <- function(object, type = c("curve", "residuals", "qq", "all"), ...) {
+autoplot.measure_calibration <- function(
+  object,
+  type = c("curve", "residuals", "qq", "all"),
+  ...
+) {
   type <- match.arg(type)
 
   if (type == "all") {
@@ -256,11 +265,16 @@ autoplot.measure_calibration <- function(object, type = c("curve", "residuals", 
 
   # Create prediction line
   conc_range <- range(data[[conc_col]], na.rm = TRUE)
-  pred_data <- data.frame(x = seq(conc_range[1], conc_range[2], length.out = 100))
+  pred_data <- data.frame(
+    x = seq(conc_range[1], conc_range[2], length.out = 100)
+  )
   names(pred_data) <- conc_col
   pred_data$predicted <- stats::predict(object$model, newdata = pred_data)
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[conc_col]], y = .data[[response_col]])) +
+  p <- ggplot2::ggplot(
+    data,
+    ggplot2::aes(x = .data[[conc_col]], y = .data[[response_col]])
+  ) +
     ggplot2::geom_point(size = 2.5, alpha = 0.7) +
     ggplot2::geom_line(
       data = pred_data,
@@ -283,14 +297,15 @@ autoplot.measure_calibration <- function(object, type = c("curve", "residuals", 
   # Mark outliers if present
   if (!is.null(object$outliers) && nrow(object$outliers) > 0) {
     outlier_data <- object$outliers
-    p <- p + ggplot2::geom_point(
-      data = outlier_data,
-      ggplot2::aes(x = .data[[conc_col]], y = .data[[response_col]]),
-      color = "red",
-      shape = 1,
-      size = 4,
-      stroke = 1.2
-    )
+    p <- p +
+      ggplot2::geom_point(
+        data = outlier_data,
+        ggplot2::aes(x = .data[[conc_col]], y = .data[[response_col]]),
+        color = "red",
+        shape = 1,
+        size = 4,
+        stroke = 1.2
+      )
   }
 
   p
@@ -320,8 +335,16 @@ autoplot.measure_calibration <- function(object, type = c("curve", "residuals", 
     sample = stats::qqnorm(resid_std, plot.it = FALSE)$y
   )
 
-  ggplot2::ggplot(qq_data, ggplot2::aes(x = .data$theoretical, y = .data$sample)) +
-    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray50") +
+  ggplot2::ggplot(
+    qq_data,
+    ggplot2::aes(x = .data$theoretical, y = .data$sample)
+  ) +
+    ggplot2::geom_abline(
+      slope = 1,
+      intercept = 0,
+      linetype = "dashed",
+      color = "gray50"
+    ) +
     ggplot2::geom_point(size = 2.5, alpha = 0.7) +
     ggplot2::labs(
       title = "Normal Q-Q Plot",

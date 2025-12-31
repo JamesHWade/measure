@@ -39,7 +39,12 @@ prep_augment_recipe <- function(steps_fn) {
 
 test_that("step_measure_augment_noise adds gaussian noise", {
   rec <- prep_augment_recipe(function(r) {
-    step_measure_augment_noise(r, sd = 0.1, distribution = "gaussian", skip = FALSE)
+    step_measure_augment_noise(
+      r,
+      sd = 0.1,
+      distribution = "gaussian",
+      skip = FALSE
+    )
   })
 
   result <- bake(rec, new_data = NULL)
@@ -54,7 +59,12 @@ test_that("step_measure_augment_noise adds gaussian noise", {
 
 test_that("step_measure_augment_noise adds uniform noise", {
   rec <- prep_augment_recipe(function(r) {
-    step_measure_augment_noise(r, sd = 0.1, distribution = "uniform", skip = FALSE)
+    step_measure_augment_noise(
+      r,
+      sd = 0.1,
+      distribution = "uniform",
+      skip = FALSE
+    )
   })
 
   result <- bake(rec, new_data = NULL)
@@ -96,7 +106,9 @@ test_that("step_measure_augment_noise respects relative parameter", {
   result_abs <- bake(rec_abs, new_data = NULL)
 
   # Results should be different
-  expect_false(all(result_rel$.measures[[1]]$value == result_abs$.measures[[1]]$value))
+  expect_false(all(
+    result_rel$.measures[[1]]$value == result_abs$.measures[[1]]$value
+  ))
 })
 
 test_that("step_measure_augment_noise skips by default", {
@@ -120,7 +132,9 @@ test_that("step_measure_augment_noise skips by default", {
   orig_result <- bake(rec_orig, new_data = NULL)
 
   # The training result should have noise added (different from original)
-  expect_false(all(result_train$.measures[[1]]$value == orig_result$.measures[[1]]$value))
+  expect_false(all(
+    result_train$.measures[[1]]$value == orig_result$.measures[[1]]$value
+  ))
 })
 
 test_that("step_measure_augment_noise validates inputs", {
@@ -255,7 +269,7 @@ test_that("step_measure_augment_scale is reproducible", {
 
 test_that("step_measure_augment_scale with range [1,1] produces original", {
   rec <- prep_augment_recipe(function(r) {
-    step_measure_augment_scale(r, range = c(1, 1.0001), skip = FALSE)  # Near-unity range
+    step_measure_augment_scale(r, range = c(1, 1.0001), skip = FALSE) # Near-unity range
   })
 
   result <- bake(rec, new_data = NULL)

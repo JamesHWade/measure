@@ -59,16 +59,16 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_integrals <- function(
-    recipe,
-    regions,
-    method = c("trapezoid", "simpson"),
-    measures = NULL,
-    prefix = "integral_",
-    role = "predictor",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_integrals")) {
-
+  recipe,
+  regions,
+  method = c("trapezoid", "simpson"),
+  measures = NULL,
+  prefix = "integral_",
+  role = "predictor",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_integrals")
+) {
   method <- rlang::arg_match(method)
 
   if (missing(regions)) {
@@ -119,7 +119,15 @@ step_measure_integrals <- function(
 }
 
 step_measure_integrals_new <- function(
-    regions, method, measures, prefix, role, trained, skip, id) {
+  regions,
+  method,
+  measures,
+  prefix,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_integrals",
     regions = regions,
@@ -189,11 +197,13 @@ prep.step_measure_integrals <- function(x, training, info = NULL, ...) {
         if (i + 2 <= n) {
           h1 <- x[i + 1] - x[i]
           h2 <- x[i + 2] - x[i + 1]
-          area <- area + (h1 + h2) / 6 * (
-            y[i] * (2 - h2 / h1) +
-              y[i + 1] * (h1 + h2)^2 / (h1 * h2) +
-              y[i + 2] * (2 - h1 / h2)
-          )
+          area <- area +
+            (h1 + h2) /
+              6 *
+              (y[i] *
+                (2 - h2 / h1) +
+                y[i + 1] * (h1 + h2)^2 / (h1 * h2) +
+                y[i + 2] * (2 - h1 / h2))
         }
       }
       # Handle last segment if odd number of intervals
@@ -234,7 +244,11 @@ bake.step_measure_integrals <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_integrals <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_integrals <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   n_regions <- length(x$regions)
   title <- paste0("Calculate integrals for ", n_regions, " region(s)")
   if (x$trained) {
@@ -316,18 +330,18 @@ required_pkgs.step_measure_integrals <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_ratios <- function(
-    recipe,
-    numerator,
-    denominator,
-    name = NULL,
-    method = c("trapezoid", "simpson"),
-    measures = NULL,
-    prefix = "ratio_",
-    role = "predictor",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_ratios")) {
-
+  recipe,
+  numerator,
+  denominator,
+  name = NULL,
+  method = c("trapezoid", "simpson"),
+  measures = NULL,
+  prefix = "ratio_",
+  role = "predictor",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_ratios")
+) {
   method <- rlang::arg_match(method)
 
   # Validate numerator
@@ -339,7 +353,9 @@ step_measure_ratios <- function(
   }
 
   # Validate denominator
-  if (missing(denominator) || !is.numeric(denominator) || length(denominator) != 2) {
+  if (
+    missing(denominator) || !is.numeric(denominator) || length(denominator) != 2
+  ) {
     cli::cli_abort("{.arg denominator} must be a numeric vector of length 2.")
   }
   if (denominator[1] >= denominator[2]) {
@@ -369,7 +385,17 @@ step_measure_ratios <- function(
 }
 
 step_measure_ratios_new <- function(
-    numerator, denominator, name, method, measures, prefix, role, trained, skip, id) {
+  numerator,
+  denominator,
+  name,
+  method,
+  measures,
+  prefix,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_ratios",
     numerator = numerator,
@@ -439,10 +465,21 @@ bake.step_measure_ratios <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_ratios <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_ratios <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0(
-    "Calculate ratio [", x$numerator[1], ",", x$numerator[2], "] / [",
-    x$denominator[1], ",", x$denominator[2], "]"
+    "Calculate ratio [",
+    x$numerator[1],
+    ",",
+    x$numerator[2],
+    "] / [",
+    x$denominator[1],
+    ",",
+    x$denominator[2],
+    "]"
   )
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
@@ -528,16 +565,16 @@ required_pkgs.step_measure_ratios <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_moments <- function(
-    recipe,
-    moments = c("mean", "sd", "skewness", "kurtosis"),
-    weighted = FALSE,
-    measures = NULL,
-    prefix = "moment_",
-    role = "predictor",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_moments")) {
-
+  recipe,
+  moments = c("mean", "sd", "skewness", "kurtosis"),
+  weighted = FALSE,
+  measures = NULL,
+  prefix = "moment_",
+  role = "predictor",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_moments")
+) {
   valid_moments <- c("mean", "sd", "skewness", "kurtosis", "entropy")
   if (!all(moments %in% valid_moments)) {
     invalid <- setdiff(moments, valid_moments)
@@ -562,7 +599,15 @@ step_measure_moments <- function(
 }
 
 step_measure_moments_new <- function(
-    moments, weighted, measures, prefix, role, trained, skip, id) {
+  moments,
+  weighted,
+  measures,
+  prefix,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_moments",
     moments = moments,
@@ -650,7 +695,7 @@ prep.step_measure_moments <- function(x, training, info = NULL, ...) {
     # Shannon entropy - requires positive values
     p <- pmax(value, 0)
     p <- p / sum(p)
-    p <- p[p > 0]  # Remove zeros to avoid log(0)
+    p <- p[p > 0] # Remove zeros to avoid log(0)
     if (length(p) > 0) {
       result["entropy"] <- -sum(p * log(p))
     } else {
@@ -687,7 +732,11 @@ bake.step_measure_moments <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_moments <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_moments <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   moments_str <- paste(x$moments, collapse = ", ")
   title <- paste0("Calculate moments: ", moments_str)
   if (x$weighted) {
@@ -774,17 +823,17 @@ required_pkgs.step_measure_moments <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_bin <- function(
-    recipe,
-    n_bins = NULL,
-    bin_width = NULL,
-    method = c("mean", "sum", "median", "max"),
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    bin_breaks = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_bin")) {
-
+  recipe,
+  n_bins = NULL,
+  bin_width = NULL,
+  method = c("mean", "sum", "median", "max"),
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  bin_breaks = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_bin")
+) {
   method <- rlang::arg_match(method)
 
   # Must specify exactly one of n_bins or bin_width
@@ -792,14 +841,21 @@ step_measure_bin <- function(
   has_width <- !is.null(bin_width)
 
   if (!has_n && !has_width) {
-    cli::cli_abort("Either {.arg n_bins} or {.arg bin_width} must be specified.")
+    cli::cli_abort(
+      "Either {.arg n_bins} or {.arg bin_width} must be specified."
+    )
   }
   if (has_n && has_width) {
     cli::cli_abort("{.arg n_bins} and {.arg bin_width} are mutually exclusive.")
   }
 
   if (has_n) {
-    if (!is.numeric(n_bins) || length(n_bins) != 1 || n_bins < 2 || n_bins != round(n_bins)) {
+    if (
+      !is.numeric(n_bins) ||
+        length(n_bins) != 1 ||
+        n_bins < 2 ||
+        n_bins != round(n_bins)
+    ) {
       cli::cli_abort("{.arg n_bins} must be a positive integer >= 2.")
     }
   }
@@ -827,7 +883,16 @@ step_measure_bin <- function(
 }
 
 step_measure_bin_new <- function(
-    n_bins, bin_width, method, measures, role, trained, bin_breaks, skip, id) {
+  n_bins,
+  bin_width,
+  method,
+  measures,
+  role,
+  trained,
+  bin_breaks,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_bin",
     n_bins = n_bins,
@@ -896,7 +961,9 @@ prep.step_measure_bin <- function(x, training, info = NULL, ...) {
     method,
     mean = function(x) if (length(x) > 0) mean(x, na.rm = TRUE) else NA_real_,
     sum = function(x) if (length(x) > 0) sum(x, na.rm = TRUE) else NA_real_,
-    median = function(x) if (length(x) > 0) stats::median(x, na.rm = TRUE) else NA_real_,
+    median = function(x) {
+      if (length(x) > 0) stats::median(x, na.rm = TRUE) else NA_real_
+    },
     max = function(x) if (length(x) > 0) max(x, na.rm = TRUE) else NA_real_
   )
 
@@ -928,7 +995,11 @@ bake.step_measure_bin <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_bin <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_bin <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   if (x$trained) {
     n_bins <- length(x$bin_breaks) - 1
     title <- paste0("Bin to ", n_bins, " points (", x$method, ")")

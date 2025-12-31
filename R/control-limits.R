@@ -13,7 +13,7 @@
 #' rules and optionally EWMA or CUSUM statistics.
 #'
 #' @param data A data frame containing QC measurements.
-#' @param value_col Name of the column containing QC values.
+#' @param response_col Name of the column containing QC values.
 #' @param group_col Optional grouping column (e.g., for different QC levels).
 #' @param type Type of control chart: `"shewhart"` (default), `"ewma"`, or `"cusum"`.
 #' @param n_sigma Number of standard deviations for control limits. Default is 3.
@@ -65,21 +65,21 @@
 #' # EWMA control limits
 #' limits_ewma <- measure_control_limits(qc_data, "qc_value", type = "ewma")
 measure_control_limits <- function(
-    data,
-    value_col,
-    group_col = NULL,
-    type = c("shewhart", "ewma", "cusum"),
-    n_sigma = 3,
-    target = NULL,
-    lambda = 0.2,
-    k = 0.5,
-    h = 5) {
-
+  data,
+  response_col,
+  group_col = NULL,
+  type = c("shewhart", "ewma", "cusum"),
+  n_sigma = 3,
+  target = NULL,
+  lambda = 0.2,
+  k = 0.5,
+  h = 5
+) {
   type <- match.arg(type)
 
   # Validate inputs
-  if (!value_col %in% names(data)) {
-    cli::cli_abort("Column {.field {value_col}} not found in data.")
+  if (!response_col %in% names(data)) {
+    cli::cli_abort("Column {.field {response_col}} not found in data.")
   }
 
   if (!is.null(group_col) && !group_col %in% names(data)) {
@@ -89,15 +89,29 @@ measure_control_limits <- function(
   # Calculate limits
   if (is.null(group_col)) {
     result <- calculate_limits_single(
-      data[[value_col]], type, n_sigma, target, lambda, k, h
+      data[[response_col]],
+      type,
+      n_sigma,
+      target,
+      lambda,
+      k,
+      h
     )
     result$group <- "all"
     result <- tibble::as_tibble(result)
   } else {
     groups <- unique(data[[group_col]])
     results <- lapply(groups, function(g) {
-      values <- data[[value_col]][data[[group_col]] == g]
-      res <- calculate_limits_single(values, type, n_sigma, target, lambda, k, h)
+      values <- data[[response_col]][data[[group_col]] == g]
+      res <- calculate_limits_single(
+        values,
+        type,
+        n_sigma,
+        target,
+        lambda,
+        k,
+        h
+      )
       res$group <- g
       res
     })
@@ -120,7 +134,7 @@ measure_control_limits <- function(
 #' Creates a control chart with optional multi-rule (Westgard) violation detection.
 #'
 #' @param data A data frame containing QC measurements.
-#' @param value_col Name of the column containing QC values.
+#' @param response_col Name of the column containing QC values.
 #' @param order_col Name of the column containing run order/sequence.
 #' @param limits Optional `measure_control_limits` object. If NULL, calculated
 #'   from the data.
@@ -164,15 +178,15 @@ measure_control_limits <- function(
 #' chart <- measure_control_chart(qc_data, "qc_value", "run_order")
 #' print(chart)
 measure_control_chart <- function(
-    data,
-    value_col,
-    order_col,
-    limits = NULL,
-    rules = c("1_3s", "2_2s", "R_4s", "4_1s", "10x"),
-    group_col = NULL) {
-
+  data,
+  response_col,
+  order_col,
+  limits = NULL,
+  rules = c("1_3s", "2_2s", "R_4s", "4_1s", "10x"),
+  group_col = NULL
+) {
   # Validate inputs
-  for (col in c(value_col, order_col)) {
+  for (col in c(response_col, order_col)) {
     if (!col %in% names(data)) {
       cli::cli_abort("Column {.field {col}} not found in data.")
     }
@@ -183,20 +197,23 @@ measure_control_chart <- function(
 
   # Calculate limits if not provided
   if (is.null(limits)) {
-    limits <- measure_control_limits(data, value_col, group_col)
+    limits <- measure_control_limits(data, response_col, group_col)
   }
 
   # Apply rules and detect violations
   if (is.null(group_col)) {
     result <- apply_westgard_rules(
-      data, value_col, limits, rules
+      data,
+      response_col,
+      limits,
+      rules
     )
   } else {
     groups <- unique(data[[group_col]])
     results <- lapply(groups, function(g) {
       sub_data <- data[data[[group_col]] == g, ]
       group_limits <- limits[limits$group == g, ]
-      apply_westgard_rules(sub_data, value_col, group_limits, rules)
+      apply_westgard_rules(sub_data, response_col, group_limits, rules)
     })
     result <- list(
       data = dplyr::bind_rows(lapply(results, `[[`, "data")),
@@ -265,11 +282,11 @@ measure_control_chart <- function(
 #' )
 #' print(result)
 measure_system_suitability <- function(
-    data,
-    metrics,
-    sample_type_col = NULL,
-    sst_type = "sst") {
-
+  data,
+  metrics,
+  sample_type_col = NULL,
+  sst_type = "sst"
+) {
   # Filter to SST samples if specified
   if (!is.null(sample_type_col)) {
     if (!sample_type_col %in% names(data)) {
@@ -288,7 +305,9 @@ measure_system_suitability <- function(
     col <- spec$col
 
     if (!col %in% names(data)) {
-      cli::cli_warn("Column {.field {col}} not found. Skipping metric {.field {metric_name}}.")
+      cli::cli_warn(
+        "Column {.field {col}} not found. Skipping metric {.field {metric_name}}."
+      )
       return(NULL)
     }
 
@@ -298,8 +317,16 @@ measure_system_suitability <- function(
     cv_val <- 100 * sd_val / mean_val
 
     # Check against limits
-    pass_min <- if (!is.null(spec$min)) all(values >= spec$min, na.rm = TRUE) else TRUE
-    pass_max <- if (!is.null(spec$max)) all(values <= spec$max, na.rm = TRUE) else TRUE
+    pass_min <- if (!is.null(spec$min)) {
+      all(values >= spec$min, na.rm = TRUE)
+    } else {
+      TRUE
+    }
+    pass_max <- if (!is.null(spec$max)) {
+      all(values <= spec$max, na.rm = TRUE)
+    } else {
+      TRUE
+    }
     pass <- pass_min && pass_max
 
     tibble::tibble(
@@ -339,19 +366,21 @@ measure_system_suitability <- function(
 #' Calculate control limits for a single group
 #' @noRd
 calculate_limits_single <- function(
-    values,
-    type,
-    n_sigma,
-    target,
-    lambda,
-    k,
-    h) {
-
+  values,
+  type,
+  n_sigma,
+  target,
+  lambda,
+  k,
+  h
+) {
   values <- values[!is.na(values)]
   n <- length(values)
 
   if (n < 2) {
-    cli::cli_abort("At least 2 observations required to calculate control limits.")
+    cli::cli_abort(
+      "At least 2 observations required to calculate control limits."
+    )
   }
 
   # Center and spread
@@ -390,8 +419,8 @@ calculate_limits_single <- function(
       n = n,
       center = center,
       sigma = sigma,
-      k = k * sigma,  # Slack in original units
-      h = h * sigma,  # Decision interval in original units
+      k = k * sigma, # Slack in original units
+      h = h * sigma, # Decision interval in original units
       k_sigma = k,
       h_sigma = h
     )
@@ -400,8 +429,8 @@ calculate_limits_single <- function(
 
 #' Apply Westgard rules to detect violations
 #' @noRd
-apply_westgard_rules <- function(data, value_col, limits, rules) {
-  values <- data[[value_col]]
+apply_westgard_rules <- function(data, response_col, limits, rules) {
+  values <- data[[response_col]]
   n <- length(values)
 
   center <- limits$center[1]
@@ -428,9 +457,9 @@ apply_westgard_rules <- function(data, value_col, limits, rules) {
   # Rule 2:2s - Two consecutive points beyond 2 sigma (same side)
   if ("2_2s" %in% rules && n >= 2) {
     for (i in 2:n) {
-      if ((z[i] > 2 && z[i-1] > 2) || (z[i] < -2 && z[i-1] < -2)) {
+      if ((z[i] > 2 && z[i - 1] > 2) || (z[i] < -2 && z[i - 1] < -2)) {
         violations[i] <- paste0(violations[i], "2:2s ")
-        violations[i-1] <- paste0(violations[i-1], "2:2s ")
+        violations[i - 1] <- paste0(violations[i - 1], "2:2s ")
       }
     }
   }
@@ -438,9 +467,9 @@ apply_westgard_rules <- function(data, value_col, limits, rules) {
   # Rule R:4s - Range of two consecutive points > 4 sigma
   if ("R_4s" %in% rules && n >= 2) {
     for (i in 2:n) {
-      if (abs(z[i] - z[i-1]) > 4) {
+      if (abs(z[i] - z[i - 1]) > 4) {
         violations[i] <- paste0(violations[i], "R:4s ")
-        violations[i-1] <- paste0(violations[i-1], "R:4s ")
+        violations[i - 1] <- paste0(violations[i - 1], "R:4s ")
       }
     }
   }
@@ -448,8 +477,8 @@ apply_westgard_rules <- function(data, value_col, limits, rules) {
   # Rule 4:1s - Four consecutive points beyond 1 sigma (same side)
   if ("4_1s" %in% rules && n >= 4) {
     for (i in 4:n) {
-      if (all(z[(i-3):i] > 1) || all(z[(i-3):i] < -1)) {
-        for (j in (i-3):i) {
+      if (all(z[(i - 3):i] > 1) || all(z[(i - 3):i] < -1)) {
+        for (j in (i - 3):i) {
           violations[j] <- paste0(violations[j], "4:1s ")
         }
       }
@@ -459,8 +488,8 @@ apply_westgard_rules <- function(data, value_col, limits, rules) {
   # Rule 10x - Ten consecutive points on same side of mean
   if ("10x" %in% rules && n >= 10) {
     for (i in 10:n) {
-      if (all(z[(i-9):i] > 0) || all(z[(i-9):i] < 0)) {
-        for (j in (i-9):i) {
+      if (all(z[(i - 9):i] > 0) || all(z[(i - 9):i] < 0)) {
+        for (j in (i - 9):i) {
           violations[j] <- paste0(violations[j], "10x ")
         }
       }
@@ -473,7 +502,10 @@ apply_westgard_rules <- function(data, value_col, limits, rules) {
   data$has_violation <- nchar(violations) > 0
 
   # Summary of violations
-  violation_summary <- data[data$has_violation, c(names(data)[1], value_col, "violation")]
+  violation_summary <- data[
+    data$has_violation,
+    c(names(data)[1], response_col, "violation")
+  ]
 
   list(
     data = data,
@@ -566,15 +598,19 @@ print.measure_sst <- function(x, ...) {
 #' @rdname tidy.recipe
 #' @export
 tidy.measure_control_limits <- function(x, ...) {
-
   tibble::as_tibble(x)
 }
 
 #' @rdname tidy.recipe
 #' @export
-tidy.measure_control_chart <- function(x, type = c("data", "violations", "limits"), ...) {
+tidy.measure_control_chart <- function(
+  x,
+  type = c("data", "violations", "limits"),
+  ...
+) {
   type <- match.arg(type)
-  switch(type,
+  switch(
+    type,
     data = tibble::as_tibble(x$data),
     violations = tibble::as_tibble(x$violations),
     limits = tidy(x$limits)
@@ -610,12 +646,15 @@ autoplot.measure_control_chart <- function(object, ...) {
   # Find the order column (first non-value column before violation)
   cols <- names(data)
   order_col <- cols[1]
-  value_col <- cols[2]
+  response_col <- cols[2]
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(
-    x = .data[[order_col]],
-    y = .data[[value_col]]
-  )) +
+  p <- ggplot2::ggplot(
+    data,
+    ggplot2::aes(
+      x = .data[[order_col]],
+      y = .data[[response_col]]
+    )
+  ) +
     # Control limits
     ggplot2::geom_hline(
       yintercept = limits$center[1],

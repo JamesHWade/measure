@@ -201,7 +201,7 @@ test_that("measure_linearity stores model object", {
   set.seed(42)
   data <- data.frame(
     concentration = 1:10,
-    response = 1:10 * 2 + 5 + rnorm(10, 0, 0.5)  # Add noise to avoid perfect fit warning
+    response = 1:10 * 2 + 5 + rnorm(10, 0, 0.5) # Add noise to avoid perfect fit warning
   )
 
   result <- measure_linearity(data, "concentration", "response")
@@ -216,10 +216,19 @@ test_that("measure_linearity stores model object", {
 test_that("measure_carryover calculates carryover", {
   data <- data.frame(
     run_order = 1:10,
-    sample_type = c("std", "std", "std", "high", "blank",
-                    "qc", "qc", "high", "blank", "std"),
-    response = c(100, 500, 1000, 5000, 5,
-                 500, 510, 4900, 8, 100)
+    sample_type = c(
+      "std",
+      "std",
+      "std",
+      "high",
+      "blank",
+      "qc",
+      "qc",
+      "high",
+      "blank",
+      "std"
+    ),
+    response = c(100, 500, 1000, 5000, 5, 500, 510, 4900, 8, 100)
   )
 
   result <- measure_carryover(
@@ -240,7 +249,7 @@ test_that("measure_carryover calculates percentage correctly", {
   data <- data.frame(
     run_order = 1:4,
     sample_type = c("std", "high", "blank", "std"),
-    response = c(100, 1000, 10, 100)  # Blank = 10
+    response = c(100, 1000, 10, 100) # Blank = 10
   )
 
   # With LLOQ = 100, carryover = 10/100 * 100 = 10%
@@ -300,7 +309,7 @@ test_that("measure_carryover uses high response when LLOQ not provided", {
   )
 
   expect_equal(result$reference_type, "high")
-  expect_equal(result$carryover_pct, 1)  # 10/1000 * 100 = 1%
+  expect_equal(result$carryover_pct, 1) # 10/1000 * 100 = 1%
 })
 
 test_that("measure_carryover validates inputs", {
@@ -315,7 +324,7 @@ test_that("measure_carryover validates inputs", {
 test_that("measure_carryover errors when no blanks after highs", {
   data <- data.frame(
     run_order = 1:5,
-    sample_type = c("std", "high", "qc", "blank", "std"),  # Blank not after high
+    sample_type = c("std", "high", "qc", "blank", "std"), # Blank not after high
     response = 1:5
   )
 
@@ -369,7 +378,7 @@ test_that("tidy.measure_linearity returns tibble", {
   set.seed(42)
   data <- data.frame(
     concentration = 1:10,
-    response = 1:10 * 2 + 5 + rnorm(10, 0, 0.5)  # Add noise to avoid perfect fit warning
+    response = 1:10 * 2 + 5 + rnorm(10, 0, 0.5) # Add noise to avoid perfect fit warning
   )
   result <- measure_linearity(data, "concentration", "response")
 

@@ -61,7 +61,13 @@ generate_hplc_data <- function() {
   peak_widths <- c(0.15, 0.18, 0.22, 0.25, 0.30)
 
   # Compound names
-  compound_names <- c("Caffeine", "Theobromine", "Catechin", "Epicatechin", "Quercetin")
+  compound_names <- c(
+    "Caffeine",
+    "Theobromine",
+    "Catechin",
+    "Epicatechin",
+    "Quercetin"
+  )
 
   # Create time axis (0 to 15 minutes at 0.01 min resolution)
   time <- seq(0, 15, by = 0.01)
@@ -89,12 +95,13 @@ generate_hplc_data <- function() {
     for (j in 1:5) {
       # Add small retention time variation
       rt_shift <- rnorm(1, 0, 0.02)
-      signal <- signal + gaussian_peak(
-        time,
-        peak_times[j] + rt_shift,
-        peak_heights[j] * conc_factors[j],
-        peak_widths[j]
-      )
+      signal <- signal +
+        gaussian_peak(
+          time,
+          peak_times[j] + rt_shift,
+          peak_heights[j] * conc_factors[j],
+          peak_widths[j]
+        )
     }
 
     # Add noise
@@ -104,7 +111,7 @@ generate_hplc_data <- function() {
     sample_data <- tibble(
       sample_id = i,
       time_min = time,
-      absorbance_mAU = pmax(signal, 0),  # No negative values
+      absorbance_mAU = pmax(signal, 0), # No negative values
       # Store true concentrations for modeling
       caffeine_conc = 100 * conc_factors[1],
       theobromine_conc = 80 * conc_factors[2],
@@ -162,16 +169,22 @@ generate_sec_data <- function() {
   standards_names <- c("PS_1k", "PS_5k", "PS_20k", "PS_100k", "PS_500k")
 
   # Generate 5 polymer samples with different MW distributions
-  sample_mw <- c(15000, 45000, 120000, 250000, 80000)  # Weight-average MW
-  sample_dispersity <- c(1.8, 2.2, 1.5, 2.5, 1.9)  # Mw/Mn
-  sample_names <- c("Polymer_A", "Polymer_B", "Polymer_C", "Polymer_D", "Polymer_E")
+  sample_mw <- c(15000, 45000, 120000, 250000, 80000) # Weight-average MW
+  sample_dispersity <- c(1.8, 2.2, 1.5, 2.5, 1.9) # Mw/Mn
+  sample_names <- c(
+    "Polymer_A",
+    "Polymer_B",
+    "Polymer_C",
+    "Polymer_D",
+    "Polymer_E"
+  )
 
   sec_data <- tibble()
 
   # Generate standard chromatograms
   for (i in seq_along(standards_mw)) {
     baseline <- 2 + rnorm(n_points, 0, 0.5)
-    signal <- baseline + sec_peak(time, standards_mw[i], 100, 1.05)  # Narrow dispersity
+    signal <- baseline + sec_peak(time, standards_mw[i], 100, 1.05) # Narrow dispersity
     signal <- pmax(signal + rnorm(n_points, 0, 0.8), 0)
 
     sample_data <- tibble(
@@ -204,7 +217,14 @@ generate_sec_data <- function() {
 
   # Create wide format version for easier use
   sec_wide <- sec_data |>
-    select(sample_id, sample_type, elution_time, ri_signal, known_mw, known_dispersity) |>
+    select(
+      sample_id,
+      sample_type,
+      elution_time,
+      ri_signal,
+      known_mw,
+      known_dispersity
+    ) |>
     pivot_wider(
       id_cols = c(sample_id, sample_type, known_mw, known_dispersity),
       names_from = elution_time,
@@ -245,17 +265,25 @@ generate_maldi_data <- function() {
   # Each spectrum has different composition
   peak_sets <- list(
     # Sample 1: Typical peptide mixture
-    list(mz = c(1200, 1450, 1800, 2200, 3500, 5800, 8400, 12000),
-         intensity = c(800, 1200, 950, 600, 1500, 2000, 1100, 400)),
+    list(
+      mz = c(1200, 1450, 1800, 2200, 3500, 5800, 8400, 12000),
+      intensity = c(800, 1200, 950, 600, 1500, 2000, 1100, 400)
+    ),
     # Sample 2: Different peptide mixture
-    list(mz = c(1100, 1650, 2100, 2800, 4200, 6500, 9200, 14000),
-         intensity = c(1000, 900, 1300, 800, 1800, 1600, 900, 350)),
+    list(
+      mz = c(1100, 1650, 2100, 2800, 4200, 6500, 9200, 14000),
+      intensity = c(1000, 900, 1300, 800, 1800, 1600, 900, 350)
+    ),
     # Sample 3: Protein-focused
-    list(mz = c(2500, 4000, 5500, 8000, 11000, 15000, 18000),
-         intensity = c(600, 800, 1200, 2200, 1800, 1000, 500)),
+    list(
+      mz = c(2500, 4000, 5500, 8000, 11000, 15000, 18000),
+      intensity = c(600, 800, 1200, 2200, 1800, 1000, 500)
+    ),
     # Sample 4: Peptide mapping
-    list(mz = c(1050, 1280, 1520, 1890, 2340, 2980, 3650, 4500),
-         intensity = c(1100, 1400, 1250, 1800, 900, 750, 600, 450))
+    list(
+      mz = c(1050, 1280, 1520, 1890, 2340, 2980, 3650, 4500),
+      intensity = c(1100, 1400, 1250, 1800, 900, 750, 600, 450)
+    )
   )
 
   # Function to generate Gaussian-like MS peak
@@ -284,11 +312,12 @@ generate_maldi_data <- function() {
         # Add slight m/z shift and intensity variation
         mz_shift <- rnorm(1, 0, base_peaks$mz[p] * 0.0002)
         int_factor <- runif(1, 0.8, 1.2)
-        signal <- signal + ms_peak(
-          mz,
-          base_peaks$mz[p] + mz_shift,
-          base_peaks$intensity[p] * int_factor
-        )
+        signal <- signal +
+          ms_peak(
+            mz,
+            base_peaks$mz[p] + mz_shift,
+            base_peaks$intensity[p] * int_factor
+          )
       }
 
       # Add noise proportional to baseline
@@ -319,18 +348,25 @@ if (interactive()) {
   message("Generating datasets...")
 
   # 1. NIR Soil data (requires prospectr)
-  tryCatch({
-    nir_soil <- generate_nir_soil()
-    usethis::use_data(nir_soil, overwrite = TRUE)
-    message("Created: nir_soil (", nrow(nir_soil), " observations)")
-  }, error = function(e) {
-    message("Skipping nir_soil: ", e$message)
-  })
+  tryCatch(
+    {
+      nir_soil <- generate_nir_soil()
+      usethis::use_data(nir_soil, overwrite = TRUE)
+      message("Created: nir_soil (", nrow(nir_soil), " observations)")
+    },
+    error = function(e) {
+      message("Skipping nir_soil: ", e$message)
+    }
+  )
 
   # 2. HPLC data
   hplc_chromatograms <- generate_hplc_data()
   usethis::use_data(hplc_chromatograms, overwrite = TRUE)
-  message("Created: hplc_chromatograms (", nrow(hplc_chromatograms), " observations)")
+  message(
+    "Created: hplc_chromatograms (",
+    nrow(hplc_chromatograms),
+    " observations)"
+  )
 
   # 3. SEC/GPC data
   sec_result <- generate_sec_data()
@@ -338,7 +374,11 @@ if (interactive()) {
   sec_calibration <- sec_result$calibration
   usethis::use_data(sec_chromatograms, overwrite = TRUE)
   usethis::use_data(sec_calibration, overwrite = TRUE)
-  message("Created: sec_chromatograms (", nrow(sec_chromatograms), " observations)")
+  message(
+    "Created: sec_chromatograms (",
+    nrow(sec_chromatograms),
+    " observations)"
+  )
   message("Created: sec_calibration (", nrow(sec_calibration), " standards)")
 
   # 4. MALDI data

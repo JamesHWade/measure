@@ -21,10 +21,13 @@ create_test_data <- function() {
 capture_with_result <- function(code) {
   tc <- textConnection("output_text", "w", local = TRUE)
   sink(tc)
-  on.exit({
-    sink()
-    close(tc)
-  }, add = TRUE)
+  on.exit(
+    {
+      sink()
+      close(tc)
+    },
+    add = TRUE
+  )
   result <- code
   list(result = result, output = output_text)
 }
@@ -396,7 +399,7 @@ test_that("measure_map_safely captures errors", {
   result <- measure_map_safely(test_data, always_fails)
 
   expect_equal(nrow(result$errors), nrow(test_data))
-  expect_true(all(grepl("I always fail", result$errors$error)))
+  expect_true(all(grepl("I always fail", result$errors$error, fixed = TRUE)))
 })
 
 test_that("measure_map_safely uses .otherwise when provided", {
@@ -675,7 +678,7 @@ test_that("step_measure_map verbosity = 1 allows output (default)", {
   output <- captured$output
 
   expect_true(length(output) > 0)
-  expect_true(any(grepl("Processing sample", output)))
+  expect_true(any(grepl("Processing sample", output, fixed = TRUE)))
 })
 
 test_that("measure_map verbosity = 0 suppresses output", {
@@ -687,7 +690,11 @@ test_that("measure_map verbosity = 0 suppresses output", {
   }
 
   # Should not produce output when verbosity = 0
-  captured <- capture_with_result(measure_map(test_data, noisy_fn, verbosity = 0L))
+  captured <- capture_with_result(measure_map(
+    test_data,
+    noisy_fn,
+    verbosity = 0L
+  ))
   result <- captured$result
   output <- captured$output
 
@@ -704,11 +711,15 @@ test_that("measure_map verbosity = 1 allows output (default)", {
   }
 
   # Should produce output when verbosity = 1
-  captured <- capture_with_result(measure_map(test_data, noisy_fn, verbosity = 1L))
+  captured <- capture_with_result(measure_map(
+    test_data,
+    noisy_fn,
+    verbosity = 1L
+  ))
   output <- captured$output
 
   expect_true(length(output) > 0)
-  expect_true(any(grepl("Processing sample", output)))
+  expect_true(any(grepl("Processing sample", output, fixed = TRUE)))
 })
 
 test_that("step_measure_map verbosity is preserved through prep", {

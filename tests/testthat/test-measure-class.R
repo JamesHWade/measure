@@ -348,6 +348,6 @@ test_that("measure_list prints informatively", {
   ml <- new_measure_list(tibbles)
 
   output <- capture.output(print(ml))
-  expect_true(any(grepl("measure_list", output)))
-  expect_true(any(grepl("3", output))) # 3 measurements
+  expect_true(any(grepl("measure_list", output, fixed = TRUE)))
+  expect_true(any(grepl("3", output, fixed = TRUE))) # 3 measurements
 })

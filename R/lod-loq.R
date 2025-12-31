@@ -75,26 +75,45 @@
 #'
 #' @export
 measure_lod <- function(
-    data,
-    response_col,
-    method = c("blank_sd", "calibration", "sn", "precision"),
-    conc_col = "nominal_conc",
-    sample_type_col = "sample_type",
-    calibration = NULL,
-    k = 3,
-    sn_col = NULL,
-    noise = NULL,
-    sn_threshold = 3,
-    ...) {
-
+  data,
+  response_col,
+  method = c("blank_sd", "calibration", "sn", "precision"),
+  conc_col = "nominal_conc",
+  sample_type_col = "sample_type",
+  calibration = NULL,
+  k = 3,
+  sn_col = NULL,
+  noise = NULL,
+  sn_threshold = 3,
+  ...
+) {
   method <- match.arg(method)
 
   result <- switch(
     method,
     blank_sd = .lod_blank_sd(data, response_col, sample_type_col, k),
-    calibration = .lod_calibration(data, response_col, conc_col, calibration, k = 3.3),
-    sn = .lod_signal_noise(data, response_col, conc_col, sn_col, noise, sn_threshold),
-    precision = .lod_precision(data, response_col, conc_col, sample_type_col, ...)
+    calibration = .lod_calibration(
+      data,
+      response_col,
+      conc_col,
+      calibration,
+      k = 3.3
+    ),
+    sn = .lod_signal_noise(
+      data,
+      response_col,
+      conc_col,
+      sn_col,
+      noise,
+      sn_threshold
+    ),
+    precision = .lod_precision(
+      data,
+      response_col,
+      conc_col,
+      sample_type_col,
+      ...
+    )
   )
 
   result$method <- method
@@ -155,27 +174,47 @@ measure_lod <- function(
 #'
 #' @export
 measure_loq <- function(
-    data,
-    response_col,
-    method = c("blank_sd", "calibration", "sn", "precision"),
-    conc_col = "nominal_conc",
-    sample_type_col = "sample_type",
-    calibration = NULL,
-    k = 10,
-    sn_col = NULL,
-    noise = NULL,
-    sn_threshold = 10,
-    precision_cv = 20,
-    ...) {
-
+  data,
+  response_col,
+  method = c("blank_sd", "calibration", "sn", "precision"),
+  conc_col = "nominal_conc",
+  sample_type_col = "sample_type",
+  calibration = NULL,
+  k = 10,
+  sn_col = NULL,
+  noise = NULL,
+  sn_threshold = 10,
+  precision_cv = 20,
+  ...
+) {
   method <- match.arg(method)
 
   result <- switch(
     method,
     blank_sd = .lod_blank_sd(data, response_col, sample_type_col, k),
-    calibration = .lod_calibration(data, response_col, conc_col, calibration, k = 10),
-    sn = .lod_signal_noise(data, response_col, conc_col, sn_col, noise, sn_threshold),
-    precision = .loq_precision(data, response_col, conc_col, sample_type_col, precision_cv, ...)
+    calibration = .lod_calibration(
+      data,
+      response_col,
+      conc_col,
+      calibration,
+      k = 10
+    ),
+    sn = .lod_signal_noise(
+      data,
+      response_col,
+      conc_col,
+      sn_col,
+      noise,
+      sn_threshold
+    ),
+    precision = .loq_precision(
+      data,
+      response_col,
+      conc_col,
+      sample_type_col,
+      precision_cv,
+      ...
+    )
   )
 
   result$method <- method
@@ -211,16 +250,16 @@ measure_loq <- function(
 #'
 #' @export
 measure_lod_loq <- function(
-    data,
-    response_col,
-    method = c("blank_sd", "calibration", "sn", "precision"),
-    conc_col = "nominal_conc",
-    sample_type_col = "sample_type",
-    calibration = NULL,
-    k_lod = NULL,
-    k_loq = 10,
-    ...) {
-
+  data,
+  response_col,
+  method = c("blank_sd", "calibration", "sn", "precision"),
+  conc_col = "nominal_conc",
+  sample_type_col = "sample_type",
+  calibration = NULL,
+  k_lod = NULL,
+  k_loq = 10,
+  ...
+) {
   method <- match.arg(method)
 
   # Set default k_lod based on method
@@ -274,7 +313,14 @@ print.measure_lod <- function(x, ...) {
   if (!is.null(x$parameters)) {
     cat("  Parameters:\n")
     for (nm in names(x$parameters)) {
-      cat("    ", nm, ": ", format(x$parameters[[nm]], digits = 4), "\n", sep = "")
+      cat(
+        "    ",
+        nm,
+        ": ",
+        format(x$parameters[[nm]], digits = 4),
+        "\n",
+        sep = ""
+      )
     }
   }
 
@@ -295,7 +341,14 @@ print.measure_loq <- function(x, ...) {
   if (!is.null(x$parameters)) {
     cat("  Parameters:\n")
     for (nm in names(x$parameters)) {
-      cat("    ", nm, ": ", format(x$parameters[[nm]], digits = 4), "\n", sep = "")
+      cat(
+        "    ",
+        nm,
+        ": ",
+        format(x$parameters[[nm]], digits = 4),
+        "\n",
+        sep = ""
+      )
     }
   }
 
@@ -379,7 +432,7 @@ tidy.measure_lod_loq <- function(x, ...) {
       blank_sd = blank_sd,
       n_blanks = sum(!is.na(blanks))
     ),
-    uncertainty = k * blank_sd / sqrt(length(blanks))  # Approximate SE
+    uncertainty = k * blank_sd / sqrt(length(blanks)) # Approximate SE
   )
 }
 
@@ -391,7 +444,9 @@ tidy.measure_lod_loq <- function(x, ...) {
   }
 
   if (!is_measure_calibration(calibration)) {
-    cli::cli_abort("{.arg calibration} must be a {.cls measure_calibration} object.")
+    cli::cli_abort(
+      "{.arg calibration} must be a {.cls measure_calibration} object."
+    )
   }
 
   sigma <- calibration$diagnostics$sigma
@@ -406,13 +461,22 @@ tidy.measure_lod_loq <- function(x, ...) {
       sigma = sigma,
       slope = slope
     ),
-    uncertainty = NULL  # Could be calculated via error propagation
+    uncertainty = NULL # Could be calculated via error propagation
   )
 }
 
-.lod_signal_noise <- function(data, response_col, conc_col, sn_col, noise, sn_threshold) {
+.lod_signal_noise <- function(
+  data,
+  response_col,
+  conc_col,
+  sn_col,
+  noise,
+  sn_threshold
+) {
   if (is.null(sn_col) && is.null(noise)) {
-    cli::cli_abort("Either {.arg sn_col} or {.arg noise} must be provided for S/N method.")
+    cli::cli_abort(
+      "Either {.arg sn_col} or {.arg noise} must be provided for S/N method."
+    )
   }
 
   if (!is.null(sn_col)) {
@@ -428,7 +492,9 @@ tidy.measure_lod_loq <- function(x, ...) {
     if (all(above_threshold)) {
       # All above threshold - LOD is below lowest concentration
       value <- min(conc_values, na.rm = TRUE)
-      cli::cli_warn("All S/N values above threshold. LOD may be below lowest measured concentration.")
+      cli::cli_warn(
+        "All S/N values above threshold. LOD may be below lowest measured concentration."
+      )
     } else if (!any(above_threshold)) {
       value <- NA_real_
       cli::cli_warn("No S/N values above threshold. Cannot determine LOD.")
@@ -463,8 +529,14 @@ tidy.measure_lod_loq <- function(x, ...) {
   )
 }
 
-.lod_precision <- function(data, response_col, conc_col, sample_type_col, cv_threshold = 33, ...) {
-
+.lod_precision <- function(
+  data,
+  response_col,
+  conc_col,
+  sample_type_col,
+  cv_threshold = 33,
+  ...
+) {
   # Calculate CV at each concentration level
   cv_by_conc <- data |>
     dplyr::group_by(.data[[conc_col]]) |>
@@ -491,7 +563,9 @@ tidy.measure_lod_loq <- function(x, ...) {
 
   if (nrow(passing) == 0) {
     value <- NA_real_
-    cli::cli_warn("No concentration level meets the CV criterion of {cv_threshold}%.")
+    cli::cli_warn(
+      "No concentration level meets the CV criterion of {cv_threshold}%."
+    )
   } else {
     value <- passing[[conc_col]][1]
   }
@@ -506,6 +580,20 @@ tidy.measure_lod_loq <- function(x, ...) {
   )
 }
 
-.loq_precision <- function(data, response_col, conc_col, sample_type_col, precision_cv = 20, ...) {
-  .lod_precision(data, response_col, conc_col, sample_type_col, cv_threshold = precision_cv, ...)
+.loq_precision <- function(
+  data,
+  response_col,
+  conc_col,
+  sample_type_col,
+  precision_cv = 20,
+  ...
+) {
+  .lod_precision(
+    data,
+    response_col,
+    conc_col,
+    sample_type_col,
+    cv_threshold = precision_cv,
+    ...
+  )
 }

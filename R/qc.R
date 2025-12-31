@@ -59,15 +59,16 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_qc_snr <- function(
-    recipe,
-    measures = NULL,
-    new_col = ".snr",
-    signal_method = c("max", "range", "rms"),
-    noise_method = c("diff", "mad", "residual"),
-    role = "predictor",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_qc_snr")) {
+  recipe,
+  measures = NULL,
+  new_col = ".snr",
+  signal_method = c("max", "range", "rms"),
+  noise_method = c("diff", "mad", "residual"),
+  role = "predictor",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_qc_snr")
+) {
   signal_method <- match.arg(signal_method)
   noise_method <- match.arg(noise_method)
 
@@ -87,7 +88,15 @@ step_measure_qc_snr <- function(
 }
 
 step_measure_qc_snr_new <- function(
-    measures, new_col, signal_method, noise_method, role, trained, skip, id) {
+  measures,
+  new_col,
+  signal_method,
+  noise_method,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_qc_snr",
     measures = measures,
@@ -125,7 +134,7 @@ prep.step_measure_qc_snr <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_qc_snr <- function(object, new_data, ...) {
-  col <- object$measures[1]  # Use first measure column
+  col <- object$measures[1] # Use first measure column
 
   snr_values <- purrr::map_dbl(
     new_data[[col]],
@@ -139,7 +148,11 @@ bake.step_measure_qc_snr <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_qc_snr <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_qc_snr <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Signal-to-noise ratio calculation -> ", x$new_col)
   cat(title)
   cat("\n")
@@ -191,7 +204,9 @@ tidy.step_measure_qc_snr <- function(x, ...) {
       # Residuals from a smooth fit
       n <- length(values)
       window <- min(21, n %/% 5)
-      if (window %% 2 == 0) window <- window + 1
+      if (window %% 2 == 0) {
+        window <- window + 1
+      }
       if (window >= 3) {
         kernel <- rep(1 / window, window)
         smoothed <- stats::filter(values, kernel, sides = 2)
@@ -268,17 +283,18 @@ tidy.step_measure_qc_snr <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_qc_saturated <- function(
-    recipe,
-    measures = NULL,
-    upper_limit = NULL,
-    lower_limit = NULL,
-    tolerance = 0.01,
-    new_col_flag = ".saturated",
-    new_col_pct = ".sat_pct",
-    role = "predictor",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_qc_saturated")) {
+  recipe,
+  measures = NULL,
+  upper_limit = NULL,
+  lower_limit = NULL,
+  tolerance = 0.01,
+  new_col_flag = ".saturated",
+  new_col_pct = ".sat_pct",
+  role = "predictor",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_qc_saturated")
+) {
   recipes::add_step(
     recipe,
     step_measure_qc_saturated_new(
@@ -297,8 +313,17 @@ step_measure_qc_saturated <- function(
 }
 
 step_measure_qc_saturated_new <- function(
-    measures, upper_limit, lower_limit, tolerance, new_col_flag, new_col_pct,
-    role, trained, skip, id) {
+  measures,
+  upper_limit,
+  lower_limit,
+  tolerance,
+  new_col_flag,
+  new_col_pct,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_qc_saturated",
     measures = measures,
@@ -373,12 +398,20 @@ bake.step_measure_qc_saturated <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_qc_saturated <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_qc_saturated <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Saturation detection"
   if (x$trained) {
     title <- paste0(
       title,
-      " [", round(x$lower_limit, 3), ", ", round(x$upper_limit, 3), "]"
+      " [",
+      round(x$lower_limit, 3),
+      ", ",
+      round(x$upper_limit, 3),
+      "]"
     )
   }
   cat(title)
@@ -470,14 +503,15 @@ tidy.step_measure_qc_saturated <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_impute <- function(
-    recipe,
-    measures = NULL,
-    method = c("linear", "spline", "constant", "mean"),
-    max_gap = Inf,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_impute")) {
+  recipe,
+  measures = NULL,
+  method = c("linear", "spline", "constant", "mean"),
+  max_gap = Inf,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_impute")
+) {
   method <- match.arg(method)
 
   recipes::add_step(
@@ -495,7 +529,14 @@ step_measure_impute <- function(
 }
 
 step_measure_impute_new <- function(
-    measures, method, max_gap, role, trained, skip, id) {
+  measures,
+  method,
+  max_gap,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_impute",
     measures = measures,
@@ -544,7 +585,11 @@ bake.step_measure_impute <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_impute <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_impute <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Imputation (", x$method, ") on ")
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -574,7 +619,7 @@ tidy.step_measure_impute <- function(x, ...) {
 
   na_idx <- which(is.na(values))
   if (length(na_idx) == 0) {
-    return(x)  # No missing values
+    return(x) # No missing values
   }
 
   if (length(na_idx) == n) {
@@ -617,10 +662,9 @@ tidy.step_measure_impute <- function(x, ...) {
       x = locations[non_na_idx],
       y = values[non_na_idx],
       xout = locations[na_idx],
-      rule = 2  # Constant extrapolation at edges
+      rule = 2 # Constant extrapolation at edges
     )
     result[na_idx] <- interp$y
-
   } else if (method == "spline") {
     if (length(non_na_idx) >= 4) {
       interp <- stats::spline(
@@ -639,7 +683,6 @@ tidy.step_measure_impute <- function(x, ...) {
       )
       result[na_idx] <- interp$y
     }
-
   } else if (method == "constant") {
     # Nearest neighbor
     for (i in na_idx) {
@@ -647,7 +690,6 @@ tidy.step_measure_impute <- function(x, ...) {
       nearest <- non_na_idx[which.min(distances)]
       result[i] <- values[nearest]
     }
-
   } else if (method == "mean") {
     result[na_idx] <- mean(values, na.rm = TRUE)
   }
@@ -715,17 +757,18 @@ tidy.step_measure_impute <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_qc_outlier <- function(
-    recipe,
-    measures = NULL,
-    method = c("mahalanobis", "pca"),
-    threshold = 3,
-    n_components = NULL,
-    new_col = ".outlier",
-    new_col_score = ".outlier_score",
-    role = "predictor",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_qc_outlier")) {
+  recipe,
+  measures = NULL,
+  method = c("mahalanobis", "pca"),
+  threshold = 3,
+  n_components = NULL,
+  new_col = ".outlier",
+  new_col_score = ".outlier_score",
+  role = "predictor",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_qc_outlier")
+) {
   method <- match.arg(method)
 
   recipes::add_step(
@@ -750,8 +793,21 @@ step_measure_qc_outlier <- function(
 }
 
 step_measure_qc_outlier_new <- function(
-    measures, method, threshold, n_components, new_col, new_col_score,
-    center, scale, pca_rotation, pca_sdev, role, trained, skip, id) {
+  measures,
+  method,
+  threshold,
+  n_components,
+  new_col,
+  new_col_score,
+  center,
+  scale,
+  pca_rotation,
+  pca_sdev,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_qc_outlier",
     measures = measures,
@@ -789,7 +845,7 @@ prep.step_measure_qc_outlier <- function(x, training, info = NULL, ...) {
   # Compute robust center and scale
   center <- apply(mat, 2, stats::median, na.rm = TRUE)
   scale <- apply(mat, 2, stats::mad, constant = 1.4826, na.rm = TRUE)
-  scale[scale == 0] <- 1  # Avoid division by zero
+  scale[scale == 0] <- 1 # Avoid division by zero
 
   pca_rotation <- NULL
   pca_sdev <- NULL
@@ -844,14 +900,14 @@ bake.step_measure_qc_outlier <- function(object, new_data, ...) {
     scores <- rowSums(mat_scaled^2)
     # Convert to approximate SD units
     scores <- sqrt(scores / ncol(mat))
-
   } else {
     # PCA method
     mat_scaled <- scale(mat, center = object$center, scale = object$scale)
     mat_scaled[is.na(mat_scaled)] <- 0
 
     # Project onto PCA space
-    scores_pca <- mat_scaled %*% object$pca_rotation[, 1:object$n_components, drop = FALSE]
+    scores_pca <- mat_scaled %*%
+      object$pca_rotation[, 1:object$n_components, drop = FALSE]
 
     # Hotelling's T^2
     sdev <- object$pca_sdev[1:object$n_components]
@@ -868,9 +924,17 @@ bake.step_measure_qc_outlier <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_qc_outlier <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_qc_outlier <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0(
-    "Outlier detection (", x$method, ", threshold = ", x$threshold, ")"
+    "Outlier detection (",
+    x$method,
+    ", threshold = ",
+    x$threshold,
+    ")"
   )
   cat(title)
   cat("\n")

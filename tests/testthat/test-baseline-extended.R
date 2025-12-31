@@ -23,7 +23,10 @@ test_that("step_measure_baseline_rolling removes baseline", {
     prep() |>
     bake(new_data = NULL)
 
-  expect_false(identical(result$.measures[[1]]$value, original$.measures[[1]]$value))
+  expect_false(identical(
+    result$.measures[[1]]$value,
+    original$.measures[[1]]$value
+  ))
 })
 
 test_that("step_measure_baseline_rolling preserves locations", {
@@ -34,7 +37,7 @@ test_that("step_measure_baseline_rolling preserves locations", {
     prep()
 
   result <- bake(rec, new_data = NULL)
-  original_locs <- seq_len(100)  # meats_long has 100 channels
+  original_locs <- seq_len(100) # meats_long has 100 channels
 
   expect_equal(result$.measures[[1]]$location, original_locs)
 })
@@ -93,8 +96,10 @@ test_that("step_measure_baseline_airpls preserves locations", {
 
   result <- bake(rec, new_data = NULL)
 
-  expect_equal(length(result$.measures[[1]]$location),
-               length(result$.measures[[1]]$value))
+  expect_equal(
+    length(result$.measures[[1]]$location),
+    length(result$.measures[[1]]$value)
+  )
 })
 
 test_that("step_measure_baseline_airpls errors with invalid lambda", {

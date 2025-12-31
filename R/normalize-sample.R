@@ -1110,15 +1110,16 @@ required_pkgs.step_measure_normalize_peak <- function(x, ...) {
 #'     method = "integral"
 #'   )
 step_measure_normalize_istd <- function(
-    recipe,
-    location_min,
-    location_max,
-    method = "mean",
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_normalize_istd")) {
+  recipe,
+  location_min,
+  location_max,
+  method = "mean",
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_normalize_istd")
+) {
   step_measure_normalize_peak(
     recipe = recipe,
     location_min = location_min,

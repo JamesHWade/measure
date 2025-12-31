@@ -66,17 +66,18 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_smooth_wavelet <- function(
-    recipe,
-    measures = NULL,
-    wavelet = "DaubExPhase",
-    filter_number = 4L,
-    threshold_type = c("soft", "hard"),
-    threshold_policy = c("universal", "sure", "cv"),
-    levels = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_smooth_wavelet")) {
+  recipe,
+  measures = NULL,
+  wavelet = "DaubExPhase",
+  filter_number = 4L,
+  threshold_type = c("soft", "hard"),
+  threshold_policy = c("universal", "sure", "cv"),
+  levels = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_smooth_wavelet")
+) {
   threshold_type <- match.arg(threshold_type)
   threshold_policy <- match.arg(threshold_policy)
 
@@ -98,8 +99,17 @@ step_measure_smooth_wavelet <- function(
 }
 
 step_measure_smooth_wavelet_new <- function(
-    measures, wavelet, filter_number, threshold_type, threshold_policy,
-    levels, role, trained, skip, id) {
+  measures,
+  wavelet,
+  filter_number,
+  threshold_type,
+  threshold_policy,
+  levels,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_smooth_wavelet",
     measures = measures,
@@ -159,7 +169,11 @@ bake.step_measure_smooth_wavelet <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_smooth_wavelet <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_smooth_wavelet <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Wavelet denoising (", x$wavelet, ") on ")
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -189,13 +203,21 @@ required_pkgs.step_measure_smooth_wavelet <- function(x, ...) {
   c("measure", "wavethresh")
 }
 
-.smooth_wavelet_single <- function(x, wavelet, filter_number, threshold_type,
-                                   threshold_policy, levels) {
+.smooth_wavelet_single <- function(
+  x,
+  wavelet,
+  filter_number,
+  threshold_type,
+  threshold_policy,
+  levels
+) {
   values <- x$value
   n <- length(values)
 
   if (n < 8) {
-    cli::cli_warn("Spectrum too short for wavelet denoising. Returning unchanged.")
+    cli::cli_warn(
+      "Spectrum too short for wavelet denoising. Returning unchanged."
+    )
     return(x)
   }
 
@@ -252,36 +274,42 @@ required_pkgs.step_measure_smooth_wavelet <- function(x, ...) {
     levels <- min(levels, max_levels)
   }
 
-  tryCatch({
-    # Discrete wavelet transform (standard, not stationary)
-    wt <- wavethresh::wd(values_padded, filter.number = filter_number,
-                         family = wavelet)
+  tryCatch(
+    {
+      # Discrete wavelet transform (standard, not stationary)
+      wt <- wavethresh::wd(
+        values_padded,
+        filter.number = filter_number,
+        family = wavelet
+      )
 
-    # Threshold the wavelet coefficients
-    wt_thresh <- wavethresh::threshold(
-      wt,
-      type = threshold_type,
-      policy = threshold_policy,
-      levels = 0:(levels - 1)
-    )
+      # Threshold the wavelet coefficients
+      wt_thresh <- wavethresh::threshold(
+        wt,
+        type = threshold_type,
+        policy = threshold_policy,
+        levels = 0:(levels - 1)
+      )
 
-    # Inverse transform using wr (wavelet reconstruction)
-    denoised <- wavethresh::wr(wt_thresh)
+      # Inverse transform using wr (wavelet reconstruction)
+      denoised <- wavethresh::wr(wt_thresh)
 
-    # Remove padding
-    if (pad_left > 0 || length(denoised) > orig_n) {
-      denoised <- denoised[(pad_left + 1):(pad_left + orig_n)]
+      # Remove padding
+      if (pad_left > 0 || length(denoised) > orig_n) {
+        denoised <- denoised[(pad_left + 1):(pad_left + orig_n)]
+      }
+
+      # Restore NAs if there were any
+      if (any(na_mask)) {
+        denoised[na_mask] <- NA_real_
+      }
+
+      x$value <- denoised
+    },
+    error = function(e) {
+      cli::cli_warn("Wavelet denoising failed: {e$message}")
     }
-
-    # Restore NAs if there were any
-    if (any(na_mask)) {
-      denoised[na_mask] <- NA_real_
-    }
-
-    x$value <- denoised
-  }, error = function(e) {
-    cli::cli_warn("Wavelet denoising failed: {e$message}")
-  })
+  )
 
   x
 }

@@ -40,10 +40,12 @@
 #' validate_measure(spec, checks = c("monotonic", "missing"))
 #'
 #' @export
-validate_measure <- function(x,
-                             checks = c("monotonic", "duplicates", "missing", "spacing"),
-                             tolerance = 1e-6,
-                             action = c("error", "warn", "message")) {
+validate_measure <- function(
+  x,
+  checks = c("monotonic", "duplicates", "missing", "spacing"),
+  tolerance = 1e-6,
+  action = c("error", "warn", "message")
+) {
   action <- match.arg(action)
   checks <- match.arg(checks, several.ok = TRUE)
 
@@ -138,7 +140,9 @@ check_monotonic <- function(measures) {
 
     # Skip if too few points or all NA
     loc_clean <- loc[!is.na(loc)]
-    if (length(loc_clean) < 2) next
+    if (length(loc_clean) < 2) {
+      next
+    }
 
     diffs <- diff(loc_clean)
 
@@ -156,10 +160,13 @@ check_monotonic <- function(measures) {
         if (length(sign_changes) > 0) {
           # Find position in original sequence
           first_change <- sign_changes[1]
-          issues <- c(issues, sprintf(
-            "Sample %s: non-monotonic (direction changes detected)",
-            names(measures)[i]
-          ))
+          issues <- c(
+            issues,
+            sprintf(
+              "Sample %s: non-monotonic (direction changes detected)",
+              names(measures)[i]
+            )
+          )
         }
       }
     }
@@ -193,12 +200,15 @@ check_no_duplicates <- function(measures) {
     dups <- loc[duplicated(loc)]
 
     if (length(dups) > 0) {
-      issues <- c(issues, sprintf(
-        "Sample %s: %d duplicate location(s) found (e.g., %.4g)",
-        names(measures)[i],
-        length(dups),
-        dups[1]
-      ))
+      issues <- c(
+        issues,
+        sprintf(
+          "Sample %s: %d duplicate location(s) found (e.g., %.4g)",
+          names(measures)[i],
+          length(dups),
+          dups[1]
+        )
+      )
     }
   }
 
@@ -231,12 +241,15 @@ check_no_missing <- function(measures) {
     val_na <- sum(is.na(m$value))
 
     if (loc_na > 0 || val_na > 0) {
-      issues <- c(issues, sprintf(
-        "Sample %s: %d missing location(s), %d missing value(s)",
-        names(measures)[i],
-        loc_na,
-        val_na
-      ))
+      issues <- c(
+        issues,
+        sprintf(
+          "Sample %s: %d missing location(s), %d missing value(s)",
+          names(measures)[i],
+          loc_na,
+          val_na
+        )
+      )
     }
   }
 
@@ -266,10 +279,14 @@ check_regular_spacing <- function(measures, tolerance = 1e-6) {
 
   for (i in seq_along(measures)) {
     loc <- measures[[i]]$location
-    if (length(loc) < 3) next
+    if (length(loc) < 3) {
+      next
+    }
 
     # Skip if NAs present (handled by check_no_missing)
-    if (anyNA(loc)) next
+    if (anyNA(loc)) {
+      next
+    }
 
     diffs <- diff(loc)
     median_diff <- stats::median(diffs)
@@ -287,12 +304,15 @@ check_regular_spacing <- function(measures, tolerance = 1e-6) {
     }
 
     if (length(irregular) > 0) {
-      issues <- c(issues, sprintf(
-        "Sample %s: irregular spacing (max deviation: %.2f%%, %d irregular intervals)",
-        names(measures)[i],
-        max_dev * 100,
-        length(irregular)
-      ))
+      issues <- c(
+        issues,
+        sprintf(
+          "Sample %s: irregular spacing (max deviation: %.2f%%, %d irregular intervals)",
+          names(measures)[i],
+          max_dev * 100,
+          length(irregular)
+        )
+      )
     }
   }
 
@@ -350,7 +370,9 @@ measure_axis_info <- function(x, sample = 1L) {
     m <- x
   } else if (is_measure_list(x)) {
     if (sample > length(x)) {
-      cli::cli_abort("Sample {sample} does not exist (only {length(x)} samples).")
+      cli::cli_abort(
+        "Sample {sample} does not exist (only {length(x)} samples)."
+      )
     }
     m <- x[[sample]]
   } else if (is.data.frame(x)) {
@@ -360,7 +382,9 @@ measure_axis_info <- function(x, sample = 1L) {
     }
     measures <- x[[meas_cols[1]]]
     if (sample > length(measures)) {
-      cli::cli_abort("Sample {sample} does not exist (only {length(measures)} samples).")
+      cli::cli_abort(
+        "Sample {sample} does not exist (only {length(measures)} samples)."
+      )
     }
     m <- measures[[sample]]
   } else {
@@ -468,7 +492,13 @@ infer_axis_type <- function(location) {
   }
 
   # Retention time (minutes): typically 0 to 60, starts near 0
-  if (loc_min >= -1 && loc_min < 5 && loc_max <= 120 && loc_range > 5 && loc_range < 150) {
+  if (
+    loc_min >= -1 &&
+      loc_min < 5 &&
+      loc_max <= 120 &&
+      loc_range > 5 &&
+      loc_range < 150
+  ) {
     return("retention_time")
   }
 
@@ -556,9 +586,11 @@ infer_axis_type <- function(location) {
 #' try(check_axis_consistency(specs_bad))
 #'
 #' @export
-check_axis_consistency <- function(x,
-                                   tolerance = 1e-10,
-                                   action = c("error", "warn", "message")) {
+check_axis_consistency <- function(
+  x,
+  tolerance = 1e-10,
+  action = c("error", "warn", "message")
+) {
   action <- match.arg(action)
 
   # Get measure_list
@@ -577,7 +609,11 @@ check_axis_consistency <- function(x,
   if (length(measures) < 2) {
     return(invisible(list(
       consistent = TRUE,
-      reference_locations = if (length(measures) == 1) measures[[1]]$location else NULL,
+      reference_locations = if (length(measures) == 1) {
+        measures[[1]]$location
+      } else {
+        NULL
+      },
       inconsistent_samples = integer(),
       max_deviation = 0
     )))
@@ -672,7 +708,7 @@ measure_quality_summary <- function(x, verbose = TRUE) {
   }
 
   # Check for empty data
- if (n_samples == 0) {
+  if (n_samples == 0) {
     cli::cli_abort("Cannot summarize empty measure data.")
   }
 
@@ -707,7 +743,9 @@ measure_quality_summary <- function(x, verbose = TRUE) {
     cli::cli_ul()
     cli::cli_li("Samples: {n_samples}")
     cli::cli_li("Points per sample: {axis_info$n_points}")
-    cli::cli_li("Axis range: {round(axis_info$min, 4)} to {round(axis_info$max, 4)}")
+    cli::cli_li(
+      "Axis range: {round(axis_info$min, 4)} to {round(axis_info$max, 4)}"
+    )
     cli::cli_li("Axis type: {.field {axis_info$axis_type}}")
     cli::cli_li("Direction: {axis_info$direction}")
     cli::cli_li("Regular spacing: {if (axis_info$regular) 'Yes' else 'No'}")
@@ -721,7 +759,11 @@ measure_quality_summary <- function(x, verbose = TRUE) {
     cli::cli_ul()
     for (check_name in names(validation)) {
       v <- validation[[check_name]]
-      status <- if (v$valid) cli::col_green("\u2714") else cli::col_red("\u2718")
+      status <- if (v$valid) {
+        cli::col_green("\u2714")
+      } else {
+        cli::col_red("\u2718")
+      }
       cli::cli_li("{status} {check_name}: {v$message}")
     }
     cli::cli_end()

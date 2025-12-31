@@ -121,7 +121,7 @@ step_measure_savitzky_golay_new <-
 #' @export
 prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
-  if (!is.numeric(x$degree) | length(x$degree) != 1 | x$degree < 1) {
+  if (!is.numeric(x$degree) || length(x$degree) != 1 || x$degree < 1) {
     cli::cli_abort(
       "The {.arg degree} argument to \\
                    {.fn  step_measure_savitzky_golay} was {x$degree} and \\
@@ -129,8 +129,8 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
     )
   }
   if (
-    !is.numeric(x$differentiation_order) |
-      length(x$differentiation_order) != 1 |
+    !is.numeric(x$differentiation_order) ||
+      length(x$differentiation_order) != 1 ||
       x$differentiation_order < 0
   ) {
     cli::cli_abort(
@@ -140,7 +140,9 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
     )
   }
   if (
-    !is.numeric(x$window_side) | length(x$window_side) != 1 | x$window_side < 1
+    !is.numeric(x$window_side) ||
+      length(x$window_side) != 1 ||
+      x$window_side < 1
   ) {
     cli::cli_abort(
       "The {.arg window_side} argument to \\

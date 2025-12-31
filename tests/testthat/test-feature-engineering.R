@@ -17,7 +17,7 @@ create_test_spectrum <- function() {
   tibble::tibble(
     id = "sample1",
     location = 1:100,
-    value = sin(seq(0, 4 * pi, length.out = 100)) + 1  # Values 0-2
+    value = sin(seq(0, 4 * pi, length.out = 100)) + 1 # Values 0-2
   )
 }
 
@@ -26,7 +26,9 @@ create_multi_sample_data <- function(n = 5) {
     tibble::tibble(
       id = paste0("sample", i),
       location = 1:100,
-      value = sin(seq(0, 4 * pi, length.out = 100) + i * 0.5) + 1 + rnorm(100, sd = 0.01)
+      value = sin(seq(0, 4 * pi, length.out = 100) + i * 0.5) +
+        1 +
+        rnorm(100, sd = 0.01)
     )
   })
 }
@@ -61,7 +63,8 @@ test_that("step_measure_integrals calculates areas with trapezoid method", {
 
 test_that("step_measure_integrals works with simpson method", {
   rec <- prep_test_recipe(function(r) {
-    step_measure_integrals(r,
+    step_measure_integrals(
+      r,
       regions = list(region1 = c(10, 50)),
       method = "simpson"
     )
@@ -75,7 +78,8 @@ test_that("step_measure_integrals works with simpson method", {
 
 test_that("step_measure_integrals uses custom prefix", {
   rec <- prep_test_recipe(function(r) {
-    step_measure_integrals(r,
+    step_measure_integrals(
+      r,
       regions = list(peak = c(40, 60)),
       prefix = "area_"
     )
@@ -137,7 +141,8 @@ test_that("step_measure_integrals tidy method works", {
 
 test_that("step_measure_ratios calculates ratios", {
   rec <- prep_test_recipe(function(r) {
-    step_measure_ratios(r,
+    step_measure_ratios(
+      r,
       numerator = c(1, 30),
       denominator = c(70, 100),
       name = "low_high_ratio"
@@ -153,7 +158,8 @@ test_that("step_measure_ratios calculates ratios", {
 
 test_that("step_measure_ratios works with simpson method", {
   rec <- prep_test_recipe(function(r) {
-    step_measure_ratios(r,
+    step_measure_ratios(
+      r,
       numerator = c(1, 50),
       denominator = c(50, 100),
       method = "simpson"
@@ -230,7 +236,12 @@ test_that("step_measure_moments calculates selected moments", {
 
 test_that("step_measure_moments works with weighted option", {
   rec_unweighted <- prep_test_recipe(function(r) {
-    step_measure_moments(r, moments = c("mean"), weighted = FALSE, prefix = "uw_")
+    step_measure_moments(
+      r,
+      moments = c("mean"),
+      weighted = FALSE,
+      prefix = "uw_"
+    )
   })
 
   rec_weighted <- prep_test_recipe(function(r) {
@@ -374,7 +385,10 @@ test_that("step_measure_bin tidy method works", {
 })
 
 test_that("step_measure_bin is tunable", {
-  step <- step_measure_bin(recipe(~., data = create_test_spectrum()), n_bins = 10)
+  step <- step_measure_bin(
+    recipe(~., data = create_test_spectrum()),
+    n_bins = 10
+  )
   tunable_result <- tunable(step$steps[[1]])
   expect_s3_class(tunable_result, "tbl_df")
   expect_true("n_bins" %in% tunable_result$name)

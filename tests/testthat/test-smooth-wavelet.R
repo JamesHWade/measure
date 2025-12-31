@@ -23,7 +23,7 @@ test_that("step_measure_smooth_wavelet processes synthetic data", {
 
   # Create noisy synthetic data
   set.seed(123)
-  n_points <- 128  # Power of 2 for wavelet
+  n_points <- 128 # Power of 2 for wavelet
   signal <- sin(seq(0, 4 * pi, length.out = n_points))
   noisy <- signal + rnorm(n_points, sd = 0.3)
 
@@ -103,7 +103,7 @@ test_that("step_measure_smooth_wavelet handles short signals", {
   skip_if_not_installed("wavethresh")
 
   # Create short signal
-  n_points <- 6  # Very short
+  n_points <- 6 # Very short
   synthetic_data <- tibble::tibble(
     id = rep(1, n_points),
     outcome = rep(1, n_points),
