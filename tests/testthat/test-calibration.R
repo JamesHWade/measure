@@ -197,7 +197,7 @@ test_that("measure_calibration_predict works with quadratic model", {
 
   preds <- measure_calibration_predict(cal_quad, unknowns)
   expect_equal(nrow(preds), 3)
-  expect_true(all(!is.na(preds$.pred_conc)))
+  expect_true(!any(is.na(preds$.pred_conc)))
 })
 
 test_that("measure_calibration_predict validates input", {
@@ -312,7 +312,7 @@ test_that("measure_calibration_verify identifies failing samples", {
   result <- measure_calibration_verify(cal, qc_data, acceptance_pct = 15)
 
   # At least one sample should fail
-  expect_true(any(!result$pass))
+  expect_true(!all(result$pass))
 })
 
 test_that("measure_calibration_verify uses LLOQ acceptance criteria", {

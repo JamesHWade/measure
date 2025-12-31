@@ -189,7 +189,7 @@ prep.step_measure_emsc <- function(x, training, info = NULL, ...) {
     error = function(e) NULL
   )
 
-  if (is.null(fit) || any(is.na(fit$coefficients))) {
+  if (is.null(fit) || anyNA(fit$coefficients)) {
     cli::cli_warn("EMSC fitting failed for a spectrum. Returning centered values.")
     x$value <- values - mean(values, na.rm = TRUE)
     return(x)

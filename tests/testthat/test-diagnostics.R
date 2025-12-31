@@ -81,7 +81,7 @@ test_that("autoplot.measure_list respects max_spectra", {
 
   expect_s3_class(p, "ggplot")
   # Subtitle should mention subsetting
-  expect_true(grepl("10 of 100", p$labels$subtitle))
+  expect_true(grepl("10 of 100", p$labels$subtitle, fixed = TRUE))
 })
 
 test_that("autoplot.recipe works with prepped recipe", {

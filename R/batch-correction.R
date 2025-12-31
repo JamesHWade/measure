@@ -221,7 +221,7 @@ prep.step_measure_batch_reference <- function(x, training, info = NULL, ...) {
 
     # Calculate correction factors
     for (batch in batches) {
-      if (grepl("ratio", x$method)) {
+      if (grepl("ratio", x$method, fixed = TRUE)) {
         # Guard against division by zero
         if (is.na(ref_summaries[[batch]]) || ref_summaries[[batch]] == 0) {
           cli::cli_warn(
@@ -287,7 +287,7 @@ bake.step_measure_batch_reference <- function(object, new_data, ...) {
       batch_idx <- batches == batch
       factor <- factors$batch_factors[[batch]]
 
-      if (grepl("ratio", object$method)) {
+      if (grepl("ratio", object$method, fixed = TRUE)) {
         corrected[batch_idx] <- values[batch_idx] * factor
       } else {
         corrected[batch_idx] <- values[batch_idx] + factor

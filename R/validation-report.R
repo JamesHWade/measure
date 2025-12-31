@@ -941,7 +941,7 @@ tidy.measure_validation_report <- function(x, ...) {
   if (section_name %in% names(labels)) {
     labels[[section_name]]
   } else {
-    tools::toTitleCase(gsub("_", " ", section_name))
+    tools::toTitleCase(gsub("_", " ", section_name, fixed = TRUE))
   }
 }
 

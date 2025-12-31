@@ -418,7 +418,7 @@ measure_standardize_sample_type <- function(
     dup_check <- data |>
       dplyr::group_by(.data$batch_id) |>
       dplyr::summarize(
-        has_dups = any(duplicated(.data$run_order[!is.na(.data$run_order)])),
+        has_dups = anyDuplicated(.data$run_order[!is.na(.data$run_order)]) > 0,
         .groups = "drop"
       )
 

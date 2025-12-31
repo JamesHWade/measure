@@ -258,7 +258,7 @@ test_that("measure_gage_rr calculates tolerance percentage when provided", {
     tolerance = 20
   )
 
-  expect_false(any(is.na(result$pct_tolerance)))
+  expect_false(anyNA(result$pct_tolerance))
   expect_true(all(result$pct_tolerance >= 0))
 })
 

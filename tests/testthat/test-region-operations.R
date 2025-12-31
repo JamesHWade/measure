@@ -318,7 +318,7 @@ test_that("step_measure_resample linear method works", {
   result <- bake(rec, new_data = NULL)
 
   # Should have values (not NA)
-  expect_false(any(is.na(result$.measures[[1]]$value)))
+  expect_false(anyNA(result$.measures[[1]]$value))
 })
 
 test_that("step_measure_resample spline method works", {
@@ -331,7 +331,7 @@ test_that("step_measure_resample spline method works", {
   result <- bake(rec, new_data = NULL)
 
   # Should have values (not NA)
-  expect_false(any(is.na(result$.measures[[1]]$value)))
+  expect_false(anyNA(result$.measures[[1]]$value))
 })
 
 test_that("step_measure_resample respects custom range", {

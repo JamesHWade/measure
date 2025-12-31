@@ -126,7 +126,7 @@ bake.step_measure_output_wide <- function(object, new_data, ...) {
   res <-
     new_data |>
     tidyr::unnest(cols = dplyr::all_of(col)) |>
-    dplyr::mutate(location = gsub(" ", "0", format(location))) |>
+    dplyr::mutate(location = gsub(" ", "0", format(location), fixed = TRUE)) |>
     # remove NA values that are introduced by padding
     tidyr::drop_na("value") |>
     tidyr::pivot_wider(

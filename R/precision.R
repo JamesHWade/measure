@@ -380,7 +380,7 @@ measure_gage_rr <- function(
   # Extract mean squares using grep to handle name variations
   part_row <- grep(paste0("^", part_col, "$"), rownames(anova_table), value = TRUE)
   operator_row <- grep(paste0("^", operator_col, "$"), rownames(anova_table), value = TRUE)
-  interaction_row <- grep(":", rownames(anova_table), value = TRUE)
+  interaction_row <- grep(":", rownames(anova_table), value = TRUE, fixed = TRUE)
 
   ms_part <- anova_table[part_row, "Mean Sq"]
   ms_operator <- anova_table[operator_row, "Mean Sq"]

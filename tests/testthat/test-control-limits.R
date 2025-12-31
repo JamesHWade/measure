@@ -152,7 +152,7 @@ test_that("measure_control_chart detects 1:3s violations", {
 
   expect_false(chart$in_control)
   expect_true(nrow(chart$violations) >= 1)
-  expect_true(any(grepl("1:3s", chart$violations$violation)))
+  expect_true(any(grepl("1:3s", chart$violations$violation, fixed = TRUE)))
 })
 
 test_that("measure_control_chart detects 2:2s violations", {
@@ -188,7 +188,7 @@ test_that("measure_control_chart detects 10x violations", {
   chart <- measure_control_chart(data, "qc_value", "run_order", rules = "10x")
 
   expect_false(chart$in_control)
-  expect_true(any(grepl("10x", chart$violations$violation)))
+  expect_true(any(grepl("10x", chart$violations$violation, fixed = TRUE)))
 })
 
 test_that("measure_control_chart accepts pre-calculated limits", {

@@ -396,7 +396,7 @@ test_that("measure_map_safely captures errors", {
   result <- measure_map_safely(test_data, always_fails)
 
   expect_equal(nrow(result$errors), nrow(test_data))
-  expect_true(all(grepl("I always fail", result$errors$error)))
+  expect_true(all(grepl("I always fail", result$errors$error, fixed = TRUE)))
 })
 
 test_that("measure_map_safely uses .otherwise when provided", {
@@ -675,7 +675,7 @@ test_that("step_measure_map verbosity = 1 allows output (default)", {
   output <- captured$output
 
   expect_true(length(output) > 0)
-  expect_true(any(grepl("Processing sample", output)))
+  expect_true(any(grepl("Processing sample", output, fixed = TRUE)))
 })
 
 test_that("measure_map verbosity = 0 suppresses output", {
@@ -708,7 +708,7 @@ test_that("measure_map verbosity = 1 allows output (default)", {
   output <- captured$output
 
   expect_true(length(output) > 0)
-  expect_true(any(grepl("Processing sample", output)))
+  expect_true(any(grepl("Processing sample", output, fixed = TRUE)))
 })
 
 test_that("step_measure_map verbosity is preserved through prep", {
