@@ -358,8 +358,13 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
     ctol = tol
   )
 
+  # multiway::tucker returns $A, $B, $C as separate matrices (not $A as a list)
+  # $A = sample scores (n_samples x ranks[1])
+  # $B = mode 2 loadings (dim1 x ranks[2])
+  # $C = mode 3 loadings (dim2 x ranks[3])
+  # Store as list for consistent access
   list(
-    loadings = fit$A, # List of loading matrices for each mode
+    loadings = list(fit$A, fit$B, fit$C),
     core = fit$G, # Core tensor
     center_values = center_values,
     scale_values = scale_values,

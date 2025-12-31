@@ -346,8 +346,13 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
     ctol = tol
   )
 
+  # multiway::parafac returns $A, $B, $C as separate matrices (not $A as a list)
+  # $A = sample scores (n_samples x nfac)
+  # $B = mode 2 loadings (dim1 x nfac)
+  # $C = mode 3 loadings (dim2 x nfac)
+  # Store as list for consistent access
   list(
-    loadings = fit$A, # List of loading matrices for each mode
+    loadings = list(fit$A, fit$B, fit$C),
     center_values = center_values,
     scale_values = scale_values,
     grid_info = grid_info
