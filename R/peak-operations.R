@@ -900,7 +900,7 @@ bake.step_measure_peaks_filter <- function(object, new_data, ...) {
       # Limit number of peaks (keep largest)
       if (!is.null(object$max_peaks) && nrow(peaks) > object$max_peaks) {
         # Sort by area if available, otherwise height
-        if (!any(is.na(peaks$area))) {
+        if (!anyNA(peaks$area)) {
           ord <- order(peaks$area, decreasing = TRUE)
         } else {
           ord <- order(peaks$height, decreasing = TRUE)

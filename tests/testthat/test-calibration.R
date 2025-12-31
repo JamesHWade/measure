@@ -197,7 +197,7 @@ test_that("measure_calibration_predict works with quadratic model", {
 
   preds <- measure_calibration_predict(cal_quad, unknowns)
   expect_equal(nrow(preds), 3)
-  expect_true(!any(is.na(preds$.pred_conc)))
+  expect_true(!anyNA(preds$.pred_conc))
 })
 
 test_that("measure_calibration_predict validates input", {
