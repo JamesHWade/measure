@@ -1003,6 +1003,236 @@ sample-specific correction:</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="validation-reports">Validation Reports<a class="anchor" aria-label="anchor" href="#validation-reports"></a>
+</h2>
+<p>Once you’ve completed your validation studies, you can compile all
+results into a reproducible validation report using
+<code><a href="../reference/measure_validation_report.html">measure_validation_report()</a></code>. The package provides templates
+following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
+### Creating a Validation Report</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Gather validation results (using objects from above)</span></span>
+<span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_validation_report.html">measure_validation_report</a></span><span class="op">(</span></span>
+<span>  <span class="co"># Metadata</span></span>
+<span>  title <span class="op">=</span> <span class="st">"HPLC-UV Method Validation Report"</span>,</span>
+<span>  method_name <span class="op">=</span> <span class="st">"Compound X Assay"</span>,</span>
+<span>  method_description <span class="op">=</span> <span class="st">"Reversed-phase HPLC with UV detection at 254 nm"</span>,</span>
+<span>  analyst <span class="op">=</span> <span class="st">"J. Smith"</span>,</span>
+<span>  reviewer <span class="op">=</span> <span class="st">"A. Jones"</span>,</span>
+<span>  lab <span class="op">=</span> <span class="st">"Analytical Development"</span>,</span>
+<span>  instrument <span class="op">=</span> <span class="st">"Agilent 1260 Infinity II"</span>,</span>
+<span></span>
+<span></span>
+<span>  <span class="co"># Validation sections (results from earlier in this vignette)</span></span>
+<span>  calibration <span class="op">=</span> <span class="va">cal</span>,</span>
+<span>  lod_loq <span class="op">=</span> <span class="va">lod_loq</span>,</span>
+<span>  accuracy <span class="op">=</span> <span class="va">accuracy</span>,</span>
+<span>  precision <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>repeatability <span class="op">=</span> <span class="va">repeatability</span>, intermediate <span class="op">=</span> <span class="va">ip_result</span><span class="op">)</span>,</span>
+<span>  linearity <span class="op">=</span> <span class="va">linearity</span>,</span>
+<span>  range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">1</span>, upper <span class="op">=</span> <span class="fl">500</span>, units <span class="op">=</span> <span class="st">"ng/mL"</span><span class="op">)</span>,</span>
+<span>  uncertainty <span class="op">=</span> <span class="va">budget</span>,</span>
+<span></span>
+<span>  <span class="co"># Text sections</span></span>
+<span>  specificity <span class="op">=</span> <span class="st">"No interfering peaks observed at the analyte retention time when analyzing blank matrix samples."</span>,</span>
+<span>  robustness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    factors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Flow rate (±0.1 mL/min)"</span>, <span class="st">"Column temperature (±5°C)"</span>, <span class="st">"Mobile phase pH (±0.2)"</span><span class="op">)</span>,</span>
+<span>    conclusion <span class="op">=</span> <span class="st">"Method showed acceptable robustness within tested parameter ranges."</span></span>
+<span>  <span class="op">)</span>,</span>
+<span></span>
+<span>  <span class="co"># Conclusions</span></span>
+<span>  conclusions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    summary <span class="op">=</span> <span class="st">"The analytical method meets all acceptance criteria for precision, accuracy, and linearity."</span>,</span>
+<span>    recommendations <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Method is suitable for intended use"</span>,</span>
+<span>      <span class="st">"Revalidate if significant changes are made to instrumentation or reagents"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span></span>
+<span>  <span class="co"># References</span></span>
+<span>  references <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"ICH Q2(R2) Validation of Analytical Procedures (2023)"</span>,</span>
+<span>    <span class="st">"USP &lt;1225&gt; Validation of Compendial Procedures"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Validation Report</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Title</span>: HPLC-UV Method Validation Report</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Method</span>: Compound X Assay</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Analyst</span>: J. Smith</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Lab</span>: Analytical Development</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Date</span>: 2025-12-31</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Validation Sections</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Calibration</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> LOD/LOQ</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Accuracy</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Precision</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Linearity</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Range</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Specificity/Selectivity</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Robustness</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Measurement Uncertainty</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Conclusions</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; The analytical method meets all acceptance criteria for precision, accuracy,</span></span>
+<span><span class="co">#&gt; and linearity.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Provenance</span> ──</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Generated: 2025-12-31 03:03:40.385153</span></span>
+<span><span class="co">#&gt; R version: 4.5.2</span></span>
+<span><span class="co">#&gt; measure version: 0.0.1.9001</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `render_validation_report()` to generate document</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="inspecting-report-sections">Inspecting Report Sections<a class="anchor" aria-label="anchor" href="#inspecting-report-sections"></a>
+</h3>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Check which sections are included</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Validation Report Summary</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Method</span>: Compound X Assay</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Date</span>: 2025-12-31</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 4</span></span></span>
+<span><span class="co">#&gt;   section                 status n_results notes             </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Calibration             info           8 <span style="color: #949494;">""</span>                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> LOD/LOQ                 info          <span style="color: #BB0000;">NA</span> <span style="color: #949494;">"</span>Method: blank_sd<span style="color: #949494;">"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Accuracy                info           3 <span style="color: #949494;">""</span>                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Precision               info          <span style="color: #BB0000;">NA</span> <span style="color: #949494;">""</span>                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Linearity               info          <span style="color: #BB0000;">NA</span> <span style="color: #949494;">""</span>                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Range                   info          <span style="color: #BB0000;">NA</span> <span style="color: #949494;">""</span>                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> Specificity/Selectivity info          <span style="color: #BB0000;">NA</span> <span style="color: #949494;">""</span>                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> Robustness              info          <span style="color: #BB0000;">NA</span> <span style="color: #949494;">""</span>                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> Measurement Uncertainty info          <span style="color: #BB0000;">NA</span> <span style="color: #949494;">""</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> All sections meet acceptance criteria</span></span>
+<span></span>
+<span><span class="co"># Access specific sections</span></span>
+<span><span class="fu"><a href="../reference/has_validation_section.html">has_validation_section</a></span><span class="op">(</span><span class="va">report</span>, <span class="st">"calibration"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="../reference/has_validation_section.html">has_validation_section</a></span><span class="op">(</span><span class="va">report</span>, <span class="st">"stability"</span><span class="op">)</span>  <span class="co"># Not included</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span></span>
+<span><span class="co"># Get section data</span></span>
+<span><span class="fu"><a href="../reference/get_validation_section.html">get_validation_section</a></span><span class="op">(</span><span class="va">report</span>, <span class="st">"range"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $lower</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $upper</span></span>
+<span><span class="co">#&gt; [1] 500</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $units</span></span>
+<span><span class="co">#&gt; [1] "ng/mL"</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="adding-custom-sections">Adding Custom Sections<a class="anchor" aria-label="anchor" href="#adding-custom-sections"></a>
+</h3>
+<p>You can add additional sections after report creation:</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Add a stability section later</span></span>
+<span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_validation_section.html">add_validation_section</a></span><span class="op">(</span></span>
+<span>  <span class="va">report</span>,</span>
+<span>  <span class="st">"stability"</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    description <span class="op">=</span> <span class="st">"Short-term stability at room temperature"</span>,</span>
+<span>    results <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>      timepoint <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0h"</span>, <span class="st">"4h"</span>, <span class="st">"8h"</span>, <span class="st">"24h"</span><span class="op">)</span>,</span>
+<span>      recovery_pct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">99.5</span>, <span class="fl">98.8</span>, <span class="fl">97.2</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    conclusion <span class="op">=</span> <span class="st">"Sample is stable for 24 hours at room temperature."</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/has_validation_section.html">has_validation_section</a></span><span class="op">(</span><span class="va">report</span>, <span class="st">"stability"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="tidy-output">Tidy Output<a class="anchor" aria-label="anchor" href="#tidy-output"></a>
+</h3>
+<p>Extract all results as a tidy tibble for further analysis:</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 41</span></span></span>
+<span><span class="co">#&gt;    section              term  estimate std_error statistic   p_value group     n</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Calibration          (Int…    0.119    0.039<span style="text-decoration: underline;">5</span>      3.00  2.39<span style="color: #949494;">e</span><span style="color: #BB0000;">- 2</span> <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Calibration          nomi…    1.06     0.014<span style="text-decoration: underline;">3</span>     73.8   4.16<span style="color: #949494;">e</span><span style="color: #BB0000;">-10</span> <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Accuracy             <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>    Low       5</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Accuracy             <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>    Mid       5</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Accuracy             <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>    High      5</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Linearity            <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>    <span style="color: #BB0000;">NA</span>       15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Measurement Uncerta… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>    <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Measurement Uncerta… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>    <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Measurement Uncerta… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>    <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Measurement Uncerta… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>    <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 33 more variables: mean_measured &lt;dbl&gt;, mean_reference &lt;dbl&gt;, bias &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   bias_pct &lt;dbl&gt;, mean_recovery &lt;dbl&gt;, sd_recovery &lt;dbl&gt;, cv_recovery &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   recovery_ci_lower &lt;dbl&gt;, recovery_ci_upper &lt;dbl&gt;, n_levels &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   range_min &lt;dbl&gt;, range_max &lt;dbl&gt;, slope &lt;dbl&gt;, slope_ci_lower &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   slope_ci_upper &lt;dbl&gt;, intercept &lt;dbl&gt;, intercept_ci_lower &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   intercept_ci_upper &lt;dbl&gt;, r_squared &lt;dbl&gt;, adj_r_squared &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   residual_sd &lt;dbl&gt;, residual_cv &lt;dbl&gt;, lof_f &lt;dbl&gt;, lof_p &lt;dbl&gt;, …</span></span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="rendering-reports">Rendering Reports<a class="anchor" aria-label="anchor" href="#rendering-reports"></a>
+</h3>
+<p>To render a validation report to HTML or PDF, use
+<code><a href="../reference/render_validation_report.html">render_validation_report()</a></code>. Two templates are provided:</p>
+<ul>
+<li>
+<strong>ICH Q2(R2)</strong>: Organized by validation characteristics
+(specificity, linearity, range, accuracy, precision, etc.)</li>
+<li>
+<strong>USP &lt;1225&gt;</strong>: Organized by procedure category
+(I, II, III, IV)</li>
+</ul>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Render to HTML using ICH Q2 template (default)</span></span>
+<span><span class="fu"><a href="../reference/render_validation_report.html">render_validation_report</a></span><span class="op">(</span></span>
+<span>  <span class="va">report</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="st">"validation_report.html"</span>,</span>
+<span>  template <span class="op">=</span> <span class="st">"ich_q2"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Render to PDF using USP &lt;1225&gt; template</span></span>
+<span><span class="fu"><a href="../reference/render_validation_report.html">render_validation_report</a></span><span class="op">(</span></span>
+<span>  <span class="va">report</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="st">"validation_report.pdf"</span>,</span>
+<span>  output_format <span class="op">=</span> <span class="st">"pdf"</span>,</span>
+<span>  template <span class="op">=</span> <span class="st">"usp_1225"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Use a custom Quarto template</span></span>
+<span><span class="fu"><a href="../reference/render_validation_report.html">render_validation_report</a></span><span class="op">(</span></span>
+<span>  <span class="va">report</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="st">"custom_report.html"</span>,</span>
+<span>  template_path <span class="op">=</span> <span class="st">"path/to/custom_template.qmd"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The rendered report includes:</p>
+<ul>
+<li>
+<strong>Header</strong>: Method name, date, analyst, reviewer, lab,
+instrument</li>
+<li>
+<strong>Table of Contents</strong>: Auto-generated from
+sections</li>
+<li>
+<strong>Validation Sections</strong>: Each with formatted tables and
+plots</li>
+<li>
+<strong>Provenance</strong>: R version, package versions, timestamp
+for reproducibility</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
 <p>The <code>measure</code> package provides a complete toolkit for
@@ -1097,6 +1327,13 @@ analytical method validation:</p>
 <td>
 <code><a href="../reference/measure_detect_drift.html">measure_detect_drift()</a></code>,
 <code><a href="../reference/step_measure_drift_qc_loess.html">step_measure_drift_qc_loess()</a></code>
+</td>
+</tr>
+<tr class="even">
+<td><strong>Validation Reports</strong></td>
+<td>
+<code><a href="../reference/measure_validation_report.html">measure_validation_report()</a></code>,
+<code><a href="../reference/render_validation_report.html">render_validation_report()</a></code>
 </td>
 </tr>
 </tbody>

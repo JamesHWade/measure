@@ -936,24 +936,249 @@ rec <- recipe(~ ., data = drift_data) |>
 corrected <- bake(rec, new_data = NULL)
 ```
 
+## Validation Reports
+
+Once you’ve completed your validation studies, you can compile all
+results into a reproducible validation report using
+[`measure_validation_report()`](https://jameshwade.github.io/measure/dev/reference/measure_validation_report.md).
+The package provides templates following regulatory frameworks like ICH
+Q2(R2) and USP \<1225\>. \### Creating a Validation Report
+
+``` r
+# Gather validation results (using objects from above)
+report <- measure_validation_report(
+  # Metadata
+  title = "HPLC-UV Method Validation Report",
+  method_name = "Compound X Assay",
+  method_description = "Reversed-phase HPLC with UV detection at 254 nm",
+  analyst = "J. Smith",
+  reviewer = "A. Jones",
+  lab = "Analytical Development",
+  instrument = "Agilent 1260 Infinity II",
+
+
+  # Validation sections (results from earlier in this vignette)
+  calibration = cal,
+  lod_loq = lod_loq,
+  accuracy = accuracy,
+  precision = list(repeatability = repeatability, intermediate = ip_result),
+  linearity = linearity,
+  range = list(lower = 1, upper = 500, units = "ng/mL"),
+  uncertainty = budget,
+
+  # Text sections
+  specificity = "No interfering peaks observed at the analyte retention time when analyzing blank matrix samples.",
+  robustness = list(
+    factors = c("Flow rate (±0.1 mL/min)", "Column temperature (±5°C)", "Mobile phase pH (±0.2)"),
+    conclusion = "Method showed acceptable robustness within tested parameter ranges."
+  ),
+
+  # Conclusions
+  conclusions = list(
+    summary = "The analytical method meets all acceptance criteria for precision, accuracy, and linearity.",
+    recommendations = c(
+      "Method is suitable for intended use",
+      "Revalidate if significant changes are made to instrumentation or reagents"
+    )
+  ),
+
+  # References
+  references = c(
+    "ICH Q2(R2) Validation of Analytical Procedures (2023)",
+    "USP <1225> Validation of Compendial Procedures"
+  )
+)
+
+print(report)
+#> 
+#> ── Validation Report ───────────────────────────────────────────────────────────
+#> Title: HPLC-UV Method Validation Report
+#> Method: Compound X Assay
+#> Analyst: J. Smith
+#> Lab: Analytical Development
+#> Date: 2025-12-31
+#> 
+#> ── Validation Sections ──
+#> 
+#> ℹ Calibration
+#> ℹ LOD/LOQ
+#> ℹ Accuracy
+#> ℹ Precision
+#> ℹ Linearity
+#> ℹ Range
+#> ℹ Specificity/Selectivity
+#> ℹ Robustness
+#> ℹ Measurement Uncertainty
+#> 
+#> ── Conclusions ──
+#> 
+#> The analytical method meets all acceptance criteria for precision, accuracy,
+#> and linearity.
+#> 
+#> ── Provenance ──
+#> 
+#> Generated: 2025-12-31 03:03:40.385153
+#> R version: 4.5.2
+#> measure version: 0.0.1.9001
+#> 
+#> ℹ Use `render_validation_report()` to generate document
+```
+
+### Inspecting Report Sections
+
+``` r
+# Check which sections are included
+summary(report)
+#> 
+#> ── Validation Report Summary ───────────────────────────────────────────────────
+#> Method: Compound X Assay
+#> Date: 2025-12-31
+#> 
+#> # A tibble: 9 × 4
+#>   section                 status n_results notes             
+#>   <chr>                   <chr>      <int> <chr>             
+#> 1 Calibration             info           8 ""                
+#> 2 LOD/LOQ                 info          NA "Method: blank_sd"
+#> 3 Accuracy                info           3 ""                
+#> 4 Precision               info          NA ""                
+#> 5 Linearity               info          NA ""                
+#> 6 Range                   info          NA ""                
+#> 7 Specificity/Selectivity info          NA ""                
+#> 8 Robustness              info          NA ""                
+#> 9 Measurement Uncertainty info          NA ""
+#> 
+#> ✔ All sections meet acceptance criteria
+
+# Access specific sections
+has_validation_section(report, "calibration")
+#> [1] TRUE
+has_validation_section(report, "stability")  # Not included
+#> [1] FALSE
+
+# Get section data
+get_validation_section(report, "range")
+#> $lower
+#> [1] 1
+#> 
+#> $upper
+#> [1] 500
+#> 
+#> $units
+#> [1] "ng/mL"
+```
+
+### Adding Custom Sections
+
+You can add additional sections after report creation:
+
+``` r
+# Add a stability section later
+report <- add_validation_section(
+  report,
+  "stability",
+  list(
+    description = "Short-term stability at room temperature",
+    results = data.frame(
+      timepoint = c("0h", "4h", "8h", "24h"),
+      recovery_pct = c(100, 99.5, 98.8, 97.2)
+    ),
+    conclusion = "Sample is stable for 24 hours at room temperature."
+  )
+)
+
+has_validation_section(report, "stability")
+#> [1] TRUE
+```
+
+### Tidy Output
+
+Extract all results as a tidy tibble for further analysis:
+
+``` r
+tidy(report)
+#> # A tibble: 10 × 41
+#>    section              term  estimate std_error statistic   p_value group     n
+#>    <chr>                <chr>    <dbl>     <dbl>     <dbl>     <dbl> <chr> <int>
+#>  1 Calibration          (Int…    0.119    0.0395      3.00  2.39e- 2 NA       NA
+#>  2 Calibration          nomi…    1.06     0.0143     73.8   4.16e-10 NA       NA
+#>  3 Accuracy             NA      NA       NA          NA    NA        Low       5
+#>  4 Accuracy             NA      NA       NA          NA    NA        Mid       5
+#>  5 Accuracy             NA      NA       NA          NA    NA        High      5
+#>  6 Linearity            NA      NA       NA          NA    NA        NA       15
+#>  7 Measurement Uncerta… NA      NA       NA          NA    NA        NA       NA
+#>  8 Measurement Uncerta… NA      NA       NA          NA    NA        NA       NA
+#>  9 Measurement Uncerta… NA      NA       NA          NA    NA        NA       NA
+#> 10 Measurement Uncerta… NA      NA       NA          NA    NA        NA       NA
+#> # ℹ 33 more variables: mean_measured <dbl>, mean_reference <dbl>, bias <dbl>,
+#> #   bias_pct <dbl>, mean_recovery <dbl>, sd_recovery <dbl>, cv_recovery <dbl>,
+#> #   recovery_ci_lower <dbl>, recovery_ci_upper <dbl>, n_levels <int>,
+#> #   range_min <dbl>, range_max <dbl>, slope <dbl>, slope_ci_lower <dbl>,
+#> #   slope_ci_upper <dbl>, intercept <dbl>, intercept_ci_lower <dbl>,
+#> #   intercept_ci_upper <dbl>, r_squared <dbl>, adj_r_squared <dbl>,
+#> #   residual_sd <dbl>, residual_cv <dbl>, lof_f <dbl>, lof_p <dbl>, …
+```
+
+### Rendering Reports
+
+To render a validation report to HTML or PDF, use
+[`render_validation_report()`](https://jameshwade.github.io/measure/dev/reference/render_validation_report.md).
+Two templates are provided:
+
+- **ICH Q2(R2)**: Organized by validation characteristics (specificity,
+  linearity, range, accuracy, precision, etc.)
+- **USP \<1225\>**: Organized by procedure category (I, II, III, IV)
+
+``` r
+# Render to HTML using ICH Q2 template (default)
+render_validation_report(
+  report,
+  output_file = "validation_report.html",
+  template = "ich_q2"
+)
+
+# Render to PDF using USP <1225> template
+render_validation_report(
+  report,
+  output_file = "validation_report.pdf",
+  output_format = "pdf",
+  template = "usp_1225"
+)
+
+# Use a custom Quarto template
+render_validation_report(
+  report,
+  output_file = "custom_report.html",
+  template_path = "path/to/custom_template.qmd"
+)
+```
+
+The rendered report includes:
+
+- **Header**: Method name, date, analyst, reviewer, lab, instrument
+- **Table of Contents**: Auto-generated from sections
+- **Validation Sections**: Each with formatted tables and plots
+- **Provenance**: R version, package versions, timestamp for
+  reproducibility
+
 ## Summary
 
 The `measure` package provides a complete toolkit for analytical method
 validation:
 
-| Category              | Key Functions                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Calibration**       | [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md), [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md), [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)                                                                                                                                                |
-| **LOD/LOQ**           | [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md), [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md), [`measure_lod_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_lod_loq.md)                                                                                                                                                                                                                              |
-| **Precision**         | [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md), [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md), [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md)                                                                                                                                                                    |
-| **Accuracy**          | [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md), [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md), [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)                                                                                                                                                                                                    |
-| **Method Comparison** | [`measure_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.md), [`measure_deming_regression()`](https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.md), [`measure_passing_bablok()`](https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.md), [`measure_proficiency_score()`](https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.md)                                                |
-| **Matrix Effects**    | [`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md), [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md)                                                                                                                                                                                                                                                                  |
-| **Sample Prep QC**    | [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md), [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md)                                                                                                                                                                                                                                                |
-| **Uncertainty**       | [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md), [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md)                                                                                                                                                                                                                                                                              |
-| **Control Charts**    | [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md), [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md)                                                                                                                                                                                                                                                                                  |
-| **Criteria**          | [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md), [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md), [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md), [`criteria_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md), [`criteria_matrix_effects()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) |
-| **Drift**             | [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md), [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md)                                                                                                                                                                                                                                                                          |
+| Category               | Key Functions                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Calibration**        | [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md), [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md), [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)                                                                                                                                                |
+| **LOD/LOQ**            | [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md), [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md), [`measure_lod_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_lod_loq.md)                                                                                                                                                                                                                              |
+| **Precision**          | [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md), [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md), [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md)                                                                                                                                                                    |
+| **Accuracy**           | [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md), [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md), [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)                                                                                                                                                                                                    |
+| **Method Comparison**  | [`measure_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.md), [`measure_deming_regression()`](https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.md), [`measure_passing_bablok()`](https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.md), [`measure_proficiency_score()`](https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.md)                                                |
+| **Matrix Effects**     | [`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md), [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md)                                                                                                                                                                                                                                                                  |
+| **Sample Prep QC**     | [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md), [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md)                                                                                                                                                                                                                                                |
+| **Uncertainty**        | [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md), [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md)                                                                                                                                                                                                                                                                              |
+| **Control Charts**     | [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md), [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md)                                                                                                                                                                                                                                                                                  |
+| **Criteria**           | [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md), [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md), [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md), [`criteria_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md), [`criteria_matrix_effects()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) |
+| **Drift**              | [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md), [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md)                                                                                                                                                                                                                                                                          |
+| **Validation Reports** | [`measure_validation_report()`](https://jameshwade.github.io/measure/dev/reference/measure_validation_report.md), [`render_validation_report()`](https://jameshwade.github.io/measure/dev/reference/render_validation_report.md)                                                                                                                                                                                                                                                                      |
 
 All functions follow a consistent design philosophy: - **Tidy outputs**:
 Results are tibbles with

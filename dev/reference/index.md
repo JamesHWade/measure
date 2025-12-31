@@ -549,6 +549,27 @@ Axis semantics and data quality validation
 - [`measure_quality_summary()`](https://jameshwade.github.io/measure/dev/reference/measure_quality_summary.md)
   : Summarize measure data quality
 
+## Validation Reporting
+
+Generate reproducible analytical method validation reports
+
+- [`measure_validation_report()`](https://jameshwade.github.io/measure/dev/reference/measure_validation_report.md)
+  : Create an Analytical Method Validation Report
+- [`render_validation_report()`](https://jameshwade.github.io/measure/dev/reference/render_validation_report.md)
+  : Render a Validation Report to Document Format
+- [`has_validation_section()`](https://jameshwade.github.io/measure/dev/reference/has_validation_section.md)
+  : Check if validation report has a section
+- [`get_validation_section()`](https://jameshwade.github.io/measure/dev/reference/get_validation_section.md)
+  : Get validation section data
+- [`add_validation_section()`](https://jameshwade.github.io/measure/dev/reference/add_validation_section.md)
+  : Add or update a validation section
+- [`print(`*`<measure_validation_report>`*`)`](https://jameshwade.github.io/measure/dev/reference/print.measure_validation_report.md)
+  : Print a Validation Report
+- [`summary(`*`<measure_validation_report>`*`)`](https://jameshwade.github.io/measure/dev/reference/summary.measure_validation_report.md)
+  : Summarize a Validation Report
+- [`tidy(`*`<measure_validation_report>`*`)`](https://jameshwade.github.io/measure/dev/reference/tidy.measure_validation_report.md)
+  : Tidy a Validation Report
+
 ## Visualization & Diagnostics
 
 Plotting and diagnostic functions for measure data
