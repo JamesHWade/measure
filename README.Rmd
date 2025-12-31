@@ -30,6 +30,8 @@ measure helps you:
 - **Convert** measurement data from wide or long formats into an internal representation
 - **Preprocess** spectra using techniques like smoothing, derivatives, and normalization
 - **Transform** data back to wide or long format for modeling or visualization
+- **Handle multi-dimensional data** like LC-DAD, EEM fluorescence, and 2D NMR with native nD support
+- **Decompose** complex signals using PARAFAC, Tucker, and MCR-ALS methods
 
 ## Installation
 You can install the development version of measure from [GitHub](https://github.com/):

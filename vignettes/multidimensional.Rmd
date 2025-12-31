@@ -242,6 +242,121 @@ wl_total <- measure_project(m1, along = "time", fn = sum)
 wl_total
 ```
 
+## Multi-Channel Operations
+
+When working with multiple detector channels (e.g., UV + RI in SEC, or multiple wavelengths in LC-DAD), the package provides steps for aligning, combining, and computing ratios between channels.
+
+### Channel Alignment
+
+`step_measure_channel_align()` aligns multiple measure columns to a common grid:
+
+```{r channel-align, eval = FALSE}
+# Align UV and RI detector signals to the same time grid
+rec <- recipe(outcome ~ ., data = sec_data) |>
+ step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
+ step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
+ step_measure_channel_align(uv, ri, method = "intersection") |>
+ prep()
+```
+
+Methods include:
+- `"intersection"`: Keep only locations present in all channels
+- `"union"`: Include all locations, interpolating missing values
+- `"reference"`: Align all channels to a reference channel's grid
+
+### Channel Combination
+
+`step_measure_channel_combine()` merges multiple channels:
+
+```{r channel-combine, eval = FALSE}
+# Stack channels into a single 2D measure (location x channel)
+rec <- recipe(outcome ~ ., data = multi_detector_data) |>
+ step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
+ step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
+ step_measure_channel_align(uv, ri) |>
+ step_measure_channel_combine(uv, ri, strategy = "stack") |>
+ prep()
+```
+
+Strategies include:
+- `"stack"`: Create a 2D measure with channel as a dimension
+- `"concat"`: Concatenate into a single 1D vector
+- `"mean"` or `"weighted_sum"`: Combine into a single channel
+
+### Channel Ratios
+
+`step_measure_channel_ratio()` computes ratios between channels:
+
+```{r channel-ratio, eval = FALSE}
+# Compute UV/RI ratio for each sample
+rec <- recipe(outcome ~ ., data = sec_data) |>
+ step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
+ step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
+ step_measure_channel_align(uv, ri) |>
+ step_measure_channel_ratio(numerator = uv, denominator = ri) |>
+ prep()
+```
+
+## Multi-Way Analysis
+
+For extracting interpretable components from 2D or 3D measurement data, the package provides multi-way decomposition methods.
+
+### PARAFAC Decomposition
+
+`step_measure_parafac()` performs Parallel Factor Analysis, extracting trilinear components:
+```{r parafac, eval = FALSE}
+# Extract 3 PARAFAC components from EEM fluorescence data
+rec <- recipe(concentration ~ ., data = eem_data) |>
+ step_measure_input_long(
+   fluorescence,
+   location = vars(excitation, emission)
+ ) |>
+ step_measure_parafac(n_components = 3) |>
+ prep()
+
+# Result contains parafac_1, parafac_2, parafac_3 score columns
+baked <- bake(rec, new_data = NULL)
+```
+
+PARAFAC is particularly useful for:
+- EEM fluorescence (excitation x emission matrices)
+- Resolving overlapping chromatographic peaks
+- Identifying underlying chemical species in mixtures
+
+### Tucker Decomposition
+
+`step_measure_tucker()` provides more flexibility with independent ranks per mode:
+
+```{r tucker, eval = FALSE}
+# Tucker decomposition with different ranks for each dimension
+rec <- recipe(concentration ~ ., data = lc_dad_data) |>
+ step_measure_input_long(
+   absorbance,
+   location = vars(time, wavelength)
+ ) |>
+ step_measure_tucker(ranks = c(5, 3)) |>  # 5 time, 3 wavelength components
+ prep()
+```
+
+### MCR-ALS (Experimental)
+
+`step_measure_mcr_als()` implements Multivariate Curve Resolution with Alternating Least Squares:
+
+```{r mcr-als, eval = FALSE}
+# MCR-ALS with non-negativity constraints
+rec <- recipe(concentration ~ ., data = chrom_data) |>
+ step_measure_input_long(
+   absorbance,
+   location = vars(time, wavelength)
+ ) |>
+ step_measure_mcr_als(
+   n_components = 3,
+   non_negativity = TRUE
+ ) |>
+ prep()
+```
+> **Note:** MCR-ALS is marked as experimental. The implementation uses a simple ALS algorithm suitable for exploratory analysis.
+
 ## Summary
 
 Key functions for multi-dimensional measurement data:
@@ -260,3 +375,9 @@ Key functions for multi-dimensional measurement data:
 | `measure_fold()` | Reconstruct nD from unfolded 1D |
 | `measure_slice()` | Extract slices at specific coordinates |
 | `measure_project()` | Aggregate across dimensions |
+| `step_measure_channel_align()` | Align channels to common grid |
+| `step_measure_channel_combine()` | Combine multiple channels |
+| `step_measure_channel_ratio()` | Compute ratios between channels |
+| `step_measure_parafac()` | PARAFAC decomposition |
+| `step_measure_tucker()` | Tucker decomposition |
+| `step_measure_mcr_als()` | MCR-ALS decomposition (experimental) |
