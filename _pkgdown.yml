@@ -69,6 +69,12 @@ reference:
   - step_measure_snv
   - step_measure_msc
   - step_measure_map
+- title: Multi-Channel Operations
+  desc: Align, combine, and compute ratios between measurement channels
+  contents:
+  - step_measure_channel_align
+  - step_measure_channel_combine
+  - step_measure_channel_ratio
 - title: Spectral Math
   desc: Mathematical transformations for spectral data
   contents:
