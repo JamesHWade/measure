@@ -292,6 +292,12 @@ reference:
   - measure_validate_metadata
   - measure_standardize_sample_type
   - measure_sample_types
+- title: Multi-Way Analysis
+  desc: PARAFAC, Tucker, and MCR-ALS decomposition for multi-dimensional data
+  contents:
+  - step_measure_parafac
+  - step_measure_tucker
+  - step_measure_mcr_als
 - title: Multi-Dimensional Data
   desc: Support for 2D and higher-dimensional measurement data (LC-DAD, EEM, 2D NMR)
   contents:
