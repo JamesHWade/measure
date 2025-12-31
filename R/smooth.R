@@ -57,14 +57,15 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_smooth_ma <- function(
-    recipe,
-    measures = NULL,
-    window = 5L,
-    edge_method = c("reflect", "constant", "NA"),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_smooth_ma")) {
+  recipe,
+  measures = NULL,
+  window = 5L,
+  edge_method = c("reflect", "constant", "NA"),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_smooth_ma")
+) {
   edge_method <- match.arg(edge_method)
 
   recipes::add_step(
@@ -82,7 +83,14 @@ step_measure_smooth_ma <- function(
 }
 
 step_measure_smooth_ma_new <- function(
-    measures, window, edge_method, role, trained, skip, id) {
+  measures,
+  window,
+  edge_method,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_smooth_ma",
     measures = measures,
@@ -142,8 +150,12 @@ bake.step_measure_smooth_ma <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_smooth_ma <- function(x, width = max(20, options()$width - 30), ...) {
- title <- paste0("Moving average smoothing (window = ", x$window, ") on ")
+print.step_measure_smooth_ma <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  title <- paste0("Moving average smoothing (window = ", x$window, ") on ")
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
   } else {
@@ -169,14 +181,20 @@ tidy.step_measure_smooth_ma <- function(x, ...) {
   n <- length(values)
 
   if (n < window) {
-    cli::cli_warn("Spectrum length ({n}) is less than window ({window}). Returning unchanged.")
+    cli::cli_warn(
+      "Spectrum length ({n}) is less than window ({window}). Returning unchanged."
+    )
     return(x)
   }
 
   # Pad values based on edge method
   half <- (window - 1) / 2
   if (edge_method == "reflect") {
-    padded <- c(rev(values[2:(half + 1)]), values, rev(values[(n - half):(n - 1)]))
+    padded <- c(
+      rev(values[2:(half + 1)]),
+      values,
+      rev(values[(n - half):(n - 1)])
+    )
   } else if (edge_method == "constant") {
     padded <- c(rep(values[1], half), values, rep(values[n], half))
   } else {
@@ -230,14 +248,15 @@ tidy.step_measure_smooth_ma <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_smooth_median <- function(
-    recipe,
-    measures = NULL,
-    window = 5L,
-    edge_method = c("reflect", "constant", "NA"),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_smooth_median")) {
+  recipe,
+  measures = NULL,
+  window = 5L,
+  edge_method = c("reflect", "constant", "NA"),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_smooth_median")
+) {
   edge_method <- match.arg(edge_method)
 
   recipes::add_step(
@@ -255,7 +274,14 @@ step_measure_smooth_median <- function(
 }
 
 step_measure_smooth_median_new <- function(
-    measures, window, edge_method, role, trained, skip, id) {
+  measures,
+  window,
+  edge_method,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_smooth_median",
     measures = measures,
@@ -313,7 +339,11 @@ bake.step_measure_smooth_median <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_smooth_median <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_smooth_median <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Median filter smoothing (window = ", x$window, ") on ")
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -340,7 +370,9 @@ tidy.step_measure_smooth_median <- function(x, ...) {
   n <- length(values)
 
   if (n < window) {
-    cli::cli_warn("Spectrum length ({n}) is less than window ({window}). Returning unchanged.")
+    cli::cli_warn(
+      "Spectrum length ({n}) is less than window ({window}). Returning unchanged."
+    )
     return(x)
   }
 
@@ -348,7 +380,11 @@ tidy.step_measure_smooth_median <- function(x, ...) {
 
   # Pad values
   if (edge_method == "reflect") {
-    padded <- c(rev(values[2:(half + 1)]), values, rev(values[(n - half):(n - 1)]))
+    padded <- c(
+      rev(values[2:(half + 1)]),
+      values,
+      rev(values[(n - half):(n - 1)])
+    )
   } else if (edge_method == "constant") {
     padded <- c(rep(values[1], half), values, rep(values[n], half))
   } else {
@@ -413,15 +449,16 @@ tidy.step_measure_smooth_median <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_smooth_gaussian <- function(
-    recipe,
-    measures = NULL,
-    sigma = 1,
-    window = NULL,
-    edge_method = c("reflect", "constant", "NA"),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_smooth_gaussian")) {
+  recipe,
+  measures = NULL,
+  sigma = 1,
+  window = NULL,
+  edge_method = c("reflect", "constant", "NA"),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_smooth_gaussian")
+) {
   edge_method <- match.arg(edge_method)
 
   recipes::add_step(
@@ -440,7 +477,15 @@ step_measure_smooth_gaussian <- function(
 }
 
 step_measure_smooth_gaussian_new <- function(
-    measures, sigma, window, edge_method, role, trained, skip, id) {
+  measures,
+  sigma,
+  window,
+  edge_method,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_smooth_gaussian",
     measures = measures,
@@ -508,7 +553,11 @@ bake.step_measure_smooth_gaussian <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_smooth_gaussian <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_smooth_gaussian <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Gaussian smoothing (sigma = ", x$sigma, ") on ")
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -536,7 +585,9 @@ tidy.step_measure_smooth_gaussian <- function(x, ...) {
   n <- length(values)
 
   if (n < window) {
-    cli::cli_warn("Spectrum length ({n}) is less than window ({window}). Returning unchanged.")
+    cli::cli_warn(
+      "Spectrum length ({n}) is less than window ({window}). Returning unchanged."
+    )
     return(x)
   }
 
@@ -545,11 +596,15 @@ tidy.step_measure_smooth_gaussian <- function(x, ...) {
   # Build Gaussian kernel
   k <- seq(-half, half)
   kernel <- exp(-k^2 / (2 * sigma^2))
-  kernel <- kernel / sum(kernel)  # Normalize
+  kernel <- kernel / sum(kernel) # Normalize
 
   # Pad values
   if (edge_method == "reflect") {
-    padded <- c(rev(values[2:(half + 1)]), values, rev(values[(n - half):(n - 1)]))
+    padded <- c(
+      rev(values[2:(half + 1)]),
+      values,
+      rev(values[(n - half):(n - 1)])
+    )
   } else if (edge_method == "constant") {
     padded <- c(rep(values[1], half), values, rep(values[n], half))
   } else {
@@ -613,14 +668,15 @@ tidy.step_measure_smooth_gaussian <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_filter_fourier <- function(
-    recipe,
-    measures = NULL,
-    cutoff = 0.1,
-    type = c("lowpass", "highpass"),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_filter_fourier")) {
+  recipe,
+  measures = NULL,
+  cutoff = 0.1,
+  type = c("lowpass", "highpass"),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_filter_fourier")
+) {
   type <- match.arg(type)
 
   recipes::add_step(
@@ -638,7 +694,14 @@ step_measure_filter_fourier <- function(
 }
 
 step_measure_filter_fourier_new <- function(
-    measures, cutoff, type, role, trained, skip, id) {
+  measures,
+  cutoff,
+  type,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_filter_fourier",
     measures = measures,
@@ -655,8 +718,12 @@ step_measure_filter_fourier_new <- function(
 prep.step_measure_filter_fourier <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
-  if (!is.numeric(x$cutoff) || length(x$cutoff) != 1 ||
-      x$cutoff <= 0 || x$cutoff >= 0.5) {
+  if (
+    !is.numeric(x$cutoff) ||
+      length(x$cutoff) != 1 ||
+      x$cutoff <= 0 ||
+      x$cutoff >= 0.5
+  ) {
     cli::cli_abort("{.arg cutoff} must be a number between 0 and 0.5.")
   }
 
@@ -692,7 +759,11 @@ bake.step_measure_filter_fourier <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_filter_fourier <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_filter_fourier <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Fourier ", x$type, " filter (cutoff = ", x$cutoff, ") on ")
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -720,7 +791,9 @@ tidy.step_measure_filter_fourier <- function(x, ...) {
   n <- length(values)
 
   if (n < 4) {
-    cli::cli_warn("Spectrum too short for Fourier filtering. Returning unchanged.")
+    cli::cli_warn(
+      "Spectrum too short for Fourier filtering. Returning unchanged."
+    )
     return(x)
   }
 
@@ -730,7 +803,12 @@ tidy.step_measure_filter_fourier <- function(x, ...) {
     if (sum(non_na) < 2) {
       return(x)
     }
-    values <- stats::approx(which(non_na), values[non_na], seq_len(n), rule = 2)$y
+    values <- stats::approx(
+      which(non_na),
+      values[non_na],
+      seq_len(n),
+      rule = 2
+    )$y
   }
 
   # FFT

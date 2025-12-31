@@ -140,7 +140,9 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
     )
   }
   if (
-    !is.numeric(x$window_side) || length(x$window_side) != 1 || x$window_side < 1
+    !is.numeric(x$window_side) ||
+      length(x$window_side) != 1 ||
+      x$window_side < 1
   ) {
     cli::cli_abort(
       "The {.arg window_side} argument to \\

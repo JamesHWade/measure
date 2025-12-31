@@ -13,7 +13,7 @@ test_that("criterion creates valid criterion object", {
   expect_equal(crit$name, "cv_qc")
   expect_equal(crit$operator, "<")
   expect_equal(crit$threshold, 15)
-  expect_equal(crit$priority, "major")  # default
+  expect_equal(crit$priority, "major") # default
 })
 
 test_that("criterion handles all operators", {
@@ -209,7 +209,7 @@ test_that("measure_assess handles missing values", {
   criteria <- measure_criteria(cv = 15, rsd = 20)
 
   # Missing criterion value
-  results <- list(cv = 10)  # rsd is missing
+  results <- list(cv = 10) # rsd is missing
   assessment <- measure_assess(results, criteria)
 
   expect_true(assessment$pass[assessment$criterion == "cv"])
@@ -268,7 +268,7 @@ test_that("all_pass returns TRUE when all pass", {
 
 test_that("all_pass returns FALSE when any fail", {
   criteria <- measure_criteria(cv = 15, rsd = 20)
-  results <- list(cv = 20, rsd = 15)  # cv fails
+  results <- list(cv = 20, rsd = 15) # cv fails
   assessment <- measure_assess(results, criteria)
 
   expect_false(all_pass(assessment))
@@ -291,8 +291,12 @@ test_that("all_pass handles NA values", {
 # ==============================================================================
 
 test_that("get_failures returns only failed criteria", {
-  criteria <- measure_criteria(cv = 15, rsd = 20, bias = list("between", c(-10, 10)))
-  results <- list(cv = 20, rsd = 15, bias = 15)  # cv and bias fail
+  criteria <- measure_criteria(
+    cv = 15,
+    rsd = 20,
+    bias = list("between", c(-10, 10))
+  )
+  results <- list(cv = 20, rsd = 15, bias = 15) # cv and bias fail
 
   assessment <- measure_assess(results, criteria)
   failures <- get_failures(assessment)

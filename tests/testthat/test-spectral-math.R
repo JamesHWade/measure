@@ -524,7 +524,7 @@ test_that("step_measure_derivative_gap with segment > 1 uses averaging", {
   # Verify averaging calculation
   gap <- 3L
   segment <- 2L
-  effective_gap <- gap + segment - 1  # 4
+  effective_gap <- gap + segment - 1 # 4
   idx <- (effective_gap + 1):(n - effective_gap)
 
   # Calculate expected values with segment averaging

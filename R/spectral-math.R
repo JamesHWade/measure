@@ -57,12 +57,13 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_absorbance <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_absorbance")) {
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_absorbance")
+) {
   recipes::add_step(
     recipe,
     step_measure_absorbance_new(
@@ -117,9 +118,10 @@ bake.step_measure_absorbance <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_absorbance <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Transmittance to absorbance"
 
   if (x$trained) {
@@ -190,12 +192,13 @@ required_pkgs.step_measure_absorbance <- function(x, ...) {
 #'   step_measure_transmittance() |>
 #'   prep()
 step_measure_transmittance <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_transmittance")) {
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_transmittance")
+) {
   recipes::add_step(
     recipe,
     step_measure_transmittance_new(
@@ -209,7 +212,6 @@ step_measure_transmittance <- function(
 }
 
 step_measure_transmittance_new <- function(measures, role, trained, skip, id) {
-
   recipes::step(
     subclass = "measure_transmittance",
     measures = measures,
@@ -251,9 +253,10 @@ bake.step_measure_transmittance <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_transmittance <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Absorbance to transmittance"
 
   if (x$trained) {
@@ -341,14 +344,15 @@ required_pkgs.step_measure_transmittance <- function(x, ...) {
 #'   step_measure_log(base = 10) |>
 #'   prep()
 step_measure_log <- function(
-    recipe,
-    base = exp(1),
-    offset = 0,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_log")) {
+  recipe,
+  base = exp(1),
+  offset = 0,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_log")
+) {
   recipes::add_step(
     recipe,
     step_measure_log_new(
@@ -364,13 +368,14 @@ step_measure_log <- function(
 }
 
 step_measure_log_new <- function(
-    base,
-    offset,
-    measures,
-    role,
-    trained,
-    skip,
-    id) {
+  base,
+  offset,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_log",
     base = base,
@@ -421,10 +426,15 @@ bake.step_measure_log <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_log <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
-  base_str <- if (x$base == exp(1)) "natural" else paste0("base ", round(x$base, 2))
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  base_str <- if (x$base == exp(1)) {
+    "natural"
+  } else {
+    paste0("base ", round(x$base, 2))
+  }
   offset_str <- if (x$offset != 0) paste0(", offset=", x$offset) else ""
   title <- paste0("Log transformation (", base_str, offset_str, ")")
 
@@ -442,7 +452,7 @@ print.step_measure_log <- function(
 #' @export
 #' @keywords internal
 tidy.step_measure_log <- function(x, ...) {
- if (is_trained(x)) {
+  if (is_trained(x)) {
     terms <- x$measures
   } else {
     terms <- "<all measure columns>"
@@ -505,12 +515,13 @@ required_pkgs.step_measure_log <- function(x, ...) {
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_kubelka_munk()
 step_measure_kubelka_munk <- function(
-    recipe,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_kubelka_munk")) {
+  recipe,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_kubelka_munk")
+) {
   recipes::add_step(
     recipe,
     step_measure_kubelka_munk_new(
@@ -565,9 +576,10 @@ bake.step_measure_kubelka_munk <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_kubelka_munk <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Kubelka-Munk transformation"
 
   if (x$trained) {
@@ -652,13 +664,14 @@ required_pkgs.step_measure_kubelka_munk <- function(x, ...) {
 #'   step_measure_derivative(order = 2) |>
 #'   prep()
 step_measure_derivative <- function(
-    recipe,
-    order = 1L,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_derivative")) {
+  recipe,
+  order = 1L,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_derivative")
+) {
   order <- as.integer(order)
   if (order < 1 || order > 2) {
     cli::cli_abort("{.arg order} must be 1 or 2, not {order}.")
@@ -678,12 +691,13 @@ step_measure_derivative <- function(
 }
 
 step_measure_derivative_new <- function(
-    order,
-    measures,
-    role,
-    trained,
-    skip,
-    id) {
+  order,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_derivative",
     order = order,
@@ -731,9 +745,10 @@ bake.step_measure_derivative <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_derivative <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   order_str <- if (x$order == 1) "1st" else "2nd"
   title <- paste0(order_str, " derivative (finite difference)")
 
@@ -825,14 +840,15 @@ required_pkgs.step_measure_derivative <- function(x, ...) {
 #'   step_measure_derivative_gap(gap = 3, segment = 2) |>
 #'   prep()
 step_measure_derivative_gap <- function(
-    recipe,
-    gap = 2L,
-    segment = 1L,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_derivative_gap")) {
+  recipe,
+  gap = 2L,
+  segment = 1L,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_derivative_gap")
+) {
   gap <- as.integer(gap)
   segment <- as.integer(segment)
 
@@ -858,13 +874,14 @@ step_measure_derivative_gap <- function(
 }
 
 step_measure_derivative_gap_new <- function(
-    gap,
-    segment,
-    measures,
-    role,
-    trained,
-    skip,
-    id) {
+  gap,
+  segment,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_derivative_gap",
     gap = gap,
@@ -915,9 +932,10 @@ bake.step_measure_derivative_gap <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_derivative_gap <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   seg_str <- if (x$segment > 1) paste0(", segment=", x$segment) else ""
   title <- paste0("Gap derivative (gap=", x$gap, seg_str, ")")
 
@@ -1080,14 +1098,22 @@ required_pkgs.step_measure_derivative_gap <- function(x, ...) {
     values_minus <- x$value[idx - gap]
   } else {
     # Norris-Williams: average segment points on each side
-    values_plus <- vapply(idx, function(i) {
-      plus_range <- i + gap + seq(0, segment - 1)
-      mean(x$value[plus_range], na.rm = TRUE)
-    }, numeric(1))
-    values_minus <- vapply(idx, function(i) {
-      minus_range <- i - gap - seq(0, segment - 1)
-      mean(x$value[minus_range], na.rm = TRUE)
-    }, numeric(1))
+    values_plus <- vapply(
+      idx,
+      function(i) {
+        plus_range <- i + gap + seq(0, segment - 1)
+        mean(x$value[plus_range], na.rm = TRUE)
+      },
+      numeric(1)
+    )
+    values_minus <- vapply(
+      idx,
+      function(i) {
+        minus_range <- i - gap - seq(0, segment - 1)
+        mean(x$value[minus_range], na.rm = TRUE)
+      },
+      numeric(1)
+    )
   }
 
   dx <- x$location[idx + gap] - x$location[idx - gap]

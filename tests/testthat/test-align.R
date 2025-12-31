@@ -241,7 +241,7 @@ test_that("step_measure_align_cow corrects shifts", {
   # Sample 2: slightly warped (stretched in middle)
   x_warped <- c(
     seq(1, 40, length.out = 35),
-    seq(40, 60, length.out = 30),  # stretched
+    seq(40, 60, length.out = 30), # stretched
     seq(60, 100, length.out = 35)
   )
   warped_signal <- stats::approx(1:n_points, base_signal, xout = x_warped)$y
@@ -256,7 +256,11 @@ test_that("step_measure_align_cow corrects shifts", {
   rec <- recipe(outcome ~ ., data = synthetic_data) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(value, location = vars(location)) |>
-    step_measure_align_cow(segment_length = 20, slack = 2, reference = "first") |>
+    step_measure_align_cow(
+      segment_length = 20,
+      slack = 2,
+      reference = "first"
+    ) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -268,7 +272,7 @@ test_that("step_measure_align_cow corrects shifts", {
   aligned_corr <- cor(aligned_s1, aligned_s2)
 
   # Alignment should improve or maintain correlation
-  expect_gte(aligned_corr, orig_corr - 0.1)  # Allow small tolerance
+  expect_gte(aligned_corr, orig_corr - 0.1) # Allow small tolerance
 })
 
 test_that("step_measure_align_cow reference options work", {

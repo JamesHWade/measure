@@ -75,19 +75,19 @@
 #'
 #' corrected <- bake(rec, new_data = NULL)
 step_measure_batch_reference <- function(
-    recipe,
-    ...,
-    batch_col = "batch_id",
-    sample_type_col = "sample_type",
-    reference_type = "reference",
-    method = c("median_ratio", "mean_ratio", "median_center", "mean_center"),
-    target_batch = NULL,
-    min_ref = 2,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_batch_reference")) {
-
+  recipe,
+  ...,
+  batch_col = "batch_id",
+  sample_type_col = "sample_type",
+  reference_type = "reference",
+  method = c("median_ratio", "mean_ratio", "median_center", "mean_center"),
+  target_batch = NULL,
+  min_ref = 2,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_batch_reference")
+) {
   method <- match.arg(method)
 
   recipes::add_step(
@@ -110,19 +110,19 @@ step_measure_batch_reference <- function(
 }
 
 step_measure_batch_reference_new <- function(
-    terms,
-    batch_col,
-    sample_type_col,
-    reference_type,
-    method,
-    target_batch,
-    min_ref,
-    correction_factors,
-    role,
-    trained,
-    skip,
-    id) {
-
+  terms,
+  batch_col,
+  sample_type_col,
+  reference_type,
+  method,
+  target_batch,
+  min_ref,
+  correction_factors,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_batch_reference",
     terms = terms,
@@ -142,7 +142,6 @@ step_measure_batch_reference_new <- function(
 
 #' @export
 prep.step_measure_batch_reference <- function(x, training, info = NULL, ...) {
-
   # Validate required columns
   if (!x$batch_col %in% names(training)) {
     cli::cli_abort("Column {.field {x$batch_col}} not found in data.")
@@ -225,10 +224,12 @@ prep.step_measure_batch_reference <- function(x, training, info = NULL, ...) {
         # Guard against division by zero
         if (is.na(ref_summaries[[batch]]) || ref_summaries[[batch]] == 0) {
           cli::cli_warn(
-            c("Batch {.val {batch}} has zero or NA reference summary for {.field {col}}.",
-              "i" = "No correction will be applied to this batch.")
+            c(
+              "Batch {.val {batch}} has zero or NA reference summary for {.field {col}}.",
+              "i" = "No correction will be applied to this batch."
+            )
           )
-          batch_factors[[batch]] <- 1  # No correction
+          batch_factors[[batch]] <- 1 # No correction
         } else {
           batch_factors[[batch]] <- target_ref / ref_summaries[[batch]]
         }
@@ -262,7 +263,6 @@ prep.step_measure_batch_reference <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_batch_reference <- function(object, new_data, ...) {
-
   batches <- new_data[[object$batch_col]]
   unique_batches <- unique(batches)
 
@@ -272,8 +272,10 @@ bake.step_measure_batch_reference <- function(object, new_data, ...) {
     unknown_batches <- setdiff(unique_batches, known_batches)
     if (length(unknown_batches) > 0) {
       cli::cli_warn(
-        c("Unknown batch{?es} found in new data: {.val {unknown_batches}}.",
-          "i" = "No correction will be applied to samples in these batches.")
+        c(
+          "Unknown batch{?es} found in new data: {.val {unknown_batches}}.",
+          "i" = "No correction will be applied to samples in these batches."
+        )
       )
     }
   }
@@ -301,13 +303,25 @@ bake.step_measure_batch_reference <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_batch_reference <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_batch_reference <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Reference-based batch correction (", x$method, ")")
 
   if (x$trained) {
     n_features <- length(x$correction_factors)
     n_batches <- length(x$correction_factors[[1]]$batch_factors)
-    cat(title, " [", n_features, " features, ", n_batches, " batches]\n", sep = "")
+    cat(
+      title,
+      " [",
+      n_features,
+      " features, ",
+      n_batches,
+      " batches]\n",
+      sep = ""
+    )
   } else {
     cat(title, "\n", sep = "")
   }

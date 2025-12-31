@@ -60,11 +60,11 @@
 #' )
 #' measure_repeatability(data, "concentration", group_col = "level")
 measure_repeatability <- function(
-    data,
-    response_col,
-    group_col = NULL,
-    conf_level = 0.95) {
-
+  data,
+  response_col,
+  group_col = NULL,
+  conf_level = 0.95
+) {
   # Validate inputs
   if (!response_col %in% names(data)) {
     cli::cli_abort("Column {.field {response_col}} not found in data.")
@@ -73,7 +73,6 @@ measure_repeatability <- function(
   if (!is.null(group_col) && !group_col %in% names(data)) {
     cli::cli_abort("Column {.field {group_col}} not found in data.")
   }
-
 
   # Calculate precision stats
   if (is.null(group_col)) {
@@ -146,12 +145,12 @@ measure_repeatability <- function(
 #' )
 #' measure_intermediate_precision(data, "concentration", factors = "day")
 measure_intermediate_precision <- function(
-    data,
-    response_col,
-    factors,
-    group_col = NULL,
-    conf_level = 0.95) {
-
+  data,
+  response_col,
+  factors,
+  group_col = NULL,
+  conf_level = 0.95
+) {
   # Validate inputs
   if (!response_col %in% names(data)) {
     cli::cli_abort("Column {.field {response_col}} not found in data.")
@@ -170,7 +169,10 @@ measure_intermediate_precision <- function(
   # Calculate variance components
   if (is.null(group_col)) {
     result <- calculate_variance_components(
-      data, response_col, factors, conf_level
+      data,
+      response_col,
+      factors,
+      conf_level
     )
     result$group <- "overall"
   } else {
@@ -178,7 +180,10 @@ measure_intermediate_precision <- function(
     results <- lapply(groups, function(g) {
       sub_data <- data[data[[group_col]] == g, ]
       res <- calculate_variance_components(
-        sub_data, response_col, factors, conf_level
+        sub_data,
+        response_col,
+        factors,
+        conf_level
       )
       res$group <- g
       res
@@ -233,12 +238,12 @@ measure_intermediate_precision <- function(
 #' )
 #' measure_reproducibility(data, "concentration", lab_col = "lab_id")
 measure_reproducibility <- function(
-    data,
-    response_col,
-    lab_col,
-    group_col = NULL,
-    conf_level = 0.95) {
-
+  data,
+  response_col,
+  lab_col,
+  group_col = NULL,
+  conf_level = 0.95
+) {
   # Validate inputs
   if (!response_col %in% names(data)) {
     cli::cli_abort("Column {.field {response_col}} not found in data.")
@@ -250,7 +255,10 @@ measure_reproducibility <- function(
 
   # Use intermediate precision with lab as the factor
   result <- calculate_variance_components(
-    data, response_col, lab_col, conf_level
+    data,
+    response_col,
+    lab_col,
+    conf_level
   )
 
   # Add reproducibility-specific summary
@@ -334,14 +342,14 @@ measure_reproducibility <- function(
 #' )
 #' print(result)
 measure_gage_rr <- function(
-    data,
-    response_col,
-    part_col,
-    operator_col,
-    tolerance = NULL,
-    conf_level = 0.95,
-    k = 5.15) {
-
+  data,
+  response_col,
+  part_col,
+  operator_col,
+  tolerance = NULL,
+  conf_level = 0.95,
+  k = 5.15
+) {
   # Validate inputs
   for (col in c(response_col, part_col, operator_col)) {
     if (!col %in% names(data)) {
@@ -378,9 +386,22 @@ measure_gage_rr <- function(
   rownames(anova_table) <- trimws(rownames(anova_table))
 
   # Extract mean squares using grep to handle name variations
-  part_row <- grep(paste0("^", part_col, "$"), rownames(anova_table), value = TRUE)
-  operator_row <- grep(paste0("^", operator_col, "$"), rownames(anova_table), value = TRUE)
-  interaction_row <- grep(":", rownames(anova_table), value = TRUE, fixed = TRUE)
+  part_row <- grep(
+    paste0("^", part_col, "$"),
+    rownames(anova_table),
+    value = TRUE
+  )
+  operator_row <- grep(
+    paste0("^", operator_col, "$"),
+    rownames(anova_table),
+    value = TRUE
+  )
+  interaction_row <- grep(
+    ":",
+    rownames(anova_table),
+    value = TRUE,
+    fixed = TRUE
+  )
 
   ms_part <- anova_table[part_row, "Mean Sq"]
   ms_operator <- anova_table[operator_row, "Mean Sq"]
@@ -390,7 +411,10 @@ measure_gage_rr <- function(
   # Calculate variance components (EMS method)
   var_repeatability <- ms_error
   var_interaction <- max(0, (ms_interaction - ms_error) / n_replicates)
-  var_operator <- max(0, (ms_operator - ms_interaction) / (n_parts * n_replicates))
+  var_operator <- max(
+    0,
+    (ms_operator - ms_interaction) / (n_parts * n_replicates)
+  )
   var_part <- max(0, (ms_part - ms_interaction) / (n_operators * n_replicates))
 
   # Combine components
@@ -413,19 +437,34 @@ measure_gage_rr <- function(
   sv_total <- k * sd_total
 
   # Calculate percentages
-  pct_contribution <- 100 * c(
-    var_repeatability, var_reproducibility, var_rr, var_part
-  ) / var_total
+  pct_contribution <- 100 *
+    c(
+      var_repeatability,
+      var_reproducibility,
+      var_rr,
+      var_part
+    ) /
+    var_total
 
-  pct_study_var <- 100 * c(
-    sd_repeatability, sd_reproducibility, sd_rr, sd_part
-  ) / sd_total
+  pct_study_var <- 100 *
+    c(
+      sd_repeatability,
+      sd_reproducibility,
+      sd_rr,
+      sd_part
+    ) /
+    sd_total
 
   # Calculate %Tolerance if provided
   if (!is.null(tolerance)) {
-    pct_tolerance <- 100 * c(
-      sv_repeatability, sv_reproducibility, sv_rr, sv_part
-    ) / tolerance
+    pct_tolerance <- 100 *
+      c(
+        sv_repeatability,
+        sv_reproducibility,
+        sv_rr,
+        sv_part
+      ) /
+      tolerance
   } else {
     pct_tolerance <- rep(NA_real_, 4)
   }
@@ -497,7 +536,12 @@ calculate_precision_stats <- function(x, conf_level = 0.95, group = NULL) {
 
 #' Calculate variance components from ANOVA
 #' @noRd
-calculate_variance_components <- function(data, response_col, factors, conf_level) {
+calculate_variance_components <- function(
+  data,
+  response_col,
+  factors,
+  conf_level
+) {
   # Build formula
   formula_str <- paste(response_col, "~", paste(factors, collapse = " + "))
   formula <- stats::as.formula(formula_str)
@@ -572,21 +616,40 @@ print.measure_precision <- function(x, ...) {
       cat("  Mean =", format(x$mean[i], digits = 4), "\n")
       cat("  SD =", format(x$sd[i], digits = 4), "\n")
       cat("  CV =", format(x$cv[i], digits = 2), "%\n")
-      cat("  95% CI: [", format(x$ci_lower[i], digits = 4), ", ",
-          format(x$ci_upper[i], digits = 4), "]\n", sep = "")
+      cat(
+        "  95% CI: [",
+        format(x$ci_lower[i], digits = 4),
+        ", ",
+        format(x$ci_upper[i], digits = 4),
+        "]\n",
+        sep = ""
+      )
     }
   } else {
     # Variance components display
     cat("\nVariance Components:\n")
     for (i in seq_len(nrow(x))) {
-      cat("  ", x$component[i], ": ",
-          format(x$variance[i], digits = 4),
-          " (", format(x$percent_variance[i], digits = 1), "%)\n", sep = "")
+      cat(
+        "  ",
+        x$component[i],
+        ": ",
+        format(x$variance[i], digits = 4),
+        " (",
+        format(x$percent_variance[i], digits = 1),
+        "%)\n",
+        sep = ""
+      )
     }
     cat("\nCV by component:\n")
     for (i in seq_len(nrow(x))) {
-      cat("  ", x$component[i], ": ",
-          format(x$cv[i], digits = 2), "%\n", sep = "")
+      cat(
+        "  ",
+        x$component[i],
+        ": ",
+        format(x$cv[i], digits = 2),
+        "%\n",
+        sep = ""
+      )
     }
   }
 
@@ -605,22 +668,41 @@ print.measure_gage_rr <- function(x, ...) {
 
   cat("Variance Components:\n")
   for (i in seq_len(nrow(x))) {
-    cat("  ", x$source[i], ": ",
-        format(x$variance[i], digits = 4),
-        " (", format(x$pct_contribution[i], digits = 1), "% contribution)\n", sep = "")
+    cat(
+      "  ",
+      x$source[i],
+      ": ",
+      format(x$variance[i], digits = 4),
+      " (",
+      format(x$pct_contribution[i], digits = 1),
+      "% contribution)\n",
+      sep = ""
+    )
   }
 
   cat("\n% Study Variation:\n")
   for (i in seq_len(nrow(x))) {
-    cat("  ", x$source[i], ": ",
-        format(x$pct_study_var[i], digits = 1), "%\n", sep = "")
+    cat(
+      "  ",
+      x$source[i],
+      ": ",
+      format(x$pct_study_var[i], digits = 1),
+      "%\n",
+      sep = ""
+    )
   }
 
   if (!is.null(attr(x, "tolerance"))) {
     cat("\n% Tolerance:\n")
     for (i in seq_len(nrow(x))) {
-      cat("  ", x$source[i], ": ",
-          format(x$pct_tolerance[i], digits = 1), "%\n", sep = "")
+      cat(
+        "  ",
+        x$source[i],
+        ": ",
+        format(x$pct_tolerance[i], digits = 1),
+        "%\n",
+        sep = ""
+      )
     }
   }
 
@@ -634,8 +716,10 @@ print.measure_gage_rr <- function(x, ...) {
   } else if (pct_rr < 30) {
     cat("  Measurement system MAY BE ACCEPTABLE (%R&R 10-30%)\n")
   } else {
-    cat("
-  Measurement system NEEDS IMPROVEMENT (%R&R > 30%)\n")
+    cat(
+      "
+  Measurement system NEEDS IMPROVEMENT (%R&R > 30%)\n"
+    )
   }
 
   invisible(x)

@@ -80,7 +80,9 @@ test_that("step_measure_emsc works with different degrees", {
   expect_false(anyNA(result_3$.measures[[1]]$value))
 
   # Different degrees should produce different results
-  expect_false(all(result_0$.measures[[1]]$value == result_1$.measures[[1]]$value))
+  expect_false(all(
+    result_0$.measures[[1]]$value == result_1$.measures[[1]]$value
+  ))
 })
 
 test_that("step_measure_emsc works with median reference", {
@@ -98,9 +100,12 @@ test_that("step_measure_emsc works with custom reference", {
   data <- create_scatter_data()
   custom_ref <- sin(seq(0, 2 * pi, length.out = 100))
 
-  rec <- prep_scatter_recipe(function(r) {
-    step_measure_emsc(r, reference = custom_ref)
-  }, data = data)
+  rec <- prep_scatter_recipe(
+    function(r) {
+      step_measure_emsc(r, reference = custom_ref)
+    },
+    data = data
+  )
 
   result <- bake(rec, new_data = NULL)
 
@@ -142,7 +147,10 @@ test_that("step_measure_emsc tidy method works", {
 })
 
 test_that("step_measure_emsc is tunable", {
-  step <- step_measure_emsc(recipe(~., data = create_scatter_data()), degree = 2)
+  step <- step_measure_emsc(
+    recipe(~., data = create_scatter_data()),
+    degree = 2
+  )
   tunable_result <- tunable(step$steps[[1]])
   expect_s3_class(tunable_result, "tbl_df")
   expect_true("degree" %in% tunable_result$name)
@@ -197,7 +205,7 @@ test_that("step_measure_osc errors without outcomes", {
   data <- create_scatter_data()
 
   expect_error(
-    recipe(~ ., data = data) |>
+    recipe(~., data = data) |>
       update_role(id, new_role = "id") |>
       update_role(outcome, new_role = "other") |>
       step_measure_input_long(value, location = vars(location)) |>

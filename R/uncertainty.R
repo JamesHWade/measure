@@ -69,14 +69,14 @@
 #'
 #' @export
 uncertainty_component <- function(
-    name,
-    value,
-    type = c("A", "B"),
-    sensitivity = 1,
-    df = Inf,
-    distribution = c("normal", "rectangular", "triangular", "u-shaped"),
-    coverage_factor = 1) {
-
+  name,
+  value,
+  type = c("A", "B"),
+  sensitivity = 1,
+  df = Inf,
+  distribution = c("normal", "rectangular", "triangular", "u-shaped"),
+  coverage_factor = 1
+) {
   type <- match.arg(type)
   distribution <- match.arg(distribution)
 
@@ -182,7 +182,12 @@ print.uncertainty_component <- function(x, ...) {
 #' )
 #'
 #' @export
-measure_uncertainty_budget <- function(..., .list = NULL, k = 2, result_value = NULL) {
+measure_uncertainty_budget <- function(
+  ...,
+  .list = NULL,
+  k = 2,
+  result_value = NULL
+) {
   components <- list(...)
 
   # Add from .list
@@ -278,7 +283,16 @@ print.measure_uncertainty_budget <- function(x, ...) {
   n_type_b <- n - n_type_a
 
   cat("<measure_uncertainty_budget>\n")
-  cat("  Components: ", n, " (", n_type_a, " Type A, ", n_type_b, " Type B)\n", sep = "")
+  cat(
+    "  Components: ",
+    n,
+    " (",
+    n_type_a,
+    " Type A, ",
+    n_type_b,
+    " Type B)\n",
+    sep = ""
+  )
   cat("  Combined u: ", format(x$combined_u, digits = 4), "\n", sep = "")
   cat("  Effective df: ", format(x$effective_df, digits = 1), "\n", sep = "")
   cat("  Coverage k: ", x$coverage_factor, "\n", sep = "")
@@ -287,8 +301,18 @@ print.measure_uncertainty_budget <- function(x, ...) {
   if (!is.null(x$result_value)) {
     cat("\n  Result: ", format(x$result_value, digits = 4), "\n", sep = "")
     if (!is.null(x$relative_u)) {
-      cat("  Relative u: ", format(100 * x$relative_u, digits = 2), "%\n", sep = "")
-      cat("  Relative U: ", format(100 * x$relative_U, digits = 2), "%\n", sep = "")
+      cat(
+        "  Relative u: ",
+        format(100 * x$relative_u, digits = 2),
+        "%\n",
+        sep = ""
+      )
+      cat(
+        "  Relative U: ",
+        format(100 * x$relative_U, digits = 2),
+        "%\n",
+        sep = ""
+      )
     }
   }
 
@@ -317,7 +341,11 @@ print.measure_uncertainty_budget <- function(x, ...) {
 #'
 #' @importFrom generics tidy
 #' @export
-tidy.measure_uncertainty_budget <- function(x, type = c("components", "summary"), ...) {
+tidy.measure_uncertainty_budget <- function(
+  x,
+  type = c("components", "summary"),
+  ...
+) {
   type <- match.arg(type)
 
   if (type == "components") {
@@ -379,7 +407,10 @@ autoplot.measure_uncertainty_budget <- function(object, ...) {
   # Calculate cumulative percentage for Pareto line
   tidy_data$cumulative <- cumsum(tidy_data$percent_contribution)
 
-  ggplot2::ggplot(tidy_data, ggplot2::aes(x = .data$name, y = .data$percent_contribution)) +
+  ggplot2::ggplot(
+    tidy_data,
+    ggplot2::aes(x = .data$name, y = .data$percent_contribution)
+  ) +
     ggplot2::geom_col(ggplot2::aes(fill = .data$type), width = 0.7) +
     ggplot2::geom_line(
       ggplot2::aes(y = .data$cumulative, group = 1),
@@ -398,7 +429,7 @@ autoplot.measure_uncertainty_budget <- function(object, ...) {
     ) +
     ggplot2::scale_y_continuous(
       name = "Contribution to Variance (%)",
-      sec.axis = ggplot2::sec_axis(~ ., name = "Cumulative (%)")
+      sec.axis = ggplot2::sec_axis(~., name = "Cumulative (%)")
     ) +
     ggplot2::labs(
       title = "Uncertainty Budget - Pareto Chart",
@@ -441,7 +472,9 @@ uncertainty_type_a <- function(x, name = "Type A", sensitivity = 1) {
   n <- length(x)
 
   if (n < 2) {
-    cli::cli_abort("At least 2 measurements are required for Type A evaluation.")
+    cli::cli_abort(
+      "At least 2 measurements are required for Type A evaluation."
+    )
   }
 
   se <- stats::sd(x) / sqrt(n)
@@ -475,7 +508,13 @@ uncertainty_type_a <- function(x, name = "Type A", sensitivity = 1) {
 #' u_cal <- uncertainty_type_b_expanded(0.05, k = 2, name = "Calibrator")
 #'
 #' @export
-uncertainty_type_b_expanded <- function(expanded_U, k = 2, name = "Type B", df = Inf, sensitivity = 1) {
+uncertainty_type_b_expanded <- function(
+  expanded_U,
+  k = 2,
+  name = "Type B",
+  df = Inf,
+  sensitivity = 1
+) {
   uncertainty_component(
     name = name,
     value = expanded_U,
@@ -504,7 +543,11 @@ uncertainty_type_b_expanded <- function(expanded_U, k = 2, name = "Type B", df =
 #' u_temp <- uncertainty_type_b_rectangular(0.5, name = "Temperature")
 #'
 #' @export
-uncertainty_type_b_rectangular <- function(half_width, name = "Type B", sensitivity = 1) {
+uncertainty_type_b_rectangular <- function(
+  half_width,
+  name = "Type B",
+  sensitivity = 1
+) {
   u <- half_width / sqrt(3)
 
   uncertainty_component(

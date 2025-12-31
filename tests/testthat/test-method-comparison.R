@@ -11,7 +11,11 @@ test_that("measure_bland_altman calculates basic statistics", {
     method2 = rnorm(30, mean = 102, sd = 10)
   )
 
-  ba <- measure_bland_altman(data, method1_col = "method1", method2_col = "method2")
+  ba <- measure_bland_altman(
+    data,
+    method1_col = "method1",
+    method2_col = "method2"
+  )
 
   expect_s3_class(ba, "measure_bland_altman")
   expect_named(ba, c("data", "statistics", "regression", "call"))
@@ -30,7 +34,7 @@ test_that("measure_bland_altman tests for proportional bias", {
   # Create data with proportional bias
   set.seed(42)
   x <- seq(50, 150, length.out = 30)
-  y <- x + 0.1 * x + rnorm(30, sd = 3)  # Proportional bias
+  y <- x + 0.1 * x + rnorm(30, sd = 3) # Proportional bias
 
   data <- data.frame(method1 = x, method2 = y)
   ba <- measure_bland_altman(data, "method1", "method2", regression = "linear")
@@ -63,7 +67,11 @@ test_that("measure_bland_altman validates inputs", {
   )
 
   expect_error(
-    measure_bland_altman(data.frame(method1 = 1:2, method2 = 2:3), "method1", "method2"),
+    measure_bland_altman(
+      data.frame(method1 = 1:2, method2 = 2:3),
+      "method1",
+      "method2"
+    ),
     "At least 3"
   )
 })
@@ -119,15 +127,31 @@ test_that("measure_deming_regression accepts error ratio", {
   )
 
   # With error ratio
-  result1 <- measure_deming_regression(data, "reference", "new_method", error_ratio = 1)
-  result2 <- measure_deming_regression(data, "reference", "new_method", error_ratio = 2)
+  result1 <- measure_deming_regression(
+    data,
+    "reference",
+    "new_method",
+    error_ratio = 1
+  )
+  result2 <- measure_deming_regression(
+    data,
+    "reference",
+    "new_method",
+    error_ratio = 2
+  )
 
   # Results should differ with different error ratios
-  expect_false(identical(result1$coefficients$estimate, result2$coefficients$estimate))
+  expect_false(identical(
+    result1$coefficients$estimate,
+    result2$coefficients$estimate
+  ))
 })
 
 test_that("measure_deming_regression can use bootstrap CIs", {
-  skip_if(requireNamespace("mcr", quietly = TRUE), "mcr available, using mcr instead of bootstrap")
+  skip_if(
+    requireNamespace("mcr", quietly = TRUE),
+    "mcr available, using mcr instead of bootstrap"
+  )
 
   data <- data.frame(
     reference = c(5, 10, 15, 25, 50, 75, 100),
@@ -135,16 +159,18 @@ test_that("measure_deming_regression can use bootstrap CIs", {
   )
 
   result <- measure_deming_regression(
-    data, "reference", "new_method",
-    bootstrap = TRUE, bootstrap_n = 100
+    data,
+    "reference",
+    "new_method",
+    bootstrap = TRUE,
+    bootstrap_n = 100
   )
 
   expect_false(is.null(result$bootstrap))
   expect_false(is.na(result$coefficients$ci_lower[2]))
 })
 
-test_that("tidy.measure_deming_regression returns coefficients",
-{
+test_that("tidy.measure_deming_regression returns coefficients", {
   data <- data.frame(reference = 1:10, new_method = 1.1 * (1:10))
   result <- measure_deming_regression(data, "reference", "new_method")
 
@@ -184,7 +210,18 @@ test_that("measure_passing_bablok works with mcr", {
   set.seed(123)
   data <- data.frame(
     reference = c(5, 10, 15, 25, 50, 75, 100, 125, 150, 175),
-    new_method = c(5.2, 10.3, 15.1, 25.5, 50.1, 75.3, 100.2, 125.4, 150.1, 175.5)
+    new_method = c(
+      5.2,
+      10.3,
+      15.1,
+      25.5,
+      50.1,
+      75.3,
+      100.2,
+      125.4,
+      150.1,
+      175.5
+    )
   )
 
   result <- measure_passing_bablok(data, "reference", "new_method")
@@ -206,8 +243,11 @@ test_that("measure_proficiency_score calculates z-scores", {
   )
 
   result <- measure_proficiency_score(
-    data, "measured", "reference",
-    score_type = "z_score", sigma = 2
+    data,
+    "measured",
+    "reference",
+    score_type = "z_score",
+    sigma = 2
   )
 
   expect_s3_class(result, "measure_proficiency_score")
@@ -219,13 +259,16 @@ test_that("measure_proficiency_score calculates z-scores", {
 
 test_that("measure_proficiency_score flags appropriately", {
   data <- data.frame(
-    measured = c(100, 105, 110),  # Progressively worse
+    measured = c(100, 105, 110), # Progressively worse
     reference = rep(100, 3)
   )
 
   result <- measure_proficiency_score(
-    data, "measured", "reference",
-    score_type = "z_score", sigma = 2
+    data,
+    "measured",
+    "reference",
+    score_type = "z_score",
+    sigma = 2
   )
 
   # First should be satisfactory, third should be unsatisfactory
@@ -241,7 +284,9 @@ test_that("measure_proficiency_score calculates En scores", {
   )
 
   result <- measure_proficiency_score(
-    data, "measured", "reference",
+    data,
+    "measured",
+    "reference",
     uncertainty_col = "uncertainty",
     score_type = "en_score"
   )
@@ -255,7 +300,12 @@ test_that("measure_proficiency_score validates inputs", {
 
   # En score requires uncertainty
   expect_error(
-    measure_proficiency_score(data, "measured", "reference", score_type = "en_score"),
+    measure_proficiency_score(
+      data,
+      "measured",
+      "reference",
+      score_type = "en_score"
+    ),
     "uncertainty_col"
   )
 })
@@ -317,7 +367,7 @@ test_that("measure_proficiency_score errors when IQR is zero (identical differen
   # All differences are identical, so IQR = 0
   data <- data.frame(
     measured = c(100, 101, 102),
-    reference = c(100, 101, 102)  # Differences are all 0
+    reference = c(100, 101, 102) # Differences are all 0
   )
 
   expect_error(
@@ -344,7 +394,7 @@ test_that("measure_proficiency_score errors on zero sigma", {
       measured_col = "measured",
       reference_col = "reference",
       score_type = "z_score",
-      sigma = 0  # Zero sigma should error
+      sigma = 0 # Zero sigma should error
     ),
     "positive"
   )
@@ -354,7 +404,7 @@ test_that("measure_proficiency_score errors on zero combined uncertainty", {
   data <- data.frame(
     measured = c(100, 105, 110),
     reference = c(100, 100, 100),
-    u_measured = c(0, 0, 0),  # All zeros
+    u_measured = c(0, 0, 0), # All zeros
     u_reference = c(0, 0, 0)
   )
 

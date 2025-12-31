@@ -23,38 +23,66 @@ test_that("measure_calibration_fit creates valid calibration object", {
 
 test_that("measure_calibration_fit handles different model types", {
   # Linear
-  cal_linear <- measure_calibration_fit(cal_data, response ~ nominal_conc, model = "linear")
+  cal_linear <- measure_calibration_fit(
+    cal_data,
+    response ~ nominal_conc,
+    model = "linear"
+  )
   expect_equal(cal_linear$model_type, "linear")
 
   # Quadratic
-  cal_quad <- measure_calibration_fit(cal_data, response ~ nominal_conc, model = "quadratic")
+  cal_quad <- measure_calibration_fit(
+    cal_data,
+    response ~ nominal_conc,
+    model = "quadratic"
+  )
   expect_equal(cal_quad$model_type, "quadratic")
 })
 
 test_that("measure_calibration_fit handles weighting schemes", {
   # 1/x weighting
-  cal_1x <- measure_calibration_fit(cal_data, response ~ nominal_conc, weights = "1/x")
+  cal_1x <- measure_calibration_fit(
+    cal_data,
+    response ~ nominal_conc,
+    weights = "1/x"
+  )
   expect_equal(cal_1x$weights_type, "1/x")
 
   # 1/x^2 weighting
-  cal_1x2 <- measure_calibration_fit(cal_data, response ~ nominal_conc, weights = "1/x2")
+  cal_1x2 <- measure_calibration_fit(
+    cal_data,
+    response ~ nominal_conc,
+    weights = "1/x2"
+  )
   expect_equal(cal_1x2$weights_type, "1/x2")
 
   # 1/y weighting
-  cal_1y <- measure_calibration_fit(cal_data, response ~ nominal_conc, weights = "1/y")
+  cal_1y <- measure_calibration_fit(
+    cal_data,
+    response ~ nominal_conc,
+    weights = "1/y"
+  )
   expect_equal(cal_1y$weights_type, "1/y")
 })
 
 test_that("measure_calibration_fit handles custom weights", {
   custom_weights <- rep(1, nrow(cal_data))
-  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc, weights = custom_weights)
+  cal <- measure_calibration_fit(
+    cal_data,
+    response ~ nominal_conc,
+    weights = custom_weights
+  )
   expect_equal(cal$weights_type, "custom")
 })
 
 test_that("measure_calibration_fit validates custom weight length", {
-  bad_weights <- c(1, 2, 3)  # Wrong length
+  bad_weights <- c(1, 2, 3) # Wrong length
   expect_error(
-    measure_calibration_fit(cal_data, response ~ nominal_conc, weights = bad_weights),
+    measure_calibration_fit(
+      cal_data,
+      response ~ nominal_conc,
+      weights = bad_weights
+    ),
     "length"
   )
 })
@@ -63,7 +91,7 @@ test_that("measure_calibration_fit calculates diagnostics", {
   cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
 
   expect_true(!is.null(cal$diagnostics$r_squared))
-  expect_true(cal$diagnostics$r_squared > 0.99)  # Should be very linear
+  expect_true(cal$diagnostics$r_squared > 0.99) # Should be very linear
   expect_true(!is.null(cal$diagnostics$sigma))
 })
 
@@ -81,7 +109,14 @@ test_that("measure_calibration_fit handles through-origin", {
 
 test_that("measure_calibration_fit filters by sample_type", {
   data_with_type <- cal_data
-  data_with_type$sample_type <- c("standard", "standard", "standard", "qc", "standard", "standard")
+  data_with_type$sample_type <- c(
+    "standard",
+    "standard",
+    "standard",
+    "qc",
+    "standard",
+    "standard"
+  )
 
   cal <- measure_calibration_fit(
     data_with_type,
@@ -96,7 +131,7 @@ test_that("measure_calibration_fit filters by sample_type", {
 test_that("measure_calibration_fit detects outliers with studentized method", {
   # Add an outlier
   data_outlier <- cal_data
-  data_outlier$response[3] <- 100  # Way off
+  data_outlier$response[3] <- 100 # Way off
 
   cal <- measure_calibration_fit(
     data_outlier,
@@ -112,7 +147,7 @@ test_that("measure_calibration_fit detects outliers with studentized method", {
 test_that("measure_calibration_fit removes outliers when requested", {
   # Add an outlier
   data_outlier <- cal_data
-  data_outlier$response[3] <- 100  # Way off
+  data_outlier$response[3] <- 100 # Way off
 
   cal_flag <- measure_calibration_fit(
     data_outlier,
@@ -182,17 +217,32 @@ test_that("measure_calibration_predict handles intervals", {
   unknowns <- data.frame(response = c(45, 85, 120))
 
   # Confidence intervals
-  preds_ci <- measure_calibration_predict(cal, unknowns, interval = "confidence")
+  preds_ci <- measure_calibration_predict(
+    cal,
+    unknowns,
+    interval = "confidence"
+  )
   expect_true(".pred_lower" %in% names(preds_ci))
   expect_true(".pred_upper" %in% names(preds_ci))
 
   # Prediction intervals (should be wider)
-  preds_pi <- measure_calibration_predict(cal, unknowns, interval = "prediction")
-  expect_true(all(preds_pi$.pred_upper - preds_pi$.pred_lower >= preds_ci$.pred_upper - preds_ci$.pred_lower))
+  preds_pi <- measure_calibration_predict(
+    cal,
+    unknowns,
+    interval = "prediction"
+  )
+  expect_true(all(
+    preds_pi$.pred_upper - preds_pi$.pred_lower >=
+      preds_ci$.pred_upper - preds_ci$.pred_lower
+  ))
 })
 
 test_that("measure_calibration_predict works with quadratic model", {
-  cal_quad <- measure_calibration_fit(cal_data, response ~ nominal_conc, model = "quadratic")
+  cal_quad <- measure_calibration_fit(
+    cal_data,
+    response ~ nominal_conc,
+    model = "quadratic"
+  )
   unknowns <- data.frame(response = c(45, 85, 120))
 
   preds <- measure_calibration_predict(cal_quad, unknowns)
@@ -286,7 +336,7 @@ test_that("measure_calibration_verify works with passing samples", {
   # Create verification data that should pass
   qc_data <- data.frame(
     nominal_conc = c(25, 75, 150),
-    response = c(35.5, 108.0, 218.5)  # Within calibration range
+    response = c(35.5, 108.0, 218.5) # Within calibration range
   )
 
   result <- measure_calibration_verify(cal, qc_data)
@@ -306,7 +356,7 @@ test_that("measure_calibration_verify identifies failing samples", {
   # Create verification data with one failing sample (>15% deviation)
   qc_data <- data.frame(
     nominal_conc = c(25, 75, 150),
-    response = c(35.5, 150.0, 218.5)  # Middle one is way off
+    response = c(35.5, 150.0, 218.5) # Middle one is way off
   )
 
   result <- measure_calibration_verify(cal, qc_data, acceptance_pct = 15)
@@ -319,8 +369,8 @@ test_that("measure_calibration_verify uses LLOQ acceptance criteria", {
   cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
 
   qc_data <- data.frame(
-    nominal_conc = c(10, 75),  # 10 is at LLOQ
-    response = c(16.0, 108.0)  # First has ~20% deviation
+    nominal_conc = c(10, 75), # 10 is at LLOQ
+    response = c(16.0, 108.0) # First has ~20% deviation
   )
 
   # Without LLOQ specified, uses standard acceptance
@@ -328,14 +378,15 @@ test_that("measure_calibration_verify uses LLOQ acceptance criteria", {
 
   # With LLOQ, samples at that level use relaxed criteria
   result_lloq <- measure_calibration_verify(
-    cal, qc_data,
+    cal,
+    qc_data,
     acceptance_pct = 15,
     acceptance_pct_lloq = 25,
     lloq = 10
   )
 
   # The LLOQ sample might pass with relaxed criteria
- expect_s3_class(result_lloq, "measure_calibration_verify")
+  expect_s3_class(result_lloq, "measure_calibration_verify")
 })
 
 test_that("measure_calibration_verify validates inputs", {
@@ -376,7 +427,8 @@ test_that("measure_calibration_verify filters by sample_type", {
   )
 
   result <- measure_calibration_verify(
-    cal, qc_data,
+    cal,
+    qc_data,
     sample_type_col = "sample_type"
   )
 
@@ -395,7 +447,8 @@ test_that("measure_calibration_verify errors with no verification samples", {
 
   expect_error(
     measure_calibration_verify(
-      cal, qc_data,
+      cal,
+      qc_data,
       sample_type_col = "sample_type"
     ),
     "No verification samples found"

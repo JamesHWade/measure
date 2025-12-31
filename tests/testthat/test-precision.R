@@ -105,13 +105,17 @@ test_that("measure_intermediate_precision calculates variance components", {
       rep(rnorm(5, 0, 2), each = 6)
   )
 
-  result <- measure_intermediate_precision(data, "concentration", factors = "day")
+  result <- measure_intermediate_precision(
+    data,
+    "concentration",
+    factors = "day"
+  )
 
   expect_s3_class(result, "measure_precision")
   expect_true("component" %in% names(result))
   expect_true("variance" %in% names(result))
   expect_true("percent_variance" %in% names(result))
-  expect_true(sum(result$percent_variance) > 99.9)  # Should sum to ~100%
+  expect_true(sum(result$percent_variance) > 99.9) # Should sum to ~100%
 })
 
 test_that("measure_intermediate_precision validates inputs", {
@@ -140,7 +144,8 @@ test_that("measure_intermediate_precision handles multiple factors", {
     ifelse(data$analyst == "A", 1, -1)
 
   result <- measure_intermediate_precision(
-    data, "concentration",
+    data,
+    "concentration",
     factors = c("day", "analyst")
   )
 
@@ -155,7 +160,11 @@ test_that("measure_intermediate_precision print method works", {
     day = rep(1:3, each = 5),
     concentration = rnorm(15, 100, 2)
   )
-  result <- measure_intermediate_precision(data, "concentration", factors = "day")
+  result <- measure_intermediate_precision(
+    data,
+    "concentration",
+    factors = "day"
+  )
 
   expect_output(print(result), "measure_precision")
   expect_output(print(result), "intermediate")
@@ -204,8 +213,7 @@ test_that("measure_gage_rr calculates variance components", {
   )
   data$measurement <- 50 +
     (data$part - 5) * 2 +
-    ifelse(data$operator == "A", 0.5,
-           ifelse(data$operator == "B", -0.3, 0)) +
+    ifelse(data$operator == "A", 0.5, ifelse(data$operator == "B", -0.3, 0)) +
     rnorm(nrow(data), 0, 0.5)
 
   result <- measure_gage_rr(
@@ -217,7 +225,10 @@ test_that("measure_gage_rr calculates variance components", {
 
   expect_s3_class(result, "measure_gage_rr")
   expect_equal(nrow(result), 4)
-  expect_true(all(c("Repeatability", "Reproducibility", "Total R&R", "Part-to-Part") %in% result$source))
+  expect_true(all(
+    c("Repeatability", "Reproducibility", "Total R&R", "Part-to-Part") %in%
+      result$source
+  ))
 })
 
 test_that("measure_gage_rr calculates percentages correctly", {
@@ -331,8 +342,8 @@ test_that("measure_gage_rr ndc calculation is reasonable", {
     replicate = 1:3
   )
   data$measurement <- 50 +
-    (data$part - 5) * 10 +  # Large part variation
-    rnorm(nrow(data), 0, 0.5)  # Small measurement error
+    (data$part - 5) * 10 + # Large part variation
+    rnorm(nrow(data), 0, 0.5) # Small measurement error
 
   result <- measure_gage_rr(
     data,
@@ -397,6 +408,6 @@ test_that("precision workflow with criteria integration works", {
   result <- measure_repeatability(data, "concentration", group_col = "level")
 
   # All CVs should be reasonable
-  expect_true(all(result$cv < 10))  # Expect CV < 10%
+  expect_true(all(result$cv < 10)) # Expect CV < 10%
   expect_equal(nrow(result), 3)
 })

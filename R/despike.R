@@ -65,16 +65,17 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_despike <- function(
-    recipe,
-    measures = NULL,
-    window = 5L,
-    threshold = 5,
-    method = c("interpolate", "median", "mean"),
-    max_width = 3L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_despike")) {
+  recipe,
+  measures = NULL,
+  window = 5L,
+  threshold = 5,
+  method = c("interpolate", "median", "mean"),
+  max_width = 3L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_despike")
+) {
   method <- match.arg(method)
 
   recipes::add_step(
@@ -94,7 +95,16 @@ step_measure_despike <- function(
 }
 
 step_measure_despike_new <- function(
-    measures, window, threshold, method, max_width, role, trained, skip, id) {
+  measures,
+  window,
+  threshold,
+  method,
+  max_width,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_despike",
     measures = measures,
@@ -124,7 +134,9 @@ prep.step_measure_despike <- function(x, training, info = NULL, ...) {
   }
 
   # Validate threshold
-  if (!is.numeric(x$threshold) || length(x$threshold) != 1 || x$threshold <= 0) {
+  if (
+    !is.numeric(x$threshold) || length(x$threshold) != 1 || x$threshold <= 0
+  ) {
     cli::cli_abort("{.arg threshold} must be a positive number.")
   }
 
@@ -170,10 +182,17 @@ bake.step_measure_despike <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_despike <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_despike <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0(
-    "Spike removal (threshold = ", x$threshold,
-    ", window = ", x$window, ") on "
+    "Spike removal (threshold = ",
+    x$threshold,
+    ", window = ",
+    x$window,
+    ") on "
   )
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -202,7 +221,9 @@ tidy.step_measure_despike <- function(x, ...) {
   n <- length(values)
 
   if (n < window) {
-    cli::cli_warn("Spectrum length ({n}) is less than window ({window}). Returning unchanged.")
+    cli::cli_warn(
+      "Spectrum length ({n}) is less than window ({window}). Returning unchanged."
+    )
     return(x)
   }
 
@@ -238,7 +259,7 @@ tidy.step_measure_despike <- function(x, ...) {
 
   # Find consecutive spike regions
   if (!any(is_spike, na.rm = TRUE)) {
-    return(x)  # No spikes found
+    return(x) # No spikes found
   }
 
   # Identify spike regions using run-length encoding
@@ -273,11 +294,9 @@ tidy.step_measure_despike <- function(x, ...) {
           result_values[start:end] <- result_values[right_idx]
         }
         # If neither neighbor exists, leave unchanged
-
       } else if (method == "median") {
         # Replace with local median (from non-spike neighbors)
         result_values[start:end] <- local_median[start:end]
-
       } else if (method == "mean") {
         # Use mean of neighbors
         left_idx <- max(1, start - half)

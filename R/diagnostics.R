@@ -58,7 +58,9 @@ fortify.measure_tbl <- function(model, data = NULL, ...) {
     cli::cli_abort("{.arg model} must be a {.cls measure_tbl} object.")
   }
   if (is.null(model$location) || is.null(model$value)) {
-    cli::cli_abort("{.cls measure_tbl} object is missing required {.field location} or {.field value} columns.")
+    cli::cli_abort(
+      "{.cls measure_tbl} object is missing required {.field location} or {.field value} columns."
+    )
   }
   tibble::tibble(
     location = model$location,
@@ -139,7 +141,10 @@ autoplot.measure_tbl <- function(object, ...) {
 
   plot_data <- fortify.measure_tbl(object)
 
-  ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$location, y = .data$value)) +
+  ggplot2::ggplot(
+    plot_data,
+    ggplot2::aes(x = .data$location, y = .data$value)
+  ) +
     ggplot2::geom_line() +
     ggplot2::labs(
       x = "Location",
@@ -158,11 +163,13 @@ autoplot.measure_tbl <- function(object, ...) {
 #'   Default 50. Set to NULL for no limit.
 #' @param alpha Transparency for individual spectrum lines. Default 0.3.
 #' @export
-autoplot.measure_list <- function(object,
-                                  summary = FALSE,
-                                  max_spectra = 50,
-                                  alpha = 0.3,
-                                  ...) {
+autoplot.measure_list <- function(
+  object,
+  summary = FALSE,
+  max_spectra = 50,
+  alpha = 0.3,
+  ...
+) {
   check_ggplot2()
 
   plot_data <- fortify.measure_list(object)
@@ -178,14 +185,18 @@ autoplot.measure_list <- function(object,
   }
 
   # Build base plot
-  p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$location, y = .data$value))
+  p <- ggplot2::ggplot(
+    plot_data,
+    ggplot2::aes(x = .data$location, y = .data$value)
+  )
 
   # Add individual lines
-  p <- p + ggplot2::geom_line(
-    ggplot2::aes(group = .data$sample),
-    alpha = alpha,
-    linewidth = 0.3
-  )
+  p <- p +
+    ggplot2::geom_line(
+      ggplot2::aes(group = .data$sample),
+      alpha = alpha,
+      linewidth = 0.3
+    )
 
   # Add summary ribbon if requested
   if (summary) {
@@ -239,10 +250,12 @@ autoplot.measure_list <- function(object,
 #'   side-by-side before/after comparison, `"summary"` shows summary statistics
 #'   (mean +/- SD) for the processed data.
 #' @export
-autoplot.recipe <- function(object,
-                            n_samples = 10,
-                            which = c("before_after", "summary"),
-                            ...) {
+autoplot.recipe <- function(
+  object,
+  n_samples = 10,
+  which = c("before_after", "summary"),
+  ...
+) {
   check_ggplot2()
 
   which <- match.arg(which)
@@ -297,11 +310,12 @@ autoplot.recipe <- function(object,
       plot_data <- rbind(before_df, after_df)
       plot_data$stage <- factor(plot_data$stage, levels = c("Before", "After"))
 
-      p <- ggplot2::ggplot(plot_data,
-                           ggplot2::aes(x = .data$location, y = .data$value,
-                                        group = .data$sample)) +
+      p <- ggplot2::ggplot(
+        plot_data,
+        ggplot2::aes(x = .data$location, y = .data$value, group = .data$sample)
+      ) +
         ggplot2::geom_line(alpha = 0.5, linewidth = 0.3) +
-        ggplot2::facet_wrap(~ stage, scales = "free_y") +
+        ggplot2::facet_wrap(~stage, scales = "free_y") +
         ggplot2::labs(
           x = "Location",
           y = "Value",
@@ -309,13 +323,13 @@ autoplot.recipe <- function(object,
           subtitle = paste(n_show, "samples shown")
         ) +
         ggplot2::theme_minimal()
-
     } else {
       # Can't extract before, just show after
       plot_data <- fortify.measure_list(new_measure_list(processed_subset))
-      p <- ggplot2::ggplot(plot_data,
-                           ggplot2::aes(x = .data$location, y = .data$value,
-                                        group = .data$sample)) +
+      p <- ggplot2::ggplot(
+        plot_data,
+        ggplot2::aes(x = .data$location, y = .data$value, group = .data$sample)
+      ) +
         ggplot2::geom_line(alpha = 0.5, linewidth = 0.3) +
         ggplot2::labs(
           x = "Location",
@@ -342,18 +356,31 @@ autoplot.recipe <- function(object,
     p <- ggplot2::ggplot(summary_data, ggplot2::aes(x = .data$location)) +
       ggplot2::geom_ribbon(
         ggplot2::aes(ymin = .data$min, ymax = .data$max),
-        alpha = 0.2, fill = "gray60"
+        alpha = 0.2,
+        fill = "gray60"
       ) +
       ggplot2::geom_ribbon(
-        ggplot2::aes(ymin = .data$mean - .data$sd, ymax = .data$mean + .data$sd),
-        alpha = 0.3, fill = "steelblue"
+        ggplot2::aes(
+          ymin = .data$mean - .data$sd,
+          ymax = .data$mean + .data$sd
+        ),
+        alpha = 0.3,
+        fill = "steelblue"
       ) +
-      ggplot2::geom_line(ggplot2::aes(y = .data$mean), color = "steelblue", linewidth = 1) +
+      ggplot2::geom_line(
+        ggplot2::aes(y = .data$mean),
+        color = "steelblue",
+        linewidth = 1
+      ) +
       ggplot2::labs(
         x = "Location",
         y = "Value",
         title = "Processed Spectra Summary",
-        subtitle = paste0("Mean +/- SD (blue), min/max (gray) from ", n_show, " samples")
+        subtitle = paste0(
+          "Mean +/- SD (blue), min/max (gray) from ",
+          n_show,
+          " samples"
+        )
       ) +
       ggplot2::theme_minimal()
   }
@@ -376,24 +403,27 @@ apply_input_step_only <- function(recipe) {
     return(NULL)
   }
 
-  tryCatch({
-    # Get the trained input step
-    input_step <- recipe$steps[[input_idx[1]]]
+  tryCatch(
+    {
+      # Get the trained input step
+      input_step <- recipe$steps[[input_idx[1]]]
 
-    # Get template data (training data)
-    template_data <- recipe$template
+      # Get template data (training data)
+      template_data <- recipe$template
 
-    # Apply just the input step's bake method to the template
-    result <- recipes::bake(input_step, new_data = template_data)
-    result
-  }, error = function(e) {
-    cli::cli_warn(c(
-      "Could not extract 'before' data for comparison.",
-      "i" = "Showing processed data only.",
-      "x" = conditionMessage(e)
-    ))
-    NULL
-  })
+      # Apply just the input step's bake method to the template
+      result <- recipes::bake(input_step, new_data = template_data)
+      result
+    },
+    error = function(e) {
+      cli::cli_warn(c(
+        "Could not extract 'before' data for comparison.",
+        "i" = "Showing processed data only.",
+        "x" = conditionMessage(e)
+      ))
+      NULL
+    }
+  )
 }
 
 
@@ -440,10 +470,12 @@ apply_input_step_only <- function(recipe) {
 #' }
 #'
 #' @export
-plot_measure_comparison <- function(...,
-                                    data = NULL,
-                                    n_samples = 5,
-                                    summary_only = FALSE) {
+plot_measure_comparison <- function(
+  ...,
+  data = NULL,
+  n_samples = 5,
+  summary_only = FALSE
+) {
   check_ggplot2()
 
   recipes_list <- list(...)
@@ -464,7 +496,9 @@ plot_measure_comparison <- function(...,
       cli::cli_abort("{.arg {recipe_names[i]}} must be a recipe object.")
     }
     if (!recipes::fully_trained(recipes_list[[i]])) {
-      cli::cli_abort("{.arg {recipe_names[i]}} must be prepped. Use {.code prep()} first.")
+      cli::cli_abort(
+        "{.arg {recipe_names[i]}} must be prepped. Use {.code prep()} first."
+      )
     }
   }
 
@@ -521,22 +555,28 @@ plot_measure_comparison <- function(...,
 
     p <- ggplot2::ggplot(summary_data, ggplot2::aes(x = .data$location)) +
       ggplot2::geom_ribbon(
-        ggplot2::aes(ymin = .data$mean - .data$sd, ymax = .data$mean + .data$sd),
-        alpha = 0.3, fill = "steelblue"
+        ggplot2::aes(
+          ymin = .data$mean - .data$sd,
+          ymax = .data$mean + .data$sd
+        ),
+        alpha = 0.3,
+        fill = "steelblue"
       ) +
       ggplot2::geom_line(
         ggplot2::aes(y = .data$mean),
-        color = "steelblue", linewidth = 0.8
+        color = "steelblue",
+        linewidth = 0.8
       )
   } else {
-    p <- ggplot2::ggplot(all_data,
-                         ggplot2::aes(x = .data$location, y = .data$value,
-                                      group = .data$sample)) +
+    p <- ggplot2::ggplot(
+      all_data,
+      ggplot2::aes(x = .data$location, y = .data$value, group = .data$sample)
+    ) +
       ggplot2::geom_line(alpha = 0.5, linewidth = 0.3)
   }
 
   p <- p +
-    ggplot2::facet_wrap(~ recipe, scales = "free_y") +
+    ggplot2::facet_wrap(~recipe, scales = "free_y") +
     ggplot2::labs(
       x = "Location",
       y = "Value",
@@ -609,20 +649,24 @@ measure_plot_summary <- function(data, measure_col = NULL, show_range = FALSE) {
   p <- ggplot2::ggplot(summary_data, ggplot2::aes(x = .data$location))
 
   if (show_range) {
-    p <- p + ggplot2::geom_ribbon(
-      ggplot2::aes(ymin = .data$min, ymax = .data$max),
-      alpha = 0.15, fill = "gray50"
-    )
+    p <- p +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = .data$min, ymax = .data$max),
+        alpha = 0.15,
+        fill = "gray50"
+      )
   }
 
   p <- p +
     ggplot2::geom_ribbon(
       ggplot2::aes(ymin = .data$mean - .data$sd, ymax = .data$mean + .data$sd),
-      alpha = 0.3, fill = "steelblue"
+      alpha = 0.3,
+      fill = "steelblue"
     ) +
     ggplot2::geom_line(
       ggplot2::aes(y = .data$mean),
-      color = "steelblue", linewidth = 1
+      color = "steelblue",
+      linewidth = 1
     ) +
     ggplot2::labs(
       x = "Location",

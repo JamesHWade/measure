@@ -123,7 +123,10 @@ test_that("step_measure_trim print method works", {
   expect_output(print(rec$steps[[2]]), "Trim measurements to \\[20, 80\\]")
 
   rec_prepped <- prep(rec)
-  expect_output(print(rec_prepped$steps[[2]]), "Trim measurements to \\[20, 80\\]")
+  expect_output(
+    print(rec_prepped$steps[[2]]),
+    "Trim measurements to \\[20, 80\\]"
+  )
 })
 
 test_that("step_measure_trim tidy method works", {
@@ -258,7 +261,7 @@ test_that("step_measure_exclude tidy method works", {
   expect_true("terms" %in% names(tidy_result))
   expect_true("range_min" %in% names(tidy_result))
   expect_true("range_max" %in% names(tidy_result))
-  expect_equal(nrow(tidy_result), 2)  # One row per exclusion range
+  expect_equal(nrow(tidy_result), 2) # One row per exclusion range
 })
 
 # ==============================================================================
@@ -485,8 +488,7 @@ test_that("region operations can be combined", {
   expect_lte(max(locs), 90)
 })
 
-test_that("region operations preserve measure class",
-{
+test_that("region operations preserve measure class", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>

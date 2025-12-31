@@ -53,7 +53,7 @@ test_that("step_measure_calibrate_x works with calibration data.frame", {
   # Create calibration data spanning the location range
   cal_data <- data.frame(
     x = c(min(locs), max(locs)),
-    y = c(0, 100)  # Linear transformation to 0-100
+    y = c(0, 100) # Linear transformation to 0-100
   )
 
   rec <- recipe(water + fat + protein ~ ., data = meats_long) |>

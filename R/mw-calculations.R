@@ -69,16 +69,17 @@
 #' #   step_measure_mw_averages() |>
 #' #   prep()
 step_measure_mw_averages <- function(
-    recipe,
-    measures = NULL,
-    calibration = NULL,
-    integration_range = NULL,
-    output_cols = c("mn", "mw", "mz", "mp", "dispersity"),
-    prefix = "mw_",
-    role = "predictor",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_mw_averages")) {
+  recipe,
+  measures = NULL,
+  calibration = NULL,
+  integration_range = NULL,
+  output_cols = c("mn", "mw", "mz", "mp", "dispersity"),
+  prefix = "mw_",
+  role = "predictor",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_mw_averages")
+) {
   valid_cols <- c("mn", "mw", "mz", "mp", "dispersity")
   if (!all(output_cols %in% valid_cols)) {
     invalid <- setdiff(output_cols, valid_cols)
@@ -89,7 +90,9 @@ step_measure_mw_averages <- function(
 
   if (!is.null(integration_range)) {
     if (!is.numeric(integration_range) || length(integration_range) != 2) {
-      cli::cli_abort("{.arg integration_range} must be a numeric vector of length 2.")
+      cli::cli_abort(
+        "{.arg integration_range} must be a numeric vector of length 2."
+      )
     }
   }
 
@@ -110,8 +113,16 @@ step_measure_mw_averages <- function(
 }
 
 step_measure_mw_averages_new <- function(
-    measures, calibration, integration_range, output_cols, prefix,
-    role, trained, skip, id) {
+  measures,
+  calibration,
+  integration_range,
+  output_cols,
+  prefix,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_mw_averages",
     measures = measures,
@@ -151,8 +162,13 @@ prep.step_measure_mw_averages <- function(x, training, info = NULL, ...) {
 
 #' Calculate MW averages from a single chromatogram
 #' @noRd
-.calc_mw_averages <- function(location, value, calibration, integration_range,
-                               output_cols) {
+.calc_mw_averages <- function(
+  location,
+  value,
+  calibration,
+  integration_range,
+  output_cols
+) {
   # Apply integration range
   if (!is.null(integration_range)) {
     idx <- location >= integration_range[1] & location <= integration_range[2]
@@ -179,7 +195,7 @@ prep.step_measure_mw_averages <- function(x, training, info = NULL, ...) {
   }
 
   # Convert to MW
-mw <- 10^log_mw
+  mw <- 10^log_mw
 
   # Weight is proportional to signal (assuming RI detector)
   # Ensure non-negative
@@ -245,8 +261,13 @@ bake.step_measure_mw_averages <- function(object, new_data, ...) {
 
   # Calculate MW averages for each sample
   all_results <- purrr::map(new_data[[object$measures[1]]], function(m) {
-    .calc_mw_averages(m$location, m$value, calibration, integration_range,
-                       output_cols)
+    .calc_mw_averages(
+      m$location,
+      m$value,
+      calibration,
+      integration_range,
+      output_cols
+    )
   })
 
   # Convert to data frame
@@ -263,7 +284,11 @@ bake.step_measure_mw_averages <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_mw_averages <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_mw_averages <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   cols <- paste(x$output_cols, collapse = ", ")
   title <- paste0("MW averages (", cols, ")")
   if (x$trained) {
@@ -342,18 +367,21 @@ required_pkgs.step_measure_mw_averages <- function(x, ...) {
 #' #   step_measure_mw_fractions(cutoffs = c(1000, 10000, 100000)) |>
 #' #   prep()
 step_measure_mw_fractions <- function(
-    recipe,
-    measures = NULL,
-    cutoffs = c(1000, 10000, 100000),
-    calibration = NULL,
-    integration_range = NULL,
-    prefix = "frac_",
-    role = "predictor",
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_mw_fractions")) {
+  recipe,
+  measures = NULL,
+  cutoffs = c(1000, 10000, 100000),
+  calibration = NULL,
+  integration_range = NULL,
+  prefix = "frac_",
+  role = "predictor",
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_mw_fractions")
+) {
   if (!is.numeric(cutoffs) || length(cutoffs) < 1) {
-    cli::cli_abort("{.arg cutoffs} must be a numeric vector with at least one value.")
+    cli::cli_abort(
+      "{.arg cutoffs} must be a numeric vector with at least one value."
+    )
   }
 
   if (any(cutoffs <= 0)) {
@@ -362,7 +390,9 @@ step_measure_mw_fractions <- function(
 
   if (!is.null(integration_range)) {
     if (!is.numeric(integration_range) || length(integration_range) != 2) {
-      cli::cli_abort("{.arg integration_range} must be a numeric vector of length 2.")
+      cli::cli_abort(
+        "{.arg integration_range} must be a numeric vector of length 2."
+      )
     }
   }
 
@@ -383,8 +413,16 @@ step_measure_mw_fractions <- function(
 }
 
 step_measure_mw_fractions_new <- function(
-    measures, cutoffs, calibration, integration_range, prefix,
-    role, trained, skip, id) {
+  measures,
+  cutoffs,
+  calibration,
+  integration_range,
+  prefix,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_mw_fractions",
     measures = measures,
@@ -424,8 +462,13 @@ prep.step_measure_mw_fractions <- function(x, training, info = NULL, ...) {
 
 #' Calculate MW fractions from a single chromatogram
 #' @noRd
-.calc_mw_fractions <- function(location, value, cutoffs, calibration,
-                                integration_range) {
+.calc_mw_fractions <- function(
+  location,
+  value,
+  cutoffs,
+  calibration,
+  integration_range
+) {
   # Apply integration range
   if (!is.null(integration_range)) {
     idx <- location >= integration_range[1] & location <= integration_range[2]
@@ -487,8 +530,13 @@ bake.step_measure_mw_fractions <- function(object, new_data, ...) {
 
   # Calculate MW fractions for each sample
   all_results <- purrr::map(new_data[[object$measures[1]]], function(m) {
-    .calc_mw_fractions(m$location, m$value, cutoffs, calibration,
-                        integration_range)
+    .calc_mw_fractions(
+      m$location,
+      m$value,
+      cutoffs,
+      calibration,
+      integration_range
+    )
   })
 
   # Convert to data frame
@@ -505,7 +553,11 @@ bake.step_measure_mw_fractions <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_mw_fractions <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_mw_fractions <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   cutoffs_str <- paste(format(x$cutoffs, scientific = FALSE), collapse = ", ")
   title <- paste0("MW fractions at cutoffs: ", cutoffs_str)
   if (x$trained) {
@@ -596,22 +648,25 @@ required_pkgs.step_measure_mw_fractions <- function(x, ...) {
 #' #   step_measure_mw_distribution(type = "differential") |>
 #' #   prep()
 step_measure_mw_distribution <- function(
-    recipe,
-    measures = NULL,
-    type = c("differential", "cumulative", "both"),
-    calibration = NULL,
-    n_points = 100L,
-    mw_range = NULL,
-    normalize = TRUE,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_mw_distribution")) {
+  recipe,
+  measures = NULL,
+  type = c("differential", "cumulative", "both"),
+  calibration = NULL,
+  n_points = 100L,
+  mw_range = NULL,
+  normalize = TRUE,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_mw_distribution")
+) {
   type <- match.arg(type)
 
   if (!is.null(n_points)) {
     if (!is.numeric(n_points) || length(n_points) != 1 || n_points < 10) {
-      cli::cli_abort("{.arg n_points} must be a positive integer >= 10 or NULL.")
+      cli::cli_abort(
+        "{.arg n_points} must be a positive integer >= 10 or NULL."
+      )
     }
     n_points <- as.integer(n_points)
   }
@@ -643,8 +698,17 @@ step_measure_mw_distribution <- function(
 }
 
 step_measure_mw_distribution_new <- function(
-    measures, type, calibration, n_points, mw_range, normalize,
-    role, trained, skip, id) {
+  measures,
+  type,
+  calibration,
+  n_points,
+  mw_range,
+  normalize,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_mw_distribution",
     measures = measures,
@@ -686,8 +750,15 @@ prep.step_measure_mw_distribution <- function(x, training, info = NULL, ...) {
 
 #' Generate MW distribution from a single chromatogram
 #' @noRd
-.generate_mw_distribution <- function(location, value, type, calibration,
-                                       n_points, mw_range, normalize) {
+.generate_mw_distribution <- function(
+  location,
+  value,
+  type,
+  calibration,
+  n_points,
+  mw_range,
+  normalize
+) {
   if (length(location) < 2) {
     return(list(
       differential = tibble::tibble(location = numeric(0), value = numeric(0)),
@@ -796,8 +867,15 @@ bake.step_measure_mw_distribution <- function(object, new_data, ...) {
 
   # Generate distributions for each sample
   all_results <- purrr::map(new_data[[measure_col]], function(m) {
-    .generate_mw_distribution(m$location, m$value, type, calibration,
-                               n_points, mw_range, normalize)
+    .generate_mw_distribution(
+      m$location,
+      m$value,
+      type,
+      calibration,
+      n_points,
+      mw_range,
+      normalize
+    )
   })
 
   # Replace measure column with distribution data
@@ -827,7 +905,11 @@ bake.step_measure_mw_distribution <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_mw_distribution <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_mw_distribution <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("MW distribution (", x$type, ")")
   if (!is.null(x$n_points)) {
     title <- paste0(title, ", ", x$n_points, " points")

@@ -98,11 +98,11 @@ measure_sample_types <- c("qc", "standard", "blank", "unknown", "reference")
 #'   action = "warn"
 #' )
 measure_validate_metadata <- function(
-    data,
-    require = NULL,
-    sample_types = measure_sample_types,
-    action = c("error", "warn", "message")) {
-
+  data,
+  require = NULL,
+  sample_types = measure_sample_types,
+  action = c("error", "warn", "message")
+) {
   action <- match.arg(action)
 
   if (!is.data.frame(data)) {
@@ -117,7 +117,6 @@ measure_validate_metadata <- function(
 
   issues <- character()
 
-
   # Check for required columns
   if (!is.null(require)) {
     missing_cols <- setdiff(require, names(data))
@@ -125,13 +124,19 @@ measure_validate_metadata <- function(
       results$valid <- FALSE
       results$checks$missing_columns <- list(
         valid = FALSE,
-        message = paste("Missing required columns:", paste(missing_cols, collapse = ", ")),
+        message = paste(
+          "Missing required columns:",
+          paste(missing_cols, collapse = ", ")
+        ),
         columns = missing_cols
       )
-      issues <- c(issues, sprintf(
-        "Missing required column(s): %s",
-        paste(cli::style_bold(missing_cols), collapse = ", ")
-      ))
+      issues <- c(
+        issues,
+        sprintf(
+          "Missing required column(s): %s",
+          paste(cli::style_bold(missing_cols), collapse = ", ")
+        )
+      )
     } else {
       results$checks$missing_columns <- list(
         valid = TRUE,
@@ -255,11 +260,11 @@ measure_validate_metadata <- function(
 #'   )
 #' )
 measure_standardize_sample_type <- function(
-    data,
-    col = "sample_type",
-    mapping = NULL,
-    unknown_action = c("error", "warn", "keep", "unknown")) {
-
+  data,
+  col = "sample_type",
+  mapping = NULL,
+  unknown_action = c("error", "warn", "keep", "unknown")
+) {
   unknown_action <- match.arg(unknown_action)
 
   if (!is.data.frame(data)) {
@@ -275,11 +280,49 @@ measure_standardize_sample_type <- function(
   # Default mapping: case-insensitive match to canonical names
   if (is.null(mapping)) {
     mapping <- list(
-      qc = c("qc", "QC", "Qc", "quality_control", "pooled_qc", "system_suitability"),
-      standard = c("standard", "Standard", "STANDARD", "std", "STD", "cal", "calibrator"),
-      blank = c("blank", "Blank", "BLANK", "blk", "BLK", "solvent_blank", "matrix_blank"),
-      unknown = c("unknown", "Unknown", "UNKNOWN", "unk", "UNK", "sample", "SAMPLE"),
-      reference = c("reference", "Reference", "REFERENCE", "ref", "REF", "reference_material")
+      qc = c(
+        "qc",
+        "QC",
+        "Qc",
+        "quality_control",
+        "pooled_qc",
+        "system_suitability"
+      ),
+      standard = c(
+        "standard",
+        "Standard",
+        "STANDARD",
+        "std",
+        "STD",
+        "cal",
+        "calibrator"
+      ),
+      blank = c(
+        "blank",
+        "Blank",
+        "BLANK",
+        "blk",
+        "BLK",
+        "solvent_blank",
+        "matrix_blank"
+      ),
+      unknown = c(
+        "unknown",
+        "Unknown",
+        "UNKNOWN",
+        "unk",
+        "UNK",
+        "sample",
+        "SAMPLE"
+      ),
+      reference = c(
+        "reference",
+        "Reference",
+        "REFERENCE",
+        "ref",
+        "REF",
+        "reference_material"
+      )
     )
   }
 
@@ -303,7 +346,7 @@ measure_standardize_sample_type <- function(
       new_values[i] <- reverse_map[[val]]
     } else {
       unmatched <- c(unmatched, val)
-      new_values[i] <- val  # Keep original for now
+      new_values[i] <- val # Keep original for now
     }
   }
 
@@ -322,7 +365,9 @@ measure_standardize_sample_type <- function(
         "!" = paste(unmatched, collapse = ", ")
       ))
     } else if (unknown_action == "unknown") {
-      new_values[original_values %in% unmatched & !is.na(original_values)] <- "unknown"
+      new_values[
+        original_values %in% unmatched & !is.na(original_values)
+      ] <- "unknown"
     }
     # "keep" does nothing extra
   }
@@ -357,7 +402,9 @@ measure_standardize_sample_type <- function(
   values_char <- as.character(values)
 
   # Check for invalid values (excluding NA)
-  invalid <- unique(values_char[!is.na(values_char) & !(values_char %in% allowed_types)])
+  invalid <- unique(values_char[
+    !is.na(values_char) & !(values_char %in% allowed_types)
+  ])
 
   if (length(invalid) > 0) {
     return(list(

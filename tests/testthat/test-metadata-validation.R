@@ -21,9 +21,11 @@ test_that("measure_validate_metadata validates required columns", {
   )
 
   # Should pass when required columns present
-  result <- measure_validate_metadata(data, require = c("sample_id", "sample_type"))
+  result <- measure_validate_metadata(
+    data,
+    require = c("sample_id", "sample_type")
+  )
   expect_true(result$valid)
-
 
   # Should fail when required column is missing
   expect_error(
@@ -62,8 +64,7 @@ test_that("measure_validate_metadata validates sample_type values", {
   expect_true(result$valid)
 })
 
-test_that("measure_validate_metadata validates run_order column",
-{
+test_that("measure_validate_metadata validates run_order column", {
   # Non-numeric should fail
   data <- data.frame(
     run_order = c("a", "b", "c")
@@ -183,7 +184,7 @@ test_that("measure_validate_metadata validates dilution_factor column", {
 test_that("measure_validate_metadata checks for duplicate run_order within batch", {
   data <- data.frame(
     batch_id = c("B1", "B1", "B1"),
-    run_order = c(1, 1, 2)  # Duplicate run_order in B1
+    run_order = c(1, 1, 2) # Duplicate run_order in B1
   )
   expect_error(
     measure_validate_metadata(data, require = c("batch_id", "run_order")),
@@ -195,7 +196,10 @@ test_that("measure_validate_metadata checks for duplicate run_order within batch
     batch_id = c("B1", "B1", "B2", "B2"),
     run_order = c(1, 2, 1, 2)
   )
-  result <- measure_validate_metadata(data, require = c("batch_id", "run_order"))
+  result <- measure_validate_metadata(
+    data,
+    require = c("batch_id", "run_order")
+  )
   expect_true(result$valid)
 })
 

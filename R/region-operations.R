@@ -57,13 +57,14 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_trim <- function(
-    recipe,
-    range,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_trim")) {
+  recipe,
+  range,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_trim")
+) {
   if (missing(range)) {
     cli::cli_abort("{.arg range} must be provided.")
   }
@@ -141,9 +142,10 @@ bake.step_measure_trim <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_trim <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Trim measurements to [", x$range[1], ", ", x$range[2], "]")
 
   if (x$trained) {
@@ -226,20 +228,21 @@ tidy.step_measure_trim <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_exclude <- function(
-    recipe,
-    ranges,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_exclude")) {
+  recipe,
+  ranges,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_exclude")
+) {
   if (missing(ranges)) {
     cli::cli_abort("{.arg ranges} must be provided.")
   }
 
   # Accept a single range as c(min, max) for convenience
 
-if (!is.list(ranges)) {
+  if (!is.list(ranges)) {
     if (is.numeric(ranges) && length(ranges) == 2) {
       ranges <- list(ranges)
     } else {
@@ -280,7 +283,14 @@ if (!is.list(ranges)) {
   )
 }
 
-step_measure_exclude_new <- function(ranges, measures, role, trained, skip, id) {
+step_measure_exclude_new <- function(
+  ranges,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_exclude",
     ranges = ranges,
@@ -340,15 +350,23 @@ bake.step_measure_exclude <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_exclude <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   n_ranges <- length(x$ranges)
   ranges_str <- paste(
     purrr::map_chr(x$ranges, ~ paste0("[", .x[1], ", ", .x[2], "]")),
     collapse = ", "
   )
-  title <- paste0("Exclude ", n_ranges, " range", if (n_ranges > 1) "s", ": ", ranges_str)
+  title <- paste0(
+    "Exclude ",
+    n_ranges,
+    " range",
+    if (n_ranges > 1) "s",
+    ": ",
+    ranges_str
+  )
 
   if (nchar(title) > width) {
     title <- paste0("Exclude ", n_ranges, " range", if (n_ranges > 1) "s")
@@ -463,17 +481,18 @@ tidy.step_measure_exclude <- function(x, ...) {
 #'
 #' bake(rec2, new_data = NULL)
 step_measure_resample <- function(
-    recipe,
-    n = NULL,
-    spacing = NULL,
-    range = NULL,
-    method = c("linear", "spline"),
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    new_locations = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_resample")) {
+  recipe,
+  n = NULL,
+  spacing = NULL,
+  range = NULL,
+  method = c("linear", "spline"),
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  new_locations = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_resample")
+) {
   method <- rlang::arg_match(method)
 
   # Must specify exactly one of n or spacing
@@ -528,7 +547,17 @@ step_measure_resample <- function(
 }
 
 step_measure_resample_new <- function(
-    n, spacing, range, method, measures, role, trained, new_locations, skip, id) {
+  n,
+  spacing,
+  range,
+  method,
+  measures,
+  role,
+  trained,
+  new_locations,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_resample",
     n = n,
@@ -602,7 +631,7 @@ bake.step_measure_resample <- function(object, new_data, ...) {
           x = m$location,
           y = m$value,
           xout = new_locs,
-          rule = 2  # Use boundary values for extrapolation
+          rule = 2 # Use boundary values for extrapolation
         )$y
       } else if (method == "spline") {
         # spline requires at least 4 points
@@ -637,9 +666,10 @@ bake.step_measure_resample <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_resample <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   if (x$trained) {
     n_pts <- length(x$new_locations)
     title <- paste0("Resample to ", n_pts, " points (", x$method, ")")
@@ -733,22 +763,24 @@ required_pkgs.step_measure_resample <- function(x, ...) {
 #'   step_measure_interpolate(ranges = list(c(40, 50)), method = "spline") |>
 #'   prep()
 step_measure_interpolate <- function(
-    recipe,
-    ranges,
-    method = c("linear", "spline"),
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_interpolate")) {
-
+  recipe,
+  ranges,
+  method = c("linear", "spline"),
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_interpolate")
+) {
   method <- rlang::arg_match(method)
 
   if (!is.list(ranges)) {
     if (is.numeric(ranges) && length(ranges) == 2) {
       ranges <- list(ranges)
     } else {
-      cli::cli_abort("{.arg ranges} must be a list of numeric vectors of length 2.")
+      cli::cli_abort(
+        "{.arg ranges} must be a list of numeric vectors of length 2."
+      )
     }
   }
 
@@ -776,7 +808,14 @@ step_measure_interpolate <- function(
 }
 
 step_measure_interpolate_new <- function(
-    ranges, method, measures, role, trained, skip, id) {
+  ranges,
+  method,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_interpolate",
     ranges = ranges,
@@ -819,7 +858,9 @@ prep.step_measure_interpolate <- function(x, training, info = NULL, ...) {
     # Find indices within the range
     in_range <- location >= r[1] & location <= r[2]
 
-    if (!any(in_range)) next
+    if (!any(in_range)) {
+      next
+    }
 
     # Find boundary points (just outside the range)
     below_range <- location < r[1]
@@ -868,7 +909,11 @@ bake.step_measure_interpolate <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_interpolate <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_interpolate <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   n_ranges <- length(x$ranges)
   title <- paste0("Interpolate ", n_ranges, " region(s) (", x$method, ")")
   if (x$trained) {

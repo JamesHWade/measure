@@ -32,7 +32,7 @@ test_that("fortify.measure_list converts to tibble with sample column", {
 test_that("autoplot.measure_tbl creates ggplot", {
   skip_if_not_installed("ggplot2")
 
-  spec <- new_measure_tbl(location = 1:100, value = sin(1:100/10))
+  spec <- new_measure_tbl(location = 1:100, value = sin(1:100 / 10))
 
   p <- autoplot(spec)
 
@@ -43,8 +43,8 @@ test_that("autoplot.measure_tbl creates ggplot", {
 test_that("autoplot.measure_list creates ggplot", {
   skip_if_not_installed("ggplot2")
 
-  spec1 <- new_measure_tbl(location = 1:50, value = sin(1:50/5))
-  spec2 <- new_measure_tbl(location = 1:50, value = cos(1:50/5))
+  spec1 <- new_measure_tbl(location = 1:50, value = sin(1:50 / 5))
+  spec2 <- new_measure_tbl(location = 1:50, value = cos(1:50 / 5))
   specs <- new_measure_list(list(spec1, spec2))
 
   p <- autoplot(specs)
@@ -56,8 +56,8 @@ test_that("autoplot.measure_list creates ggplot", {
 test_that("autoplot.measure_list with summary adds ribbon", {
   skip_if_not_installed("ggplot2")
 
-  spec1 <- new_measure_tbl(location = 1:50, value = sin(1:50/5))
-  spec2 <- new_measure_tbl(location = 1:50, value = sin(1:50/5) + 0.1)
+  spec1 <- new_measure_tbl(location = 1:50, value = sin(1:50 / 5))
+  spec2 <- new_measure_tbl(location = 1:50, value = sin(1:50 / 5) + 0.1)
   specs <- new_measure_list(list(spec1, spec2))
 
   p <- autoplot(specs, summary = TRUE)

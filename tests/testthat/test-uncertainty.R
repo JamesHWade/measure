@@ -33,22 +33,22 @@ test_that("uncertainty_component calculates contribution", {
 test_that("uncertainty_component applies coverage factor", {
   # Value given as expanded uncertainty with k=2
   uc <- uncertainty_component("Test", 0.10, coverage_factor = 2)
-  expect_equal(uc$value, 0.05)  # Should be divided by k
+  expect_equal(uc$value, 0.05) # Should be divided by k
 })
 
 test_that("uncertainty_component validates inputs", {
   expect_error(
-    uncertainty_component(123, 0.05),  # name must be character
+    uncertainty_component(123, 0.05), # name must be character
     "character"
   )
 
   expect_error(
-    uncertainty_component("Test", -0.05),  # value must be non-negative
+    uncertainty_component("Test", -0.05), # value must be non-negative
     "non-negative"
   )
 
   expect_error(
-    uncertainty_component("Test", 0.05, df = -5),  # df must be positive
+    uncertainty_component("Test", 0.05, df = -5), # df must be positive
     "positive"
   )
 })
@@ -67,7 +67,7 @@ test_that("uncertainty_component handles distributions", {
 })
 
 test_that("print.uncertainty_component works", {
- uc <- uncertainty_component("Repeatability", 0.05, type = "A", df = 9)
+  uc <- uncertainty_component("Repeatability", 0.05, type = "A", df = 9)
   expect_output(print(uc), "uncertainty_component")
   expect_output(print(uc), "Repeatability")
   expect_output(print(uc), "Type: A")
@@ -128,8 +128,8 @@ test_that("measure_uncertainty_budget calculates relative uncertainty", {
 
   budget <- measure_uncertainty_budget(u1, result_value = 10)
 
-  expect_equal(budget$relative_u, 0.01)  # 0.1 / 10
-  expect_equal(budget$relative_U, 0.02)  # 0.2 / 10 (with k=2)
+  expect_equal(budget$relative_u, 0.01) # 0.1 / 10
+  expect_equal(budget$relative_U, 0.02) # 0.2 / 10 (with k=2)
 })
 
 test_that("measure_uncertainty_budget validates inputs", {
@@ -139,7 +139,7 @@ test_that("measure_uncertainty_budget validates inputs", {
   )
 
   expect_error(
-    measure_uncertainty_budget(),  # No components
+    measure_uncertainty_budget(), # No components
     "At least one"
   )
 })
@@ -182,7 +182,10 @@ test_that("measure_uncertainty returns simplified result", {
   result <- measure_uncertainty(u1, u2)
 
   expect_type(result, "list")
-  expect_equal(names(result), c("combined_u", "expanded_U", "effective_df", "coverage_factor"))
+  expect_equal(
+    names(result),
+    c("combined_u", "expanded_U", "effective_df", "coverage_factor")
+  )
   expect_equal(result$combined_u, 0.05)
 })
 
@@ -246,7 +249,7 @@ test_that("uncertainty_type_a calculates from measurements", {
 
   expect_s3_class(uc, "uncertainty_component")
   expect_equal(uc$type, "A")
-  expect_equal(uc$df, 4)  # n - 1
+  expect_equal(uc$df, 4) # n - 1
 
   # SE should be sd / sqrt(n)
   expected_se <- sd(measurements) / sqrt(5)
@@ -265,7 +268,7 @@ test_that("uncertainty_type_b_expanded creates from expanded uncertainty", {
 
   expect_s3_class(uc, "uncertainty_component")
   expect_equal(uc$type, "B")
-  expect_equal(uc$value, 0.05)  # Divided by k
+  expect_equal(uc$value, 0.05) # Divided by k
 })
 
 test_that("uncertainty_type_b_rectangular creates from half-width", {
@@ -295,7 +298,9 @@ test_that("full uncertainty budget workflow works", {
 
   # Create budget
   budget <- measure_uncertainty_budget(
-    u_repeat, u_cal, u_temp,
+    u_repeat,
+    u_cal,
+    u_temp,
     k = 2,
     result_value = mean(measurements)
   )

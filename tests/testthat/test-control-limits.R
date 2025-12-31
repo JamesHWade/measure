@@ -51,7 +51,12 @@ test_that("measure_control_limits calculates EWMA limits", {
   set.seed(123)
   data <- data.frame(qc_value = rnorm(30, mean = 100, sd = 2))
 
-  limits <- measure_control_limits(data, "qc_value", type = "ewma", lambda = 0.2)
+  limits <- measure_control_limits(
+    data,
+    "qc_value",
+    type = "ewma",
+    lambda = 0.2
+  )
 
   expect_equal(attr(limits, "type"), "ewma")
   expect_true("ewma_sigma" %in% names(limits))
@@ -140,15 +145,20 @@ test_that("measure_control_chart detects 1:3s violations", {
   set.seed(123)
   data <- data.frame(
     run_order = 1:30,
-    qc_value = c(rnorm(29, 100, 1), 115)  # Last point is clear outlier
+    qc_value = c(rnorm(29, 100, 1), 115) # Last point is clear outlier
   )
 
   # Calculate limits from first 29 points (stable data), then apply to all
   stable_data <- data[1:29, ]
   limits <- measure_control_limits(stable_data, "qc_value")
 
-  chart <- measure_control_chart(data, "qc_value", "run_order",
-                                  limits = limits, rules = "1_3s")
+  chart <- measure_control_chart(
+    data,
+    "qc_value",
+    "run_order",
+    limits = limits,
+    rules = "1_3s"
+  )
 
   expect_false(chart$in_control)
   expect_true(nrow(chart$violations) >= 1)
@@ -168,7 +178,7 @@ test_that("measure_control_chart detects 2:2s violations", {
   set.seed(42)
   data <- data.frame(
     run_order = 1:20,
-    qc_value = c(rep(100, 18), 106, 107)  # Last two are high
+    qc_value = c(rep(100, 18), 106, 107) # Last two are high
   )
 
   chart <- measure_control_chart(data, "qc_value", "run_order", rules = "2_2s")
@@ -236,7 +246,7 @@ test_that("measure_control_chart in_control flag is correct", {
   set.seed(42)
   data <- data.frame(
     run_order = 1:30,
-    qc_value = rnorm(30, 100, 0.5)  # Very tight distribution
+    qc_value = rnorm(30, 100, 0.5) # Very tight distribution
   )
 
   chart <- measure_control_chart(data, "qc_value", "run_order")
@@ -273,7 +283,7 @@ test_that("measure_system_suitability evaluates metrics", {
 
 test_that("measure_system_suitability detects failures", {
   data <- data.frame(
-    resolution = c(1.5, 1.6, 1.4),  # All below min of 2.0
+    resolution = c(1.5, 1.6, 1.4), # All below min of 2.0
     tailing = c(1.1, 1.0, 1.2)
   )
 
@@ -331,7 +341,7 @@ test_that("measure_system_suitability filters by sample_type", {
   )
 
   expect_equal(result$n_samples, 2)
-  expect_true(result$overall_pass)  # Only SST samples evaluated
+  expect_true(result$overall_pass) # Only SST samples evaluated
 })
 
 test_that("measure_system_suitability calculates summary statistics", {

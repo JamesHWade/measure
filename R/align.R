@@ -58,14 +58,15 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_align_shift <- function(
-    recipe,
-    measures = NULL,
-    max_shift = 10L,
-    reference = c("mean", "median", "first"),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_align_shift")) {
+  recipe,
+  measures = NULL,
+  max_shift = 10L,
+  reference = c("mean", "median", "first"),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_align_shift")
+) {
   reference <- match.arg(reference)
 
   recipes::add_step(
@@ -84,7 +85,15 @@ step_measure_align_shift <- function(
 }
 
 step_measure_align_shift_new <- function(
-    measures, max_shift, reference, ref_spectrum, role, trained, skip, id) {
+  measures,
+  max_shift,
+  reference,
+  ref_spectrum,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_align_shift",
     measures = measures,
@@ -151,7 +160,11 @@ bake.step_measure_align_shift <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_align_shift <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_align_shift <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Shift alignment (max_shift = ", x$max_shift, ") on ")
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -201,7 +214,11 @@ tidy.step_measure_align_shift <- function(x, ...) {
       idx_ref <- 1:n
     }
 
-    corr <- stats::cor(values[idx_val], ref_spectrum[idx_ref], use = "complete.obs")
+    corr <- stats::cor(
+      values[idx_val],
+      ref_spectrum[idx_ref],
+      use = "complete.obs"
+    )
     if (!is.na(corr) && corr > best_corr) {
       best_corr <- corr
       best_shift <- shift
@@ -214,7 +231,7 @@ tidy.step_measure_align_shift <- function(x, ...) {
     if (best_shift > 0) {
       # Shift right: values move to higher indices
       new_values[(best_shift + 1):n] <- values[1:(n - best_shift)]
-      new_values[1:best_shift] <- values[1]  # Constant extrapolation
+      new_values[1:best_shift] <- values[1] # Constant extrapolation
     } else {
       # Shift left: values move to lower indices
       new_values[1:(n + best_shift)] <- values[(1 - best_shift):n]
@@ -272,14 +289,15 @@ tidy.step_measure_align_shift <- function(x, ...) {
 #'   prep()
 #' }
 step_measure_align_reference <- function(
-    recipe,
-    measures = NULL,
-    ref_spectrum,
-    max_shift = 10L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_align_reference")) {
+  recipe,
+  measures = NULL,
+  ref_spectrum,
+  max_shift = 10L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_align_reference")
+) {
   if (missing(ref_spectrum) || !is.numeric(ref_spectrum)) {
     cli::cli_abort("{.arg ref_spectrum} must be a numeric vector.")
   }
@@ -299,7 +317,14 @@ step_measure_align_reference <- function(
 }
 
 step_measure_align_reference_new <- function(
-    measures, ref_spectrum, max_shift, role, trained, skip, id) {
+  measures,
+  ref_spectrum,
+  max_shift,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_align_reference",
     measures = measures,
@@ -349,7 +374,7 @@ bake.step_measure_align_reference <- function(object, new_data, ...) {
   for (col in object$measures) {
     result <- purrr::map(
       new_data[[col]],
-      .align_shift_single,  # Reuse the same function
+      .align_shift_single, # Reuse the same function
       ref_spectrum = object$ref_spectrum,
       max_shift = object$max_shift
     )
@@ -359,7 +384,11 @@ bake.step_measure_align_reference <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_align_reference <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_align_reference <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("Reference alignment (max_shift = ", x$max_shift, ") on ")
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -433,15 +462,16 @@ tidy.step_measure_align_reference <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_align_dtw <- function(
-    recipe,
-    measures = NULL,
-    reference = c("mean", "median", "first"),
-    window_type = c("none", "sakoechiba", "slantedband"),
-    window_size = 10L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_align_dtw")) {
+  recipe,
+  measures = NULL,
+  reference = c("mean", "median", "first"),
+  window_type = c("none", "sakoechiba", "slantedband"),
+  window_size = 10L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_align_dtw")
+) {
   reference <- match.arg(reference)
   window_type <- match.arg(window_type)
 
@@ -462,8 +492,16 @@ step_measure_align_dtw <- function(
 }
 
 step_measure_align_dtw_new <- function(
-    measures, reference, window_type, window_size, ref_spectrum,
-    role, trained, skip, id) {
+  measures,
+  reference,
+  window_type,
+  window_size,
+  ref_spectrum,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_align_dtw",
     measures = measures,
@@ -531,7 +569,11 @@ bake.step_measure_align_dtw <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_align_dtw <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_align_dtw <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "DTW alignment on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -565,7 +607,9 @@ required_pkgs.step_measure_align_dtw <- function(x, ...) {
   n <- length(values)
 
   if (n != length(ref_spectrum)) {
-    cli::cli_warn("Spectrum length differs from reference. Skipping DTW alignment.")
+    cli::cli_warn(
+      "Spectrum length differs from reference. Skipping DTW alignment."
+    )
     return(x)
   }
 
@@ -579,42 +623,50 @@ required_pkgs.step_measure_align_dtw <- function(x, ...) {
   }
 
   # Compute DTW alignment
-  tryCatch({
-    alignment <- dtw::dtw(
-      x = values,
-      y = ref_spectrum,
-      window.type = window_func,
-      window.size = window_size,
-      keep.internals = TRUE
-    )
+  tryCatch(
+    {
+      alignment <- dtw::dtw(
+        x = values,
+        y = ref_spectrum,
+        window.type = window_func,
+        window.size = window_size,
+        keep.internals = TRUE
+      )
 
-    # Warp the query to match reference indices
-    # Use the warping path to remap values
-    warped <- numeric(n)
-    warp_idx <- alignment$index1
+      # Warp the query to match reference indices
+      # Use the warping path to remap values
+      warped <- numeric(n)
+      warp_idx <- alignment$index1
 
-    # For each reference position, average the corresponding query values
-    for (i in seq_len(n)) {
-      matching <- which(alignment$index2 == i)
-      if (length(matching) > 0) {
-        warped[i] <- mean(values[warp_idx[matching]], na.rm = TRUE)
-      } else {
-        warped[i] <- NA_real_
+      # For each reference position, average the corresponding query values
+      for (i in seq_len(n)) {
+        matching <- which(alignment$index2 == i)
+        if (length(matching) > 0) {
+          warped[i] <- mean(values[warp_idx[matching]], na.rm = TRUE)
+        } else {
+          warped[i] <- NA_real_
+        }
       }
-    }
 
-    # Fill any remaining NAs by interpolation
-    if (anyNA(warped)) {
-      non_na <- which(!is.na(warped))
-      if (length(non_na) >= 2) {
-        warped <- stats::approx(non_na, warped[non_na], seq_len(n), rule = 2)$y
+      # Fill any remaining NAs by interpolation
+      if (anyNA(warped)) {
+        non_na <- which(!is.na(warped))
+        if (length(non_na) >= 2) {
+          warped <- stats::approx(
+            non_na,
+            warped[non_na],
+            seq_len(n),
+            rule = 2
+          )$y
+        }
       }
-    }
 
-    x$value <- warped
-  }, error = function(e) {
-    cli::cli_warn("DTW alignment failed: {e$message}")
-  })
+      x$value <- warped
+    },
+    error = function(e) {
+      cli::cli_warn("DTW alignment failed: {e$message}")
+    }
+  )
 
   x
 }
@@ -668,13 +720,14 @@ required_pkgs.step_measure_align_dtw <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_align_ptw <- function(
-    recipe,
-    measures = NULL,
-    reference = c("mean", "median", "first"),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_align_ptw")) {
+  recipe,
+  measures = NULL,
+  reference = c("mean", "median", "first"),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_align_ptw")
+) {
   reference <- match.arg(reference)
 
   recipes::add_step(
@@ -692,7 +745,14 @@ step_measure_align_ptw <- function(
 }
 
 step_measure_align_ptw_new <- function(
-    measures, reference, ref_spectrum, role, trained, skip, id) {
+  measures,
+  reference,
+  ref_spectrum,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_align_ptw",
     measures = measures,
@@ -740,7 +800,6 @@ prep.step_measure_align_ptw <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_align_ptw <- function(object, new_data, ...) {
-
   rlang::check_installed("ptw", reason = "for PTW alignment")
 
   for (col in object$measures) {
@@ -750,33 +809,40 @@ bake.step_measure_align_ptw <- function(object, new_data, ...) {
     # Convert to matrix for ptw
     mat <- measure_to_matrix(new_data[[col]])
 
-    tryCatch({
-      # Apply Parametric Time Warping alignment
-      # ptw expects ref and samp as matrices (one signal per row)
-      ref_mat <- matrix(object$ref_spectrum, nrow = 1)
+    tryCatch(
+      {
+        # Apply Parametric Time Warping alignment
+        # ptw expects ref and samp as matrices (one signal per row)
+        ref_mat <- matrix(object$ref_spectrum, nrow = 1)
 
-      aligned <- ptw::ptw(
-        ref = ref_mat,
-        samp = mat,
-        init.coef = c(0, 1, 0),  # Start with identity warp
-        warp.type = "individual"
-      )
+        aligned <- ptw::ptw(
+          ref = ref_mat,
+          samp = mat,
+          init.coef = c(0, 1, 0), # Start with identity warp
+          warp.type = "individual"
+        )
 
-      # Extract warped samples
-      warped_mat <- aligned$warped.sample
+        # Extract warped samples
+        warped_mat <- aligned$warped.sample
 
-      # Convert back to measure_list using the original locations
-      result <- matrix_to_measure(warped_mat, locations)
-      new_data[[col]] <- new_measure_list(result)
-    }, error = function(e) {
-      cli::cli_warn("PTW alignment failed: {e$message}")
-    })
+        # Convert back to measure_list using the original locations
+        result <- matrix_to_measure(warped_mat, locations)
+        new_data[[col]] <- new_measure_list(result)
+      },
+      error = function(e) {
+        cli::cli_warn("PTW alignment failed: {e$message}")
+      }
+    )
   }
   tibble::as_tibble(new_data)
 }
 
 #' @export
-print.step_measure_align_ptw <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_align_ptw <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "PTW alignment on "
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -865,15 +931,16 @@ required_pkgs.step_measure_align_ptw <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_align_cow <- function(
-    recipe,
-    measures = NULL,
-    reference = c("mean", "median", "first"),
-    segment_length = 30L,
-    slack = 1L,
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_align_cow")) {
+  recipe,
+  measures = NULL,
+  reference = c("mean", "median", "first"),
+  segment_length = 30L,
+  slack = 1L,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_align_cow")
+) {
   reference <- match.arg(reference)
 
   recipes::add_step(
@@ -893,8 +960,16 @@ step_measure_align_cow <- function(
 }
 
 step_measure_align_cow_new <- function(
-    measures, reference, segment_length, slack, ref_spectrum,
-    role, trained, skip, id) {
+  measures,
+  reference,
+  segment_length,
+  slack,
+  ref_spectrum,
+  role,
+  trained,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_align_cow",
     measures = measures,
@@ -967,10 +1042,17 @@ bake.step_measure_align_cow <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_align_cow <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_align_cow <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0(
-    "COW alignment (segment = ", x$segment_length,
-    ", slack = ", x$slack, ") on "
+    "COW alignment (segment = ",
+    x$segment_length,
+    ", slack = ",
+    x$slack,
+    ") on "
   )
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
@@ -997,12 +1079,20 @@ tidy.step_measure_align_cow <- function(x, ...) {
 #' @rdname tunable_measure
 #' @export
 tunable.step_measure_align_cow <- function(x, ...) {
- tibble::tibble(
+  tibble::tibble(
     name = c("segment_length", "slack"),
     call_info = list(
       list(pkg = "measure", fun = "align_segment_length"),
-      list(pkg = "dials", fun = "new_quant_param",
-           args = list(type = "integer", range = c(0L, 5L), default = 1L, label = "Slack"))
+      list(
+        pkg = "dials",
+        fun = "new_quant_param",
+        args = list(
+          type = "integer",
+          range = c(0L, 5L),
+          default = 1L,
+          label = "Slack"
+        )
+      )
     ),
     source = "recipe",
     component = "step_measure_align_cow",
@@ -1020,7 +1110,9 @@ tunable.step_measure_align_cow <- function(x, ...) {
   n_ref <- length(ref_spectrum)
 
   if (n != n_ref) {
-    cli::cli_warn("Spectrum length differs from reference. Skipping COW alignment.")
+    cli::cli_warn(
+      "Spectrum length differs from reference. Skipping COW alignment."
+    )
     return(x)
   }
 
@@ -1064,7 +1156,8 @@ tunable.step_measure_align_cow <- function(x, ...) {
   # Process first segment
   for (w in warp_options) {
     seg_cost <- .cow_segment_cost(
-      sample_values, ref_spectrum,
+      sample_values,
+      ref_spectrum,
       seg_start = 1,
       seg_len = round(seg_len),
       warp = w
@@ -1078,16 +1171,19 @@ tunable.step_measure_align_cow <- function(x, ...) {
     for (w in warp_options) {
       # Try all previous states
       for (prev_w in warp_options) {
-        prev_total <- (seg - 2) * 0  # Not tracking cumulative directly
+        prev_total <- (seg - 2) * 0 # Not tracking cumulative directly
         # This approach: track segment-by-segment, each warp is local
 
         prev_state <- state_idx(prev_w)
-        if (cost[seg - 1, prev_state] == Inf) next
+        if (cost[seg - 1, prev_state] == Inf) {
+          next
+        }
 
         # Compute cost for this segment with warp w
         seg_start <- round((seg - 1) * seg_len) + 1
         seg_cost <- .cow_segment_cost(
-          sample_values, ref_spectrum,
+          sample_values,
+          ref_spectrum,
           seg_start = seg_start,
           seg_len = round(seg_len),
           warp = w
@@ -1143,29 +1239,36 @@ tunable.step_measure_align_cow <- function(x, ...) {
 }
 
 .cow_segment_cost <- function(sample, reference, seg_start, seg_len, warp) {
-
   n <- length(sample)
 
   # Warped segment length
   warped_len <- seg_len + warp
 
-  if (warped_len < 2) return(Inf)
+  if (warped_len < 2) {
+    return(Inf)
+  }
 
   # Sample indices for this segment
   seg_end <- min(seg_start + seg_len - 1, n)
-  if (seg_start > n || seg_start < 1) return(Inf)
+  if (seg_start > n || seg_start < 1) {
+    return(Inf)
+  }
 
   samp_seg <- sample[seg_start:seg_end]
 
   # Reference indices (fixed)
   ref_start <- seg_start
   ref_end <- min(ref_start + seg_len - 1, length(reference))
-  if (ref_start > length(reference)) return(Inf)
+  if (ref_start > length(reference)) {
+    return(Inf)
+  }
 
   ref_seg <- reference[ref_start:ref_end]
 
   # Interpolate sample to match warped length then compare to reference
-  if (length(samp_seg) < 2 || length(ref_seg) < 2) return(Inf)
+  if (length(samp_seg) < 2 || length(ref_seg) < 2) {
+    return(Inf)
+  }
 
   # Warp the sample segment to new length, then interpolate to ref length
   warped_samp <- stats::approx(
@@ -1177,7 +1280,9 @@ tunable.step_measure_align_cow <- function(x, ...) {
 
   # Cost is negative correlation (we want to maximize correlation)
   corr <- stats::cor(warped_samp, ref_seg, use = "complete.obs")
-  if (is.na(corr)) return(Inf)
+  if (is.na(corr)) {
+    return(Inf)
+  }
 
   -corr
 }
@@ -1193,7 +1298,9 @@ tunable.step_measure_align_cow <- function(x, ...) {
     seg_start <- round((seg - 1) * seg_len) + 1
     seg_end <- min(round(seg * seg_len), n)
 
-    if (seg_start > n) break
+    if (seg_start > n) {
+      break
+    }
 
     samp_seg <- sample[seg_start:seg_end]
     warp <- warps[seg]

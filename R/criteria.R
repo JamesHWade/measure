@@ -40,12 +40,12 @@
 #'
 #' @export
 criterion <- function(
-    name,
-    operator = c("<", "<=", ">", ">=", "==", "!=", "between", "outside"),
-    threshold,
-    description = NULL,
-    priority = c("major", "critical", "minor")) {
-
+  name,
+  operator = c("<", "<=", ">", ">=", "==", "!=", "between", "outside"),
+  threshold,
+  description = NULL,
+  priority = c("major", "critical", "minor")
+) {
   operator <- match.arg(operator)
   priority <- match.arg(priority)
 
@@ -81,7 +81,8 @@ criterion <- function(
       name = name,
       operator = operator,
       threshold = threshold,
-      description = description %||% .generate_description(name, operator, threshold),
+      description = description %||%
+        .generate_description(name, operator, threshold),
       priority = priority
     ),
     class = "measure_criterion"
@@ -167,7 +168,7 @@ measure_criteria <- function(..., .list = NULL) {
 
     # Already a criterion object
 
-if (inherits(x, "measure_criterion")) {
+    if (inherits(x, "measure_criterion")) {
       return(x)
     }
 
@@ -197,7 +198,9 @@ if (inherits(x, "measure_criterion")) {
   if (!is.null(.list)) {
     for (x in .list) {
       if (!inherits(x, "measure_criterion")) {
-        cli::cli_abort("All elements of {.arg .list} must be criterion objects.")
+        cli::cli_abort(
+          "All elements of {.arg .list} must be criterion objects."
+        )
       }
       criteria <- c(criteria, list(x))
     }
@@ -288,10 +291,10 @@ c.measure_criteria <- function(...) {
 #'
 #' @export
 measure_assess <- function(
-    data,
-    criteria,
-    action = c("return", "warn", "error")) {
-
+  data,
+  criteria,
+  action = c("return", "warn", "error")
+) {
   action <- match.arg(action)
 
   if (!inherits(criteria, "measure_criteria")) {
@@ -369,9 +372,17 @@ measure_assess <- function(
       failures$criterion,
       format(failures$value),
       failures$operator,
-      vapply(failures$threshold, function(t) {
-        if (length(t) == 2) paste0("[", t[1], ", ", t[2], "]") else as.character(t)
-      }, character(1))
+      vapply(
+        failures$threshold,
+        function(t) {
+          if (length(t) == 2) {
+            paste0("[", t[1], ", ", t[2], "]")
+          } else {
+            as.character(t)
+          }
+        },
+        character(1)
+      )
     )
 
     if (action == "error") {
@@ -379,7 +390,10 @@ measure_assess <- function(
       if (nrow(critical_failures) > 0) {
         cli::cli_abort(c(
           "Critical acceptance criteria failed:",
-          stats::setNames(failure_msgs[failures$priority == "critical"], rep("x", sum(failures$priority == "critical")))
+          stats::setNames(
+            failure_msgs[failures$priority == "critical"],
+            rep("x", sum(failures$priority == "critical"))
+          )
         ))
       }
     }
@@ -427,7 +441,9 @@ print.measure_assessment <- function(x, ...) {
 
   cat("<measure_assessment> [", overall, "]\n", sep = "")
   cat("  ", n_pass, " passed, ", n_fail, " failed", sep = "")
-  if (n_na > 0) cat(", ", n_na, " not evaluated", sep = "")
+  if (n_na > 0) {
+    cat(", ", n_na, " not evaluated", sep = "")
+  }
   cat("\n\n")
 
   # Print details
@@ -448,9 +464,17 @@ print.measure_assessment <- function(x, ...) {
     }
 
     cat(
-      "  ", status_symbol, " ", row$criterion,
-      ": ", format(row$value, digits = 4),
-      " (", row$operator, " ", thresh_str, ")\n",
+      "  ",
+      status_symbol,
+      " ",
+      row$criterion,
+      ": ",
+      format(row$value, digits = 4),
+      " (",
+      row$operator,
+      " ",
+      thresh_str,
+      ")\n",
       sep = ""
     )
   }
@@ -475,9 +499,10 @@ print.measure_assessment <- function(x, ...) {
 #'
 #' @export
 all_pass <- function(assessment, na_pass = FALSE) {
-
   if (!inherits(assessment, "measure_assessment")) {
-    cli::cli_abort("{.arg assessment} must be a {.cls measure_assessment} object.")
+    cli::cli_abort(
+      "{.arg assessment} must be a {.cls measure_assessment} object."
+    )
   }
 
   if (na_pass) {
@@ -507,7 +532,9 @@ all_pass <- function(assessment, na_pass = FALSE) {
 #' @export
 get_failures <- function(assessment) {
   if (!inherits(assessment, "measure_assessment")) {
-    cli::cli_abort("{.arg assessment} must be a {.cls measure_assessment} object.")
+    cli::cli_abort(
+      "{.arg assessment} must be a {.cls measure_assessment} object."
+    )
   }
 
   out <- assessment[!is.na(assessment$pass) & !assessment$pass, ]
@@ -547,30 +574,49 @@ NULL
 #' @rdname criteria_presets
 #' @export
 criteria_bioanalytical <- function(
-    cv_qc = 15,
-    cv_calibration = 20,
-    r_squared = 0.99,
-    recovery_range = c(80, 120),
-    accuracy_bias = 15) {
-
+  cv_qc = 15,
+  cv_calibration = 20,
+  r_squared = 0.99,
+  recovery_range = c(80, 120),
+  accuracy_bias = 15
+) {
   measure_criteria(
-    criterion("cv_qc", "<=", cv_qc,
+    criterion(
+      "cv_qc",
+      "<=",
+      cv_qc,
       description = sprintf("QC CV <= %s%%", cv_qc),
       priority = "critical"
     ),
-    criterion("cv_calibration", "<=", cv_calibration,
+    criterion(
+      "cv_calibration",
+      "<=",
+      cv_calibration,
       description = sprintf("Calibration CV <= %s%%", cv_calibration),
       priority = "major"
     ),
-    criterion("r_squared", ">=", r_squared,
+    criterion(
+      "r_squared",
+      ">=",
+      r_squared,
       description = sprintf("R\u00b2 >= %s", r_squared),
       priority = "critical"
     ),
-    criterion("recovery", "between", recovery_range,
-      description = sprintf("Recovery %s-%s%%", recovery_range[1], recovery_range[2]),
+    criterion(
+      "recovery",
+      "between",
+      recovery_range,
+      description = sprintf(
+        "Recovery %s-%s%%",
+        recovery_range[1],
+        recovery_range[2]
+      ),
       priority = "critical"
     ),
-    criterion("accuracy_bias", "between", c(-accuracy_bias, accuracy_bias),
+    criterion(
+      "accuracy_bias",
+      "between",
+      c(-accuracy_bias, accuracy_bias),
       description = sprintf("Bias within +/-%s%%", accuracy_bias),
       priority = "major"
     )
@@ -580,25 +626,44 @@ criteria_bioanalytical <- function(
 #' @rdname criteria_presets
 #' @export
 criteria_ich_q2 <- function(
-    cv_repeatability = 2,
-    cv_intermediate = 5,
-    recovery_range = c(98, 102),
-    r_squared = 0.999) {
-
+  cv_repeatability = 2,
+  cv_intermediate = 5,
+  recovery_range = c(98, 102),
+  r_squared = 0.999
+) {
   measure_criteria(
-    criterion("cv_repeatability", "<=", cv_repeatability,
+    criterion(
+      "cv_repeatability",
+      "<=",
+      cv_repeatability,
       description = sprintf("Repeatability RSD <= %s%%", cv_repeatability),
       priority = "critical"
     ),
-    criterion("cv_intermediate", "<=", cv_intermediate,
-      description = sprintf("Intermediate precision RSD <= %s%%", cv_intermediate),
+    criterion(
+      "cv_intermediate",
+      "<=",
+      cv_intermediate,
+      description = sprintf(
+        "Intermediate precision RSD <= %s%%",
+        cv_intermediate
+      ),
       priority = "major"
     ),
-    criterion("recovery", "between", recovery_range,
-      description = sprintf("Recovery %s-%s%%", recovery_range[1], recovery_range[2]),
+    criterion(
+      "recovery",
+      "between",
+      recovery_range,
+      description = sprintf(
+        "Recovery %s-%s%%",
+        recovery_range[1],
+        recovery_range[2]
+      ),
       priority = "critical"
     ),
-    criterion("r_squared", ">=", r_squared,
+    criterion(
+      "r_squared",
+      ">=",
+      r_squared,
       description = sprintf("R\u00b2 >= %s", r_squared),
       priority = "critical"
     )
@@ -611,36 +676,57 @@ criteria_ich_q2 <- function(
 #' @param proportional_bias_p Significance level for proportional bias test.
 #' @export
 criteria_bland_altman <- function(
-    loa_width = NULL,
-    bias_max = NULL,
-    proportional_bias_p = 0.05) {
-
+  loa_width = NULL,
+  bias_max = NULL,
+  proportional_bias_p = 0.05
+) {
   criteria_list <- list()
 
   if (!is.null(loa_width)) {
-    criteria_list <- c(criteria_list, list(
-      criterion("loa_width", "<=", loa_width,
-        description = sprintf("LOA width <= %s", loa_width),
-        priority = "major"
+    criteria_list <- c(
+      criteria_list,
+      list(
+        criterion(
+          "loa_width",
+          "<=",
+          loa_width,
+          description = sprintf("LOA width <= %s", loa_width),
+          priority = "major"
+        )
       )
-    ))
+    )
   }
 
   if (!is.null(bias_max)) {
-    criteria_list <- c(criteria_list, list(
-      criterion("mean_bias", "between", c(-bias_max, bias_max),
-        description = sprintf("Mean bias within +/-%s", bias_max),
-        priority = "critical"
+    criteria_list <- c(
+      criteria_list,
+      list(
+        criterion(
+          "mean_bias",
+          "between",
+          c(-bias_max, bias_max),
+          description = sprintf("Mean bias within +/-%s", bias_max),
+          priority = "critical"
+        )
       )
-    ))
+    )
   }
 
-  criteria_list <- c(criteria_list, list(
-    criterion("proportional_bias_p", ">=", proportional_bias_p,
-      description = sprintf("Proportional bias p >= %s (not significant)", proportional_bias_p),
-      priority = "major"
+  criteria_list <- c(
+    criteria_list,
+    list(
+      criterion(
+        "proportional_bias_p",
+        ">=",
+        proportional_bias_p,
+        description = sprintf(
+          "Proportional bias p >= %s (not significant)",
+          proportional_bias_p
+        ),
+        priority = "major"
+      )
     )
-  ))
+  )
 
   measure_criteria(.list = criteria_list)
 }
@@ -650,28 +736,48 @@ criteria_bland_altman <- function(
 #' @param intercept_range Acceptable range for regression intercept.
 #' @export
 criteria_method_comparison <- function(
-    slope_range = c(0.9, 1.1),
-    intercept_range = NULL,
-    r_squared = 0.95) {
-
+  slope_range = c(0.9, 1.1),
+  intercept_range = NULL,
+  r_squared = 0.95
+) {
   criteria_list <- list(
-    criterion("slope", "between", slope_range,
-      description = sprintf("Slope in [%s, %s]", slope_range[1], slope_range[2]),
+    criterion(
+      "slope",
+      "between",
+      slope_range,
+      description = sprintf(
+        "Slope in [%s, %s]",
+        slope_range[1],
+        slope_range[2]
+      ),
       priority = "critical"
     ),
-    criterion("r_squared", ">=", r_squared,
+    criterion(
+      "r_squared",
+      ">=",
+      r_squared,
       description = sprintf("R\u00b2 >= %s", r_squared),
       priority = "major"
     )
   )
 
   if (!is.null(intercept_range)) {
-    criteria_list <- c(criteria_list, list(
-      criterion("intercept", "between", intercept_range,
-        description = sprintf("Intercept in [%s, %s]", intercept_range[1], intercept_range[2]),
-        priority = "major"
+    criteria_list <- c(
+      criteria_list,
+      list(
+        criterion(
+          "intercept",
+          "between",
+          intercept_range,
+          description = sprintf(
+            "Intercept in [%s, %s]",
+            intercept_range[1],
+            intercept_range[2]
+          ),
+          priority = "major"
+        )
       )
-    ))
+    )
   }
 
   measure_criteria(.list = criteria_list)
@@ -682,15 +788,21 @@ criteria_method_comparison <- function(
 #' @param pct_satisfactory Minimum percentage of satisfactory results.
 #' @export
 criteria_proficiency_testing <- function(
-    max_z_score = 2,
-    pct_satisfactory = 100) {
-
+  max_z_score = 2,
+  pct_satisfactory = 100
+) {
   measure_criteria(
-    criterion("max_abs_score", "<=", max_z_score,
+    criterion(
+      "max_abs_score",
+      "<=",
+      max_z_score,
       description = sprintf("Max |z-score| <= %s", max_z_score),
       priority = "critical"
     ),
-    criterion("pct_satisfactory", ">=", pct_satisfactory,
+    criterion(
+      "pct_satisfactory",
+      ">=",
+      pct_satisfactory,
       description = sprintf("Satisfactory results >= %s%%", pct_satisfactory),
       priority = "major"
     )
@@ -702,23 +814,39 @@ criteria_proficiency_testing <- function(
 #' @param me_cv Maximum acceptable CV of matrix effects.
 #' @export
 criteria_matrix_effects <- function(
-    me_range = c(80, 120),
-    me_cv = 15) {
-
+  me_range = c(80, 120),
+  me_cv = 15
+) {
   measure_criteria(
-    criterion("mean_me_pct", "between", me_range,
-      description = sprintf("Mean ME in [%s%%, %s%%]", me_range[1], me_range[2]),
+    criterion(
+      "mean_me_pct",
+      "between",
+      me_range,
+      description = sprintf(
+        "Mean ME in [%s%%, %s%%]",
+        me_range[1],
+        me_range[2]
+      ),
       priority = "critical"
     ),
-    criterion("cv_me_pct", "<=", me_cv,
+    criterion(
+      "cv_me_pct",
+      "<=",
+      me_cv,
       description = sprintf("CV of ME <= %s%%", me_cv),
       priority = "major"
     ),
-    criterion("min_me_pct", ">=", me_range[1],
+    criterion(
+      "min_me_pct",
+      ">=",
+      me_range[1],
       description = sprintf("Min ME >= %s%%", me_range[1]),
       priority = "major"
     ),
-    criterion("max_me_pct", "<=", me_range[2],
+    criterion(
+      "max_me_pct",
+      "<=",
+      me_range[2],
       description = sprintf("Max ME <= %s%%", me_range[2]),
       priority = "major"
     )
@@ -729,14 +857,20 @@ criteria_matrix_effects <- function(
 #' @param surrogate_recovery Acceptable surrogate recovery range.
 #' @export
 criteria_surrogate_recovery <- function(
-    surrogate_recovery = c(70, 130)) {
-
+  surrogate_recovery = c(70, 130)
+) {
   measure_criteria(
-    criterion("min_recovery", ">=", surrogate_recovery[1],
+    criterion(
+      "min_recovery",
+      ">=",
+      surrogate_recovery[1],
       description = sprintf("Min recovery >= %s%%", surrogate_recovery[1]),
       priority = "major"
     ),
-    criterion("max_recovery", "<=", surrogate_recovery[2],
+    criterion(
+      "max_recovery",
+      "<=",
+      surrogate_recovery[2],
       description = sprintf("Max recovery <= %s%%", surrogate_recovery[2]),
       priority = "major"
     )

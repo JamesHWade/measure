@@ -814,14 +814,16 @@ measure_summarize <- function(
 #' @return The result of applying fn to x
 #' @noRd
 .eval_transform <- function(fn, x, fn_args, capture = FALSE) {
-
   if (capture) {
     tc <- textConnection("output_text", "w", local = TRUE)
     sink(tc)
-    on.exit({
-      sink()
-      close(tc)
-    }, add = TRUE)
+    on.exit(
+      {
+        sink()
+        close(tc)
+      },
+      add = TRUE
+    )
   }
 
   res <- do.call(fn, c(list(x), fn_args))

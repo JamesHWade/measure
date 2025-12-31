@@ -21,10 +21,13 @@ create_test_data <- function() {
 capture_with_result <- function(code) {
   tc <- textConnection("output_text", "w", local = TRUE)
   sink(tc)
-  on.exit({
-    sink()
-    close(tc)
-  }, add = TRUE)
+  on.exit(
+    {
+      sink()
+      close(tc)
+    },
+    add = TRUE
+  )
   result <- code
   list(result = result, output = output_text)
 }
@@ -687,7 +690,11 @@ test_that("measure_map verbosity = 0 suppresses output", {
   }
 
   # Should not produce output when verbosity = 0
-  captured <- capture_with_result(measure_map(test_data, noisy_fn, verbosity = 0L))
+  captured <- capture_with_result(measure_map(
+    test_data,
+    noisy_fn,
+    verbosity = 0L
+  ))
   result <- captured$result
   output <- captured$output
 
@@ -704,7 +711,11 @@ test_that("measure_map verbosity = 1 allows output (default)", {
   }
 
   # Should produce output when verbosity = 1
-  captured <- capture_with_result(measure_map(test_data, noisy_fn, verbosity = 1L))
+  captured <- capture_with_result(measure_map(
+    test_data,
+    noisy_fn,
+    verbosity = 1L
+  ))
   output <- captured$output
 
   expect_true(length(output) > 0)

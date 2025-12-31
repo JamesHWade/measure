@@ -17,10 +17,11 @@ create_peaked_data <- function() {
   # Create synthetic data with known peaks
   x <- seq(0, 100, by = 1)
   # Three Gaussian peaks at x = 20, 50, 80
-  y <- 0.5 * exp(-((x - 20)^2) / 20) +
-       1.0 * exp(-((x - 50)^2) / 30) +
-       0.3 * exp(-((x - 80)^2) / 15) +
-       rnorm(length(x), sd = 0.01)
+  y <- 0.5 *
+    exp(-((x - 20)^2) / 20) +
+    1.0 * exp(-((x - 50)^2) / 30) +
+    0.3 * exp(-((x - 80)^2) / 15) +
+    rnorm(length(x), sd = 0.01)
 
   tibble::tibble(
     id = "sample1",
@@ -89,13 +90,16 @@ test_that("step_measure_peaks_detect respects min_height", {
 
 test_that("step_measure_peaks_detect respects min_distance", {
   rec <- prep_peaked_recipe(function(r) {
-    step_measure_peaks_detect(r, method = "derivative", min_height = 0.05,
-                              min_distance = 40)
+    step_measure_peaks_detect(
+      r,
+      method = "derivative",
+      min_height = 0.05,
+      min_distance = 40
+    )
   })
 
   result <- bake(rec, new_data = NULL)
   peaks <- result$.peaks[[1]]
-
 
   # Ensure at least one expectation always runs
   expect_true(nrow(peaks) >= 0)

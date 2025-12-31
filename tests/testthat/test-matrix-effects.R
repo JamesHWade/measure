@@ -21,7 +21,7 @@ test_that("measure_matrix_effect calculates basic ME", {
   expect_s3_class(me, "measure_matrix_effect")
 
   # Mean ME should be ~92.3%
-  expect_true(me$statistics$mean_me < 100)  # Suppression
+  expect_true(me$statistics$mean_me < 100) # Suppression
   expect_true(me$statistics$mean_me > 80)
 })
 
@@ -31,9 +31,15 @@ test_that("measure_matrix_effect handles grouped data", {
     concentration = rep(c("low", "high", "low", "high"), 2),
     response = c(
       # Matrix
-      45, 90, 48, 95,
+      45,
+      90,
+      48,
+      95,
       # Neat
-      50, 100, 50, 100
+      50,
+      100,
+      50,
+      100
     )
   )
 
@@ -55,22 +61,30 @@ test_that("measure_matrix_effect classifies suppression/enhancement", {
   # Strong suppression
   data_suppress <- data.frame(
     sample_type = c("matrix", "neat"),
-    response = c(50, 100)  # 50% ME
+    response = c(50, 100) # 50% ME
   )
 
   me_suppress <- measure_matrix_effect(
-    data_suppress, "response", "sample_type", "matrix", "neat"
+    data_suppress,
+    "response",
+    "sample_type",
+    "matrix",
+    "neat"
   )
   expect_equal(me_suppress$results$interpretation, "strong_suppression")
 
   # Enhancement
   data_enhance <- data.frame(
     sample_type = c("matrix", "neat"),
-    response = c(110, 100)  # 110% ME
+    response = c(110, 100) # 110% ME
   )
 
   me_enhance <- measure_matrix_effect(
-    data_enhance, "response", "sample_type", "matrix", "neat"
+    data_enhance,
+    "response",
+    "sample_type",
+    "matrix",
+    "neat"
   )
   expect_equal(me_enhance$results$interpretation, "enhancement")
 })
@@ -129,7 +143,11 @@ test_that("autoplot.measure_matrix_effect returns ggplot", {
   )
 
   me <- measure_matrix_effect(
-    data, "response", "sample_type", "matrix", "neat",
+    data,
+    "response",
+    "sample_type",
+    "matrix",
+    "neat",
     concentration_col = "concentration"
   )
 
@@ -152,13 +170,19 @@ test_that("step_measure_standard_addition calculates concentrations", {
     addition = rep(c(0, 10, 20, 30), 2),
     response = c(
       # S1: slope=10, intercept=150 -> original = 15
-      150, 250, 350, 450,
+      150,
+      250,
+      350,
+      450,
       # S2: slope=10, intercept=250 -> original = 25
-      250, 350, 450, 550
+      250,
+      350,
+      450,
+      550
     )
   )
 
-  rec <- recipes::recipe(~ ., data = sa_data) |>
+  rec <- recipes::recipe(~., data = sa_data) |>
     step_measure_standard_addition(
       response,
       addition_col = "addition",
@@ -185,7 +209,7 @@ test_that("step_measure_standard_addition includes diagnostics", {
     response = c(150, 250, 350, 450)
   )
 
-  rec <- recipes::recipe(~ ., data = sa_data) |>
+  rec <- recipes::recipe(~., data = sa_data) |>
     step_measure_standard_addition(
       response,
       addition_col = "addition",
@@ -212,15 +236,15 @@ test_that("step_measure_standard_addition validates inputs", {
   )
 
   # Missing sample_id_col
-expect_error(
-    recipes::recipe(~ ., data = sa_data) |>
+  expect_error(
+    recipes::recipe(~., data = sa_data) |>
       step_measure_standard_addition(response, addition_col = "addition"),
     "sample_id_col"
   )
 
   # min_points too small
   expect_error(
-    recipes::recipe(~ ., data = sa_data) |>
+    recipes::recipe(~., data = sa_data) |>
       step_measure_standard_addition(
         response,
         addition_col = "addition",
@@ -234,12 +258,12 @@ expect_error(
 test_that("step_measure_standard_addition handles insufficient points", {
   sa_data <- data.frame(
     sample_id = c("S1", "S1", "S2"),
-    addition = c(0, 10, 0),  # S2 has only 1 point
+    addition = c(0, 10, 0), # S2 has only 1 point
     response = c(100, 200, 150)
   )
 
   expect_warning(
-    rec <- recipes::recipe(~ ., data = sa_data) |>
+    rec <- recipes::recipe(~., data = sa_data) |>
       step_measure_standard_addition(
         response,
         addition_col = "addition",
@@ -258,7 +282,7 @@ test_that("tidy.step_measure_standard_addition returns calibrations", {
     response = c(100, 200, 300, 150, 250, 350)
   )
 
-  rec <- recipes::recipe(~ ., data = sa_data) |>
+  rec <- recipes::recipe(~., data = sa_data) |>
     step_measure_standard_addition(
       response,
       addition_col = "addition",
@@ -269,7 +293,7 @@ test_that("tidy.step_measure_standard_addition returns calibrations", {
   tidy_sa <- tidy(rec, number = 1)
 
   expect_s3_class(tidy_sa, "tbl_df")
-  expect_equal(nrow(tidy_sa), 2)  # 2 samples
+  expect_equal(nrow(tidy_sa), 2) # 2 samples
   expect_true("original_concentration" %in% names(tidy_sa))
   expect_true("slope" %in% names(tidy_sa))
   expect_true("r_squared" %in% names(tidy_sa))
@@ -282,7 +306,7 @@ test_that("print.step_measure_standard_addition works", {
     response = c(100, 200, 300)
   )
 
-  rec <- recipes::recipe(~ ., data = sa_data) |>
+  rec <- recipes::recipe(~., data = sa_data) |>
     step_measure_standard_addition(
       response,
       addition_col = "addition",
@@ -358,11 +382,11 @@ test_that("step_measure_standard_addition warns on zero/negative slope", {
   sa_data <- data.frame(
     sample_id = rep("S1", 3),
     addition = c(0, 10, 20),
-    response = c(300, 200, 100)  # Decreasing - gives negative slope
+    response = c(300, 200, 100) # Decreasing - gives negative slope
   )
 
   expect_warning(
-    rec <- recipes::recipe(~ ., data = sa_data) |>
+    rec <- recipes::recipe(~., data = sa_data) |>
       step_measure_standard_addition(
         response,
         addition_col = "addition",

@@ -36,7 +36,6 @@ NULL
 #'
 #' @export
 measure_column_patterns <- list(
-
   wavenumber = "^wn_",
   wavelength = "^nm_",
 
@@ -115,61 +114,96 @@ measure_identify_columns <- function(data, patterns = measure_column_patterns) {
   col_names <- names(data)
 
   # Detect type for each column
-  types <- vapply(col_names, function(col) {
-    for (type_name in names(patterns)) {
-      if (grepl(patterns[[type_name]], col, ignore.case = TRUE)) {
-        return(type_name)
+  types <- vapply(
+    col_names,
+    function(col) {
+      for (type_name in names(patterns)) {
+        if (grepl(patterns[[type_name]], col, ignore.case = TRUE)) {
+          return(type_name)
+        }
       }
-    }
-    return("other")
-  }, character(1), USE.NAMES = FALSE)
+      return("other")
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
 
   # Determine suggested roles
-  suggested_roles <- vapply(seq_along(col_names), function(i) {
-    col <- col_names[i]
-    type <- types[i]
-    col_data <- data[[col]]
+  suggested_roles <- vapply(
+    seq_along(col_names),
+    function(i) {
+      col <- col_names[i]
+      type <- types[i]
+      col_data <- data[[col]]
 
-    # Measurement columns become predictors
-    if (type != "other") {
-      return("predictor")
-    }
-
-    # For "other" columns, use heuristics
-    if (is.character(col_data) || is.factor(col_data)) {
-      # Check if it looks like an ID (mostly unique values)
-      unique_ratio <- length(unique(col_data)) / length(col_data)
-      if (unique_ratio > 0.9) {
-        return("id")
+      # Measurement columns become predictors
+      if (type != "other") {
+        return("predictor")
       }
-      return("predictor")
-    }
 
-    if (is.numeric(col_data)) {
-      # Could be outcome or predictor - suggest based on column name
-      outcome_hints <- c("outcome", "target", "response", "y",
-                         "concentration", "conc", "amount",
-                         "water", "fat", "protein", "moisture")
-      if (any(vapply(outcome_hints, function(h) {
-        grepl(h, col, ignore.case = TRUE)
-      }, logical(1)))) {
-        return("outcome")
+      # For "other" columns, use heuristics
+      if (is.character(col_data) || is.factor(col_data)) {
+        # Check if it looks like an ID (mostly unique values)
+        unique_ratio <- length(unique(col_data)) / length(col_data)
+        if (unique_ratio > 0.9) {
+          return("id")
+        }
+        return("predictor")
       }
-      return("predictor")
-    }
 
-    "predictor"
-  }, character(1))
+      if (is.numeric(col_data)) {
+        # Could be outcome or predictor - suggest based on column name
+        outcome_hints <- c(
+          "outcome",
+          "target",
+          "response",
+          "y",
+          "concentration",
+          "conc",
+          "amount",
+          "water",
+          "fat",
+          "protein",
+          "moisture"
+        )
+        if (
+          any(vapply(
+            outcome_hints,
+            function(h) {
+              grepl(h, col, ignore.case = TRUE)
+            },
+            logical(1)
+          ))
+        ) {
+          return("outcome")
+        }
+        return("predictor")
+      }
+
+      "predictor"
+    },
+    character(1)
+  )
 
   # Count non-NA values
-  n_values <- vapply(col_names, function(col) {
-    sum(!is.na(data[[col]]))
-  }, integer(1), USE.NAMES = FALSE)
+  n_values <- vapply(
+    col_names,
+    function(col) {
+      sum(!is.na(data[[col]]))
+    },
+    integer(1),
+    USE.NAMES = FALSE
+  )
 
   # Get column classes
-  classes <- vapply(col_names, function(col) {
-    paste(class(data[[col]]), collapse = "/")
-  }, character(1), USE.NAMES = FALSE)
+  classes <- vapply(
+    col_names,
+    function(col) {
+      paste(class(data[[col]]), collapse = "/")
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
 
   tibble::tibble(
     column = col_names,
@@ -232,14 +266,15 @@ measure_identify_columns <- function(data, patterns = measure_column_patterns) {
 #' }
 #'
 #' @export
-set_measure_roles <- function(recipe,
-                              id_cols = NULL,
-                              blank_cols = NULL,
-                              qc_cols = NULL,
-                              standard_cols = NULL,
-                              metadata_cols = NULL,
-                              measure_cols = NULL) {
-
+set_measure_roles <- function(
+  recipe,
+  id_cols = NULL,
+  blank_cols = NULL,
+  qc_cols = NULL,
+  standard_cols = NULL,
+  metadata_cols = NULL,
+  measure_cols = NULL
+) {
   if (!inherits(recipe, "recipe")) {
     cli::cli_abort("{.arg recipe} must be a recipe object.")
   }
@@ -347,33 +382,56 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
   # Check for input step
   input_steps <- grep("^step_measure_input", step_classes)
   if (length(input_steps) == 0) {
-    add_issue("error", "no_input",
-              "Recipe has no input step. Add step_measure_input_wide() or step_measure_input_long().")
+    add_issue(
+      "error",
+      "no_input",
+      "Recipe has no input step. Add step_measure_input_wide() or step_measure_input_long()."
+    )
   } else if (length(input_steps) > 1) {
-    add_issue("error", "multiple_inputs",
-              paste("Recipe has", length(input_steps), "input steps. Only one is allowed."))
+    add_issue(
+      "error",
+      "multiple_inputs",
+      paste(
+        "Recipe has",
+        length(input_steps),
+        "input steps. Only one is allowed."
+      )
+    )
   }
 
   # Check for output step
   output_steps <- grep("^step_measure_output", step_classes)
   if (length(output_steps) == 0) {
-    add_issue("warning", "no_output",
-              "Recipe has no output step. Data will remain in internal .measures format.")
+    add_issue(
+      "warning",
+      "no_output",
+      "Recipe has no output step. Data will remain in internal .measures format."
+    )
   }
 
   # Check step order
   if (length(input_steps) > 0 && length(output_steps) > 0) {
     if (min(output_steps) < max(input_steps)) {
-      add_issue("error", "step_order",
-                "Output step appears before input step. Reorder your recipe steps.")
+      add_issue(
+        "error",
+        "step_order",
+        "Output step appears before input step. Reorder your recipe steps."
+      )
     }
 
     # Check for processing after output
-    processing_steps <- grep("^step_measure_(?!input|output)", step_classes, perl = TRUE)
+    processing_steps <- grep(
+      "^step_measure_(?!input|output)",
+      step_classes,
+      perl = TRUE
+    )
     if (length(processing_steps) > 0 && length(output_steps) > 0) {
       if (any(processing_steps > min(output_steps))) {
-        add_issue("warning", "post_output_processing",
-                  "Processing steps found after output step. These won't affect the output.")
+        add_issue(
+          "warning",
+          "post_output_processing",
+          "Processing steps found after output step. These won't affect the output."
+        )
       }
     }
   }
@@ -386,20 +444,33 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
     has_id <- any(var_info$role == "id", na.rm = TRUE)
 
     if (n_predictors == 0 && length(input_steps) == 0) {
-      add_issue("warning", "no_predictors",
-                "No predictor columns identified. Check your recipe formula.")
+      add_issue(
+        "warning",
+        "no_predictors",
+        "No predictor columns identified. Check your recipe formula."
+      )
     }
 
     if (!has_id) {
-      add_issue("info", "no_id",
-                "No ID column identified. Consider using update_role(col, new_role = 'id').")
+      add_issue(
+        "info",
+        "no_id",
+        "No ID column identified. Consider using update_role(col, new_role = 'id')."
+      )
     }
 
     # Large number of columns warning
     if (n_predictors > 1000) {
-      add_issue("info", "many_predictors",
-                paste0("Recipe has ", n_predictors, " predictor columns. ",
-                       "Consider dimension reduction (PCA, binning, etc.)."))
+      add_issue(
+        "info",
+        "many_predictors",
+        paste0(
+          "Recipe has ",
+          n_predictors,
+          " predictor columns. ",
+          "Consider dimension reduction (PCA, binning, etc.)."
+        )
+      )
     }
   }
 

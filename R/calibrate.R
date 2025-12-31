@@ -101,18 +101,19 @@
 #' #     method = "spline"
 #' #   )
 step_measure_calibrate_x <- function(
-    recipe,
-    calibration,
-    from = "x",
-    to = "y",
-    method = "spline",
-    extrapolate = FALSE,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    cal_fn = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_calibrate_x")) {
+  recipe,
+  calibration,
+  from = "x",
+  to = "y",
+  method = "spline",
+  extrapolate = FALSE,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  cal_fn = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_calibrate_x")
+) {
   if (missing(calibration)) {
     cli::cli_abort("{.arg calibration} is required.")
   }
@@ -136,17 +137,18 @@ step_measure_calibrate_x <- function(
 }
 
 step_measure_calibrate_x_new <- function(
-    calibration,
-    from,
-    to,
-    method,
-    extrapolate,
-    measures,
-    role,
-    trained,
-    cal_fn,
-    skip,
-    id) {
+  calibration,
+  from,
+  to,
+  method,
+  extrapolate,
+  measures,
+  role,
+  trained,
+  cal_fn,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_calibrate_x",
     calibration = calibration,
@@ -262,9 +264,10 @@ bake.step_measure_calibrate_x <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_calibrate_x <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "X-axis calibration"
   method_str <- paste0(" (", x$method, ")")
 
@@ -369,15 +372,16 @@ required_pkgs.step_measure_calibrate_x <- function(x, ...) {
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_calibrate_y(calibration = function(x) log10(x + 0.001))
 step_measure_calibrate_y <- function(
-    recipe,
-    response_factor = 1.0,
-    calibration = NULL,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    cal_fn = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_calibrate_y")) {
+  recipe,
+  response_factor = 1.0,
+  calibration = NULL,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  cal_fn = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_calibrate_y")
+) {
   recipes::add_step(
     recipe,
     step_measure_calibrate_y_new(
@@ -394,14 +398,15 @@ step_measure_calibrate_y <- function(
 }
 
 step_measure_calibrate_y_new <- function(
-    response_factor,
-    calibration,
-    measures,
-    role,
-    trained,
-    cal_fn,
-    skip,
-    id) {
+  response_factor,
+  calibration,
+  measures,
+  role,
+  trained,
+  cal_fn,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_calibrate_y",
     response_factor = response_factor,
@@ -475,9 +480,10 @@ bake.step_measure_calibrate_y <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_calibrate_y <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Y-axis calibration"
 
   if (x$trained) {

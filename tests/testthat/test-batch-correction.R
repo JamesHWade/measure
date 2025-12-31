@@ -9,7 +9,10 @@ create_batch_data <- function() {
   set.seed(42)
   data.frame(
     sample_id = paste0("S", 1:20),
-    sample_type = rep(c("reference", "unknown", "unknown", "unknown", "reference"), 4),
+    sample_type = rep(
+      c("reference", "unknown", "unknown", "unknown", "reference"),
+      4
+    ),
     batch_id = rep(c("B1", "B1", "B2", "B2"), 5),
     feature1 = c(rep(100, 10), rep(120, 10)) + rnorm(20, sd = 3),
     feature2 = c(rep(50, 10), rep(45, 10)) + rnorm(20, sd = 2)
@@ -23,7 +26,7 @@ create_batch_data <- function() {
 test_that("step_measure_batch_reference creates a recipe step", {
   data <- create_batch_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(feature1, feature2, batch_col = "batch_id")
 
@@ -35,7 +38,7 @@ test_that("step_measure_batch_reference creates a recipe step", {
 test_that("step_measure_batch_reference preps successfully", {
   data <- create_batch_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(feature1, feature2, batch_col = "batch_id") |>
     prep()
@@ -47,7 +50,7 @@ test_that("step_measure_batch_reference preps successfully", {
 test_that("step_measure_batch_reference median_ratio corrects batch effects", {
   data <- create_batch_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(
       feature1,
@@ -59,8 +62,12 @@ test_that("step_measure_batch_reference median_ratio corrects batch effects", {
   corrected <- bake(rec, new_data = NULL)
 
   # Reference samples should now have similar values across batches
-  ref_b1 <- corrected$feature1[corrected$sample_type == "reference" & corrected$batch_id == "B1"]
-  ref_b2 <- corrected$feature1[corrected$sample_type == "reference" & corrected$batch_id == "B2"]
+  ref_b1 <- corrected$feature1[
+    corrected$sample_type == "reference" & corrected$batch_id == "B1"
+  ]
+  ref_b2 <- corrected$feature1[
+    corrected$sample_type == "reference" & corrected$batch_id == "B2"
+  ]
 
   # Medians should be much closer after correction
   expect_true(abs(median(ref_b1) - median(ref_b2)) < 10)
@@ -69,7 +76,7 @@ test_that("step_measure_batch_reference median_ratio corrects batch effects", {
 test_that("step_measure_batch_reference mean_center method works", {
   data <- create_batch_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(
       feature1,
@@ -89,8 +96,8 @@ test_that("step_measure_batch_reference requires sufficient reference samples", 
   # Create data with reference samples in both batches, but only 1 in B2
   # batch_id positions: B1=1,2,5,6,9,10,13,14,17,18 and B2=3,4,7,8,11,12,15,16,19,20
   sample_types <- rep("unknown", 20)
-  sample_types[c(1, 5, 9)] <- "reference"  # 3 refs in B1
-  sample_types[c(3)] <- "reference"         # Only 1 ref in B2
+  sample_types[c(1, 5, 9)] <- "reference" # 3 refs in B1
+  sample_types[c(3)] <- "reference" # Only 1 ref in B2
 
   data <- data.frame(
     sample_id = paste0("S", 1:20),
@@ -99,7 +106,7 @@ test_that("step_measure_batch_reference requires sufficient reference samples", 
     feature1 = rnorm(20, 100, sd = 5)
   )
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(feature1, batch_col = "batch_id", min_ref = 2)
 
@@ -110,7 +117,7 @@ test_that("step_measure_batch_reference validates required columns", {
   data <- create_batch_data()
   data$batch_id <- NULL
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     step_measure_batch_reference(feature1, batch_col = "batch_id")
 
   expect_error(prep(rec), "not found")
@@ -120,7 +127,7 @@ test_that("step_measure_batch_reference target_batch parameter works", {
   data <- create_batch_data()
 
   # Target B2 instead of default B1
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(
       feature1,
@@ -136,7 +143,7 @@ test_that("step_measure_batch_reference target_batch parameter works", {
 test_that("step_measure_batch_reference global target works", {
   data <- create_batch_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(
       feature1,
@@ -152,7 +159,7 @@ test_that("step_measure_batch_reference global target works", {
 test_that("step_measure_batch_reference tidy method works", {
   data <- create_batch_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(feature1, feature2, batch_col = "batch_id") |>
     prep()
@@ -170,7 +177,7 @@ test_that("step_measure_batch_reference tidy method works", {
 test_that("step_measure_batch_reference print method works", {
   data <- create_batch_data()
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(feature1, batch_col = "batch_id")
 
@@ -183,9 +190,13 @@ test_that("step_measure_batch_reference print method works", {
 
 test_that("step_measure_batch_reference handles custom reference_type", {
   data <- create_batch_data()
-  data$sample_type <- ifelse(data$sample_type == "reference", "pool", data$sample_type)
+  data$sample_type <- ifelse(
+    data$sample_type == "reference",
+    "pool",
+    data$sample_type
+  )
 
-  rec <- recipe(~ ., data = data) |>
+  rec <- recipe(~., data = data) |>
     update_role(sample_id, new_role = "id") |>
     step_measure_batch_reference(
       feature1,

@@ -98,17 +98,18 @@
 #' #   step_measure_input_long(...) |>
 #' #   step_measure_subtract_blank(blank_col = sample_type, blank_value = "blank")
 step_measure_subtract_blank <- function(
-    recipe,
-    blank = NULL,
-    blank_col = NULL,
-    blank_value = NULL,
-    method = "subtract",
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    learned_blank = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_subtract_blank")) {
+  recipe,
+  blank = NULL,
+  blank_col = NULL,
+  blank_value = NULL,
+  method = "subtract",
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  learned_blank = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_subtract_blank")
+) {
   # Capture blank_col - use NULL directly if not provided, otherwise capture as
 
   # string to avoid quosure issues with recipes' tune detection
@@ -137,16 +138,17 @@ step_measure_subtract_blank <- function(
 }
 
 step_measure_subtract_blank_new <- function(
-    blank,
-    blank_col,
-    blank_value,
-    method,
-    measures,
-    role,
-    trained,
-    learned_blank,
-    skip,
-    id) {
+  blank,
+  blank_col,
+  blank_value,
+  method,
+  measures,
+  role,
+  trained,
+  learned_blank,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_subtract_blank",
     blank = blank,
@@ -186,7 +188,10 @@ prep.step_measure_subtract_blank <- function(x, training, info = NULL, ...) {
   if (!is.null(x$blank)) {
     # Mode A: External blank provided
     learned_blank <- .validate_external_reference(
-      x$blank, training, measure_cols, "blank"
+      x$blank,
+      training,
+      measure_cols,
+      "blank"
     )
   } else {
     # Mode B: Learn from training data
@@ -256,15 +261,22 @@ bake.step_measure_subtract_blank <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_subtract_blank <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Blank subtraction"
   method_str <- if (x$method == "divide") " (divide)" else ""
 
   if (x$trained) {
     source <- if (!is.null(x$blank)) "external" else "learned"
-    cat(title, method_str, " [", source, "]", " on <internal measurements>",
+    cat(
+      title,
+      method_str,
+      " [",
+      source,
+      "]",
+      " on <internal measurements>",
       sep = ""
     )
   } else {
@@ -345,15 +357,16 @@ required_pkgs.step_measure_subtract_blank <- function(x, ...) {
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_subtract_reference(reference = ref_spectrum, method = "divide")
 step_measure_subtract_reference <- function(
-    recipe,
-    reference,
-    method = "subtract",
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    learned_ref = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_subtract_reference")) {
+  recipe,
+  reference,
+  method = "subtract",
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  learned_ref = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_subtract_reference")
+) {
   if (missing(reference)) {
     cli::cli_abort("{.arg reference} is required.")
   }
@@ -374,14 +387,15 @@ step_measure_subtract_reference <- function(
 }
 
 step_measure_subtract_reference_new <- function(
-    reference,
-    method,
-    measures,
-    role,
-    trained,
-    learned_ref,
-    skip,
-    id) {
+  reference,
+  method,
+  measures,
+  role,
+  trained,
+  learned_ref,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_subtract_reference",
     reference = reference,
@@ -396,7 +410,12 @@ step_measure_subtract_reference_new <- function(
 }
 
 #' @export
-prep.step_measure_subtract_reference <- function(x, training, info = NULL, ...) {
+prep.step_measure_subtract_reference <- function(
+  x,
+  training,
+  info = NULL,
+  ...
+) {
   check_for_measure(training)
 
   # Resolve which columns to process
@@ -415,7 +434,10 @@ prep.step_measure_subtract_reference <- function(x, training, info = NULL, ...) 
 
   # Validate and convert reference
   learned_ref <- .validate_external_reference(
-    x$reference, training, measure_cols, "reference"
+    x$reference,
+    training,
+    measure_cols,
+    "reference"
   )
 
   step_measure_subtract_reference_new(
@@ -442,9 +464,10 @@ bake.step_measure_subtract_reference <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_subtract_reference <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Reference "
   method_str <- if (x$method == "divide") "division" else "subtraction"
 
@@ -530,16 +553,17 @@ required_pkgs.step_measure_subtract_reference <- function(x, ...) {
 #'     blank = blank_spectrum
 #'   )
 step_measure_ratio_reference <- function(
-    recipe,
-    reference,
-    blank = NULL,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    learned_ref = NULL,
-    learned_blank = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_ratio_reference")) {
+  recipe,
+  reference,
+  blank = NULL,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  learned_ref = NULL,
+  learned_blank = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_ratio_reference")
+) {
   if (missing(reference)) {
     cli::cli_abort("{.arg reference} is required.")
   }
@@ -561,15 +585,16 @@ step_measure_ratio_reference <- function(
 }
 
 step_measure_ratio_reference_new <- function(
-    reference,
-    blank,
-    measures,
-    role,
-    trained,
-    learned_ref,
-    learned_blank,
-    skip,
-    id) {
+  reference,
+  blank,
+  measures,
+  role,
+  trained,
+  learned_ref,
+  learned_blank,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_ratio_reference",
     reference = reference,
@@ -597,14 +622,20 @@ prep.step_measure_ratio_reference <- function(x, training, info = NULL, ...) {
 
   # Validate and convert reference
   learned_ref <- .validate_external_reference(
-    x$reference, training, measure_cols, "reference"
+    x$reference,
+    training,
+    measure_cols,
+    "reference"
   )
 
   # Validate and convert blank (if provided)
   learned_blank <- NULL
   if (!is.null(x$blank)) {
     learned_blank <- .validate_external_reference(
-      x$blank, training, measure_cols, "blank"
+      x$blank,
+      training,
+      measure_cols,
+      "blank"
     )
   }
 
@@ -634,9 +665,10 @@ bake.step_measure_ratio_reference <- function(object, new_data, ...) {
 
 #' @export
 print.step_measure_ratio_reference <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Reference ratio"
   blank_str <- if (!is.null(x$blank)) " (with blank)" else ""
 
@@ -693,7 +725,12 @@ required_pkgs.step_measure_ratio_reference <- function(x, ...) {
 #' @param arg_name Name of argument for error messages
 #' @return Named list of numeric vectors (one per measure column)
 #' @noRd
-.validate_external_reference <- function(ref, training, measure_cols, arg_name) {
+.validate_external_reference <- function(
+  ref,
+  training,
+  measure_cols,
+  arg_name
+) {
   result <- list()
 
   for (col in measure_cols) {
@@ -706,8 +743,10 @@ required_pkgs.step_measure_ratio_reference <- function(x, ...) {
         # Try interpolation if locations don't match exactly
         if (length(ref$location) >= 2) {
           interp_values <- stats::approx(
-            ref$location, ref$value,
-            xout = expected_locs, rule = 2
+            ref$location,
+            ref$value,
+            xout = expected_locs,
+            rule = 2
           )$y
           result[[col]] <- interp_values
           cli::cli_warn(c(
@@ -739,8 +778,10 @@ required_pkgs.step_measure_ratio_reference <- function(x, ...) {
       }
       # Interpolate to match locations
       interp_values <- stats::approx(
-        ref$location, ref$value,
-        xout = expected_locs, rule = 2
+        ref$location,
+        ref$value,
+        xout = expected_locs,
+        rule = 2
       )$y
       result[[col]] <- interp_values
     } else {

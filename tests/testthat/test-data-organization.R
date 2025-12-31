@@ -17,12 +17,15 @@ test_that("measure_identify_columns detects column types", {
 
   expect_s3_class(result, "tbl_df")
   expect_equal(nrow(result), ncol(df))
-  expect_named(result, c("column", "type", "suggested_role", "n_values", "class"))
+  expect_named(
+    result,
+    c("column", "type", "suggested_role", "n_values", "class")
+  )
 
   # Check type detection
   expect_equal(result$type[result$column == "wn_1000"], "wavenumber")
   expect_equal(result$type[result$column == "nm_500"], "wavelength")
- expect_equal(result$type[result$column == "rt_2.5"], "retention_time")
+  expect_equal(result$type[result$column == "rt_2.5"], "retention_time")
   expect_equal(result$type[result$column == "mz_100"], "mz")
   expect_equal(result$type[result$column == "x_001"], "generic")
   expect_equal(result$type[result$column == "sample_id"], "other")
@@ -45,7 +48,10 @@ test_that("measure_identify_columns suggests appropriate roles", {
 
   # Outcome hints should work
   expect_equal(result$suggested_role[result$column == "outcome_y"], "outcome")
-  expect_equal(result$suggested_role[result$column == "concentration"], "outcome")
+  expect_equal(
+    result$suggested_role[result$column == "concentration"],
+    "outcome"
+  )
 
   # Measurement columns should be predictors
   expect_equal(result$suggested_role[result$column == "wn_1000"], "predictor")

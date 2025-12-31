@@ -81,16 +81,16 @@
 #'
 #' @export
 measure_calibration_fit <- function(
-    data,
-    formula,
-    model = c("linear", "quadratic"),
-    weights = c("none", "1/x", "1/x2", "1/y", "1/y2"),
-    origin = FALSE,
-    outlier_method = c("none", "studentized", "cook"),
-    outlier_threshold = NULL,
-    outlier_action = c("flag", "remove"),
-    sample_type_col = NULL) {
-
+  data,
+  formula,
+  model = c("linear", "quadratic"),
+  weights = c("none", "1/x", "1/x2", "1/y", "1/y2"),
+  origin = FALSE,
+  outlier_method = c("none", "studentized", "cook"),
+  outlier_threshold = NULL,
+  outlier_action = c("flag", "remove"),
+  sample_type_col = NULL
+) {
   call <- match.call()
   model <- match.arg(model)
   outlier_method <- match.arg(outlier_method)
@@ -118,7 +118,9 @@ measure_calibration_fit <- function(
   # Parse formula
   formula_terms <- all.vars(formula)
   if (length(formula_terms) != 2) {
-    cli::cli_abort("Formula must have exactly two variables (response ~ concentration).")
+    cli::cli_abort(
+      "Formula must have exactly two variables (response ~ concentration)."
+    )
   }
   response_col <- formula_terms[1]
   conc_col <- formula_terms[2]
@@ -128,14 +130,18 @@ measure_calibration_fit <- function(
     cli::cli_abort("Response column {.field {response_col}} not found in data.")
   }
   if (!conc_col %in% names(data)) {
-    cli::cli_abort("Concentration column {.field {conc_col}} not found in data.")
+    cli::cli_abort(
+      "Concentration column {.field {conc_col}} not found in data."
+    )
   }
 
   # Filter to standards if sample_type_col provided
   fit_data <- data
   if (!is.null(sample_type_col)) {
     if (!sample_type_col %in% names(data)) {
-      cli::cli_abort("Sample type column {.field {sample_type_col}} not found in data.")
+      cli::cli_abort(
+        "Sample type column {.field {sample_type_col}} not found in data."
+      )
     }
     fit_data <- data[data[[sample_type_col]] == "standard", , drop = FALSE]
     if (nrow(fit_data) == 0) {
@@ -161,7 +167,12 @@ measure_calibration_fit <- function(
   }
 
   # Build formula based on model type and origin
-  fit_formula <- .build_calibration_formula(response_col, conc_col, model, origin)
+  fit_formula <- .build_calibration_formula(
+    response_col,
+    conc_col,
+    model,
+    origin
+  )
 
   # Fit the model
   if (weights_type == "none") {
@@ -173,7 +184,12 @@ measure_calibration_fit <- function(
   }
 
   # Calculate diagnostics
-  diagnostics <- .calculate_calibration_diagnostics(fit, fit_data, conc_col, response_col)
+  diagnostics <- .calculate_calibration_diagnostics(
+    fit,
+    fit_data,
+    conc_col,
+    response_col
+  )
 
   # Outlier detection
   outliers <- NULL
@@ -188,21 +204,34 @@ measure_calibration_fit <- function(
     )
 
     # Refit without outliers if requested
-    if (outlier_action == "remove" && !is.null(outliers) && nrow(outliers) > 0) {
+    if (
+      outlier_action == "remove" && !is.null(outliers) && nrow(outliers) > 0
+    ) {
       outlier_rows <- outliers$.row
       fit_data_clean <- fit_data[-outlier_rows, , drop = FALSE]
 
       if (nrow(fit_data_clean) < 3) {
-        cli::cli_warn("Too few points remain after outlier removal. Keeping all points.")
+        cli::cli_warn(
+          "Too few points remain after outlier removal. Keeping all points."
+        )
       } else {
         if (weights_type == "none") {
           fit <- stats::lm(fit_formula, data = fit_data_clean)
         } else {
           # Weights are already in the .weights column from earlier
-          fit <- stats::lm(fit_formula, data = fit_data_clean, weights = .weights)
+          fit <- stats::lm(
+            fit_formula,
+            data = fit_data_clean,
+            weights = .weights
+          )
         }
         fit_data <- fit_data_clean
-        diagnostics <- .calculate_calibration_diagnostics(fit, fit_data, conc_col, response_col)
+        diagnostics <- .calculate_calibration_diagnostics(
+          fit,
+          fit_data,
+          conc_col,
+          response_col
+        )
       }
     }
   }
@@ -269,12 +298,12 @@ measure_calibration_fit <- function(
 #'
 #' @export
 measure_calibration_predict <- function(
-    object,
-    newdata,
-    interval = c("none", "confidence", "prediction"),
-    level = 0.95,
-    ...) {
-
+  object,
+  newdata,
+  interval = c("none", "confidence", "prediction"),
+  level = 0.95,
+  ...
+) {
   if (!is_measure_calibration(object)) {
     cli::cli_abort("{.arg object} must be a {.cls measure_calibration} object.")
   }
@@ -363,14 +392,33 @@ measure_calibration_predict <- function(
   } else {
     # Quadratic
     if (origin) {
-      stats::as.formula(paste(response_col, "~ 0 +", conc_col, "+ I(", conc_col, "^2)"))
+      stats::as.formula(paste(
+        response_col,
+        "~ 0 +",
+        conc_col,
+        "+ I(",
+        conc_col,
+        "^2)"
+      ))
     } else {
-      stats::as.formula(paste(response_col, "~", conc_col, "+ I(", conc_col, "^2)"))
+      stats::as.formula(paste(
+        response_col,
+        "~",
+        conc_col,
+        "+ I(",
+        conc_col,
+        "^2)"
+      ))
     }
   }
 }
 
-.calculate_calibration_diagnostics <- function(fit, data, conc_col, response_col) {
+.calculate_calibration_diagnostics <- function(
+  fit,
+  data,
+  conc_col,
+  response_col
+) {
   mod_summary <- summary(fit)
 
   # Basic statistics
@@ -398,8 +446,14 @@ measure_calibration_predict <- function(
   )
 }
 
-.detect_calibration_outliers <- function(fit, data, conc_col, response_col, method, threshold) {
-
+.detect_calibration_outliers <- function(
+  fit,
+  data,
+  conc_col,
+  response_col,
+  method,
+  threshold
+) {
   if (method == "studentized") {
     threshold <- threshold %||% 2.5
     resid_std <- stats::rstudent(fit)
@@ -476,7 +530,13 @@ measure_calibration_predict <- function(
   })
 }
 
-.calculate_prediction_intervals <- function(object, responses, pred_conc, interval_type, level) {
+.calculate_prediction_intervals <- function(
+  object,
+  responses,
+  pred_conc,
+  interval_type,
+  level
+) {
   # Simplified interval calculation using delta method approximation
   # For rigorous intervals, would need to implement Fieller's theorem
 
@@ -493,7 +553,7 @@ measure_calibration_predict <- function(
 
   # Additional uncertainty for prediction intervals
   if (interval_type == "prediction") {
-    se_pred <- se_pred * sqrt(1 + 1/n)
+    se_pred <- se_pred * sqrt(1 + 1 / n)
   }
 
   # Critical value
@@ -582,17 +642,19 @@ measure_calibration_predict <- function(
 #'
 #' @export
 measure_calibration_verify <- function(
-    calibration,
-    verification_data,
-    nominal_col = "nominal_conc",
-    acceptance_pct = 15,
-    acceptance_pct_lloq = 20,
-    lloq = NULL,
-    sample_type_col = NULL,
-    criteria = NULL) {
-
+  calibration,
+  verification_data,
+  nominal_col = "nominal_conc",
+  acceptance_pct = 15,
+  acceptance_pct_lloq = 20,
+  lloq = NULL,
+  sample_type_col = NULL,
+  criteria = NULL
+) {
   if (!is_measure_calibration(calibration)) {
-    cli::cli_abort("{.arg calibration} must be a {.cls measure_calibration} object.")
+    cli::cli_abort(
+      "{.arg calibration} must be a {.cls measure_calibration} object."
+    )
   }
 
   if (!is.data.frame(verification_data)) {
@@ -618,7 +680,9 @@ measure_calibration_verify <- function(
   verify_data <- verification_data
   if (!is.null(sample_type_col)) {
     if (!sample_type_col %in% names(verification_data)) {
-      cli::cli_abort("Sample type column {.field {sample_type_col}} not found in data.")
+      cli::cli_abort(
+        "Sample type column {.field {sample_type_col}} not found in data."
+      )
     }
     sample_types <- tolower(verification_data[[sample_type_col]])
     is_verify <- grepl("qc|ccv|verification|standard", sample_types)
@@ -648,7 +712,7 @@ measure_calibration_verify <- function(
   # Determine acceptance limits for each sample
   if (!is.null(lloq)) {
     # Use wider limits for samples near LLOQ
-    is_lloq <- nominal_values <= lloq * 1.5  # 50% margin for LLOQ region
+    is_lloq <- nominal_values <= lloq * 1.5 # 50% margin for LLOQ region
     acceptance_limits <- ifelse(is_lloq, acceptance_pct_lloq, acceptance_pct)
   } else {
     acceptance_limits <- rep(acceptance_pct, length(nominal_values))
@@ -680,7 +744,11 @@ measure_calibration_verify <- function(
 
   # Add sample ID if available
   if ("sample_id" %in% names(verify_data)) {
-    result <- tibble::add_column(result, sample_id = verify_data$sample_id, .before = 1)
+    result <- tibble::add_column(
+      result,
+      sample_id = verify_data$sample_id,
+      .before = 1
+    )
   }
 
   # Calculate summary statistics
@@ -715,9 +783,13 @@ print.measure_calibration_verify <- function(x, ...) {
   cli::cli_h1("Calibration Verification")
 
   if (overall_pass) {
-    cli::cli_alert_success("Overall: PASS ({n_pass}/{n_total} samples within {acceptance_pct}%)")
+    cli::cli_alert_success(
+      "Overall: PASS ({n_pass}/{n_total} samples within {acceptance_pct}%)"
+    )
   } else {
-    cli::cli_alert_danger("Overall: FAIL ({n_fail}/{n_total} samples out of specification)")
+    cli::cli_alert_danger(
+      "Overall: FAIL ({n_fail}/{n_total} samples out of specification)"
+    )
   }
 
   cli::cli_h2("Sample Results")

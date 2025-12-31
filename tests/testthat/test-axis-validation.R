@@ -4,7 +4,7 @@ test_that("validate_measure works with measure_tbl", {
   spec <- new_measure_tbl(location = 1:100, value = sin(1:100 / 10))
 
   # Should pass without errors
- expect_silent(validate_measure(spec, action = "message"))
+  expect_silent(validate_measure(spec, action = "message"))
 
   result <- validate_measure(spec, action = "message")
   expect_true(result$monotonic$valid)
@@ -52,7 +52,7 @@ test_that("check_no_missing detects NA values", {
 
 test_that("check_regular_spacing detects irregular spacing", {
   spec <- new_measure_tbl(
-    location = c(1, 2, 3, 5, 6, 7),  # Gap at 4
+    location = c(1, 2, 3, 5, 6, 7), # Gap at 4
     value = 1:6
   )
 
@@ -181,7 +181,7 @@ test_that("check_axis_consistency detects different values", {
 
 test_that("check_axis_consistency respects tolerance", {
   loc1 <- seq(0, 1, length.out = 100)
-  loc2 <- loc1 + 1e-15  # Tiny floating point difference
+  loc2 <- loc1 + 1e-15 # Tiny floating point difference
 
   specs <- new_measure_list(list(
     new_measure_tbl(location = loc1, value = rnorm(100)),
@@ -208,8 +208,7 @@ test_that("measure_quality_summary produces output", {
   expect_true(result$consistency$consistent)
 })
 
-test_that("measure_quality_summary works with single sample",
-{
+test_that("measure_quality_summary works with single sample", {
   spec <- new_measure_tbl(location = 1:100, value = rnorm(100))
 
   result <- measure_quality_summary(spec, verbose = FALSE)

@@ -64,18 +64,23 @@
 #'
 #' bake(rec, new_data = NULL)
 step_measure_emsc <- function(
-    recipe,
-    degree = 2L,
-    reference = "mean",
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    ref_spectrum = NULL,
-    locations = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_emsc")) {
-
-  if (!is.numeric(degree) || length(degree) != 1 || degree < 0 || degree != round(degree)) {
+  recipe,
+  degree = 2L,
+  reference = "mean",
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  ref_spectrum = NULL,
+  locations = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_emsc")
+) {
+  if (
+    !is.numeric(degree) ||
+      length(degree) != 1 ||
+      degree < 0 ||
+      degree != round(degree)
+  ) {
     cli::cli_abort("{.arg degree} must be a non-negative integer.")
   }
 
@@ -103,7 +108,16 @@ step_measure_emsc <- function(
 }
 
 step_measure_emsc_new <- function(
-    degree, reference, measures, role, trained, ref_spectrum, locations, skip, id) {
+  degree,
+  reference,
+  measures,
+  role,
+  trained,
+  ref_spectrum,
+  locations,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_emsc",
     degree = degree,
@@ -190,7 +204,9 @@ prep.step_measure_emsc <- function(x, training, info = NULL, ...) {
   )
 
   if (is.null(fit) || anyNA(fit$coefficients)) {
-    cli::cli_warn("EMSC fitting failed for a spectrum. Returning centered values.")
+    cli::cli_warn(
+      "EMSC fitting failed for a spectrum. Returning centered values."
+    )
     x$value <- values - mean(values, na.rm = TRUE)
     return(x)
   }
@@ -200,7 +216,9 @@ prep.step_measure_emsc <- function(x, training, info = NULL, ...) {
   slope <- coeffs[2]
 
   if (is.na(slope) || abs(slope) < .Machine$double.eps) {
-    cli::cli_warn("EMSC multiplicative coefficient is zero. Returning centered values.")
+    cli::cli_warn(
+      "EMSC multiplicative coefficient is zero. Returning centered values."
+    )
     x$value <- values - intercept
     return(x)
   }
@@ -210,7 +228,8 @@ prep.step_measure_emsc <- function(x, training, info = NULL, ...) {
   polynomial_contribution <- 0
   if (degree > 0) {
     for (d in seq_len(degree)) {
-      polynomial_contribution <- polynomial_contribution + coeffs[2 + d] * loc_norm^d
+      polynomial_contribution <- polynomial_contribution +
+        coeffs[2 + d] * loc_norm^d
     }
   }
 
@@ -235,7 +254,11 @@ bake.step_measure_emsc <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_emsc <- function(x, width = max(20, options()$width - 30), ...) {
+print.step_measure_emsc <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- paste0("EMSC (degree = ", x$degree, ")")
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
@@ -261,7 +284,6 @@ tidy.step_measure_emsc <- function(x, ...) {
 #' @export
 #' @keywords internal
 required_pkgs.step_measure_emsc <- function(x, ...) {
-
   c("measure")
 }
 
@@ -339,20 +361,24 @@ tunable.step_measure_emsc <- function(x, ...) {
 #'
 #' bake(rec, new_data = NULL)
 step_measure_osc <- function(
-    recipe,
-    n_components = 1L,
-    tolerance = 1e-6,
-    max_iter = 100L,
-    measures = NULL,
-    role = NA,
-    trained = FALSE,
-    weights = NULL,
-    loadings = NULL,
-    skip = FALSE,
-    id = recipes::rand_id("measure_osc")) {
-
-  if (!is.numeric(n_components) || length(n_components) != 1 ||
-      n_components < 1 || n_components != round(n_components)) {
+  recipe,
+  n_components = 1L,
+  tolerance = 1e-6,
+  max_iter = 100L,
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  weights = NULL,
+  loadings = NULL,
+  skip = FALSE,
+  id = recipes::rand_id("measure_osc")
+) {
+  if (
+    !is.numeric(n_components) ||
+      length(n_components) != 1 ||
+      n_components < 1 ||
+      n_components != round(n_components)
+  ) {
     cli::cli_abort("{.arg n_components} must be a positive integer.")
   }
 
@@ -360,8 +386,12 @@ step_measure_osc <- function(
     cli::cli_abort("{.arg tolerance} must be a positive number.")
   }
 
-  if (!is.numeric(max_iter) || length(max_iter) != 1 ||
-      max_iter < 1 || max_iter != round(max_iter)) {
+  if (
+    !is.numeric(max_iter) ||
+      length(max_iter) != 1 ||
+      max_iter < 1 ||
+      max_iter != round(max_iter)
+  ) {
     cli::cli_abort("{.arg max_iter} must be a positive integer.")
   }
 
@@ -383,8 +413,17 @@ step_measure_osc <- function(
 }
 
 step_measure_osc_new <- function(
-    n_components, tolerance, max_iter, measures, role, trained,
-    weights, loadings, skip, id) {
+  n_components,
+  tolerance,
+  max_iter,
+  measures,
+  role,
+  trained,
+  weights,
+  loadings,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_osc",
     n_components = n_components,
@@ -446,7 +485,7 @@ step_measure_osc_new <- function(
 
       # Compute weight (loading) w = X' t_orth / (t_orth' t_orth)
       w <- t(X_resid) %*% t_orth / as.numeric(t(t_orth) %*% t_orth)
-      w <- w / sqrt(sum(w^2) + .Machine$double.eps)  # Normalize
+      w <- w / sqrt(sum(w^2) + .Machine$double.eps) # Normalize
 
       # Compute new score t = X w / (w' w)
       t_new <- X_resid %*% w / as.numeric(t(w) %*% w)
@@ -508,7 +547,9 @@ prep.step_measure_osc <- function(x, training, info = NULL, ...) {
   Y <- as.matrix(training[, outcome_vars, drop = FALSE])
 
   if (anyNA(Y)) {
-    cli::cli_abort("Outcome variables contain NA values. OSC cannot handle missing outcomes.")
+    cli::cli_abort(
+      "Outcome variables contain NA values. OSC cannot handle missing outcomes."
+    )
   }
 
   # Extract spectral matrix
@@ -580,8 +621,18 @@ bake.step_measure_osc <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_measure_osc <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- paste0("OSC (", x$n_components, " component", if (x$n_components > 1) "s", ")")
+print.step_measure_osc <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  title <- paste0(
+    "OSC (",
+    x$n_components,
+    " component",
+    if (x$n_components > 1) "s",
+    ")"
+  )
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
   } else {

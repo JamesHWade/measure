@@ -158,37 +158,38 @@
 #'
 #' print(report)
 measure_validation_report <- function(
-    title = "Analytical Method Validation Report",
-    method_name = NULL,
-    method_description = NULL,
-    analyst = NULL,
-    reviewer = NULL,
-    lab = NULL,
-    date = Sys.Date(),
-    instrument = NULL,
-    software = NULL,
-    calibration = NULL,
-    lod_loq = NULL,
-    accuracy = NULL,
-    precision = NULL,
-    linearity = NULL,
-    range = NULL,
-    specificity = NULL,
-    robustness = NULL,
-    carryover = NULL,
-    system_suitability = NULL,
-    uncertainty = NULL,
-    method_comparison = NULL,
-    stability = NULL,
-    criteria = NULL,
-    conclusions = NULL,
-    references = NULL,
-    appendices = NULL,
-    ...) {
+  title = "Analytical Method Validation Report",
+  method_name = NULL,
+  method_description = NULL,
+  analyst = NULL,
+  reviewer = NULL,
+  lab = NULL,
+  date = Sys.Date(),
+  instrument = NULL,
+  software = NULL,
+  calibration = NULL,
+  lod_loq = NULL,
+  accuracy = NULL,
+  precision = NULL,
+  linearity = NULL,
+  range = NULL,
+  specificity = NULL,
+  robustness = NULL,
+  carryover = NULL,
+  system_suitability = NULL,
+  uncertainty = NULL,
+  method_comparison = NULL,
+  stability = NULL,
+  criteria = NULL,
+  conclusions = NULL,
+  references = NULL,
+  appendices = NULL,
+  ...
+) {
   # Capture call
   call <- match.call()
 
- # Validate inputs
+  # Validate inputs
   .validate_report_inputs(
     calibration = calibration,
     lod_loq = lod_loq,
@@ -200,7 +201,7 @@ measure_validation_report <- function(
   )
 
   # Build metadata
-metadata <- list(
+  metadata <- list(
     title = title,
     method_name = method_name,
     method_description = method_description,
@@ -383,16 +384,17 @@ metadata <- list(
 #' render_validation_report(report, output_format = "docx")
 #' }
 render_validation_report <- function(
-    report,
-    output_file = NULL,
-    output_format = c("html", "pdf", "docx"),
-    template = c("ich_q2", "usp_1225"),
-    output_dir = ".",
-    include_plots = TRUE,
-    include_raw_data = FALSE,
-    open = interactive(),
-    quiet = FALSE,
-    ...) {
+  report,
+  output_file = NULL,
+  output_format = c("html", "pdf", "docx"),
+  template = c("ich_q2", "usp_1225"),
+  output_dir = ".",
+  include_plots = TRUE,
+  include_raw_data = FALSE,
+  open = interactive(),
+  quiet = FALSE,
+  ...
+) {
   # Validate report
   if (!inherits(report, "measure_validation_report")) {
     cli::cli_abort(
@@ -401,7 +403,7 @@ render_validation_report <- function(
   }
 
   # Check for quarto
-rlang::check_installed("quarto", reason = "to render validation reports")
+  rlang::check_installed("quarto", reason = "to render validation reports")
 
   output_format <- match.arg(output_format)
   template <- match.arg(template)
@@ -543,7 +545,10 @@ print.measure_validation_report <- function(x, ...) {
 
   # Sections summary
   section_names <- names(x$sections)
-  section_names <- setdiff(section_names, c("conclusions", "references", "appendices"))
+  section_names <- setdiff(
+    section_names,
+    c("conclusions", "references", "appendices")
+  )
 
   if (length(section_names) > 0) {
     cli::cli_h2("Validation Sections")
@@ -570,7 +575,9 @@ print.measure_validation_report <- function(x, ...) {
     conclusions <- x$sections$conclusions
     if (is.character(conclusions$data)) {
       cli::cli_text(conclusions$data)
-    } else if (is.list(conclusions$data) && !is.null(conclusions$data$summary)) {
+    } else if (
+      is.list(conclusions$data) && !is.null(conclusions$data$summary)
+    ) {
       cli::cli_text(conclusions$data$summary)
     }
     cli::cli_text("")
@@ -647,7 +654,9 @@ summary.measure_validation_report <- function(object, ...) {
 
   # Print summary
   cli::cli_h1("Validation Report Summary")
-  cli::cli_text("{.strong Method}: {object$metadata$method_name %||% 'Not specified'}")
+  cli::cli_text(
+    "{.strong Method}: {object$metadata$method_name %||% 'Not specified'}"
+  )
   cli::cli_text("{.strong Date}: {object$metadata$date}")
   cli::cli_text("")
 
@@ -659,7 +668,9 @@ summary.measure_validation_report <- function(object, ...) {
 
   cli::cli_text("")
   if (any_fail) {
-    cli::cli_alert_danger("One or more sections did not meet acceptance criteria")
+    cli::cli_alert_danger(
+      "One or more sections did not meet acceptance criteria"
+    )
   } else if (all_pass) {
     cli::cli_alert_success("All sections meet acceptance criteria")
   }
@@ -773,13 +784,14 @@ tidy.measure_validation_report <- function(x, ...) {
 #' Validate report inputs
 #' @noRd
 .validate_report_inputs <- function(
-    calibration = NULL,
-    lod_loq = NULL,
-    accuracy = NULL,
-    precision = NULL,
-    linearity = NULL,
-    uncertainty = NULL,
-    method_comparison = NULL) {
+  calibration = NULL,
+  lod_loq = NULL,
+  accuracy = NULL,
+  precision = NULL,
+  linearity = NULL,
+  uncertainty = NULL,
+  method_comparison = NULL
+) {
   # Check calibration
   if (!is.null(calibration)) {
     if (!inherits(calibration, "measure_calibration")) {
@@ -861,7 +873,8 @@ tidy.measure_validation_report <- function(x, ...) {
   )
 
   path <- system.file(
-    "templates", template_name,
+    "templates",
+    template_name,
     package = "measure",
     mustWork = FALSE
   )
@@ -1013,17 +1026,22 @@ tidy.measure_validation_report <- function(x, ...) {
   data <- section$data
 
   # Try to use tidy method if available
-  if (inherits(data, c(
-    "measure_calibration",
-    "measure_lod",
-    "measure_loq",
-    "measure_accuracy",
-    "measure_linearity",
-    "measure_precision",
-    "measure_uncertainty_budget",
-    "measure_bland_altman",
-    "measure_deming_regression"
-  ))) {
+  if (
+    inherits(
+      data,
+      c(
+        "measure_calibration",
+        "measure_lod",
+        "measure_loq",
+        "measure_accuracy",
+        "measure_linearity",
+        "measure_precision",
+        "measure_uncertainty_budget",
+        "measure_bland_altman",
+        "measure_deming_regression"
+      )
+    )
+  ) {
     tryCatch(
       {
         tidy_result <- generics::tidy(data)
@@ -1042,9 +1060,13 @@ tidy.measure_validation_report <- function(x, ...) {
       # Convert list to tibble
       stat_df <- tibble::tibble(
         parameter = names(stats),
-        value = vapply(stats, function(x) {
-          if (is.numeric(x) && length(x) == 1) x else NA_real_
-        }, numeric(1))
+        value = vapply(
+          stats,
+          function(x) {
+            if (is.numeric(x) && length(x) == 1) x else NA_real_
+          },
+          numeric(1)
+        )
       )
       stat_df <- stat_df[!is.na(stat_df$value), ]
       if (nrow(stat_df) > 0) {

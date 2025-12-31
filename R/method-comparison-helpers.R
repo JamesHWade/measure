@@ -20,7 +20,7 @@
   se_bias <- sd_diff / sqrt(n)
 
   # Limits of agreement (using 1.96 for 95% reference)
-  z <- stats::qnorm((1 + 0.95) / 2)  # Always use 95% for LOA definition
+  z <- stats::qnorm((1 + 0.95) / 2) # Always use 95% for LOA definition
   lower_loa <- mean_bias - z * sd_diff
   upper_loa <- mean_bias + z * sd_diff
   loa_width <- upper_loa - lower_loa
@@ -61,7 +61,11 @@
 #' @param type "linear" or "quadratic"
 #' @return List with model, p-value, and significance
 #' @noRd
-.test_proportional_bias <- function(mean_vals, diff_vals, type = c("linear", "quadratic")) {
+.test_proportional_bias <- function(
+  mean_vals,
+  diff_vals,
+  type = c("linear", "quadratic")
+) {
   type <- match.arg(type)
 
   if (type == "linear") {
@@ -182,7 +186,13 @@
 #' @param conf_level Confidence level
 #' @return List with bootstrap samples and confidence intervals
 #' @noRd
-.deming_bootstrap <- function(x, y, error_ratio, n_boot = 1000, conf_level = 0.95) {
+.deming_bootstrap <- function(
+  x,
+  y,
+  error_ratio,
+  n_boot = 1000,
+  conf_level = 0.95
+) {
   n <- length(x)
   boot_intercept <- numeric(n_boot)
   boot_slope <- numeric(n_boot)
@@ -190,15 +200,18 @@
 
   for (i in seq_len(n_boot)) {
     idx <- sample(n, n, replace = TRUE)
-    tryCatch({
-      boot_fit <- .deming_regression_manual(x[idx], y[idx], error_ratio)
-      boot_intercept[i] <- boot_fit$intercept
-      boot_slope[i] <- boot_fit$slope
-    }, error = function(e) {
-      boot_intercept[i] <<- NA
-      boot_slope[i] <<- NA
-      error_messages <<- c(error_messages, e$message)
-    })
+    tryCatch(
+      {
+        boot_fit <- .deming_regression_manual(x[idx], y[idx], error_ratio)
+        boot_intercept[i] <- boot_fit$intercept
+        boot_slope[i] <- boot_fit$slope
+      },
+      error = function(e) {
+        boot_intercept[i] <<- NA
+        boot_slope[i] <<- NA
+        error_messages <<- c(error_messages, e$message)
+      }
+    )
   }
 
   # Remove failed bootstraps
@@ -224,8 +237,16 @@
   }
 
   alpha <- 1 - conf_level
-  ci_intercept <- stats::quantile(boot_intercept, c(alpha/2, 1 - alpha/2), na.rm = TRUE)
-  ci_slope <- stats::quantile(boot_slope, c(alpha/2, 1 - alpha/2), na.rm = TRUE)
+  ci_intercept <- stats::quantile(
+    boot_intercept,
+    c(alpha / 2, 1 - alpha / 2),
+    na.rm = TRUE
+  )
+  ci_slope <- stats::quantile(
+    boot_slope,
+    c(alpha / 2, 1 - alpha / 2),
+    na.rm = TRUE
+  )
 
   list(
     n_successful = length(boot_slope),
@@ -244,7 +265,7 @@
 #' @noRd
 .calculate_z_score <- function(measured, reference, sigma) {
   # Handle zero or negative sigma
- if (any(sigma <= 0, na.rm = TRUE)) {
+  if (any(sigma <= 0, na.rm = TRUE)) {
     cli::cli_abort("Sigma must be positive for z-score calculation.")
   }
   (measured - reference) / sigma
@@ -277,7 +298,12 @@
 #' @param u_reference Standard uncertainty of reference value (may include shared component)
 #' @return zeta score (same as En when no shared uncertainty)
 #' @noRd
-.calculate_zeta_score <- function(measured, reference, u_measured, u_reference) {
+.calculate_zeta_score <- function(
+  measured,
+  reference,
+  u_measured,
+  u_reference
+) {
   # zeta is similar to En but used when uncertainties may be correlated
   # For independent uncertainties, it's the same as En
   .calculate_en_score(measured, reference, u_measured, u_reference)

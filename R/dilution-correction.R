@@ -82,16 +82,16 @@
 #' bake(rec, new_data = NULL)
 #' # S1: 50*1=50, S2: 45*2=90, S3: 42*5=210, S4: 48*10=480
 step_measure_dilution_correct <- function(
-    recipe,
-    ...,
-    dilution_col = "dilution_factor",
-    operation = c("multiply", "divide"),
-    handle_zero = c("error", "warn", "skip"),
-    role = NA,
-    trained = FALSE,
-    skip = FALSE,
-    id = recipes::rand_id("measure_dilution_correct")) {
-
+  recipe,
+  ...,
+  dilution_col = "dilution_factor",
+  operation = c("multiply", "divide"),
+  handle_zero = c("error", "warn", "skip"),
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_dilution_correct")
+) {
   operation <- match.arg(operation)
   handle_zero <- match.arg(handle_zero)
 
@@ -114,16 +114,16 @@ step_measure_dilution_correct <- function(
 #' Internal constructor
 #' @noRd
 step_measure_dilution_correct_new <- function(
-    terms,
-    dilution_col,
-    operation,
-    handle_zero,
-    role,
-    trained,
-    col_names,
-    skip,
-    id) {
-
+  terms,
+  dilution_col,
+  operation,
+  handle_zero,
+  role,
+  trained,
+  col_names,
+  skip,
+  id
+) {
   recipes::step(
     subclass = "measure_dilution_correct",
     terms = terms,
@@ -140,7 +140,6 @@ step_measure_dilution_correct_new <- function(
 
 #' @export
 prep.step_measure_dilution_correct <- function(x, training, info = NULL, ...) {
-
   # Validate dilution column exists
   if (!x$dilution_col %in% names(training)) {
     cli::cli_abort(
@@ -185,10 +184,9 @@ prep.step_measure_dilution_correct <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_dilution_correct <- function(object, new_data, ...) {
-
   # Validate dilution column exists in new data
 
-if (!object$dilution_col %in% names(new_data)) {
+  if (!object$dilution_col %in% names(new_data)) {
     cli::cli_abort(
       "Dilution column {.field {object$dilution_col}} not found in new data."
     )
@@ -259,10 +257,10 @@ if (!object$dilution_col %in% names(new_data)) {
 
 #' @export
 print.step_measure_dilution_correct <- function(
-    x,
-    width = max(20, options()$width - 30),
-    ...) {
-
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
   title <- "Dilution factor correction"
 
   if (x$trained) {
