@@ -253,7 +253,7 @@ print.step_measure_tucker <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  ranks_str <- paste(x$ranks, collapse = " × ")
+  ranks_str <- paste(x$ranks, collapse = " x ")
   title <- paste0("Tucker decomposition (ranks = ", ranks_str, ") ")
   if (x$trained) {
     cat(title, "on ", paste(x$measure_cols, collapse = ", "), sep = "")
@@ -311,7 +311,7 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
 # ------------------------------------------------------------------------------
 
 .fit_tucker <- function(measure_nd_list, ranks, center, scale, max_iter, tol) {
-  # Convert to 3D array (samples × dim1 × dim2)
+  # Convert to 3D array (samples x dim1 x dim2)
   array_result <- .nd_list_to_array(measure_nd_list)
   X <- array_result$array
   grid_info <- array_result$grid_info

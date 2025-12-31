@@ -32,7 +32,7 @@
 #' MCR-ALS is a powerful technique for resolving mixtures into pure component
 #' contributions. It's particularly useful for:
 #'
-#' - Chromatographic data (time × wavelength)
+#' - Chromatographic data (time x wavelength)
 #' - Spectroscopic mixtures
 #' - Process analytical data
 #'
@@ -317,7 +317,7 @@ tidy.step_measure_mcr_als <- function(x, type = "parameters", ...) {
   n_cols <- dim(X)[3]
 
   # Unfold: stack samples along first mode
-  # Result is (n_samples * n_rows) × n_cols
+  # Result is (n_samples * n_rows) x n_cols
   D <- matrix(0, nrow = n_samples * n_rows, ncol = n_cols)
   for (i in seq_len(n_samples)) {
     start_row <- (i - 1) * n_rows + 1
@@ -365,7 +365,7 @@ tidy.step_measure_mcr_als <- function(x, type = "parameters", ...) {
   }
 
   # Extract per-sample concentration profiles
-  # Reshape C from (n_samples * n_rows) × n_components to n_samples × n_rows × n_components
+  # Reshape C from (n_samples * n_rows) x n_components to n_samples x n_rows x n_components
   concentrations <- array(0, dim = c(n_samples, n_rows, n_components))
   for (i in seq_len(n_samples)) {
     start_row <- (i - 1) * n_rows + 1

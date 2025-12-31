@@ -311,7 +311,7 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
   max_iter,
   tol
 ) {
-  # Convert to 3D array (samples × dim1 × dim2)
+  # Convert to 3D array (samples x dim1 x dim2)
   array_result <- .nd_list_to_array(measure_nd_list)
   X <- array_result$array
   grid_info <- array_result$grid_info
@@ -389,7 +389,7 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
   for (i in seq_len(n_samples)) {
     Xi <- matrix(X[i, , ], nrow = dim(X)[2], ncol = dim(X)[3])
     # Use least squares projection
-    # Xi ≈ sum_r scores[i,r] * outer(loadings[[2]][,r], loadings[[3]][,r])
+    # Xi ~= sum_r scores[i,r] * outer(loadings[[2]][,r], loadings[[3]][,r])
     for (r in seq_len(n_components)) {
       # Compute score as inner product
       outer_r <- outer(loadings[[2]][, r], loadings[[3]][, r])
@@ -427,7 +427,7 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
   })
   names(grid_info) <- loc_cols
 
-  # Create array: samples × dim1 × dim2 × ...
+  # Create array: samples x dim1 x dim2 x ...
   arr <- array(NA_real_, dim = c(n_samples, dim_sizes))
 
   for (i in seq_len(n_samples)) {

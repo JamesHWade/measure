@@ -59,7 +59,7 @@ to multi-dimensional measurement data.
 MCR-ALS is a powerful technique for resolving mixtures into pure component
 contributions. It's particularly useful for:
 \itemize{
-\item Chromatographic data (time × wavelength)
+\item Chromatographic data (time x wavelength)
 \item Spectroscopic mixtures
 \item Process analytical data
 }
