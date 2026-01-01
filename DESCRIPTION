@@ -26,6 +26,7 @@ Imports:
     ggplot2,
     glue,
     IDPmisc,
+    lifecycle,
     MASS,
     purrr,
     rlang,

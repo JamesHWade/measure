@@ -102,7 +102,7 @@ new_measure_nd_tbl <- function(
   }
 
   # Validate all vectors have the same length
-  lengths <- c(vapply(dots, length, integer(1)), length(value))
+  lengths <- c(lengths(dots), length(value))
   if (length(unique(lengths)) != 1) {
     len_str <- paste(c(loc_names, "value"), "=", lengths, collapse = ", ")
     cli::cli_abort(
@@ -112,7 +112,7 @@ new_measure_nd_tbl <- function(
   }
 
   # Sort location columns by dimension number for consistent ordering
-  dim_nums <- as.integer(sub("location_", "", loc_names))
+  dim_nums <- as.integer(sub("location_", "", loc_names, fixed = TRUE))
   sorted_idx <- order(dim_nums)
   dots <- dots[sorted_idx]
   loc_names <- loc_names[sorted_idx]
@@ -182,7 +182,7 @@ as_measure_nd_tbl <- function(x, dim_names = NULL, dim_units = NULL) {
   }
 
   # Extract data in correct order
-  dim_nums <- as.integer(sub("location_", "", loc_cols))
+  dim_nums <- as.integer(sub("location_", "", loc_cols, fixed = TRUE))
   sorted_idx <- order(dim_nums)
   loc_cols <- loc_cols[sorted_idx]
 

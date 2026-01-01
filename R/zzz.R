@@ -2,6 +2,19 @@
 .measure_py <- new.env(parent = emptyenv())
 
 .onLoad <- function(libname, pkgname) {
+  # Initialize the technique pack registry
+  .measure_registry_reset()
+
+  # Register measure itself as a pack
+  register_measure_pack(
+    pack_name = "measure",
+    technique = "general",
+    description = "Core measurement preprocessing steps"
+  )
+
+  # Register all core steps
+  .register_core_steps()
+
   # Set up reticulate to use managed Python environment
   # Only if reticulate is available (it's in Suggests)
   if (requireNamespace("reticulate", quietly = TRUE)) {

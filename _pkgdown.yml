@@ -327,6 +327,13 @@ reference:
   - find_measure_cols
   - has_measure_col
   - required_pkgs.recipe
+- title: Technique Pack Registry
+  desc: Registration and discovery for technique packs
+  contents:
+  - measure_packs
+  - measure_steps
+  - register_measure_pack
+  - register_measure_step
 - title: Exploration & Analysis
   desc: Interactive exploration and summary functions for prototyping
   contents:
