@@ -176,6 +176,13 @@ R -e 'pkgdown::build_site()'
 
 When adding new exported functions, ensure they are included in `_pkgdown.yml` under the appropriate reference section.
 
+After the PR is merged:
+
+```r
+# Clean up: switch to main, pull changes, delete local/remote feature branch
+usethis::pr_finish()
+```
+
 ## Technique Pack Registry
 
 The package includes a registry system for technique packs (external packages that extend measure):
