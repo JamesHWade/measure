@@ -40,7 +40,10 @@ test_that("measure_packs returns expected columns", {
 test_that("measure_steps returns expected columns", {
   steps <- measure_steps()
 
-  expect_named(steps, c("step_name", "pack_name", "category", "description", "technique"))
+  expect_named(
+    steps,
+    c("step_name", "pack_name", "category", "description", "technique")
+  )
   expect_type(steps$step_name, "character")
   expect_type(steps$pack_name, "character")
   expect_type(steps$category, "character")
@@ -121,10 +124,16 @@ test_that("register_measure_step works correctly", {
   steps <- measure_steps()
 
   expect_true("step_test_example" %in% steps$step_name)
-  expect_equal(steps$category[steps$step_name == "step_test_example"], "testing")
+  expect_equal(
+    steps$category[steps$step_name == "step_test_example"],
+    "testing"
+  )
 
   # Should inherit technique from pack
-  expect_equal(steps$technique[steps$step_name == "step_test_example"], "Testing")
+  expect_equal(
+    steps$technique[steps$step_name == "step_test_example"],
+    "Testing"
+  )
 
   # Restore registry
   .measure_registry_reset()
