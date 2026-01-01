@@ -1,8 +1,15 @@
 # Calculate Molecular Weight Fractions for SEC/GPC
 
+**\[superseded\]**
+
 `step_measure_mw_fractions()` creates a *specification* of a recipe step
 that calculates weight fractions above and below specified molecular
 weight cutoffs.
+
+**This step has been superseded by
+`measure.sec::step_sec_mw_fractions()`.** For new code, we recommend
+using the `measure.sec` package which provides more complete SEC/GPC
+analysis functionality.
 
 ## Usage
 

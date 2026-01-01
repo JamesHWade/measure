@@ -1,8 +1,15 @@
 # Generate Molecular Weight Distribution Curve
 
+**\[superseded\]**
+
 `step_measure_mw_distribution()` creates a *specification* of a recipe
 step that generates molecular weight distribution curves from SEC/GPC
 data.
+
+**This step has been superseded by
+`measure.sec::step_sec_mw_distribution()`.** For new code, we recommend
+using the `measure.sec` package which provides more complete SEC/GPC
+analysis functionality.
 
 ## Usage
 

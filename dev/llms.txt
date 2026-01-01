@@ -730,7 +730,7 @@ Baseline correction steps and utilities
 - [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md)
   : Custom Baseline Correction with User-Provided Function
 - [`step_measure_baseline_gpc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.md)
-  : GPC/SEC Baseline Correction
+  **\[superseded\]** : GPC/SEC Baseline Correction
 - [`step_measure_baseline_minima()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_minima.md)
   : Local Minima Interpolation Baseline Correction
 - [`step_measure_baseline_morph()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morph.md)
@@ -757,11 +757,11 @@ Baseline correction steps and utilities
 Molecular weight calculations for size exclusion chromatography
 
 - [`step_measure_mw_averages()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.md)
-  : Calculate Molecular Weight Averages for SEC/GPC
+  **\[superseded\]** : Calculate Molecular Weight Averages for SEC/GPC
 - [`step_measure_mw_distribution()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_distribution.md)
-  : Generate Molecular Weight Distribution Curve
+  **\[superseded\]** : Generate Molecular Weight Distribution Curve
 - [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md)
-  : Calculate Molecular Weight Fractions for SEC/GPC
+  **\[superseded\]** : Calculate Molecular Weight Fractions for SEC/GPC
 
 ## Feature Engineering
 
@@ -1037,6 +1037,19 @@ Helper functions and utilities
   [`required_pkgs(`*`<step_measure_osc>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   [`required_pkgs(`*`<step_measure_smooth_wavelet>`*`)`](https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.md)
   : Set package dependencies
+
+## Technique Pack Registry
+
+Registration and discovery for technique packs
+
+- [`measure_packs()`](https://jameshwade.github.io/measure/dev/reference/measure_packs.md)
+  : List Registered Technique Packs
+- [`measure_steps()`](https://jameshwade.github.io/measure/dev/reference/measure_steps.md)
+  : List Available Steps
+- [`register_measure_pack()`](https://jameshwade.github.io/measure/dev/reference/register_measure_pack.md)
+  : Register a Technique Pack
+- [`register_measure_step()`](https://jameshwade.github.io/measure/dev/reference/register_measure_step.md)
+  : Register a Step from a Technique Pack
 
 ## Exploration & Analysis
 

@@ -1,10 +1,16 @@
 # GPC/SEC Baseline Correction
 
+**\[superseded\]**
+
 `step_measure_baseline_gpc()` creates a *specification* of a recipe step
 that applies baseline correction optimized for Gel Permeation
 Chromatography (GPC) or Size Exclusion Chromatography (SEC) data. This
 method estimates the baseline by interpolating between baseline regions
 at the start and end of the chromatogram.
+
+**This step has been superseded by `measure.sec::step_sec_baseline()`.**
+For new code, we recommend using the `measure.sec` package which
+provides more complete SEC/GPC analysis functionality.
 
 ## Usage
 

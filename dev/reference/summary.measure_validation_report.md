@@ -46,7 +46,7 @@ summary(report)
 #> 
 #> ── Validation Report Summary ───────────────────────────────────────────────────
 #> Method: Not specified
-#> Date: 2025-12-31
+#> Date: 2026-01-01
 #> 
 #> # A tibble: 1 × 4
 #>   section                 status n_results notes

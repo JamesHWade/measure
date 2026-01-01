@@ -1,8 +1,15 @@
 # Calculate Molecular Weight Averages for SEC/GPC
 
+**\[superseded\]**
+
 `step_measure_mw_averages()` creates a *specification* of a recipe step
 that calculates molecular weight averages from size exclusion
 chromatography data.
+
+**This step has been superseded by
+`measure.sec::step_sec_mw_averages()`.** For new code, we recommend
+using the `measure.sec` package which provides more complete SEC/GPC
+analysis functionality.
 
 ## Usage
 
