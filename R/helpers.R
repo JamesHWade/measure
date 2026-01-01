@@ -51,6 +51,16 @@ measure_to_tibble <- function(x) {
 
 # ------------------------------------------------------------------------------
 
+#' Check for Measure Columns
+#'
+#' Validates that the data contains measure columns (columns with class
+#' `measure_list`). Aborts with an informative error if no measure columns
+#' are found.
+#'
+#' @param x A data frame or tibble to check.
+#' @return Invisibly returns the names of measure columns found.
+#' @export
+#' @keywords internal
 check_for_measure <- function(x) {
   # First try class-based detection (preferred)
   meas_cols <- find_measure_cols(x)

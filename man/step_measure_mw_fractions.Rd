@@ -45,8 +45,14 @@ the x-axis range for integration. If \code{NULL}, uses full range.}
 An updated recipe with the new step added.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 \code{step_measure_mw_fractions()} creates a \emph{specification} of a recipe step that
 calculates weight fractions above and below specified molecular weight cutoffs.
+
+\strong{This step has been superseded by \code{measure.sec::step_sec_mw_fractions()}.}
+For new code, we recommend using the \code{measure.sec} package which provides
+more complete SEC/GPC analysis functionality.
 }
 \details{
 For each cutoff value \code{C}, this step calculates:

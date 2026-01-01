@@ -51,8 +51,14 @@ includes all: \code{c("mn", "mw", "mz", "mp", "dispersity")}.}
 An updated recipe with the new step added.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 \code{step_measure_mw_averages()} creates a \emph{specification} of a recipe step that
 calculates molecular weight averages from size exclusion chromatography data.
+
+\strong{This step has been superseded by \code{measure.sec::step_sec_mw_averages()}.}
+For new code, we recommend using the \code{measure.sec} package which provides
+more complete SEC/GPC analysis functionality.
 }
 \details{
 This step calculates standard molecular weight averages from SEC/GPC data:\tabular{lll}{

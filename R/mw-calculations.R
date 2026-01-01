@@ -13,8 +13,15 @@
 
 #' Calculate Molecular Weight Averages for SEC/GPC
 #'
+#' @description
+#' `r lifecycle::badge("superseded")`
+#'
 #' `step_measure_mw_averages()` creates a *specification* of a recipe step that
 #' calculates molecular weight averages from size exclusion chromatography data.
+#'
+#' **This step has been superseded by `measure.sec::step_sec_mw_averages()`.**
+#' For new code, we recommend using the `measure.sec` package which provides
+#' more complete SEC/GPC analysis functionality.
 #'
 #' @param recipe A recipe object.
 #' @param measures An optional character vector of measure column names.
@@ -324,8 +331,15 @@ required_pkgs.step_measure_mw_averages <- function(x, ...) {
 
 #' Calculate Molecular Weight Fractions for SEC/GPC
 #'
+#' @description
+#' `r lifecycle::badge("superseded")`
+#'
 #' `step_measure_mw_fractions()` creates a *specification* of a recipe step that
 #' calculates weight fractions above and below specified molecular weight cutoffs.
+#'
+#' **This step has been superseded by `measure.sec::step_sec_mw_fractions()`.**
+#' For new code, we recommend using the `measure.sec` package which provides
+#' more complete SEC/GPC analysis functionality.
 #'
 #' @param recipe A recipe object.
 #' @param measures An optional character vector of measure column names.
@@ -594,8 +608,15 @@ required_pkgs.step_measure_mw_fractions <- function(x, ...) {
 
 #' Generate Molecular Weight Distribution Curve
 #'
+#' @description
+#' `r lifecycle::badge("superseded")`
+#'
 #' `step_measure_mw_distribution()` creates a *specification* of a recipe step
 #' that generates molecular weight distribution curves from SEC/GPC data.
+#'
+#' **This step has been superseded by `measure.sec::step_sec_mw_distribution()`.**
+#' For new code, we recommend using the `measure.sec` package which provides
+#' more complete SEC/GPC analysis functionality.
 #'
 #' @param recipe A recipe object.
 #' @param measures An optional character vector of measure column names.

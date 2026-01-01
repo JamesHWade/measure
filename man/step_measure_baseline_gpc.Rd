@@ -51,11 +51,17 @@ An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 \code{step_measure_baseline_gpc()} creates a \emph{specification} of a recipe step
 that applies baseline correction optimized for Gel Permeation Chromatography
 (GPC) or Size Exclusion Chromatography (SEC) data. This method estimates the
 baseline by interpolating between baseline regions at the start and end of
 the chromatogram.
+
+\strong{This step has been superseded by \code{measure.sec::step_sec_baseline()}.}
+For new code, we recommend using the \code{measure.sec} package which provides
+more complete SEC/GPC analysis functionality.
 }
 \details{
 GPC/SEC chromatograms typically have distinct baseline regions at the

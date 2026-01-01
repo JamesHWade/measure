@@ -49,6 +49,7 @@
 ## usethis namespace: start
 #' @import recipes
 #' @import rlang
+#' @importFrom lifecycle badge
 #' @importFrom utils globalVariables
 #' @importFrom dplyr select arrange mutate
 #' @importFrom tibble tibble
