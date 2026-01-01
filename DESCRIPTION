@@ -40,7 +40,6 @@ Suggests:
     dtw,
     knitr,
     mcr,
-    measure.sec,
     modeldata,
     multiway,
     parsnip,
