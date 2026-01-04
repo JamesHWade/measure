@@ -413,9 +413,9 @@ effects:</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">rec</span>, n_samples <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Could not extract 'before' data for comparison.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Showing processed data only.</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> <span style="color: #00BBBB;">ℹ</span> In argument: `dplyr::all_of(rename_map)`. <span style="font-weight: bold;">Caused by error in</span></span></span>
-<span><span class="co">#&gt;   <span style="font-weight: bold;">`dplyr::all_of()`:</span> <span style="color: #BBBB00;">!</span> Can't subset elements that don't exist. <span style="color: #BB0000;">✖</span> Elements</span></span>
-<span><span class="co">#&gt;   `transmittance` and `channel` don't exist.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Required column not found in data: <span style="color: #00BB00;">transmittance</span> <span style="color: #00BBBB;">ℹ</span> These columns were</span></span>
+<span><span class="co">#&gt;   expected from recipe preparation. <span style="color: #BB0000;">✖</span> Ensure new_data has the same structure as</span></span>
+<span><span class="co">#&gt;   training data.</span></span></code></pre></div>
 <p><img src="roles-diagnostics_files/figure-html/autoplot-recipe-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">

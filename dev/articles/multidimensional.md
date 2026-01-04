@@ -98,12 +98,12 @@ rec <- recipe(concentration ~ ., data = lc_dad_data) |>
 
 result <- bake(rec, new_data = NULL)
 result
-#> # A tibble: 3 × 3
-#>   sample_id concentration .measures
-#>       <int>         <dbl>  <meas2d>
-#> 1         1            10  [40 × 3]
-#> 2         2            25  [40 × 3]
-#> 3         3            50  [40 × 3]
+#> # A tibble: 3 × 5
+#>   sample_id concentration .measures retention_time wavelength
+#>       <int>         <dbl>  <meas2d> <list>         <list>    
+#> 1         1            10  [40 × 3] <dbl [40]>     <dbl [40]>
+#> 2         2            25  [40 × 3] <dbl [40]>     <dbl [40]>
+#> 3         3            50  [40 × 3] <dbl [40]>     <dbl [40]>
 ```
 
 The `.measures` column now contains `measure_nd_list` objects - one 2D

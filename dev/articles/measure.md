@@ -142,19 +142,19 @@ internal_format <- bake(rec_prepped, new_data = NULL)
 
 # The data now has a .measures list-column
 internal_format
-#> # A tibble: 215 × 5
-#>       id water   fat protein .measures
-#>    <int> <dbl> <dbl>   <dbl>    <meas>
-#>  1     1  60.5  22.5    16.7 [100 × 2]
-#>  2     2  46    40.1    13.5 [100 × 2]
-#>  3     3  71     8.4    20.5 [100 × 2]
-#>  4     4  72.8   5.9    20.7 [100 × 2]
-#>  5     5  58.3  25.5    15.5 [100 × 2]
-#>  6     6  44    42.7    13.7 [100 × 2]
-#>  7     7  44    42.7    13.7 [100 × 2]
-#>  8     8  69.3  10.6    19.3 [100 × 2]
-#>  9     9  61.4  19.9    17.7 [100 × 2]
-#> 10    10  61.4  19.9    17.7 [100 × 2]
+#> # A tibble: 215 × 6
+#>       id water   fat protein .measures channel    
+#>    <int> <dbl> <dbl>   <dbl>    <meas> <list>     
+#>  1     1  60.5  22.5    16.7 [100 × 2] <int [100]>
+#>  2     2  46    40.1    13.5 [100 × 2] <int [100]>
+#>  3     3  71     8.4    20.5 [100 × 2] <int [100]>
+#>  4     4  72.8   5.9    20.7 [100 × 2] <int [100]>
+#>  5     5  58.3  25.5    15.5 [100 × 2] <int [100]>
+#>  6     6  44    42.7    13.7 [100 × 2] <int [100]>
+#>  7     7  44    42.7    13.7 [100 × 2] <int [100]>
+#>  8     8  69.3  10.6    19.3 [100 × 2] <int [100]>
+#>  9     9  61.4  19.9    17.7 [100 × 2] <int [100]>
+#> 10    10  61.4  19.9    17.7 [100 × 2] <int [100]>
 #> # ℹ 205 more rows
 
 # Each element contains location and value
@@ -275,6 +275,7 @@ rec_full <- recipe(water + fat + protein ~ ., data = meats_long) |>
   step_measure_output_wide(prefix = "nir_")
 
 modeling_data <- bake(prep(rec_full), new_data = NULL)
+#> Dropping 1 list column for wide output: channel
 
 # Ready for modeling!
 modeling_data[1:5, 1:10]

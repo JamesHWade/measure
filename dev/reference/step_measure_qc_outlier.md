@@ -117,18 +117,18 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   prep()
 
 bake(rec, new_data = NULL)
-#> # A tibble: 215 × 7
-#>       id water   fat protein .measures .outlier .outlier_score
-#>    <int> <dbl> <dbl>   <dbl>    <meas> <lgl>             <dbl>
-#>  1     1  60.5  22.5    16.7 [100 × 2] FALSE             0.305
-#>  2     2  46    40.1    13.5 [100 × 2] FALSE             0.323
-#>  3     3  71     8.4    20.5 [100 × 2] FALSE             0.626
-#>  4     4  72.8   5.9    20.7 [100 × 2] FALSE             0.133
-#>  5     5  58.3  25.5    15.5 [100 × 2] FALSE             0.310
-#>  6     6  44    42.7    13.7 [100 × 2] FALSE             0.793
-#>  7     7  44    42.7    13.7 [100 × 2] FALSE             0.731
-#>  8     8  69.3  10.6    19.3 [100 × 2] FALSE             0.522
-#>  9     9  61.4  19.9    17.7 [100 × 2] FALSE             1.44 
-#> 10    10  61.4  19.9    17.7 [100 × 2] FALSE             1.78 
+#> # A tibble: 215 × 8
+#>       id water   fat protein .measures channel     .outlier .outlier_score
+#>    <int> <dbl> <dbl>   <dbl>    <meas> <list>      <lgl>             <dbl>
+#>  1     1  60.5  22.5    16.7 [100 × 2] <int [100]> FALSE             0.305
+#>  2     2  46    40.1    13.5 [100 × 2] <int [100]> FALSE             0.323
+#>  3     3  71     8.4    20.5 [100 × 2] <int [100]> FALSE             0.626
+#>  4     4  72.8   5.9    20.7 [100 × 2] <int [100]> FALSE             0.133
+#>  5     5  58.3  25.5    15.5 [100 × 2] <int [100]> FALSE             0.310
+#>  6     6  44    42.7    13.7 [100 × 2] <int [100]> FALSE             0.793
+#>  7     7  44    42.7    13.7 [100 × 2] <int [100]> FALSE             0.731
+#>  8     8  69.3  10.6    19.3 [100 × 2] <int [100]> FALSE             0.522
+#>  9     9  61.4  19.9    17.7 [100 × 2] <int [100]> FALSE             1.44 
+#> 10    10  61.4  19.9    17.7 [100 × 2] <int [100]> FALSE             1.78 
 #> # ℹ 205 more rows
 ```

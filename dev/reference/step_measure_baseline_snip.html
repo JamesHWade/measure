@@ -163,19 +163,19 @@ Nuclear Instruments and Methods in Physics Research B, 34, 396-402.</p>
 <span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 215 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       id water   fat protein .measures</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;meas&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>     1  60.5  22.5    16.7 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>     2  46    40.1    13.5 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>     3  71     8.4    20.5 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>     4  72.8   5.9    20.7 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>     5  58.3  25.5    15.5 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>     6  44    42.7    13.7 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>     7  44    42.7    13.7 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>     8  69.3  10.6    19.3 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>     9  61.4  19.9    17.7 <span style="color: #949494;">[100 × 2]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>    10  61.4  19.9    17.7 <span style="color: #949494;">[100 × 2]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 215 × 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       id water   fat protein .measures channel    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;meas&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>     1  60.5  22.5    16.7 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>     2  46    40.1    13.5 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>     3  71     8.4    20.5 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>     4  72.8   5.9    20.7 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>     5  58.3  25.5    15.5 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>     6  44    42.7    13.7 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>     7  44    42.7    13.7 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>     8  69.3  10.6    19.3 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>     9  61.4  19.9    17.7 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>    10  61.4  19.9    17.7 <span style="color: #949494;">[100 × 2]</span> <span style="color: #949494;">&lt;int [100]&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 205 more rows</span></span>
 </code></pre></div>
     </div>

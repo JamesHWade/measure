@@ -283,9 +283,9 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 autoplot(rec, n_samples = 10)
 #> Warning: Could not extract 'before' data for comparison.
 #> ℹ Showing processed data only.
-#> ✖ ℹ In argument: `dplyr::all_of(rename_map)`. Caused by error in
-#>   `dplyr::all_of()`: ! Can't subset elements that don't exist. ✖ Elements
-#>   `transmittance` and `channel` don't exist.
+#> ✖ Required column not found in data: transmittance ℹ These columns were
+#>   expected from recipe preparation. ✖ Ensure new_data has the same structure as
+#>   training data.
 ```
 
 ![](roles-diagnostics_files/figure-html/autoplot-recipe-1.png)

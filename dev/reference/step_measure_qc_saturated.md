@@ -108,18 +108,18 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   prep()
 
 bake(rec, new_data = NULL)
-#> # A tibble: 215 × 7
-#>       id water   fat protein .measures .saturated .sat_pct
-#>    <int> <dbl> <dbl>   <dbl>    <meas> <lgl>         <dbl>
-#>  1     1  60.5  22.5    16.7 [100 × 2] FALSE             0
-#>  2     2  46    40.1    13.5 [100 × 2] FALSE             0
-#>  3     3  71     8.4    20.5 [100 × 2] FALSE             0
-#>  4     4  72.8   5.9    20.7 [100 × 2] FALSE             0
-#>  5     5  58.3  25.5    15.5 [100 × 2] FALSE             0
-#>  6     6  44    42.7    13.7 [100 × 2] FALSE             0
-#>  7     7  44    42.7    13.7 [100 × 2] FALSE             0
-#>  8     8  69.3  10.6    19.3 [100 × 2] FALSE             0
-#>  9     9  61.4  19.9    17.7 [100 × 2] FALSE             0
-#> 10    10  61.4  19.9    17.7 [100 × 2] FALSE             0
+#> # A tibble: 215 × 8
+#>       id water   fat protein .measures channel     .saturated .sat_pct
+#>    <int> <dbl> <dbl>   <dbl>    <meas> <list>      <lgl>         <dbl>
+#>  1     1  60.5  22.5    16.7 [100 × 2] <int [100]> FALSE             0
+#>  2     2  46    40.1    13.5 [100 × 2] <int [100]> FALSE             0
+#>  3     3  71     8.4    20.5 [100 × 2] <int [100]> FALSE             0
+#>  4     4  72.8   5.9    20.7 [100 × 2] <int [100]> FALSE             0
+#>  5     5  58.3  25.5    15.5 [100 × 2] <int [100]> FALSE             0
+#>  6     6  44    42.7    13.7 [100 × 2] <int [100]> FALSE             0
+#>  7     7  44    42.7    13.7 [100 × 2] <int [100]> FALSE             0
+#>  8     8  69.3  10.6    19.3 [100 × 2] <int [100]> FALSE             0
+#>  9     9  61.4  19.9    17.7 [100 × 2] <int [100]> FALSE             0
+#> 10    10  61.4  19.9    17.7 [100 × 2] <int [100]> FALSE             0
 #> # ℹ 205 more rows
 ```

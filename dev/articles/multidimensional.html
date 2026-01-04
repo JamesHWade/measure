@@ -178,12 +178,12 @@ columns to create a 2D measure column:</p>
 <span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span><span class="va">result</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
-<span><span class="co">#&gt;   sample_id concentration .measures</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;meas2d&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1            10  <span style="color: #949494;">[40 × 3]</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2            25  <span style="color: #949494;">[40 × 3]</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         3            50  <span style="color: #949494;">[40 × 3]</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
+<span><span class="co">#&gt;   sample_id concentration .measures retention_time wavelength</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;meas2d&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1            10  <span style="color: #949494;">[40 × 3]</span> <span style="color: #949494;">&lt;dbl [40]&gt;</span>     <span style="color: #949494;">&lt;dbl [40]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2            25  <span style="color: #949494;">[40 × 3]</span> <span style="color: #949494;">&lt;dbl [40]&gt;</span>     <span style="color: #949494;">&lt;dbl [40]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         3            50  <span style="color: #949494;">[40 × 3]</span> <span style="color: #949494;">&lt;dbl [40]&gt;</span>     <span style="color: #949494;">&lt;dbl [40]&gt;</span></span></span></code></pre></div>
 <p>The <code>.measures</code> column now contains
 <code>measure_nd_list</code> objects - one 2D measurement per
 sample:</p>
