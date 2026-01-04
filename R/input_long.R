@@ -240,7 +240,6 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
   group_cols <- intersect(group_cols, names(training))
 
   # Also identify outcome columns - these should be kept as scalar values,
-
   # not converted to list columns
   outcome_cols <- character(0)
   if (!is.null(info)) {
@@ -274,6 +273,17 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
   ndim <- length(loc_cols)
   group_cols <- object$group_cols
   outcome_cols <- object$outcome_cols %||% character(0)
+
+  # Validate required columns exist in new_data
+  required_cols <- c(value_col, loc_cols)
+  missing_cols <- setdiff(required_cols, names(new_data))
+  if (length(missing_cols) > 0) {
+    cli::cli_abort(c(
+      "Required column{?s} not found in data: {.field {missing_cols}}",
+      "i" = "These columns were expected from recipe preparation.",
+      "x" = "Ensure new_data has the same structure as training data."
+    ))
+  }
 
   # Filter group_cols and outcome_cols to only those present in new_data
   # (handles cases where columns may have been removed by prior steps)
@@ -324,6 +334,17 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
   )
 
   if (any(is_list_col)) {
+    # Validate all required columns are in same state (all lists or all non-lists)
+    if (!all(is_list_col)) {
+      list_cols <- cols_to_unnest[is_list_col]
+      non_list_cols <- cols_to_unnest[!is_list_col]
+      cli::cli_abort(c(
+        "Mixed column types: cannot process data.",
+        "i" = "List column{?s}: {.field {list_cols}}",
+        "i" = "Non-list column{?s}: {.field {non_list_cols}}",
+        "x" = "All value and location columns must be in the same format."
+      ))
+    }
     # Unnest the list columns to recreate long format
     # This enables multiple step_measure_input_long calls in sequence
     new_data <- tidyr::unnest(new_data, cols = dplyr::all_of(cols_to_unnest))
@@ -331,7 +352,7 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
 
   # Get all columns that are NOT nest_by_cols, value_col, or loc_cols
   # These will be preserved as list columns for subsequent steps
-  # (excludes outcome_cols since they're in nest_by_cols)
+  # (scalar outcome_cols are in nest_by_cols; variable outcome_cols end up here)
   other_cols <- setdiff(names(new_data), c(nest_by_cols, value_col, loc_cols))
 
   # Build the nested measure tibble with canonical column names (location, value)

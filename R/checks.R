@@ -78,10 +78,11 @@ pad_measure_dims <- function(x, col = ".measures") {
 #'
 #' @param x The column vector to check
 #' @param col_name The name of the column (for error messages)
+#' @return `invisible(NULL)` on success, or throws a [cli::cli_abort()] error
+#'   if the column is neither numeric nor a list of numeric vectors.
 #' @noRd
 check_type_or_list_numeric <- function(x, col_name) {
   # Accept numeric vectors directly
-
   if (is.numeric(x)) {
     return(invisible(NULL))
   }
