@@ -568,3 +568,98 @@ test_that("user-provided list columns are preserved (not truncated)", {
   expect_equal(length(result$metadata[[2]]), n_points)
   expect_equal(length(result$metadata[[3]]), n_points)
 })
+
+test_that("bake errors informatively when new_data is missing required columns", {
+  # Test error path: new_data missing columns that were in training data
+
+  set.seed(123)
+  n_samples <- 3
+  n_points <- 10
+
+  train_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n())
+    )
+
+  rec <- recipe(
+    ri_signal + uv_signal + elution_time ~ sample_id,
+    data = train_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    )
+
+  prepped <- prep(rec)
+
+  # Create new_data missing the uv_signal column
+  incomplete_data <- expand.grid(
+    sample_id = paste0("T", seq_len(2)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n())
+      # uv_signal is missing!
+    )
+
+  # Should error with informative message about missing column
+
+  expect_error(
+    bake(prepped, new_data = incomplete_data),
+    "uv_signal"
+  )
+})
+
+test_that("bake errors on mixed list/non-list columns", {
+  # Test error path: value column is list but location is not (or vice versa)
+  # This tests the defensive check at lines 339-347 in input_long.R
+
+  set.seed(123)
+  n_samples <- 3
+  n_points <- 10
+
+  train_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(ri_signal = rnorm(dplyr::n()))
+
+  # Single step recipe
+  rec <- recipe(ri_signal + elution_time ~ sample_id, data = train_data) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    )
+
+  prepped <- prep(rec)
+
+  # Create malformed new_data where ri_signal is a list but elution_time is not
+  # This simulates data corruption or misuse
+  malformed_data <- tibble::tibble(
+    sample_id = c("T1", "T1"),
+    elution_time = c(1, 2),
+    ri_signal = list(c(0.1, 0.2), c(0.3, 0.4))
+  )
+
+  # Should error about mixed column types
+  expect_error(
+    bake(prepped, new_data = malformed_data),
+    "Mixed column types"
+  )
+})
