@@ -515,3 +515,56 @@ test_that("multiple input steps work with nD data", {
   expect_true(inherits(result$detector_1, "measure_nd_list"))
   expect_true(inherits(result$detector_2, "measure_nd_list"))
 })
+
+test_that("user-provided list columns are preserved (not truncated)", {
+  # Regression test: user-provided list columns with different values per row
+  # should be preserved, not truncated to first element
+
+  set.seed(123)
+  n_samples <- 3
+  n_points <- 10
+
+  # Create data with a user-provided list column that differs per measurement
+  test_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n()),
+      # User-provided list column with different values per row
+      metadata = lapply(seq_len(dplyr::n()), function(i) list(row_id = i))
+    )
+
+  # Include metadata in the formula so it's preserved by recipes
+  rec <- recipe(
+    ri_signal + uv_signal + elution_time + metadata ~ sample_id,
+    data = test_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    update_role(metadata, new_role = "auxiliary") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    )
+
+  prepped <- prep(rec)
+  result <- bake(prepped, new_data = NULL)
+
+  # Check that metadata column exists and is a list
+  expect_true("metadata" %in% names(result))
+  expect_true(is.list(result$metadata))
+
+  # Each sample should have all n_points metadata entries preserved
+  # (not just the first one)
+  expect_equal(length(result$metadata[[1]]), n_points)
+  expect_equal(length(result$metadata[[2]]), n_points)
+  expect_equal(length(result$metadata[[3]]), n_points)
+})

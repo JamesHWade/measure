@@ -401,12 +401,18 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
         agg_data <- work_data |>
           dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
           dplyr::summarize(
-            # If column is already a list (from previous input step), it was
-            # replicated during unnest - each row in a group has the same list
-            # element. Take the first to recreate the original list structure.
-            # Otherwise, wrap in list() to preserve values for this group.
+            # For list columns, check if all elements in the group are identical
+            # (from previous input step's unnest replication). If so, take first.
+            # If elements differ (user-provided list), keep all as a list.
+            # For non-list columns, wrap in list() to preserve values.
             !!other_col := if (col_is_list) {
-              list(.data[[other_col]][[1]])
+              # Check if all elements are identical (replicated from unnest)
+              if (length(unique(.data[[other_col]])) == 1L) {
+                list(.data[[other_col]][[1]])
+              } else {
+                # User-provided list with different values - preserve all
+                list(.data[[other_col]])
+              }
             } else {
               list(.data[[other_col]])
             },
@@ -454,12 +460,18 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
         agg_data <- work_data |>
           dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
           dplyr::summarize(
-            # If column is already a list (from previous input step), it was
-            # replicated during unnest - each row in a group has the same list
-            # element. Take the first to recreate the original list structure.
-            # Otherwise, wrap in list() to preserve values for this group.
+            # For list columns, check if all elements in the group are identical
+            # (from previous input step's unnest replication). If so, take first.
+            # If elements differ (user-provided list), keep all as a list.
+            # For non-list columns, wrap in list() to preserve values.
             !!other_col := if (col_is_list) {
-              list(.data[[other_col]][[1]])
+              # Check if all elements are identical (replicated from unnest)
+              if (length(unique(.data[[other_col]])) == 1L) {
+                list(.data[[other_col]][[1]])
+              } else {
+                # User-provided list with different values - preserve all
+                list(.data[[other_col]])
+              }
             } else {
               list(.data[[other_col]])
             },
