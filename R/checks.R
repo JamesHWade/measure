@@ -71,15 +71,16 @@ pad_measure_dims <- function(x, col = ".measures") {
 #'
 #' This helper function validates that a column is either:
 #' 1. A numeric vector (double or integer)
-#' 2. A list column where each element is a numeric vector
+#' 2. A non-empty list column where each element is a numeric vector
 #'
 #' List columns occur when a previous step_measure_input_long has run,
 #' preserving columns as list columns for subsequent input steps.
+#' Empty lists are rejected as they typically indicate upstream data issues.
 #'
 #' @param x The column vector to check
 #' @param col_name The name of the column (for error messages)
 #' @return `invisible(NULL)` on success, or throws a [cli::cli_abort()] error
-#'   if the column is neither numeric nor a list of numeric vectors.
+#'   if the column is neither numeric nor a non-empty list of numeric vectors.
 #' @noRd
 check_type_or_list_numeric <- function(x, col_name) {
   # Accept numeric vectors directly
@@ -89,6 +90,13 @@ check_type_or_list_numeric <- function(x, col_name) {
 
   # Accept list columns where all elements are numeric
   if (is.list(x)) {
+    # Reject empty lists - they indicate upstream data issues
+    if (length(x) == 0) {
+      cli::cli_abort(
+        "Column {.field {col_name}} is an empty list.
+         Expected numeric data or a list of numeric vectors."
+      )
+    }
     all_numeric <- all(vapply(x, is.numeric, logical(1)))
     if (all_numeric) {
       return(invisible(NULL))

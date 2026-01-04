@@ -163,6 +163,10 @@ bake.step_measure_output_long <- function(object, new_data, ...) {
   # Drop unsafe list columns (those with incompatible lengths)
   # These are user-defined list columns that weren't created by input_long
   if (length(unsafe_list_cols) > 0) {
+    cli::cli_inform(
+      "Dropping {length(unsafe_list_cols)} list column{?s} with incompatible
+       lengths for long output: {.field {unsafe_list_cols}}"
+    )
     new_data <- new_data[, !names(new_data) %in% unsafe_list_cols]
   }
 

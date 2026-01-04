@@ -211,7 +211,8 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
   # Identify columns to group by for nesting
 
   # Strategy:
-  # 1. If explicit ID columns exist (role = "id"), use those
+  # 1. If explicit ID columns (role = "id") or measure columns from previous
+  #    input steps (role = "measure") exist, use those for grouping
   # 2. Otherwise, fall back to original behavior: exclude only value/location
   #
   # This allows multiple step_measure_input_long calls to work correctly
@@ -400,9 +401,10 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
         agg_data <- work_data |>
           dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
           dplyr::summarize(
-            # If column is already a list (from previous input step), take first
-            # element since they're all identical after unnest replication.
-            # Otherwise, wrap in list() as before.
+            # If column is already a list (from previous input step), it was
+            # replicated during unnest - each row in a group has the same list
+            # element. Take the first to recreate the original list structure.
+            # Otherwise, wrap in list() to preserve values for this group.
             !!other_col := if (col_is_list) {
               list(.data[[other_col]][[1]])
             } else {
@@ -452,9 +454,10 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
         agg_data <- work_data |>
           dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
           dplyr::summarize(
-            # If column is already a list (from previous input step), take first
-            # element since they're all identical after unnest replication.
-            # Otherwise, wrap in list() as before.
+            # If column is already a list (from previous input step), it was
+            # replicated during unnest - each row in a group has the same list
+            # element. Take the first to recreate the original list structure.
+            # Otherwise, wrap in list() to preserve values for this group.
             !!other_col := if (col_is_list) {
               list(.data[[other_col]][[1]])
             } else {

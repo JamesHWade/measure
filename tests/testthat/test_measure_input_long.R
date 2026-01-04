@@ -293,6 +293,12 @@ test_that("check_type_or_list_numeric rejects invalid inputs", {
     check_type_or_list_numeric(list(1:3, "x"), "test"),
     "must be numeric"
   )
+
+  # Empty list should fail
+  expect_error(
+    check_type_or_list_numeric(list(), "test"),
+    "empty list"
+  )
 })
 
 test_that("ingest long format data", {
@@ -398,4 +404,114 @@ test_that("ingest long format data", {
       prep(),
     error = TRUE
   )
+})
+
+test_that("multiple input steps work with new_data (not training)", {
+  # Regression test: verify fix works when baking genuinely new data,
+
+  # not just training data (new_data = NULL)
+
+  set.seed(123)
+  n_train <- 5
+  n_test <- 3
+  n_points <- 20
+
+  train_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_train)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n()),
+      mals_signal = rnorm(dplyr::n())
+    )
+
+  test_data <- expand.grid(
+    sample_id = paste0("T", seq_len(n_test)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n()),
+      mals_signal = rnorm(dplyr::n())
+    )
+
+  rec <- recipe(
+    ri_signal + uv_signal + mals_signal + elution_time ~ sample_id,
+    data = train_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    ) |>
+    step_measure_input_long(
+      mals_signal,
+      location = vars(elution_time),
+      col_name = "mals"
+    )
+
+  prepped <- prep(rec)
+
+  # Bake new data (not training data)
+  result <- bake(prepped, new_data = test_data)
+
+  expect_equal(nrow(result), n_test)
+  expect_true(inherits(result$ri, "measure_list"))
+  expect_true(inherits(result$uv, "measure_list"))
+  expect_true(inherits(result$mals, "measure_list"))
+  expect_equal(dim(result$ri[[1]]), c(n_points, 2L))
+})
+
+test_that("multiple input steps work with nD data", {
+  # Test with 2D data (e.g., LC-DAD: retention time + wavelength)
+
+  set.seed(123)
+  n_samples <- 3
+
+  test_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    retention_time = c(1, 2, 3),
+    wavelength = c(254, 280, 320)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      detector_1_signal = rnorm(dplyr::n()),
+      detector_2_signal = rnorm(dplyr::n())
+    )
+
+  rec <- recipe(
+    detector_1_signal +
+      detector_2_signal +
+      retention_time +
+      wavelength ~ sample_id,
+    data = test_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      detector_1_signal,
+      location = vars(retention_time, wavelength),
+      col_name = "detector_1"
+    ) |>
+    step_measure_input_long(
+      detector_2_signal,
+      location = vars(retention_time, wavelength),
+      col_name = "detector_2"
+    )
+
+  # Should prep without error
+  prepped <- prep(rec)
+  result <- bake(prepped, new_data = NULL)
+
+  expect_equal(nrow(result), n_samples)
+  expect_true(inherits(result$detector_1, "measure_nd_list"))
+  expect_true(inherits(result$detector_2, "measure_nd_list"))
 })
