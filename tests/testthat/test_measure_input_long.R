@@ -94,6 +94,133 @@ test_that("multiple input steps work with output_wide (Issue #67)", {
   expect_true("uv" %in% names(result))
 })
 
+test_that("three or more step_measure_input_long calls work (Issue #69)", {
+  # Regression test for Issue #69: third step_measure_input_long fails
+  # with 'Column must be numeric' error due to nested list column issue
+
+  set.seed(123)
+  n_samples <- 5
+  n_points <- 20
+
+  test_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n(), mean = elution_time / 10, sd = 0.1),
+      uv_signal = rnorm(dplyr::n(), mean = elution_time / 5, sd = 0.2),
+      mals_signal = rnorm(dplyr::n(), mean = elution_time / 8, sd = 0.15)
+    )
+
+  # Three calls should work when ID column is properly set
+  rec3 <- recipe(
+    ri_signal + uv_signal + mals_signal + elution_time ~ sample_id,
+    data = test_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    ) |>
+    step_measure_input_long(
+      mals_signal,
+      location = vars(elution_time),
+      col_name = "mals"
+    )
+
+  # Should prep without error
+  prep3 <- prep(rec3)
+
+  # Check output structure
+  result <- bake(prep3, new_data = NULL)
+  expect_equal(nrow(result), n_samples)
+  expect_true("ri" %in% names(result))
+  expect_true("uv" %in% names(result))
+  expect_true("mals" %in% names(result))
+  expect_true(inherits(result$ri, "measure_list"))
+  expect_true(inherits(result$uv, "measure_list"))
+  expect_true(inherits(result$mals, "measure_list"))
+  expect_equal(dim(result$ri[[1]]), c(n_points, 2L))
+  expect_equal(dim(result$uv[[1]]), c(n_points, 2L))
+  expect_equal(dim(result$mals[[1]]), c(n_points, 2L))
+
+  # Location values should match in all measures
+  expect_equal(result$ri[[1]]$location, result$uv[[1]]$location)
+  expect_equal(result$ri[[1]]$location, result$mals[[1]]$location)
+})
+
+test_that("four step_measure_input_long calls work (Issue #69)", {
+  # Extended regression test: ensure we handle 4+ detectors
+
+  set.seed(456)
+  n_samples <- 3
+  n_points <- 15
+
+  test_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n()),
+      mals_signal = rnorm(dplyr::n()),
+      visc_signal = rnorm(dplyr::n())
+    )
+
+  # Four calls should work
+  rec4 <- recipe(
+    ri_signal +
+      uv_signal +
+      mals_signal +
+      visc_signal +
+      elution_time ~ sample_id,
+    data = test_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    ) |>
+    step_measure_input_long(
+      mals_signal,
+      location = vars(elution_time),
+      col_name = "mals"
+    ) |>
+    step_measure_input_long(
+      visc_signal,
+      location = vars(elution_time),
+      col_name = "visc"
+    )
+
+  # Should prep without error
+  prep4 <- prep(rec4)
+
+  # Check output structure
+  result <- bake(prep4, new_data = NULL)
+  expect_equal(nrow(result), n_samples)
+  expect_true(all(c("ri", "uv", "mals", "visc") %in% names(result)))
+  expect_true(all(vapply(
+    result[c("ri", "uv", "mals", "visc")],
+    inherits,
+    logical(1),
+    "measure_list"
+  )))
+})
+
 test_that("multiple input steps work with output_long (Issue #67)", {
   set.seed(123)
   n_samples <- 5

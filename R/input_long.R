@@ -396,10 +396,18 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
     if (length(other_cols) > 0) {
       # Re-aggregate from original work_data
       for (other_col in other_cols) {
+        col_is_list <- is.list(work_data[[other_col]])
         agg_data <- work_data |>
           dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
           dplyr::summarize(
-            !!other_col := list(.data[[other_col]]),
+            # If column is already a list (from previous input step), take first
+            # element since they're all identical after unnest replication.
+            # Otherwise, wrap in list() as before.
+            !!other_col := if (col_is_list) {
+              list(.data[[other_col]][[1]])
+            } else {
+              list(.data[[other_col]])
+            },
             .groups = "drop"
           )
         new_data <- dplyr::left_join(new_data, agg_data, by = nest_by_cols)
@@ -440,10 +448,18 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
     # Preserve other_cols as list columns
     if (length(other_cols) > 0) {
       for (other_col in other_cols) {
+        col_is_list <- is.list(work_data[[other_col]])
         agg_data <- work_data |>
           dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
           dplyr::summarize(
-            !!other_col := list(.data[[other_col]]),
+            # If column is already a list (from previous input step), take first
+            # element since they're all identical after unnest replication.
+            # Otherwise, wrap in list() as before.
+            !!other_col := if (col_is_list) {
+              list(.data[[other_col]][[1]])
+            } else {
+              list(.data[[other_col]])
+            },
             .groups = "drop"
           )
         new_data <- dplyr::left_join(new_data, agg_data, by = nest_by_cols)
