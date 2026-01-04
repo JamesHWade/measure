@@ -63,7 +63,7 @@
     Code
       print(summary(prep_1))
     Output
-      # A tibble: 5 x 4
+      # A tibble: 6 x 4
         variable    type      role      source  
         <chr>       <list>    <chr>     <chr>   
       1 .sample_num <chr [2]> predictor original
@@ -71,6 +71,7 @@
       3 fat         <chr [2]> outcome   original
       4 protein     <chr [2]> outcome   original
       5 .measures   <chr [1]> measure   derived 
+      6 ind         <chr [1]> predictor original
 
 ---
 

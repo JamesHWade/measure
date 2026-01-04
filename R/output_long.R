@@ -136,16 +136,47 @@ prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
 bake.step_measure_output_long <- function(object, new_data, ...) {
   col <- object$measures
 
+  # Find any list columns that were preserved by step_measure_input_long
+  # for multi-step workflows. These need to be unnested together with
+  # the measure column so they expand at the same rate
+  measure_cols <- find_measure_cols(new_data)
+  list_cols <- names(new_data)[vapply(new_data, is.list, logical(1))]
+  non_measure_list_cols <- setdiff(list_cols, measure_cols)
+
   # Detect if this is an nD measure column
   ndim <- get_measure_col_ndim(new_data, col)
+
+  # Unnest all list columns together (measure + any preserved columns)
+  cols_to_unnest <- c(col, non_measure_list_cols)
 
   if (ndim == 1L) {
     # 1D case: original behavior
     rnm <- c(paste0(col, ".value"), paste0(col, ".location"))
     names(rnm) <- c(object$values_to, object$location_to)
-    new_data |>
-      tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") |>
+    result <- new_data |>
+      tidyr::unnest(cols = dplyr::all_of(cols_to_unnest), names_sep = ".") |>
       dplyr::rename(!!rnm)
+
+    # Drop any columns that are redundant with the location column
+    # (these were preserved for multi-step input but are now duplicates)
+    loc_col_name <- object$location_to
+    loc_values <- result[[loc_col_name]]
+    redundant_cols <- character(0)
+    for (other_col in non_measure_list_cols) {
+      if (
+        other_col %in%
+          names(result) &&
+          is.numeric(result[[other_col]]) &&
+          length(result[[other_col]]) == length(loc_values) &&
+          all(result[[other_col]] == loc_values, na.rm = TRUE)
+      ) {
+        redundant_cols <- c(redundant_cols, other_col)
+      }
+    }
+    if (length(redundant_cols) > 0) {
+      result <- result[, !names(result) %in% redundant_cols]
+    }
+    result
   } else {
     # nD case: unnest and rename location_1, location_2, etc.
     # Build rename map for nD columns
@@ -159,9 +190,31 @@ bake.step_measure_output_long <- function(object, new_data, ...) {
     )
     rnm <- stats::setNames(old_names, new_names)
 
-    new_data |>
-      tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") |>
+    result <- new_data |>
+      tidyr::unnest(cols = dplyr::all_of(cols_to_unnest), names_sep = ".") |>
       dplyr::rename(dplyr::all_of(rnm))
+
+    # Drop any columns that are redundant with the location columns
+    loc_col_names <- paste0(object$location_to, "_", seq_len(ndim))
+    redundant_cols <- character(0)
+    for (i in seq_len(ndim)) {
+      loc_values <- result[[loc_col_names[i]]]
+      for (other_col in non_measure_list_cols) {
+        if (
+          other_col %in%
+            names(result) &&
+            is.numeric(result[[other_col]]) &&
+            length(result[[other_col]]) == length(loc_values) &&
+            all(result[[other_col]] == loc_values, na.rm = TRUE)
+        ) {
+          redundant_cols <- c(redundant_cols, other_col)
+        }
+      }
+    }
+    if (length(redundant_cols) > 0) {
+      result <- result[, !names(result) %in% redundant_cols]
+    }
+    result
   }
 }
 
