@@ -211,7 +211,8 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
   # Identify columns to group by for nesting
 
   # Strategy:
-  # 1. If explicit ID columns exist (role = "id"), use those
+  # 1. If explicit ID columns (role = "id") or measure columns from previous
+  #    input steps (role = "measure") exist, use those for grouping
   # 2. Otherwise, fall back to original behavior: exclude only value/location
   #
   # This allows multiple step_measure_input_long calls to work correctly
@@ -396,10 +397,25 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
     if (length(other_cols) > 0) {
       # Re-aggregate from original work_data
       for (other_col in other_cols) {
+        col_is_list <- is.list(work_data[[other_col]])
         agg_data <- work_data |>
           dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
           dplyr::summarize(
-            !!other_col := list(.data[[other_col]]),
+            # For list columns, check if all elements in the group are identical
+            # (from previous input step's unnest replication). If so, take first.
+            # If elements differ (user-provided list), keep all as a list.
+            # For non-list columns, wrap in list() to preserve values.
+            !!other_col := if (col_is_list) {
+              # Check if all elements are identical (replicated from unnest)
+              if (length(unique(.data[[other_col]])) == 1L) {
+                list(.data[[other_col]][[1]])
+              } else {
+                # User-provided list with different values - preserve all
+                list(.data[[other_col]])
+              }
+            } else {
+              list(.data[[other_col]])
+            },
             .groups = "drop"
           )
         new_data <- dplyr::left_join(new_data, agg_data, by = nest_by_cols)
@@ -440,10 +456,25 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
     # Preserve other_cols as list columns
     if (length(other_cols) > 0) {
       for (other_col in other_cols) {
+        col_is_list <- is.list(work_data[[other_col]])
         agg_data <- work_data |>
           dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
           dplyr::summarize(
-            !!other_col := list(.data[[other_col]]),
+            # For list columns, check if all elements in the group are identical
+            # (from previous input step's unnest replication). If so, take first.
+            # If elements differ (user-provided list), keep all as a list.
+            # For non-list columns, wrap in list() to preserve values.
+            !!other_col := if (col_is_list) {
+              # Check if all elements are identical (replicated from unnest)
+              if (length(unique(.data[[other_col]])) == 1L) {
+                list(.data[[other_col]][[1]])
+              } else {
+                # User-provided list with different values - preserve all
+                list(.data[[other_col]])
+              }
+            } else {
+              list(.data[[other_col]])
+            },
             .groups = "drop"
           )
         new_data <- dplyr::left_join(new_data, agg_data, by = nest_by_cols)

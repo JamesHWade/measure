@@ -94,6 +94,133 @@ test_that("multiple input steps work with output_wide (Issue #67)", {
   expect_true("uv" %in% names(result))
 })
 
+test_that("three or more step_measure_input_long calls work (Issue #69)", {
+  # Regression test for Issue #69: third step_measure_input_long fails
+  # with 'Column must be numeric' error due to nested list column issue
+
+  set.seed(123)
+  n_samples <- 5
+  n_points <- 20
+
+  test_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n(), mean = elution_time / 10, sd = 0.1),
+      uv_signal = rnorm(dplyr::n(), mean = elution_time / 5, sd = 0.2),
+      mals_signal = rnorm(dplyr::n(), mean = elution_time / 8, sd = 0.15)
+    )
+
+  # Three calls should work when ID column is properly set
+  rec3 <- recipe(
+    ri_signal + uv_signal + mals_signal + elution_time ~ sample_id,
+    data = test_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    ) |>
+    step_measure_input_long(
+      mals_signal,
+      location = vars(elution_time),
+      col_name = "mals"
+    )
+
+  # Should prep without error
+  prep3 <- prep(rec3)
+
+  # Check output structure
+  result <- bake(prep3, new_data = NULL)
+  expect_equal(nrow(result), n_samples)
+  expect_true("ri" %in% names(result))
+  expect_true("uv" %in% names(result))
+  expect_true("mals" %in% names(result))
+  expect_true(inherits(result$ri, "measure_list"))
+  expect_true(inherits(result$uv, "measure_list"))
+  expect_true(inherits(result$mals, "measure_list"))
+  expect_equal(dim(result$ri[[1]]), c(n_points, 2L))
+  expect_equal(dim(result$uv[[1]]), c(n_points, 2L))
+  expect_equal(dim(result$mals[[1]]), c(n_points, 2L))
+
+  # Location values should match in all measures
+  expect_equal(result$ri[[1]]$location, result$uv[[1]]$location)
+  expect_equal(result$ri[[1]]$location, result$mals[[1]]$location)
+})
+
+test_that("four step_measure_input_long calls work (Issue #69)", {
+  # Extended regression test: ensure we handle 4+ detectors
+
+  set.seed(456)
+  n_samples <- 3
+  n_points <- 15
+
+  test_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n()),
+      mals_signal = rnorm(dplyr::n()),
+      visc_signal = rnorm(dplyr::n())
+    )
+
+  # Four calls should work
+  rec4 <- recipe(
+    ri_signal +
+      uv_signal +
+      mals_signal +
+      visc_signal +
+      elution_time ~ sample_id,
+    data = test_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    ) |>
+    step_measure_input_long(
+      mals_signal,
+      location = vars(elution_time),
+      col_name = "mals"
+    ) |>
+    step_measure_input_long(
+      visc_signal,
+      location = vars(elution_time),
+      col_name = "visc"
+    )
+
+  # Should prep without error
+  prep4 <- prep(rec4)
+
+  # Check output structure
+  result <- bake(prep4, new_data = NULL)
+  expect_equal(nrow(result), n_samples)
+  expect_true(all(c("ri", "uv", "mals", "visc") %in% names(result)))
+  expect_true(all(vapply(
+    result[c("ri", "uv", "mals", "visc")],
+    inherits,
+    logical(1),
+    "measure_list"
+  )))
+})
+
 test_that("multiple input steps work with output_long (Issue #67)", {
   set.seed(123)
   n_samples <- 5
@@ -165,6 +292,12 @@ test_that("check_type_or_list_numeric rejects invalid inputs", {
   expect_error(
     check_type_or_list_numeric(list(1:3, "x"), "test"),
     "must be numeric"
+  )
+
+  # Empty list should fail
+  expect_error(
+    check_type_or_list_numeric(list(), "test"),
+    "empty list"
   )
 })
 
@@ -270,5 +403,263 @@ test_that("ingest long format data", {
       step_measure_input_long(absorp, location = vars(dplyr::everything())) |>
       prep(),
     error = TRUE
+  )
+})
+
+test_that("multiple input steps work with new_data (not training)", {
+  # Regression test: verify fix works when baking genuinely new data,
+
+  # not just training data (new_data = NULL)
+
+  set.seed(123)
+  n_train <- 5
+  n_test <- 3
+  n_points <- 20
+
+  train_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_train)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n()),
+      mals_signal = rnorm(dplyr::n())
+    )
+
+  test_data <- expand.grid(
+    sample_id = paste0("T", seq_len(n_test)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n()),
+      mals_signal = rnorm(dplyr::n())
+    )
+
+  rec <- recipe(
+    ri_signal + uv_signal + mals_signal + elution_time ~ sample_id,
+    data = train_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    ) |>
+    step_measure_input_long(
+      mals_signal,
+      location = vars(elution_time),
+      col_name = "mals"
+    )
+
+  prepped <- prep(rec)
+
+  # Bake new data (not training data)
+  result <- bake(prepped, new_data = test_data)
+
+  expect_equal(nrow(result), n_test)
+  expect_true(inherits(result$ri, "measure_list"))
+  expect_true(inherits(result$uv, "measure_list"))
+  expect_true(inherits(result$mals, "measure_list"))
+  expect_equal(dim(result$ri[[1]]), c(n_points, 2L))
+})
+
+test_that("multiple input steps work with nD data", {
+  # Test with 2D data (e.g., LC-DAD: retention time + wavelength)
+
+  set.seed(123)
+  n_samples <- 3
+
+  test_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    retention_time = c(1, 2, 3),
+    wavelength = c(254, 280, 320)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      detector_1_signal = rnorm(dplyr::n()),
+      detector_2_signal = rnorm(dplyr::n())
+    )
+
+  rec <- recipe(
+    detector_1_signal +
+      detector_2_signal +
+      retention_time +
+      wavelength ~ sample_id,
+    data = test_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      detector_1_signal,
+      location = vars(retention_time, wavelength),
+      col_name = "detector_1"
+    ) |>
+    step_measure_input_long(
+      detector_2_signal,
+      location = vars(retention_time, wavelength),
+      col_name = "detector_2"
+    )
+
+  # Should prep without error
+  prepped <- prep(rec)
+  result <- bake(prepped, new_data = NULL)
+
+  expect_equal(nrow(result), n_samples)
+  expect_true(inherits(result$detector_1, "measure_nd_list"))
+  expect_true(inherits(result$detector_2, "measure_nd_list"))
+})
+
+test_that("user-provided list columns are preserved (not truncated)", {
+  # Regression test: user-provided list columns with different values per row
+  # should be preserved, not truncated to first element
+
+  set.seed(123)
+  n_samples <- 3
+  n_points <- 10
+
+  # Create data with a user-provided list column that differs per measurement
+  test_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n()),
+      # User-provided list column with different values per row
+      metadata = lapply(seq_len(dplyr::n()), function(i) list(row_id = i))
+    )
+
+  # Include metadata in the formula so it's preserved by recipes
+  rec <- recipe(
+    ri_signal + uv_signal + elution_time + metadata ~ sample_id,
+    data = test_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    update_role(metadata, new_role = "auxiliary") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    )
+
+  prepped <- prep(rec)
+  result <- bake(prepped, new_data = NULL)
+
+  # Check that metadata column exists and is a list
+  expect_true("metadata" %in% names(result))
+  expect_true(is.list(result$metadata))
+
+  # Each sample should have all n_points metadata entries preserved
+  # (not just the first one)
+  expect_equal(length(result$metadata[[1]]), n_points)
+  expect_equal(length(result$metadata[[2]]), n_points)
+  expect_equal(length(result$metadata[[3]]), n_points)
+})
+
+test_that("bake errors informatively when new_data is missing required columns", {
+  # Test error path: new_data missing columns that were in training data
+
+  set.seed(123)
+  n_samples <- 3
+  n_points <- 10
+
+  train_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n()),
+      uv_signal = rnorm(dplyr::n())
+    )
+
+  rec <- recipe(
+    ri_signal + uv_signal + elution_time ~ sample_id,
+    data = train_data
+  ) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    ) |>
+    step_measure_input_long(
+      uv_signal,
+      location = vars(elution_time),
+      col_name = "uv"
+    )
+
+  prepped <- prep(rec)
+
+  # Create new_data missing the uv_signal column
+  incomplete_data <- expand.grid(
+    sample_id = paste0("T", seq_len(2)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(
+      ri_signal = rnorm(dplyr::n())
+      # uv_signal is missing!
+    )
+
+  # Should error with informative message about missing column
+
+  expect_error(
+    bake(prepped, new_data = incomplete_data),
+    "uv_signal"
+  )
+})
+
+test_that("bake errors on mixed list/non-list columns", {
+  # Test error path: value column is list but location is not (or vice versa)
+  # This tests the defensive check at lines 339-347 in input_long.R
+
+  set.seed(123)
+  n_samples <- 3
+  n_points <- 10
+
+  train_data <- expand.grid(
+    sample_id = paste0("S", seq_len(n_samples)),
+    elution_time = seq(1, 10, length.out = n_points)
+  ) |>
+    tibble::as_tibble() |>
+    dplyr::mutate(ri_signal = rnorm(dplyr::n()))
+
+  # Single step recipe
+  rec <- recipe(ri_signal + elution_time ~ sample_id, data = train_data) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      ri_signal,
+      location = vars(elution_time),
+      col_name = "ri"
+    )
+
+  prepped <- prep(rec)
+
+  # Create malformed new_data where ri_signal is a list but elution_time is not
+  # This simulates data corruption or misuse
+  malformed_data <- tibble::tibble(
+    sample_id = c("T1", "T1"),
+    elution_time = c(1, 2),
+    ri_signal = list(c(0.1, 0.2), c(0.3, 0.4))
+  )
+
+  # Should error about mixed column types
+  expect_error(
+    bake(prepped, new_data = malformed_data),
+    "Mixed column types"
   )
 })
