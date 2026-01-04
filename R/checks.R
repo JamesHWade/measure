@@ -66,3 +66,39 @@ pad_measure_dims <- function(x, col = ".measures") {
   )
   x
 }
+
+#' Check if a column is numeric or a list of numeric vectors
+#'
+#' This helper function validates that a column is either:
+#' 1. A numeric vector (double or integer)
+#' 2. A list column where each element is a numeric vector
+#'
+#' List columns occur when a previous step_measure_input_long has run,
+#' preserving columns as list columns for subsequent input steps.
+#'
+#' @param x The column vector to check
+#' @param col_name The name of the column (for error messages)
+#' @return `invisible(NULL)` on success, or throws a [cli::cli_abort()] error
+#'   if the column is neither numeric nor a list of numeric vectors.
+#' @noRd
+check_type_or_list_numeric <- function(x, col_name) {
+  # Accept numeric vectors directly
+  if (is.numeric(x)) {
+    return(invisible(NULL))
+  }
+
+  # Accept list columns where all elements are numeric
+  if (is.list(x)) {
+    all_numeric <- all(vapply(x, is.numeric, logical(1)))
+    if (all_numeric) {
+      return(invisible(NULL))
+    }
+  }
+
+  # If neither, throw an error
+  cli::cli_abort(
+    "Column {.field {col_name}} must be numeric (double or integer) or
+     a list column containing numeric vectors.
+     Found type: {.cls {class(x)[1]}}."
+  )
+}

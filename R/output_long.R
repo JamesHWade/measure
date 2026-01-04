@@ -136,19 +136,80 @@ prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
 bake.step_measure_output_long <- function(object, new_data, ...) {
   col <- object$measures
 
+  # Find list columns that may have been preserved by step_measure_input_long
+  measure_cols <- find_measure_cols(new_data)
+  list_cols <- names(new_data)[vapply(new_data, is.list, logical(1))]
+  non_measure_list_cols <- setdiff(list_cols, measure_cols)
+
   # Detect if this is an nD measure column
   ndim <- get_measure_col_ndim(new_data, col)
 
+  # Get the expected length after unnesting the measure column
+  measure_lengths <- vapply(new_data[[col]], nrow, integer(1))
+
+  # Identify which list columns are safe to unnest (same length as measure)
+  # These are likely location columns preserved by step_measure_input_long
+  safe_to_unnest <- character(0)
+  unsafe_list_cols <- character(0)
+  for (lc in non_measure_list_cols) {
+    lc_lengths <- lengths(new_data[[lc]])
+    if (all(lc_lengths == measure_lengths)) {
+      safe_to_unnest <- c(safe_to_unnest, lc)
+    } else {
+      unsafe_list_cols <- c(unsafe_list_cols, lc)
+    }
+  }
+
+  # Drop unsafe list columns (those with incompatible lengths)
+  # These are user-defined list columns that weren't created by input_long
+  if (length(unsafe_list_cols) > 0) {
+    new_data <- new_data[, !names(new_data) %in% unsafe_list_cols]
+  }
+
+  # Unnest measure column + safe list columns together
+  cols_to_unnest <- c(col, safe_to_unnest)
+
   if (ndim == 1L) {
-    # 1D case: original behavior
+    # 1D case
     rnm <- c(paste0(col, ".value"), paste0(col, ".location"))
     names(rnm) <- c(object$values_to, object$location_to)
-    new_data |>
-      tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") |>
+    result <- new_data |>
+      tidyr::unnest(cols = dplyr::all_of(cols_to_unnest), names_sep = ".") |>
       dplyr::rename(!!rnm)
+
+    # Drop columns that are redundant with the location column
+    # After unnest with names_sep=".", columns become "colname." (single element)
+    # or remain as "colname" if they were scalar
+    loc_col_name <- object$location_to
+    loc_values <- result[[loc_col_name]]
+    redundant_cols <- character(0)
+
+    # Check both original names and unnested names (with "." suffix)
+    for (orig_col in safe_to_unnest) {
+      # Try the unnested name first (e.g., "elution_time.")
+      unnested_name <- paste0(orig_col, ".")
+      check_name <- if (unnested_name %in% names(result)) {
+        unnested_name
+      } else {
+        orig_col
+      }
+
+      if (
+        check_name %in%
+          names(result) &&
+          is.numeric(result[[check_name]]) &&
+          length(result[[check_name]]) == length(loc_values) &&
+          identical(result[[check_name]], loc_values)
+      ) {
+        redundant_cols <- c(redundant_cols, check_name)
+      }
+    }
+    if (length(redundant_cols) > 0) {
+      result <- result[, !names(result) %in% redundant_cols]
+    }
+    result
   } else {
     # nD case: unnest and rename location_1, location_2, etc.
-    # Build rename map for nD columns
     old_names <- c(
       paste0(col, ".value"),
       paste0(col, ".location_", seq_len(ndim))
@@ -159,9 +220,38 @@ bake.step_measure_output_long <- function(object, new_data, ...) {
     )
     rnm <- stats::setNames(old_names, new_names)
 
-    new_data |>
-      tidyr::unnest(cols = dplyr::all_of(col), names_sep = ".") |>
+    result <- new_data |>
+      tidyr::unnest(cols = dplyr::all_of(cols_to_unnest), names_sep = ".") |>
       dplyr::rename(dplyr::all_of(rnm))
+
+    # Drop columns that are redundant with location columns
+    loc_col_names <- paste0(object$location_to, "_", seq_len(ndim))
+    redundant_cols <- character(0)
+    for (i in seq_len(ndim)) {
+      loc_values <- result[[loc_col_names[i]]]
+      for (orig_col in safe_to_unnest) {
+        unnested_name <- paste0(orig_col, ".")
+        check_name <- if (unnested_name %in% names(result)) {
+          unnested_name
+        } else {
+          orig_col
+        }
+
+        if (
+          check_name %in%
+            names(result) &&
+            is.numeric(result[[check_name]]) &&
+            length(result[[check_name]]) == length(loc_values) &&
+            identical(result[[check_name]], loc_values)
+        ) {
+          redundant_cols <- c(redundant_cols, check_name)
+        }
+      }
+    }
+    if (length(redundant_cols) > 0) {
+      result <- result[, !names(result) %in% redundant_cols]
+    }
+    result
   }
 }
 

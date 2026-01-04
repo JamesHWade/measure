@@ -119,6 +119,8 @@ step_measure_input_long <-
         dim_names = dim_names,
         dim_units = dim_units,
         pad = pad,
+        group_cols = NULL,
+        outcome_cols = NULL,
         skip = skip,
         id = id
       )
@@ -136,6 +138,8 @@ step_measure_input_long_new <-
     dim_names,
     dim_units,
     pad,
+    group_cols,
+    outcome_cols,
     skip,
     id
   ) {
@@ -150,6 +154,8 @@ step_measure_input_long_new <-
       dim_names = dim_names,
       dim_units = dim_units,
       pad = pad,
+      group_cols = group_cols,
+      outcome_cols = outcome_cols,
       skip = skip,
       id = id
     )
@@ -159,7 +165,10 @@ step_measure_input_long_new <-
 prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
   value_name <- recipes_eval_select(x$terms, training, info)
   check_single_selector(value_name, "...")
-  check_type(training[, value_name], types = c("double", "integer"))
+
+  # Type checking: accept double/integer or list columns containing numerics
+  # (list columns occur when a previous input step has already run)
+  check_type_or_list_numeric(training[[value_name]], value_name)
 
   if (length(x$location) > 0) {
     loc_names <- recipes_eval_select(x$location, training, info)
@@ -178,7 +187,7 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
       )
     }
     for (loc_col in loc_names) {
-      check_type(training[, loc_col], types = c("double", "integer"))
+      check_type_or_list_numeric(training[[loc_col]], loc_col)
     }
   } else {
     rlang::abort("'location' is required for long input data")
@@ -199,6 +208,45 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
     )
   }
 
+  # Identify columns to group by for nesting
+
+  # Strategy:
+  # 1. If explicit ID columns exist (role = "id"), use those
+  # 2. Otherwise, fall back to original behavior: exclude only value/location
+  #
+  # This allows multiple step_measure_input_long calls to work correctly
+  # when ID columns are properly defined, while maintaining backward
+  # compatibility with existing recipes that don't set ID roles
+  consumed_cols <- c(value_name, loc_names)
+
+  if (!is.null(info)) {
+    id_cols <- info$variable[info$role == "id" & !is.na(info$role)]
+    # Also include columns with role "measure" from previous input steps
+    measure_cols <- info$variable[info$role == "measure" & !is.na(info$role)]
+
+    if (length(id_cols) > 0 || length(measure_cols) > 0) {
+      # Use explicit ID/measure columns
+      group_cols <- c(id_cols, measure_cols)
+    } else {
+      # Fallback: group by all columns except value and location
+      # This is the original behavior for backward compatibility
+      group_cols <- setdiff(names(training), consumed_cols)
+    }
+  } else {
+    # No info available - use original behavior
+    group_cols <- setdiff(names(training), consumed_cols)
+  }
+  # Filter to only columns actually present in the training data
+  group_cols <- intersect(group_cols, names(training))
+
+  # Also identify outcome columns - these should be kept as scalar values,
+  # not converted to list columns
+  outcome_cols <- character(0)
+  if (!is.null(info)) {
+    outcome_cols <- info$variable[info$role == "outcome" & !is.na(info$role)]
+    outcome_cols <- intersect(outcome_cols, names(training))
+  }
+
   # Store value name as first column, then location names
   step_measure_input_long_new(
     terms = x$terms,
@@ -210,6 +258,8 @@ prep.step_measure_input_long <- function(x, training, info = NULL, ...) {
     dim_names = x$dim_names,
     dim_units = x$dim_units,
     pad = x$pad,
+    group_cols = group_cols,
+    outcome_cols = outcome_cols,
     skip = x$skip,
     id = x$id
   )
@@ -221,20 +271,185 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
   value_col <- object$columns[1]
   loc_cols <- object$columns[-1]
   ndim <- length(loc_cols)
+  group_cols <- object$group_cols
+  outcome_cols <- object$outcome_cols %||% character(0)
 
-  # Rename columns to canonical names
-  new_data <- rename_long_cols_nd(new_data, value_col, loc_cols)
-
-  # Get list of columns to exclude from grouping (value + all locations)
-  if (ndim == 1) {
-    exclude_cols <- c("value", "location")
-  } else {
-    exclude_cols <- c("value", paste0("location_", seq_len(ndim)))
+  # Validate required columns exist in new_data
+  required_cols <- c(value_col, loc_cols)
+  missing_cols <- setdiff(required_cols, names(new_data))
+  if (length(missing_cols) > 0) {
+    cli::cli_abort(c(
+      "Required column{?s} not found in data: {.field {missing_cols}}",
+      "i" = "These columns were expected from recipe preparation.",
+      "x" = "Ensure new_data has the same structure as training data."
+    ))
   }
 
-  # Nest by all other columns
-  new_data <- new_data |>
-    tidyr::nest(.by = -dplyr::all_of(exclude_cols), .key = ".measures_temp")
+  # Filter group_cols and outcome_cols to only those present in new_data
+  # (handles cases where columns may have been removed by prior steps)
+  group_cols <- intersect(group_cols, names(new_data))
+  outcome_cols <- intersect(outcome_cols, names(new_data))
+
+  # Exclude consumed columns (value and location) from outcome_cols
+  # since they're being nested, not grouped by
+  consumed_cols <- c(value_col, loc_cols)
+  outcome_cols <- setdiff(outcome_cols, consumed_cols)
+
+  # Determine which outcome columns are actually constant per sample
+  # (i.e., have only one unique value per group). Only those should be
+  # treated as scalar values. Outcome columns that vary per measurement
+  # point should be preserved as list columns.
+  scalar_outcome_cols <- character(0)
+  if (length(outcome_cols) > 0 && length(group_cols) > 0) {
+    for (oc in outcome_cols) {
+      if (oc %in% names(new_data) && !is.list(new_data[[oc]])) {
+        # Check if this column has unique values per group
+        unique_per_group <- new_data |>
+          dplyr::group_by(dplyr::across(dplyr::all_of(group_cols))) |>
+          dplyr::summarize(
+            n_unique = dplyr::n_distinct(.data[[oc]]),
+            .groups = "drop"
+          )
+        if (all(unique_per_group$n_unique == 1)) {
+          scalar_outcome_cols <- c(scalar_outcome_cols, oc)
+        }
+      }
+    }
+  }
+
+  # Only constant outcome columns should be treated like group_cols for nesting
+  nest_by_cols <- unique(c(group_cols, scalar_outcome_cols))
+
+  # Variable outcome columns go into other_cols for list column preservation
+  variable_outcome_cols <- setdiff(outcome_cols, scalar_outcome_cols)
+
+  # Check if input columns are list columns (from a previous input step)
+  # If so, unnest them first to recreate long format
+  cols_to_unnest <- c(value_col, loc_cols)
+  cols_to_unnest <- cols_to_unnest[cols_to_unnest %in% names(new_data)]
+  is_list_col <- vapply(
+    new_data[cols_to_unnest],
+    is.list,
+    logical(1)
+  )
+
+  if (any(is_list_col)) {
+    # Validate all required columns are in same state (all lists or all non-lists)
+    if (!all(is_list_col)) {
+      list_cols <- cols_to_unnest[is_list_col]
+      non_list_cols <- cols_to_unnest[!is_list_col]
+      cli::cli_abort(c(
+        "Mixed column types: cannot process data.",
+        "i" = "List column{?s}: {.field {list_cols}}",
+        "i" = "Non-list column{?s}: {.field {non_list_cols}}",
+        "x" = "All value and location columns must be in the same format."
+      ))
+    }
+    # Unnest the list columns to recreate long format
+    # This enables multiple step_measure_input_long calls in sequence
+    new_data <- tidyr::unnest(new_data, cols = dplyr::all_of(cols_to_unnest))
+  }
+
+  # Get all columns that are NOT nest_by_cols, value_col, or loc_cols
+  # These will be preserved as list columns for subsequent steps
+  # (scalar outcome_cols are in nest_by_cols; variable outcome_cols end up here)
+  other_cols <- setdiff(names(new_data), c(nest_by_cols, value_col, loc_cols))
+
+  # Build the nested measure tibble with canonical column names (location, value)
+  # Also preserve location columns as list columns for subsequent input steps
+  if (ndim == 1) {
+    loc_col <- loc_cols[1]
+
+    # Use tidyr::nest to create the measure column, then rename inside
+    # First, create a temporary tibble with canonical names for nesting
+    work_data <- new_data
+    work_data$.measure_value <- work_data[[value_col]]
+    work_data$.measure_location <- work_data[[loc_col]]
+
+    new_data <- work_data |>
+      tidyr::nest(
+        .measures_temp = c(.measure_value, .measure_location),
+        .by = dplyr::all_of(nest_by_cols)
+      )
+
+    # Rename columns inside nested tibbles to canonical names
+    new_data$.measures_temp <- lapply(new_data$.measures_temp, function(df) {
+      tibble::tibble(
+        location = df$.measure_location,
+        value = df$.measure_value
+      )
+    })
+
+    # The location column is now inside the nested measure, but we also need
+    # to preserve it separately for subsequent steps.
+    # Extract from the first measure (all should have same locations)
+    if (nrow(new_data) > 0 && length(new_data$.measures_temp) > 0) {
+      # Create a list column with the location values for each row
+      new_data[[loc_col]] <- lapply(
+        new_data$.measures_temp,
+        function(m) m$location
+      )
+    }
+
+    # Also need to preserve other_cols as list columns
+    # These get nested by tidyr::nest, so extract them back
+    if (length(other_cols) > 0) {
+      # Re-aggregate from original work_data
+      for (other_col in other_cols) {
+        agg_data <- work_data |>
+          dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
+          dplyr::summarize(
+            !!other_col := list(.data[[other_col]]),
+            .groups = "drop"
+          )
+        new_data <- dplyr::left_join(new_data, agg_data, by = nest_by_cols)
+      }
+    }
+  } else {
+    # Multi-dimensional case
+    work_data <- new_data
+    work_data$.measure_value <- work_data[[value_col]]
+    for (i in seq_along(loc_cols)) {
+      work_data[[paste0(".measure_loc_", i)]] <- work_data[[loc_cols[i]]]
+    }
+    loc_temp_cols <- paste0(".measure_loc_", seq_along(loc_cols))
+
+    new_data <- work_data |>
+      tidyr::nest(
+        .measures_temp = c(.measure_value, dplyr::all_of(loc_temp_cols)),
+        .by = dplyr::all_of(nest_by_cols)
+      )
+
+    # Rename columns inside nested tibbles to canonical names
+    new_data$.measures_temp <- lapply(new_data$.measures_temp, function(df) {
+      result <- tibble::tibble(value = df$.measure_value)
+      for (i in seq_along(loc_cols)) {
+        result[[paste0("location_", i)]] <- df[[paste0(".measure_loc_", i)]]
+      }
+      result
+    })
+
+    # Preserve location columns for subsequent steps
+    for (i in seq_along(loc_cols)) {
+      new_data[[loc_cols[i]]] <- lapply(
+        new_data$.measures_temp,
+        function(m) m[[paste0("location_", i)]]
+      )
+    }
+
+    # Preserve other_cols as list columns
+    if (length(other_cols) > 0) {
+      for (other_col in other_cols) {
+        agg_data <- work_data |>
+          dplyr::group_by(dplyr::across(dplyr::all_of(nest_by_cols))) |>
+          dplyr::summarize(
+            !!other_col := list(.data[[other_col]]),
+            .groups = "drop"
+          )
+        new_data <- dplyr::left_join(new_data, agg_data, by = nest_by_cols)
+      }
+    }
+  }
 
   # Rename to the user-specified column name
   if (col_name != ".measures_temp") {

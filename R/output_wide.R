@@ -120,6 +120,21 @@ prep.step_measure_output_wide <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_output_wide <- function(object, new_data, ...) {
   col <- object$measures
+
+  # Drop list columns that were preserved by step_measure_input_long.
+
+  # In wide format, list columns interfere with pivot_wider (which requires
+  # scalar id_cols). Location data is already inside the measure tibble.
+  measure_cols <- find_measure_cols(new_data)
+  list_cols <- names(new_data)[vapply(new_data, is.list, logical(1))]
+  non_measure_list_cols <- setdiff(list_cols, measure_cols)
+  if (length(non_measure_list_cols) > 0) {
+    cli::cli_inform(
+      "Dropping {length(non_measure_list_cols)} list column{?s} for wide output: {.field {non_measure_list_cols}}"
+    )
+    new_data <- new_data[, !names(new_data) %in% non_measure_list_cols]
+  }
+
   non_meas <- names(new_data)
   non_meas <- non_meas[non_meas != col]
 
