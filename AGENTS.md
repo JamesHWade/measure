@@ -9,7 +9,7 @@ bd ready              # Find available work
 bd show <id>          # View issue details
 bd update <id> --status in_progress  # Claim work
 bd close <id>         # Complete work
-bd sync               # Sync with git
+bd sync               # Sync with git (also commits beads changes)
 ```
 
 ## Landing the Plane (Session Completion)
@@ -24,10 +24,11 @@ bd sync               # Sync with git
 4. **PUSH TO REMOTE** - This is MANDATORY:
    ```bash
    git pull --rebase
-   bd sync
+   bd sync              # Commits any pending beads changes
    git push
-   git status  # MUST show "up to date with origin"
+   git status           # MUST show "up to date with origin"
    ```
+   **Note:** If `git push` fails with "uncommitted changes detected", run `bd sync` again to commit beads database updates, then retry push.
 5. **Clean up** - Clear stashes, prune remote branches
 6. **Verify** - All changes committed AND pushed
 7. **Hand off** - Provide context for next session
@@ -37,4 +38,3 @@ bd sync               # Sync with git
 - NEVER stop before pushing - that leaves work stranded locally
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
-
