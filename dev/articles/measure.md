@@ -405,18 +405,24 @@ The measure package includes several datasets for testing and examples:
 
 ``` r
 # NIR spectroscopy
-data(meats_long)           # 215 meat samples, long format
+data(meats_long)
+# 215 meat samples, long format
 
 # Raman spectroscopy
-data(glucose_bioreactors)  # Loads bioreactors_small (210) and bioreactors_large (42)
+data(glucose_bioreactors)
+# Loads bioreactors_small (210) and bioreactors_large (42)
 
 # Chromatography
-data(hplc_chromatograms)   # 20 simulated HPLC samples
-data(sec_chromatograms)    # 10 SEC samples (5 standards + 5 polymers)
-data(sec_calibration)      # MW calibration standards
+data(hplc_chromatograms)
+# 20 simulated HPLC samples
+data(sec_chromatograms)
+# 10 SEC samples (5 standards + 5 polymers)
+data(sec_calibration)
+# MW calibration standards
 
 # Mass spectrometry
-data(maldi_spectra)        # 16 simulated MALDI-TOF spectra
+data(maldi_spectra)
+# 16 simulated MALDI-TOF spectra
 ```
 
 ### External data sources
@@ -427,9 +433,13 @@ For additional test data, several R packages provide spectral datasets:
 # modeldata - meats dataset in wide format
 library(modeldata)
 data(meats)
+dim(meats)
+#> [1] 215 103
 
-# prospectr - NIR soil spectroscopy (825 samples)
+# prospectr - NIR soil spectroscopy
 data(NIRsoil, package = "prospectr")
+dim(NIRsoil)
+#> [1] 825   5
 ```
 
 **Online repositories** with public analytical data:

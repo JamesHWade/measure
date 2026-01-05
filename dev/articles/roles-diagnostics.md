@@ -138,24 +138,37 @@ multiple times, but more concise for common analytical data patterns.
 ### Custom roles for analytical workflows
 
 For analytical chemistry workflows, you might want to identify special
-sample types:
+sample types and metadata columns:
 
 ``` r
-# Example with QC and blank samples
+# Example with metadata columns
 analytical_data <- data.frame(
-  sample_id = c("blank_1", "QC_1", "S1", "S2", "QC_2", "S3"),
-  sample_type = c("blank", "qc", "sample", "sample", "qc", "sample"),
-  concentration = c(NA, 50, 10, 25, 50, 75),
+  sample_id = c("S1", "S2", "S3", "S4", "S5", "S6"),
+  batch = c("A", "A", "A", "B", "B", "B"),
+  operator = c("J", "J", "J", "M", "M", "M"),
+  concentration = c(10, 25, 50, 10, 25, 50),
   wn_1000 = rnorm(6),
-  wn_1001 = rnorm(6)
+  wn_1001 = rnorm(6),
+  wn_1002 = rnorm(6)
 )
 
 rec <- recipe(concentration ~ ., data = analytical_data) |>
   set_measure_roles(
     id_cols = sample_id,
-    blank_cols = starts_with("blank"),
-    qc_cols = starts_with("QC")
+    metadata_cols = c(batch, operator),
+    measure_cols = starts_with("wn_")
   )
+
+rec
+#> 
+#> ── Recipe ──────────────────────────────────────────────────────────────────────
+#> 
+#> ── Inputs
+#> Number of variables by role
+#> outcome:  1
+#> measure:  3
+#> metadata: 2
+#> id:       1
 ```
 
 ## Validating Recipe Structure
@@ -195,7 +208,8 @@ after output step
 ``` r
 # A recipe with issues
 bad_rec <- recipe(water ~ ., data = meats_long) |>
-  step_measure_snv()  # Missing input step!
+  step_measure_snv()
+# Missing input step!
 
 issues <- check_measure_recipe(bad_rec)
 issues
@@ -209,11 +223,14 @@ issues
 
 ### Interactive mode
 
-Use `strict = FALSE` for interactive feedback:
+Use `strict = FALSE` for interactive feedback that prints directly to
+the console:
 
 ``` r
 check_measure_recipe(bad_rec, strict = FALSE)
-# ✖ Recipe has no input step. Add step_measure_input_wide() or step_measure_input_long().
+#> ✖ Recipe has no input step. Add step_measure_input_wide() or step_measure_input_long().
+#> ! Recipe has no output step. Data will remain in internal .measures format.
+#> ℹ No ID column identified. Consider using update_role(col, new_role = 'id').
 ```
 
 ## Visualizing Spectra

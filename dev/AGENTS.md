@@ -10,7 +10,7 @@ bd ready              # Find available work
 bd show <id>          # View issue details
 bd update <id> --status in_progress  # Claim work
 bd close <id>         # Complete work
-bd sync               # Sync with git
+bd sync               # Sync with git (also commits beads changes)
 ```
 
 ## Landing the Plane (Session Completion)
@@ -32,10 +32,14 @@ is NOT complete until `git push` succeeds.
 
     ``` bash
     git pull --rebase
-    bd sync
+    bd sync              # Commits any pending beads changes
     git push
-    git status  # MUST show "up to date with origin"
+    git status           # MUST show "up to date with origin"
     ```
+
+    **Note:** If `git push` fails with “uncommitted changes detected”,
+    run `bd sync` again to commit beads database updates, then retry
+    push.
 
 5.  **Clean up** - Clear stashes, prune remote branches
 

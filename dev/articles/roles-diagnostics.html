@@ -277,23 +277,36 @@ times, but more concise for common analytical data patterns.</p>
 <h3 id="custom-roles-for-analytical-workflows">Custom roles for analytical workflows<a class="anchor" aria-label="anchor" href="#custom-roles-for-analytical-workflows"></a>
 </h3>
 <p>For analytical chemistry workflows, you might want to identify
-special sample types:</p>
+special sample types and metadata columns:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example with QC and blank samples</span></span>
+<code class="sourceCode R"><span><span class="co"># Example with metadata columns</span></span>
 <span><span class="va">analytical_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blank_1"</span>, <span class="st">"QC_1"</span>, <span class="st">"S1"</span>, <span class="st">"S2"</span>, <span class="st">"QC_2"</span>, <span class="st">"S3"</span><span class="op">)</span>,</span>
-<span>  sample_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"blank"</span>, <span class="st">"qc"</span>, <span class="st">"sample"</span>, <span class="st">"sample"</span>, <span class="st">"qc"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
-<span>  concentration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fl">50</span>, <span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">75</span><span class="op">)</span>,</span>
+<span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"S1"</span>, <span class="st">"S2"</span>, <span class="st">"S3"</span>, <span class="st">"S4"</span>, <span class="st">"S5"</span>, <span class="st">"S6"</span><span class="op">)</span>,</span>
+<span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"B"</span><span class="op">)</span>,</span>
+<span>  operator <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"J"</span>, <span class="st">"J"</span>, <span class="st">"J"</span>, <span class="st">"M"</span>, <span class="st">"M"</span>, <span class="st">"M"</span><span class="op">)</span>,</span>
+<span>  concentration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span><span class="op">)</span>,</span>
 <span>  wn_1000 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>,</span>
-<span>  wn_1001 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
+<span>  wn_1001 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>,</span>
+<span>  wn_1002 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">concentration</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">analytical_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/set_measure_roles.html">set_measure_roles</a></span><span class="op">(</span></span>
 <span>    id_cols <span class="op">=</span> <span class="va">sample_id</span>,</span>
-<span>    blank_cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"blank"</span><span class="op">)</span>,</span>
-<span>    qc_cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"QC"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span>    metadata_cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">batch</span>, <span class="va">operator</span><span class="op">)</span>,</span>
+<span>    measure_cols <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"wn_"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ── Inputs</span></span>
+<span><span class="co">#&gt; Number of variables by role</span></span>
+<span><span class="co">#&gt; outcome:  1</span></span>
+<span><span class="co">#&gt; measure:  3</span></span>
+<span><span class="co">#&gt; metadata: 2</span></span>
+<span><span class="co">#&gt; id:       1</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -329,7 +342,8 @@ predictors</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># A recipe with issues</span></span>
 <span><span class="va">bad_rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Missing input step!</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># Missing input step!</span></span>
 <span></span>
 <span><span class="va">issues</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/check_measure_recipe.html">check_measure_recipe</a></span><span class="op">(</span><span class="va">bad_rec</span><span class="op">)</span></span>
 <span><span class="va">issues</span></span>
@@ -343,10 +357,13 @@ predictors</p>
 <div class="section level3">
 <h3 id="interactive-mode">Interactive mode<a class="anchor" aria-label="anchor" href="#interactive-mode"></a>
 </h3>
-<p>Use <code>strict = FALSE</code> for interactive feedback:</p>
+<p>Use <code>strict = FALSE</code> for interactive feedback that prints
+directly to the console:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/check_measure_recipe.html">check_measure_recipe</a></span><span class="op">(</span><span class="va">bad_rec</span>, strict <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co"># ✖ Recipe has no input step. Add step_measure_input_wide() or step_measure_input_long().</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Recipe has no input step. Add step_measure_input_wide() or step_measure_input_long().</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Recipe has no output step. Data will remain in internal .measures format.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> No ID column identified. Consider using update_role(col, new_role = 'id').</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
