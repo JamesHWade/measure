@@ -127,21 +127,25 @@ find_peaks_cols <- function(data) {
     return(new_peaks_tbl())
   }
 
-  # Filter by minimum distance using greedy approach
+  # Filter by minimum distance (O(n) incremental approach)
   if (min_distance > 0 && length(peaks_idx) > 1) {
     # Sort by height descending to keep highest peaks
     height_order <- order(value[peaks_idx], decreasing = TRUE)
     sorted_idx <- peaks_idx[height_order]
+    n_peaks <- length(sorted_idx)
 
-    keep <- logical(length(sorted_idx))
+    keep <- logical(n_peaks)
     keep[1] <- TRUE # Always keep the highest peak
+    kept_locs <- numeric(n_peaks)
+    kept_locs[1] <- location[sorted_idx[1]]
+    n_kept <- 1L
 
-    for (i in seq_along(sorted_idx)[-1]) {
+    for (i in seq_len(n_peaks)[-1]) {
       current_loc <- location[sorted_idx[i]]
-      # Check distance to all already-kept peaks
-      kept_locs <- location[sorted_idx[keep]]
-      if (all(abs(current_loc - kept_locs) >= min_distance)) {
+      if (all(abs(current_loc - kept_locs[seq_len(n_kept)]) >= min_distance)) {
         keep[i] <- TRUE
+        n_kept <- n_kept + 1L
+        kept_locs[n_kept] <- current_loc
       }
     }
 
@@ -222,30 +226,34 @@ find_peaks_cols <- function(data) {
     pk <- peaks_idx[i]
     pk_val <- value[pk]
 
-    # Find left contour base
+    # Find left contour base (with boundary check)
     left_idx <- pk
     left_min <- pk_val
-    for (j in (pk - 1):1) {
-      if (value[j] > pk_val) {
-        break
-      }
-      if (value[j] < left_min) {
-        left_min <- value[j]
-        left_idx <- j
+    if (pk > 1) {
+      for (j in (pk - 1):1) {
+        if (value[j] > pk_val) {
+          break
+        }
+        if (value[j] < left_min) {
+          left_min <- value[j]
+          left_idx <- j
+        }
       }
     }
     left_bases[i] <- left_idx
 
-    # Find right contour base
+    # Find right contour base (with boundary check)
     right_idx <- pk
     right_min <- pk_val
-    for (j in (pk + 1):n) {
-      if (value[j] > pk_val) {
-        break
-      }
-      if (value[j] < right_min) {
-        right_min <- value[j]
-        right_idx <- j
+    if (pk < n) {
+      for (j in (pk + 1):n) {
+        if (value[j] > pk_val) {
+          break
+        }
+        if (value[j] < right_min) {
+          right_min <- value[j]
+          right_idx <- j
+        }
       }
     }
     right_bases[i] <- right_idx
@@ -281,20 +289,24 @@ find_peaks_cols <- function(data) {
     return(new_peaks_tbl())
   }
 
-  # Filter by minimum distance using greedy approach
+  # Filter by minimum distance (O(n) incremental approach)
   if (min_distance > 0 && length(peaks_idx) > 1) {
     # Sort by prominence descending to keep most prominent peaks
     prom_order <- order(prominences, decreasing = TRUE)
+    n_peaks <- length(prom_order)
 
-    keep <- logical(length(prom_order))
+    keep <- logical(n_peaks)
     keep[1] <- TRUE # Always keep the most prominent peak
+    kept_locs <- numeric(n_peaks)
+    kept_locs[1] <- location[peaks_idx[prom_order[1]]]
+    n_kept <- 1L
 
-    for (i in seq_along(prom_order)[-1]) {
+    for (i in seq_len(n_peaks)[-1]) {
       current_loc <- location[peaks_idx[prom_order[i]]]
-      # Check distance to all already-kept peaks
-      kept_locs <- location[peaks_idx[prom_order[keep]]]
-      if (all(abs(current_loc - kept_locs) >= min_distance)) {
+      if (all(abs(current_loc - kept_locs[seq_len(n_kept)]) >= min_distance)) {
         keep[i] <- TRUE
+        n_kept <- n_kept + 1L
+        kept_locs[n_kept] <- current_loc
       }
     }
 
@@ -422,10 +434,12 @@ step_measure_peaks_detect <- function(
   }
   if (!has_peak_algorithm(algorithm)) {
     available <- peak_algorithms()$name
-    cli::cli_abort(c(
-      "Unknown peak detection algorithm {.val {algorithm}}.",
-      "i" = "Available algorithms: {.val {available}}"
-    ))
+    cli::cli_abort(
+      c(
+        "Unknown peak detection algorithm {.val {algorithm}}.",
+        "i" = "Available algorithms: {.val {available}}"
+      )
+    )
   }
 
   if (!is.numeric(min_height) || length(min_height) != 1 || min_height < 0) {
@@ -552,6 +566,19 @@ bake.step_measure_peaks_detect <- function(object, new_data, ...) {
       algo_info <- get_peak_algorithm(algorithm)
       algo_param_names <- names(algo_info$default_params)
 
+      # Validate algorithm_params keys
+      if (length(algorithm_params) > 0) {
+        invalid_params <- setdiff(names(algorithm_params), algo_param_names)
+        if (length(invalid_params) > 0) {
+          cli::cli_abort(
+            c(
+              "Invalid algorithm parameters: {.val {invalid_params}}",
+              "i" = "Algorithm {.val {algorithm}} accepts: {.val {algo_param_names}}"
+            )
+          )
+        }
+      }
+
       # Build params for algorithm - only include supported params
       all_params <- list(
         min_height = height_thresh,
@@ -560,7 +587,7 @@ bake.step_measure_peaks_detect <- function(object, new_data, ...) {
       )
       # Filter to only params the algorithm supports
       params <- all_params[names(all_params) %in% algo_param_names]
-      # Add any algorithm-specific params
+      # Add validated algorithm-specific params
       params <- utils::modifyList(params, algorithm_params)
 
       # Use registry-based algorithm dispatch
@@ -718,10 +745,12 @@ prep.step_measure_peaks_integrate <- function(x, training, info = NULL, ...) {
   # Check for peaks column
   peaks_cols <- find_peaks_cols(training)
   if (length(peaks_cols) == 0) {
-    cli::cli_abort(c(
-      "No peaks column found.",
-      "i" = "Use {.fn step_measure_peaks_detect} before integration."
-    ))
+    cli::cli_abort(
+      c(
+        "No peaks column found.",
+        "i" = "Use {.fn step_measure_peaks_detect} before integration."
+      )
+    )
   }
 
   if (is.null(x$measures)) {
@@ -985,10 +1014,12 @@ step_measure_peaks_filter_new <- function(
 prep.step_measure_peaks_filter <- function(x, training, info = NULL, ...) {
   peaks_cols <- find_peaks_cols(training)
   if (length(peaks_cols) == 0) {
-    cli::cli_abort(c(
-      "No peaks column found.",
-      "i" = "Use {.fn step_measure_peaks_detect} before filtering."
-    ))
+    cli::cli_abort(
+      c(
+        "No peaks column found.",
+        "i" = "Use {.fn step_measure_peaks_detect} before filtering."
+      )
+    )
   }
 
   step_measure_peaks_filter_new(
@@ -1205,10 +1236,12 @@ step_measure_peaks_to_table_new <- function(
 prep.step_measure_peaks_to_table <- function(x, training, info = NULL, ...) {
   peaks_cols <- find_peaks_cols(training)
   if (length(peaks_cols) == 0) {
-    cli::cli_abort(c(
-      "No peaks column found.",
-      "i" = "Use {.fn step_measure_peaks_detect} before converting to table."
-    ))
+    cli::cli_abort(
+      c(
+        "No peaks column found.",
+        "i" = "Use {.fn step_measure_peaks_detect} before converting to table."
+      )
+    )
   }
 
   step_measure_peaks_to_table_new(
@@ -1588,9 +1621,14 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
           max_iter,
           tol
         )
+      } else {
+        cli::cli_abort(
+          c(
+            "Deconvolution for {.val {model}} model not yet implemented.",
+            "i" = "Only {.val gaussian} is currently supported."
+          )
+        )
       }
-      # EMG and bigaussian would be similar but more complex
-      # For now, use Gaussian for all models as a baseline implementation
 
       new_data[[peaks_col]][[row_idx]] <- peaks
     }

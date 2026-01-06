@@ -126,6 +126,40 @@ reference:
   - step_measure_peaks_to_table
   - is_peaks_list
   - find_peaks_cols
+- title: Peak Algorithm Registry
+  desc: Registration and discovery for peak detection algorithms
+  contents:
+  - peak_algorithms
+  - get_peak_algorithm
+  - has_peak_algorithm
+  - register_peak_algorithm
+  - unregister_peak_algorithm
+- title: Peak Model Classes
+  desc: S3 class architecture for peak shape models used in deconvolution
+  contents:
+  - new_peak_model
+  - is_peak_model
+  - create_peak_model
+  - has_peak_model
+  - peak_models
+  - register_peak_model
+  - unregister_peak_model
+  - peak_model_value
+  - peak_model_gradient
+  - peak_model_gradient_numerical
+  - peak_model_bounds
+  - peak_model_initial_guess
+  - peak_model_area
+  - peak_model_param_names
+  - validate_peak_model_params
+  - sum_peak_models
+- title: Built-in Peak Models
+  desc: Core peak shape models for deconvolution
+  contents:
+  - gaussian_peak_model
+  - emg_peak_model
+  - bigaussian_peak_model
+  - lorentzian_peak_model
 - title: Smoothing & Noise Reduction
   desc: Noise reduction and spike removal steps
   contents:

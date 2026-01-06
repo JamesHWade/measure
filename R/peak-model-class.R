@@ -70,7 +70,6 @@ new_peak_model <- function(
   )
 }
 
-
 #' Test if Object is a Peak Model
 #'
 #' @param x Object to test.
@@ -79,7 +78,6 @@ new_peak_model <- function(
 is_peak_model <- function(x) {
   inherits(x, "peak_model")
 }
-
 
 #' @export
 print.peak_model <- function(x, ...) {
@@ -94,7 +92,6 @@ print.peak_model <- function(x, ...) {
   }
   invisible(x)
 }
-
 
 # ==============================================================================
 # Generic S3 Methods
@@ -131,7 +128,6 @@ peak_model_value.default <- function(model, x, params) {
   )
 }
 
-
 #' Calculate Peak Model Gradient
 #'
 #' Calculates partial derivatives of the model with respect to each parameter.
@@ -159,7 +155,6 @@ peak_model_gradient.default <- function(model, x, params) {
   # Fall back to numerical gradient if no analytical version defined
   peak_model_gradient_numerical(model, x, params)
 }
-
 
 #' Get Parameter Bounds for Optimization
 #'
@@ -193,7 +188,6 @@ peak_model_bounds.default <- function(model, x_range, y_range) {
   )
 }
 
-
 #' Generate Initial Parameter Guess
 #'
 #' Estimates initial parameter values from the data, providing a starting
@@ -222,6 +216,20 @@ peak_model_bounds.default <- function(model, x_range, y_range) {
 #' @seealso [peak_model_bounds()]
 #' @export
 peak_model_initial_guess <- function(model, x, y, peak_idx) {
+  # Validate peak_idx bounds
+  if (
+    !is.numeric(peak_idx) ||
+      length(peak_idx) != 1 ||
+      peak_idx < 1 ||
+      peak_idx > length(y)
+  ) {
+    cli::cli_abort(
+      c(
+        "{.arg peak_idx} must be a valid index between 1 and {length(y)}.",
+        "x" = "Got: {.val {peak_idx}}"
+      )
+    )
+  }
   UseMethod("peak_model_initial_guess")
 }
 
@@ -231,7 +239,6 @@ peak_model_initial_guess.default <- function(model, x, y, peak_idx) {
     "No {.fn peak_model_initial_guess} method defined for class {.cls {class(model)[1]}}."
   )
 }
-
 
 #' Calculate Peak Area
 #'
@@ -274,7 +281,6 @@ peak_model_area.default <- function(model, params, x_range = NULL) {
   sum(diff(x) * (y[-1] + y[-length(y)]) / 2)
 }
 
-
 #' Get Parameter Names from Peak Model
 #'
 #' @param model A `peak_model` object.
@@ -283,7 +289,6 @@ peak_model_area.default <- function(model, params, x_range = NULL) {
 peak_model_param_names <- function(model) {
   model$param_names
 }
-
 
 # ==============================================================================
 # Utility Functions
@@ -321,7 +326,6 @@ peak_model_gradient_numerical <- function(model, x, params, eps = 1e-8) {
   grad_matrix
 }
 
-
 #' Sum Multiple Peak Models
 #'
 #' Evaluates multiple peak models and sums their contributions.
@@ -356,7 +360,6 @@ sum_peak_models <- function(x, models, params_list) {
   total
 }
 
-
 #' Validate Peak Model Parameters
 #'
 #' Checks that a parameter list has all required parameters for a model.
@@ -373,10 +376,12 @@ validate_peak_model_params <- function(model, params) {
 
   missing <- setdiff(required, provided)
   if (length(missing) > 0) {
-    cli::cli_abort(c(
-      "Missing required parameters for {.val {model$name}} model:",
-      "x" = "Missing: {.val {missing}}"
-    ))
+    cli::cli_abort(
+      c(
+        "Missing required parameters for {.val {model$name}} model:",
+        "x" = "Missing: {.val {missing}}"
+      )
+    )
   }
 
   extra <- setdiff(provided, required)
@@ -388,7 +393,6 @@ validate_peak_model_params <- function(model, params) {
 
   invisible(TRUE)
 }
-
 
 # ==============================================================================
 # Peak Model Registry
@@ -404,7 +408,6 @@ validate_peak_model_params <- function(model, params) {
   .measure_registry$peak_models <- list()
   invisible(NULL)
 }
-
 
 #' Register a Peak Model
 #'
@@ -463,7 +466,6 @@ register_peak_model <- function(
   invisible(TRUE)
 }
 
-
 #' Unregister a Peak Model
 #'
 #' Removes a peak model from the registry.
@@ -482,7 +484,6 @@ unregister_peak_model <- function(name) {
   .measure_registry$peak_models[[name]] <- NULL
   invisible(TRUE)
 }
-
 
 #' List Available Peak Models
 #'
@@ -504,12 +505,14 @@ peak_models <- function(packs = NULL, techniques = NULL) {
   models <- .measure_registry$peak_models
 
   if (is.null(models) || length(models) == 0) {
-    return(tibble::tibble(
-      name = character(),
-      pack_name = character(),
-      description = character(),
-      technique = character()
-    ))
+    return(
+      tibble::tibble(
+        name = character(),
+        pack_name = character(),
+        description = character(),
+        technique = character()
+      )
+    )
   }
 
   result <- tibble::tibble(
@@ -538,7 +541,6 @@ peak_models <- function(packs = NULL, techniques = NULL) {
   result
 }
 
-
 #' Check if a Peak Model Exists
 #'
 #' @param name Model name.
@@ -547,7 +549,6 @@ peak_models <- function(packs = NULL, techniques = NULL) {
 has_peak_model <- function(name) {
   !is.null(.measure_registry$peak_models[[name]])
 }
-
 
 #' Create a Peak Model by Name
 #'
@@ -568,10 +569,12 @@ create_peak_model <- function(name) {
 
   if (is.null(model_info)) {
     available <- names(.measure_registry$peak_models)
-    cli::cli_abort(c(
-      "Peak model {.val {name}} not found.",
-      "i" = "Available models: {.val {available}}"
-    ))
+    cli::cli_abort(
+      c(
+        "Peak model {.val {name}} not found.",
+        "i" = "Available models: {.val {available}}"
+      )
+    )
   }
 
   model_info$constructor()

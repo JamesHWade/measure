@@ -144,7 +144,7 @@ register_peak_algorithm <- function(
 
   # Initialize registry if needed
 
-if (is.null(.measure_registry$peak_algorithms)) {
+  if (is.null(.measure_registry$peak_algorithms)) {
     .measure_registry$peak_algorithms <- list()
   }
 
@@ -162,7 +162,6 @@ if (is.null(.measure_registry$peak_algorithms)) {
 
   invisible(TRUE)
 }
-
 
 #' Unregister a Peak Detection Algorithm
 #'
@@ -185,7 +184,6 @@ unregister_peak_algorithm <- function(name) {
   .measure_registry$peak_algorithms[[name]] <- NULL
   invisible(TRUE)
 }
-
 
 # ==============================================================================
 # Discovery Functions (exported)
@@ -220,13 +218,15 @@ peak_algorithms <- function(packs = NULL, techniques = NULL) {
   algos <- .measure_registry$peak_algorithms
 
   if (is.null(algos) || length(algos) == 0) {
-    return(tibble::tibble(
-      name = character(),
-      pack_name = character(),
-      description = character(),
-      technique = character(),
-      default_params = list()
-    ))
+    return(
+      tibble::tibble(
+        name = character(),
+        pack_name = character(),
+        description = character(),
+        technique = character(),
+        default_params = list()
+      )
+    )
   }
 
   result <- tibble::tibble(
@@ -257,7 +257,6 @@ peak_algorithms <- function(packs = NULL, techniques = NULL) {
 
   result
 }
-
 
 #' Get a Peak Detection Algorithm
 #'
@@ -291,7 +290,6 @@ get_peak_algorithm <- function(name) {
   .measure_registry$peak_algorithms[[name]]
 }
 
-
 #' Check if a Peak Algorithm Exists
 #'
 #' Checks whether a peak detection algorithm is registered.
@@ -309,7 +307,6 @@ get_peak_algorithm <- function(name) {
 has_peak_algorithm <- function(name) {
   !is.null(get_peak_algorithm(name))
 }
-
 
 # ==============================================================================
 # Algorithm execution helper
@@ -332,10 +329,12 @@ has_peak_algorithm <- function(name) {
 
   if (is.null(algo)) {
     available <- names(.measure_registry$peak_algorithms)
-    cli::cli_abort(c(
-      "Peak algorithm {.val {name}} not found.",
-      "i" = "Available algorithms: {.val {available}}"
-    ))
+    cli::cli_abort(
+      c(
+        "Peak algorithm {.val {name}} not found.",
+        "i" = "Available algorithms: {.val {available}}"
+      )
+    )
   }
 
   # Merge default params with provided params
@@ -351,7 +350,6 @@ has_peak_algorithm <- function(name) {
     c(list(location = location, value = value), params)
   )
 }
-
 
 # ==============================================================================
 # Additional built-in algorithms
@@ -391,20 +389,25 @@ has_peak_algorithm <- function(name) {
     return(new_peaks_tbl())
   }
 
-  # Filter by minimum distance
+  # Filter by minimum distance (O(n) incremental approach)
   if (min_distance > 0 && length(peaks_idx) > 1) {
     # Sort by height descending
     height_order <- order(value[peaks_idx], decreasing = TRUE)
     sorted_idx <- peaks_idx[height_order]
+    n_peaks <- length(sorted_idx)
 
-    keep <- logical(length(sorted_idx))
+    keep <- logical(n_peaks)
     keep[1] <- TRUE
+    kept_locs <- numeric(n_peaks)
+    kept_locs[1] <- location[sorted_idx[1]]
+    n_kept <- 1L
 
-    for (i in seq_along(sorted_idx)[-1]) {
+    for (i in seq_len(n_peaks)[-1]) {
       current_loc <- location[sorted_idx[i]]
-      kept_locs <- location[sorted_idx[keep]]
-      if (all(abs(current_loc - kept_locs) >= min_distance)) {
+      if (all(abs(current_loc - kept_locs[seq_len(n_kept)]) >= min_distance)) {
         keep[i] <- TRUE
+        n_kept <- n_kept + 1L
+        kept_locs[n_kept] <- current_loc
       }
     }
 

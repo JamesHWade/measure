@@ -123,7 +123,6 @@ peak_model_area.gaussian_peak_model <- function(model, params, x_range = NULL) {
   params$height * params$width * sqrt(2 * pi)
 }
 
-
 # ==============================================================================
 # EMG (Exponentially Modified Gaussian) Model
 # ==============================================================================
@@ -165,17 +164,28 @@ peak_model_value.emg_peak_model <- function(model, x, params) {
     return(params$height * exp(-0.5 * ((x - params$center) / params$width)^2))
   }
 
-  # EMG formula using error function
+  # EMG formula using log-space for numerical stability
+  # log(result) = log(coef) + exp_term + log(pnorm_term)
   z <- (x - params$center) / params$width + params$width / params$tau
+  exp_term <- 0.5 *
+    (params$width / params$tau)^2 -
+    (x - params$center) / params$tau
 
-  result <- (params$height * params$width * sqrt(2 * pi) / params$tau) *
-    exp(
-      0.5 * (params$width / params$tau)^2 - (x - params$center) / params$tau
-    ) *
-    stats::pnorm(z)
+  # Clamp exp_term to avoid overflow (exp(709) is ~max for double)
+  exp_term <- pmin(exp_term, 700)
 
-  # Handle numerical issues
-  result[is.nan(result) | is.infinite(result)] <- 0
+  coef <- params$height * params$width * sqrt(2 * pi) / params$tau
+  result <- coef * exp(exp_term) * stats::pnorm(z)
+
+  # For very negative z, pnorm is essentially 0, so result should be 0
+  # For very large exp_term that was clamped, fallback to Gaussian tail
+  gaussian_fallback <- params$height *
+    exp(-0.5 * ((x - params$center) / params$width)^2)
+
+  # Use Gaussian where EMG formula has numerical issues
+  result[is.nan(result) | is.infinite(result)] <- gaussian_fallback[
+    is.nan(result) | is.infinite(result)
+  ]
 
   result
 }
@@ -244,7 +254,6 @@ peak_model_initial_guess.emg_peak_model <- function(model, x, y, peak_idx) {
     tau = tau_estimate
   )
 }
-
 
 # ==============================================================================
 # Bi-Gaussian Model
@@ -364,7 +373,6 @@ peak_model_initial_guess.bigaussian_peak_model <- function(
   )
 }
 
-
 # ==============================================================================
 # Lorentzian Model
 # ==============================================================================
@@ -479,7 +487,6 @@ peak_model_area.lorentzian_peak_model <- function(
   # Analytical integral: height * gamma * pi
   params$height * params$gamma * pi
 }
-
 
 # ==============================================================================
 # Registration
