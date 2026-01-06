@@ -108,6 +108,7 @@ rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
 \code{\link[=peak_algorithms]{peak_algorithms()}}, \code{\link[=register_peak_algorithm]{register_peak_algorithm()}}
 
 Other peak-operations: 
+\code{\link{step_measure_peaks_deconvolve}()},
 \code{\link{step_measure_peaks_filter}()},
 \code{\link{step_measure_peaks_integrate}()},
 \code{\link{step_measure_peaks_to_table}()}
