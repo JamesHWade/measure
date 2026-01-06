@@ -8,6 +8,9 @@
   # Initialize the peak algorithm registry
   .peak_algorithm_registry_reset()
 
+  # Initialize the peak model registry
+  .peak_model_registry_reset()
+
   # Register measure itself as a pack
   register_measure_pack(
     pack_name = "measure",
@@ -20,6 +23,9 @@
 
   # Register core peak detection algorithms
   .register_core_peak_algorithms()
+
+  # Register core peak models
+  .register_core_peak_models()
 
   # Set up reticulate to use managed Python environment
   # Only if reticulate is available (it's in Suggests)
