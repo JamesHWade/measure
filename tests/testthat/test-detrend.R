@@ -1,5 +1,5 @@
 test_that("step_measure_detrend runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_detrend(degree = 1) |>
@@ -13,12 +13,12 @@ test_that("step_measure_detrend runs in recipe workflow", {
 })
 
 test_that("step_measure_detrend modifies values", {
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_detrend <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_detrend <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_detrend(degree = 1) |>
@@ -35,7 +35,7 @@ test_that("step_measure_detrend modifies values", {
 
 test_that("step_measure_detrend validates degree", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_detrend(degree = -1) |>
@@ -99,7 +99,7 @@ test_that("step_measure_detrend removes linear trend", {
 })
 
 test_that("step_measure_detrend tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_detrend(degree = 2)
@@ -117,21 +117,21 @@ test_that("step_measure_detrend tidy method works", {
 })
 
 test_that("step_measure_detrend print method shows correct description", {
-  rec_linear <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_linear <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_detrend(degree = 1)
 
   expect_output(print(rec_linear), "Linear detrending")
 
-  rec_center <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_center <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_detrend(degree = 0)
 
   expect_output(print(rec_center), "Mean centering")
 
-  rec_poly <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_poly <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_detrend(degree = 3)
@@ -141,7 +141,7 @@ test_that("step_measure_detrend print method shows correct description", {
 
 test_that("step_measure_detrend works with different degrees", {
   for (deg in 0:3) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_detrend(degree = deg) |>
@@ -154,7 +154,7 @@ test_that("step_measure_detrend works with different degrees", {
 
 test_that("required_pkgs includes measure", {
   step <- step_measure_detrend(
-    recipe(water + fat + protein ~ ., data = meats_long)
+    recipe(water + fat + protein ~ ., data = meats_small)
   )
   expect_true("measure" %in% required_pkgs(step))
 })

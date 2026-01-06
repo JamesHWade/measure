@@ -7,7 +7,7 @@
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_align_shift runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_shift(max_shift = 5) |>
@@ -58,7 +58,7 @@ test_that("step_measure_align_shift corrects shifts", {
 
 test_that("step_measure_align_shift reference options work", {
   for (ref in c("mean", "median", "first")) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_align_shift(reference = ref) |>
@@ -71,7 +71,7 @@ test_that("step_measure_align_shift reference options work", {
 
 test_that("step_measure_align_shift validates max_shift", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_align_shift(max_shift = 0) |>
@@ -81,7 +81,7 @@ test_that("step_measure_align_shift validates max_shift", {
 })
 
 test_that("step_measure_align_shift tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_shift(max_shift = 10, reference = "median")
@@ -98,7 +98,7 @@ test_that("step_measure_align_shift tidy method works", {
 
 test_that("step_measure_align_reference runs with provided reference", {
   # Get a reference spectrum from the data
-  rec_input <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_input <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
@@ -106,7 +106,7 @@ test_that("step_measure_align_reference runs with provided reference", {
   input_data <- bake(rec_input, new_data = NULL)
   ref <- input_data$.measures[[1]]$value
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_reference(ref_spectrum = ref, max_shift = 5) |>
@@ -126,7 +126,7 @@ test_that("step_measure_align_reference runs with provided reference", {
 test_that("step_measure_align_dtw runs in recipe workflow", {
   skip_if_not_installed("dtw")
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_dtw() |>
@@ -142,7 +142,7 @@ test_that("step_measure_align_dtw window options work", {
   skip_if_not_installed("dtw")
 
   for (wtype in c("none", "sakoechiba", "slantedband")) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_align_dtw(window_type = wtype, window_size = 5) |>
@@ -154,7 +154,7 @@ test_that("step_measure_align_dtw window options work", {
 })
 
 test_that("step_measure_align_dtw requires dtw package", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_dtw()
@@ -164,7 +164,7 @@ test_that("step_measure_align_dtw requires dtw package", {
 })
 
 test_that("step_measure_align_dtw tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_dtw(reference = "median", window_type = "sakoechiba")
@@ -182,7 +182,7 @@ test_that("step_measure_align_dtw tidy method works", {
 test_that("step_measure_align_ptw runs in recipe workflow", {
   skip_if_not_installed("ptw")
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_ptw() |>
@@ -195,7 +195,7 @@ test_that("step_measure_align_ptw runs in recipe workflow", {
 })
 
 test_that("step_measure_align_ptw requires ptw package", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_ptw()
@@ -205,7 +205,7 @@ test_that("step_measure_align_ptw requires ptw package", {
 })
 
 test_that("step_measure_align_ptw tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_ptw(reference = "median")
@@ -220,7 +220,7 @@ test_that("step_measure_align_ptw tidy method works", {
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_align_cow runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_cow(segment_length = 20, slack = 1) |>
@@ -277,7 +277,7 @@ test_that("step_measure_align_cow corrects shifts", {
 
 test_that("step_measure_align_cow reference options work", {
   for (ref in c("mean", "median", "first")) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_align_cow(segment_length = 20, reference = ref) |>
@@ -290,7 +290,7 @@ test_that("step_measure_align_cow reference options work", {
 
 test_that("step_measure_align_cow validates parameters", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_align_cow(segment_length = 1) |>
@@ -299,7 +299,7 @@ test_that("step_measure_align_cow validates parameters", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_align_cow(slack = -1) |>
@@ -309,7 +309,7 @@ test_that("step_measure_align_cow validates parameters", {
 })
 
 test_that("step_measure_align_cow tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_cow(segment_length = 25, slack = 2, reference = "median")
@@ -321,7 +321,7 @@ test_that("step_measure_align_cow tidy method works", {
 })
 
 test_that("step_measure_align_cow is tunable", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_align_cow()

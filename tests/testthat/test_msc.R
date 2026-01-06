@@ -33,7 +33,7 @@ test_that("MSC single spectrum correction works", {
 
 test_that("MSC works with recipe workflow (long format)", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_msc() |>
@@ -74,7 +74,7 @@ test_that("MSC works with recipe workflow (wide format)", {
 
 test_that("MSC preserves location values", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
@@ -82,7 +82,7 @@ test_that("MSC preserves location values", {
   before <- bake(rec, new_data = NULL)
 
   rec_msc <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_msc() |>
@@ -112,12 +112,13 @@ test_that("MSC fails without measure input step", {
 })
 
 test_that("MSC uses same reference for new data", {
-  # Split the data
-  train_ids <- unique(meats_long$id)[1:200]
-  test_ids <- unique(meats_long$id)[201:215]
+  # Split data - use first 2 for training, last 1 for test
+  all_ids <- unique(meats_small$id)
+  train_ids <- all_ids[1:2]
+  test_ids <- all_ids[3]
 
-  train_data <- meats_long[meats_long$id %in% train_ids, ]
-  test_data <- meats_long[meats_long$id %in% test_ids, ]
+  train_data <- meats_small[meats_small$id %in% train_ids, ]
+  test_data <- meats_small[meats_small$id %in% test_ids, ]
 
   rec <-
     recipe(water + fat + protein ~ ., data = train_data) |>
@@ -139,7 +140,7 @@ test_that("MSC uses same reference for new data", {
 
 test_that("MSC print method works", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_msc()
@@ -152,7 +153,7 @@ test_that("MSC print method works", {
 
 test_that("MSC tidy method works", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_msc(id = "msc_test")

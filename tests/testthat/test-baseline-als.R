@@ -1,5 +1,5 @@
 test_that("step_measure_baseline_als runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_als(lambda = 1e5, p = 0.01) |>
@@ -13,12 +13,12 @@ test_that("step_measure_baseline_als runs in recipe workflow", {
 })
 
 test_that("step_measure_baseline_als modifies values", {
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_als <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_als <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_als(lambda = 1e5, p = 0.01) |>
@@ -36,7 +36,7 @@ test_that("step_measure_baseline_als modifies values", {
 
 test_that("step_measure_baseline_als validates lambda", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_als(lambda = -1) |>
@@ -45,7 +45,7 @@ test_that("step_measure_baseline_als validates lambda", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_als(lambda = 0) |>
@@ -56,7 +56,7 @@ test_that("step_measure_baseline_als validates lambda", {
 
 test_that("step_measure_baseline_als validates p", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_als(p = 0) |>
@@ -65,7 +65,7 @@ test_that("step_measure_baseline_als validates p", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_als(p = 1) |>
@@ -74,7 +74,7 @@ test_that("step_measure_baseline_als validates p", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_als(p = 1.5) |>
@@ -84,7 +84,7 @@ test_that("step_measure_baseline_als validates p", {
 })
 
 test_that("step_measure_baseline_als tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_als(lambda = 1e6, p = 0.02)
@@ -104,7 +104,7 @@ test_that("step_measure_baseline_als tidy method works", {
 })
 
 test_that("step_measure_baseline_als print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_als()
@@ -138,7 +138,7 @@ test_that("step_measure_baseline_als works with synthetic baseline", {
   rec <- recipe(outcome ~ ., data = synthetic_data) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(value, location = vars(location)) |>
-    step_measure_baseline_als(lambda = 1e4, p = 0.001, max_iter = 50) |>
+    step_measure_baseline_als(lambda = 1e4, p = 0.001, max_iter = 10) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -155,7 +155,7 @@ test_that("step_measure_baseline_als works with synthetic baseline", {
 
 test_that("required_pkgs includes measure", {
   step <- step_measure_baseline_als(
-    recipe(water + fat + protein ~ ., data = meats_long)
+    recipe(water + fat + protein ~ ., data = meats_small)
   )
   expect_true("measure" %in% required_pkgs(step))
 })

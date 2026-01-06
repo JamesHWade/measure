@@ -88,9 +88,9 @@ test_that("autoplot.recipe works with prepped recipe", {
   skip_if_not_installed("ggplot2")
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_snv() |>
@@ -105,9 +105,9 @@ test_that("autoplot.recipe errors on unprepped recipe", {
   skip_if_not_installed("ggplot2")
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     step_measure_input_long(transmittance, location = vars(channel))
 
   expect_error(
@@ -120,9 +120,9 @@ test_that("autoplot.recipe summary mode works", {
   skip_if_not_installed("ggplot2")
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     recipes::prep(retain = TRUE)
@@ -139,9 +139,9 @@ test_that("plot_measure_comparison works with multiple recipes", {
   skip_if_not_installed("ggplot2")
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
-  base_rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  base_rec <- recipes::recipe(water ~ ., data = meats_small) |>
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel))
 
@@ -176,9 +176,9 @@ test_that("plot_measure_comparison errors on unprepped recipe", {
   skip_if_not_installed("ggplot2")
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     step_measure_input_long(transmittance, location = vars(channel))
 
   expect_error(
@@ -191,9 +191,9 @@ test_that("plot_measure_comparison summary_only mode works", {
   skip_if_not_installed("ggplot2")
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     recipes::prep(retain = TRUE)
@@ -211,9 +211,9 @@ test_that("measure_plot_summary creates summary plot", {
   skip_if_not_installed("ggplot2")
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     recipes::prep(retain = TRUE)
@@ -228,9 +228,9 @@ test_that("measure_plot_summary with range shows min/max", {
   skip_if_not_installed("ggplot2")
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     recipes::prep(retain = TRUE)

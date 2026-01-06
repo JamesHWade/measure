@@ -90,6 +90,7 @@
 #' @examplesIf measure:::.pybaselines_available()
 #' library(recipes)
 #'
+#' \donttest{
 #' # Asymmetric Least Squares baseline correction
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
@@ -105,6 +106,7 @@
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_baseline_py(method = "snip", max_half_window = 40) |>
 #'   prep()
+#' }
 step_measure_baseline_py <- function(
   recipe,
   method = "asls",

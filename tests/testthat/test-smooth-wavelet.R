@@ -5,7 +5,7 @@
 test_that("step_measure_smooth_wavelet runs in recipe workflow", {
   skip_if_not_installed("wavethresh")
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_wavelet() |>
@@ -52,7 +52,7 @@ test_that("step_measure_smooth_wavelet threshold types work", {
   skip_if_not_installed("wavethresh")
 
   for (type in c("soft", "hard")) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_smooth_wavelet(threshold_type = type) |>
@@ -67,7 +67,7 @@ test_that("step_measure_smooth_wavelet threshold policies work", {
   skip_if_not_installed("wavethresh")
 
   for (policy in c("universal", "sure")) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_smooth_wavelet(threshold_policy = policy) |>
@@ -79,7 +79,7 @@ test_that("step_measure_smooth_wavelet threshold policies work", {
 })
 
 test_that("step_measure_smooth_wavelet requires wavethresh package", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_wavelet()
@@ -89,7 +89,7 @@ test_that("step_measure_smooth_wavelet requires wavethresh package", {
 })
 
 test_that("step_measure_smooth_wavelet tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_wavelet(wavelet = "DaubExPhase", filter_number = 8)
@@ -129,7 +129,7 @@ test_that("step_measure_smooth_wavelet different wavelets work", {
   skip_if_not_installed("wavethresh")
 
   for (wavelet in c("DaubExPhase", "DaubLeAsymm")) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_smooth_wavelet(wavelet = wavelet) |>

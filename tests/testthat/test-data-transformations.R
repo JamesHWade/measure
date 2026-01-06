@@ -1,34 +1,34 @@
 test_that("transform measure to matrix", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   spect_mat <- measure_to_matrix(rec$template$.measures)
 
-  expect_equal(nrow(spect_mat), length(unique(meats_long$id)))
-  expect_equal(ncol(spect_mat), length(unique(meats_long$channel)))
+  expect_equal(nrow(spect_mat), length(unique(meats_small$id)))
+  expect_equal(ncol(spect_mat), length(unique(meats_small$channel)))
 
-  ids <- unique(meats_long$id)
+  ids <- unique(meats_small$id)
   for (i in seq_along(ids)) {
     expect_equal(
       spect_mat[i, ],
-      meats_long[meats_long$id == ids[i], "transmittance"][[1]]
+      meats_small[meats_small$id == ids[i], "transmittance"][[1]]
     )
   }
 })
 
 test_that("transform matrix to measure", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   spect_mat <- measure_to_matrix(rec$template$.measures)
 
-  locs <- unique(meats_long$channel)
+  locs <- unique(meats_small$channel)
 
   spect_list <- matrix_to_measure(spect_mat, locs)
 
@@ -42,13 +42,13 @@ test_that("transform matrix to measure", {
 
 test_that("transform tidy format", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
   spect_df <- measure_to_tibble(rec$template$.measures)
-  exp_df <- meats_long[, c("channel", "transmittance", "id")]
+  exp_df <- meats_small[, c("channel", "transmittance", "id")]
   names(exp_df) <- c("location", "value", "sample_num")
 
   expect_equal(spect_df, exp_df)

@@ -1,5 +1,5 @@
 test_that("step_measure_baseline_poly runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_poly(degree = 2) |>
@@ -13,12 +13,12 @@ test_that("step_measure_baseline_poly runs in recipe workflow", {
 })
 
 test_that("step_measure_baseline_poly modifies values", {
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_poly <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_poly <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_poly(degree = 2) |>
@@ -35,7 +35,7 @@ test_that("step_measure_baseline_poly modifies values", {
 
 test_that("step_measure_baseline_poly validates degree", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_poly(degree = 0) |>
@@ -44,7 +44,7 @@ test_that("step_measure_baseline_poly validates degree", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_poly(degree = -1) |>
@@ -55,7 +55,7 @@ test_that("step_measure_baseline_poly validates degree", {
 
 test_that("step_measure_baseline_poly validates max_iter", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_poly(max_iter = -1) |>
@@ -65,7 +65,7 @@ test_that("step_measure_baseline_poly validates max_iter", {
 })
 
 test_that("step_measure_baseline_poly tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_poly(degree = 3)
@@ -83,7 +83,7 @@ test_that("step_measure_baseline_poly tidy method works", {
 })
 
 test_that("step_measure_baseline_poly print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_poly()
@@ -92,7 +92,7 @@ test_that("step_measure_baseline_poly print method works", {
 })
 
 test_that("step_measure_baseline_poly works with iterative fitting", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_poly(degree = 2, max_iter = 5, threshold = 1.5) |>
@@ -140,7 +140,7 @@ test_that("step_measure_baseline_poly removes known polynomial baseline", {
 
 test_that("different polynomial degrees work", {
   for (deg in 1:4) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_poly(degree = deg) |>
@@ -153,7 +153,7 @@ test_that("different polynomial degrees work", {
 
 test_that("required_pkgs includes measure", {
   step <- step_measure_baseline_poly(
-    recipe(water + fat + protein ~ ., data = meats_long)
+    recipe(water + fat + protein ~ ., data = meats_small)
   )
   expect_true("measure" %in% required_pkgs(step))
 })

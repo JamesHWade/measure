@@ -323,8 +323,8 @@ test_that("step_measure_augment_scale tidy method works", {
 # Integration tests
 # ==============================================================================
 
-test_that("augmentation steps work with meats_long data", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+test_that("augmentation steps work with meats_small data", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_augment_noise(sd = 0.01, skip = FALSE) |>

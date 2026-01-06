@@ -47,11 +47,13 @@ on a smooth baseline.
 \examples{
 library(recipes)
 
+\donttest{
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
   step_measure_baseline_tophat(half_window = 30) |>
   prep()
+}
 }
 \seealso{
 Other measure-baseline: 

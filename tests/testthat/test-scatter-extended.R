@@ -249,8 +249,8 @@ test_that("step_measure_osc is tunable", {
 # Integration tests
 # ==============================================================================
 
-test_that("EMSC works with meats_long data", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+test_that("EMSC works with meats_small data", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_emsc(degree = 2) |>
@@ -262,8 +262,8 @@ test_that("EMSC works with meats_long data", {
   expect_false(anyNA(result$.measures[[1]]$value))
 })
 
-test_that("OSC works with meats_long data", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+test_that("OSC works with meats_small data", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_osc(n_components = 2) |>
@@ -276,7 +276,7 @@ test_that("OSC works with meats_long data", {
 })
 
 test_that("EMSC and OSC can be combined", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_emsc(degree = 1) |>

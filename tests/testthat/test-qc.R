@@ -7,7 +7,7 @@
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_qc_snr runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_qc_snr() |>
@@ -21,7 +21,7 @@ test_that("step_measure_qc_snr runs in recipe workflow", {
 })
 
 test_that("step_measure_qc_snr computes positive SNR for real data", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_qc_snr() |>
@@ -36,7 +36,7 @@ test_that("step_measure_qc_snr computes positive SNR for real data", {
 test_that("step_measure_qc_snr different methods work", {
   for (signal in c("max", "range", "rms")) {
     for (noise in c("diff", "mad", "residual")) {
-      rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+      rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
         update_role(id, new_role = "id") |>
         step_measure_input_long(transmittance, location = vars(channel)) |>
         step_measure_qc_snr(signal_method = signal, noise_method = noise) |>
@@ -49,7 +49,7 @@ test_that("step_measure_qc_snr different methods work", {
 })
 
 test_that("step_measure_qc_snr custom column name works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_qc_snr(new_col = "my_snr") |>
@@ -65,7 +65,7 @@ test_that("step_measure_qc_snr custom column name works", {
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_qc_saturated runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_qc_saturated() |>
@@ -106,7 +106,7 @@ test_that("step_measure_qc_saturated detects saturation", {
 })
 
 test_that("step_measure_qc_saturated with manual limits", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_qc_saturated(upper_limit = 3, lower_limit = 2) |>
@@ -122,7 +122,7 @@ test_that("step_measure_qc_saturated with manual limits", {
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_impute runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_impute() |>
@@ -225,7 +225,7 @@ test_that("step_measure_impute respects max_gap", {
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_qc_outlier runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_qc_outlier(threshold = 3) |>
@@ -242,7 +242,7 @@ test_that("step_measure_qc_outlier runs in recipe workflow", {
 
 test_that("step_measure_qc_outlier both methods work", {
   for (method in c("mahalanobis", "pca")) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_qc_outlier(method = method, threshold = 3) |>
@@ -255,7 +255,7 @@ test_that("step_measure_qc_outlier both methods work", {
 })
 
 test_that("step_measure_qc_outlier scores are non-negative", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_qc_outlier() |>
@@ -267,7 +267,7 @@ test_that("step_measure_qc_outlier scores are non-negative", {
 })
 
 test_that("step_measure_qc_outlier custom column names work", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_qc_outlier(

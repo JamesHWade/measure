@@ -9,7 +9,7 @@ skip_if_no_pybaselines <- function() {
 test_that("step_measure_baseline_py runs with asls method", {
   skip_if_no_pybaselines()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "asls", lam = 1e6, p = 0.01) |>
@@ -25,12 +25,12 @@ test_that("step_measure_baseline_py runs with asls method", {
 test_that("step_measure_baseline_py modifies values", {
   skip_if_no_pybaselines()
 
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_py <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_py <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "asls") |>
@@ -49,7 +49,7 @@ test_that("step_measure_baseline_py works with different methods", {
   skip_if_no_pybaselines()
 
   # Test polynomial method
-  rec_poly <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_poly <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "modpoly", poly_order = 3L) |>
@@ -59,7 +59,7 @@ test_that("step_measure_baseline_py works with different methods", {
   expect_true(is_measure_list(result_poly$.measures))
 
   # Test snip method
-  rec_snip <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_snip <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "snip", max_half_window = 30L) |>
@@ -72,7 +72,7 @@ test_that("step_measure_baseline_py works with different methods", {
 test_that("step_measure_baseline_py subtract = FALSE returns baseline", {
   skip_if_no_pybaselines()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "asls", subtract = FALSE) |>
@@ -83,7 +83,7 @@ test_that("step_measure_baseline_py subtract = FALSE returns baseline", {
 
   # Baseline should be smoother than original signal
   # (lower variance of differences)
-  rec_orig <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_orig <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
@@ -101,7 +101,7 @@ test_that("step_measure_baseline_py validates method argument", {
   skip_if_no_pybaselines()
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_py(method = 123) |>
@@ -114,7 +114,7 @@ test_that("step_measure_baseline_py validates subtract argument", {
   skip_if_no_pybaselines()
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_py(subtract = "yes") |>
@@ -127,7 +127,7 @@ test_that("step_measure_baseline_py handles unknown method gracefully", {
   skip_if_no_pybaselines()
 
   # Use minimal data to reduce warnings (one per sample)
-  minimal_data <- meats_long[meats_long$id == unique(meats_long$id)[1], ]
+  minimal_data <- meats_small[meats_small$id == unique(meats_small$id)[1], ]
 
   # Warning fires during prep() because recipes bakes training data internally
   expect_warning(
@@ -143,7 +143,7 @@ test_that("step_measure_baseline_py handles unknown method gracefully", {
 test_that("step_measure_baseline_py tidy method works", {
   skip_if_no_pybaselines()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "airpls", subtract = FALSE)
@@ -162,7 +162,7 @@ test_that("step_measure_baseline_py tidy method works", {
 })
 
 test_that("step_measure_baseline_py print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "asls")
@@ -171,7 +171,7 @@ test_that("step_measure_baseline_py print method works", {
 })
 
 test_that("step_measure_baseline_py tunable returns correct params for asls", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "asls")
@@ -183,7 +183,7 @@ test_that("step_measure_baseline_py tunable returns correct params for asls", {
 })
 
 test_that("step_measure_baseline_py tunable returns correct params for modpoly", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "modpoly")
@@ -194,7 +194,7 @@ test_that("step_measure_baseline_py tunable returns correct params for modpoly",
 })
 
 test_that("step_measure_baseline_py tunable returns empty for unknown method params", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_py(method = "loess") # No tunable params defined
@@ -205,7 +205,7 @@ test_that("step_measure_baseline_py tunable returns empty for unknown method par
 
 test_that("required_pkgs includes measure and reticulate", {
   step <- step_measure_baseline_py(
-    recipe(water + fat + protein ~ ., data = meats_long),
+    recipe(water + fat + protein ~ ., data = meats_small),
     method = "asls"
   )
   pkgs <- required_pkgs(step)

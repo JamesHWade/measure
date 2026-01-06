@@ -3,7 +3,7 @@
 # ==============================================================================
 
 test_that("step_measure_despike runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_despike(threshold = 5) |>
@@ -100,7 +100,7 @@ test_that("step_measure_despike methods work", {
 
 test_that("step_measure_despike validates parameters", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_despike(window = 2) |>
@@ -109,7 +109,7 @@ test_that("step_measure_despike validates parameters", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_despike(threshold = -1) |>
@@ -119,7 +119,7 @@ test_that("step_measure_despike validates parameters", {
 })
 
 test_that("step_measure_despike tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_despike(window = 7, threshold = 4, method = "median")

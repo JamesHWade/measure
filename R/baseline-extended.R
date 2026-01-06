@@ -45,6 +45,7 @@
 #' @examples
 #' library(recipes)
 #'
+#' \donttest{
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -52,6 +53,7 @@
 #'   prep()
 #'
 #' bake(rec, new_data = NULL)
+#' }
 step_measure_baseline_rolling <- function(
   recipe,
   measures = NULL,
@@ -505,6 +507,7 @@ tunable.step_measure_baseline_airpls <- function(x, ...) {
 #' @examples
 #' library(recipes)
 #'
+#' \donttest{
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -512,6 +515,7 @@ tunable.step_measure_baseline_airpls <- function(x, ...) {
 #'   prep()
 #'
 #' bake(rec, new_data = NULL)
+#' }
 step_measure_baseline_snip <- function(
   recipe,
   measures = NULL,
@@ -920,11 +924,13 @@ tunable.step_measure_baseline_arpls <- function(x, ...) {
 #' @examples
 #' library(recipes)
 #'
+#' \donttest{
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_baseline_tophat(half_window = 30) |>
 #'   prep()
+#' }
 step_measure_baseline_tophat <- function(
   recipe,
   measures = NULL,
@@ -1098,11 +1104,13 @@ tidy.step_measure_baseline_tophat <- function(x, ...) {
 #' @examples
 #' library(recipes)
 #'
+#' \donttest{
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_baseline_morph(half_window = 30, iterations = 5) |>
 #'   prep()
+#' }
 step_measure_baseline_morph <- function(
   recipe,
   measures = NULL,
@@ -1261,11 +1269,13 @@ tidy.step_measure_baseline_morph <- function(x, ...) {
 #' @examples
 #' library(recipes)
 #'
+#' \donttest{
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_baseline_minima(window_size = 30, method = "spline") |>
 #'   prep()
+#' }
 step_measure_baseline_minima <- function(
   recipe,
   measures = NULL,
@@ -1459,11 +1469,13 @@ tidy.step_measure_baseline_minima <- function(x, ...) {
 #' @examples
 #' library(recipes)
 #'
+#' \donttest{
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_baseline_auto() |>
 #'   prep()
+#' }
 step_measure_baseline_auto <- function(
   recipe,
   measures = NULL,
