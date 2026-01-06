@@ -38,38 +38,37 @@
 #' @seealso [peak_model_value()], [peak_model_gradient()], [peak_model_bounds()]
 #' @export
 new_peak_model <- function(
-  name,
-  n_params,
-  param_names,
-  description = "",
-  technique = NULL,
-  ...
+	name,
+	n_params,
+	param_names,
+	description = "",
+	technique = NULL,
+	...
 ) {
-  if (!is.character(name) || length(name) != 1 || nchar(name) == 0) {
-    cli::cli_abort("{.arg name} must be a non-empty string.")
-  }
-  if (!is.numeric(n_params) || length(n_params) != 1 || n_params < 1) {
-    cli::cli_abort("{.arg n_params} must be a positive integer.")
-  }
-  if (!is.character(param_names) || length(param_names) != n_params) {
-    cli::cli_abort(
-      "{.arg param_names} must be a character vector of length {n_params}."
-    )
-  }
+	if (!is.character(name) || length(name) != 1 || nchar(name) == 0) {
+		cli::cli_abort("{.arg name} must be a non-empty string.")
+	}
+	if (!is.numeric(n_params) || length(n_params) != 1 || n_params < 1) {
+		cli::cli_abort("{.arg n_params} must be a positive integer.")
+	}
+	if (!is.character(param_names) || length(param_names) != n_params) {
+		cli::cli_abort(
+			"{.arg param_names} must be a character vector of length {n_params}."
+		)
+	}
 
-  structure(
-    list(
-      name = name,
-      n_params = as.integer(n_params),
-      param_names = param_names,
-      description = description,
-      technique = technique,
-      ...
-    ),
-    class = c(paste0(name, "_peak_model"), "peak_model")
-  )
+	structure(
+		list(
+			name = name,
+			n_params = as.integer(n_params),
+			param_names = param_names,
+			description = description,
+			technique = technique,
+			...
+		),
+		class = c(paste0(name, "_peak_model"), "peak_model")
+	)
 }
-
 
 #' Test if Object is a Peak Model
 #'
@@ -77,24 +76,22 @@ new_peak_model <- function(
 #' @return Logical indicating if `x` is a `peak_model`.
 #' @export
 is_peak_model <- function(x) {
-  inherits(x, "peak_model")
+	inherits(x, "peak_model")
 }
-
 
 #' @export
 print.peak_model <- function(x, ...) {
-  cat("<peak_model:", x$name, ">\n")
-  cat("  Parameters (", x$n_params, "): ", sep = "")
-  cat(paste(x$param_names, collapse = ", "), "\n")
-  if (nchar(x$description) > 0) {
-    cat("  Description:", x$description, "\n")
-  }
-  if (!is.null(x$technique)) {
-    cat("  Technique:", x$technique, "\n")
-  }
-  invisible(x)
+	cat("<peak_model:", x$name, ">\n")
+	cat("  Parameters (", x$n_params, "): ", sep = "")
+	cat(paste(x$param_names, collapse = ", "), "\n")
+	if (nchar(x$description) > 0) {
+		cat("  Description:", x$description, "\n")
+	}
+	if (!is.null(x$technique)) {
+		cat("  Technique:", x$technique, "\n")
+	}
+	invisible(x)
 }
-
 
 # ==============================================================================
 # Generic S3 Methods
@@ -121,16 +118,15 @@ print.peak_model <- function(x, ...) {
 #' @seealso [peak_model_gradient()], [peak_model_area()]
 #' @export
 peak_model_value <- function(model, x, params) {
-  UseMethod("peak_model_value")
+	UseMethod("peak_model_value")
 }
 
 #' @export
 peak_model_value.default <- function(model, x, params) {
-  cli::cli_abort(
-    "No {.fn peak_model_value} method defined for class {.cls {class(model)[1]}}."
-  )
+	cli::cli_abort(
+		"No {.fn peak_model_value} method defined for class {.cls {class(model)[1]}}."
+	)
 }
-
 
 #' Calculate Peak Model Gradient
 #'
@@ -151,15 +147,14 @@ peak_model_value.default <- function(model, x, params) {
 #' @seealso [peak_model_value()], [peak_model_gradient_numerical()]
 #' @export
 peak_model_gradient <- function(model, x, params) {
-  UseMethod("peak_model_gradient")
+	UseMethod("peak_model_gradient")
 }
 
 #' @export
 peak_model_gradient.default <- function(model, x, params) {
-  # Fall back to numerical gradient if no analytical version defined
-  peak_model_gradient_numerical(model, x, params)
+	# Fall back to numerical gradient if no analytical version defined
+	peak_model_gradient_numerical(model, x, params)
 }
-
 
 #' Get Parameter Bounds for Optimization
 #'
@@ -183,16 +178,15 @@ peak_model_gradient.default <- function(model, x, params) {
 #' @seealso [peak_model_initial_guess()]
 #' @export
 peak_model_bounds <- function(model, x_range, y_range) {
-  UseMethod("peak_model_bounds")
+	UseMethod("peak_model_bounds")
 }
 
 #' @export
 peak_model_bounds.default <- function(model, x_range, y_range) {
-  cli::cli_abort(
-    "No {.fn peak_model_bounds} method defined for class {.cls {class(model)[1]}}."
-  )
+	cli::cli_abort(
+		"No {.fn peak_model_bounds} method defined for class {.cls {class(model)[1]}}."
+	)
 }
-
 
 #' Generate Initial Parameter Guess
 #'
@@ -222,16 +216,29 @@ peak_model_bounds.default <- function(model, x_range, y_range) {
 #' @seealso [peak_model_bounds()]
 #' @export
 peak_model_initial_guess <- function(model, x, y, peak_idx) {
-  UseMethod("peak_model_initial_guess")
+	# Validate peak_idx bounds
+	if (
+		!is.numeric(peak_idx) ||
+			length(peak_idx) != 1 ||
+			peak_idx < 1 ||
+			peak_idx > length(y)
+	) {
+		cli::cli_abort(
+			c(
+				"{.arg peak_idx} must be a valid index between 1 and {length(y)}.",
+				"x" = "Got: {.val {peak_idx}}"
+			)
+		)
+	}
+	UseMethod("peak_model_initial_guess")
 }
 
 #' @export
 peak_model_initial_guess.default <- function(model, x, y, peak_idx) {
-  cli::cli_abort(
-    "No {.fn peak_model_initial_guess} method defined for class {.cls {class(model)[1]}}."
-  )
+	cli::cli_abort(
+		"No {.fn peak_model_initial_guess} method defined for class {.cls {class(model)[1]}}."
+	)
 }
-
 
 #' Calculate Peak Area
 #'
@@ -257,23 +264,22 @@ peak_model_initial_guess.default <- function(model, x, y, peak_idx) {
 #' @seealso [peak_model_value()]
 #' @export
 peak_model_area <- function(model, params, x_range = NULL) {
-  UseMethod("peak_model_area")
+	UseMethod("peak_model_area")
 }
 
 #' @export
 peak_model_area.default <- function(model, params, x_range = NULL) {
-  # Default: numerical integration
-  if (is.null(x_range)) {
-    cli::cli_abort(
-      "{.arg x_range} is required for numerical integration."
-    )
-  }
-  x <- seq(x_range[1], x_range[2], length.out = 1000)
-  y <- peak_model_value(model, x, params)
-  # Trapezoidal integration
-  sum(diff(x) * (y[-1] + y[-length(y)]) / 2)
+	# Default: numerical integration
+	if (is.null(x_range)) {
+		cli::cli_abort(
+			"{.arg x_range} is required for numerical integration."
+		)
+	}
+	x <- seq(x_range[1], x_range[2], length.out = 1000)
+	y <- peak_model_value(model, x, params)
+	# Trapezoidal integration
+	sum(diff(x) * (y[-1] + y[-length(y)]) / 2)
 }
-
 
 #' Get Parameter Names from Peak Model
 #'
@@ -281,9 +287,8 @@ peak_model_area.default <- function(model, params, x_range = NULL) {
 #' @return Character vector of parameter names.
 #' @export
 peak_model_param_names <- function(model) {
-  model$param_names
+	model$param_names
 }
-
 
 # ==============================================================================
 # Utility Functions
@@ -303,24 +308,23 @@ peak_model_param_names <- function(model) {
 #'
 #' @export
 peak_model_gradient_numerical <- function(model, x, params, eps = 1e-8) {
-  n_params <- model$n_params
-  param_names <- model$param_names
+	n_params <- model$n_params
+	param_names <- model$param_names
 
-  baseline <- peak_model_value(model, x, params)
-  grad_matrix <- matrix(0, nrow = length(x), ncol = n_params)
-  colnames(grad_matrix) <- param_names
+	baseline <- peak_model_value(model, x, params)
+	grad_matrix <- matrix(0, nrow = length(x), ncol = n_params)
+	colnames(grad_matrix) <- param_names
 
-  for (i in seq_len(n_params)) {
-    params_perturbed <- params
-    params_perturbed[[param_names[i]]] <- params[[param_names[i]]] + eps
+	for (i in seq_len(n_params)) {
+		params_perturbed <- params
+		params_perturbed[[param_names[i]]] <- params[[param_names[i]]] + eps
 
-    perturbed_value <- peak_model_value(model, x, params_perturbed)
-    grad_matrix[, i] <- (perturbed_value - baseline) / eps
-  }
+		perturbed_value <- peak_model_value(model, x, params_perturbed)
+		grad_matrix[, i] <- (perturbed_value - baseline) / eps
+	}
 
-  grad_matrix
+	grad_matrix
 }
-
 
 #' Sum Multiple Peak Models
 #'
@@ -344,18 +348,17 @@ peak_model_gradient_numerical <- function(model, x, params, eps = 1e-8) {
 #'
 #' @export
 sum_peak_models <- function(x, models, params_list) {
-  if (length(models) != length(params_list)) {
-    cli::cli_abort("Number of models must match number of parameter sets.")
-  }
+	if (length(models) != length(params_list)) {
+		cli::cli_abort("Number of models must match number of parameter sets.")
+	}
 
-  total <- rep(0, length(x))
-  for (i in seq_along(models)) {
-    total <- total + peak_model_value(models[[i]], x, params_list[[i]])
-  }
+	total <- rep(0, length(x))
+	for (i in seq_along(models)) {
+		total <- total + peak_model_value(models[[i]], x, params_list[[i]])
+	}
 
-  total
+	total
 }
-
 
 #' Validate Peak Model Parameters
 #'
@@ -368,27 +371,28 @@ sum_peak_models <- function(x, models, params_list) {
 #'
 #' @export
 validate_peak_model_params <- function(model, params) {
-  required <- model$param_names
-  provided <- names(params)
+	required <- model$param_names
+	provided <- names(params)
 
-  missing <- setdiff(required, provided)
-  if (length(missing) > 0) {
-    cli::cli_abort(c(
-      "Missing required parameters for {.val {model$name}} model:",
-      "x" = "Missing: {.val {missing}}"
-    ))
-  }
+	missing <- setdiff(required, provided)
+	if (length(missing) > 0) {
+		cli::cli_abort(
+			c(
+				"Missing required parameters for {.val {model$name}} model:",
+				"x" = "Missing: {.val {missing}}"
+			)
+		)
+	}
 
-  extra <- setdiff(provided, required)
-  if (length(extra) > 0) {
-    cli::cli_warn(
-      "Extra parameters ignored for {.val {model$name}} model: {.val {extra}}"
-    )
-  }
+	extra <- setdiff(provided, required)
+	if (length(extra) > 0) {
+		cli::cli_warn(
+			"Extra parameters ignored for {.val {model$name}} model: {.val {extra}}"
+		)
+	}
 
-  invisible(TRUE)
+	invisible(TRUE)
 }
-
 
 # ==============================================================================
 # Peak Model Registry
@@ -401,10 +405,9 @@ validate_peak_model_params <- function(model, params) {
 #' @return Invisible `NULL`.
 #' @noRd
 .peak_model_registry_reset <- function() {
-  .measure_registry$peak_models <- list()
-  invisible(NULL)
+	.measure_registry$peak_models <- list()
+	invisible(NULL)
 }
-
 
 #' Register a Peak Model
 #'
@@ -434,35 +437,34 @@ validate_peak_model_params <- function(model, params) {
 #' @seealso [peak_models()], [create_peak_model()]
 #' @export
 register_peak_model <- function(
-  name,
-  constructor,
-  pack_name,
-  description = "",
-  technique = NULL
+	name,
+	constructor,
+	pack_name,
+	description = "",
+	technique = NULL
 ) {
-  if (!is.character(name) || length(name) != 1 || nchar(name) == 0) {
-    cli::cli_abort("{.arg name} must be a non-empty string.")
-  }
-  if (!is.function(constructor)) {
-    cli::cli_abort("{.arg constructor} must be a function.")
-  }
+	if (!is.character(name) || length(name) != 1 || nchar(name) == 0) {
+		cli::cli_abort("{.arg name} must be a non-empty string.")
+	}
+	if (!is.function(constructor)) {
+		cli::cli_abort("{.arg constructor} must be a function.")
+	}
 
-  if (is.null(.measure_registry$peak_models)) {
-    .measure_registry$peak_models <- list()
-  }
+	if (is.null(.measure_registry$peak_models)) {
+		.measure_registry$peak_models <- list()
+	}
 
-  .measure_registry$peak_models[[name]] <- list(
-    name = name,
-    constructor = constructor,
-    pack_name = pack_name,
-    description = description,
-    technique = technique,
-    registered_at = Sys.time()
-  )
+	.measure_registry$peak_models[[name]] <- list(
+		name = name,
+		constructor = constructor,
+		pack_name = pack_name,
+		description = description,
+		technique = technique,
+		registered_at = Sys.time()
+	)
 
-  invisible(TRUE)
+	invisible(TRUE)
 }
-
 
 #' Unregister a Peak Model
 #'
@@ -472,17 +474,16 @@ register_peak_model <- function(
 #' @return Invisible `TRUE` if removed, `FALSE` if not found.
 #' @export
 unregister_peak_model <- function(name) {
-  if (is.null(.measure_registry$peak_models)) {
-    return(invisible(FALSE))
-  }
-  if (!name %in% names(.measure_registry$peak_models)) {
-    return(invisible(FALSE))
-  }
+	if (is.null(.measure_registry$peak_models)) {
+		return(invisible(FALSE))
+	}
+	if (!name %in% names(.measure_registry$peak_models)) {
+		return(invisible(FALSE))
+	}
 
-  .measure_registry$peak_models[[name]] <- NULL
-  invisible(TRUE)
+	.measure_registry$peak_models[[name]] <- NULL
+	invisible(TRUE)
 }
-
 
 #' List Available Peak Models
 #'
@@ -501,43 +502,44 @@ unregister_peak_model <- function(name) {
 #' @seealso [register_peak_model()], [create_peak_model()]
 #' @export
 peak_models <- function(packs = NULL, techniques = NULL) {
-  models <- .measure_registry$peak_models
+	models <- .measure_registry$peak_models
 
-  if (is.null(models) || length(models) == 0) {
-    return(tibble::tibble(
-      name = character(),
-      pack_name = character(),
-      description = character(),
-      technique = character()
-    ))
-  }
+	if (is.null(models) || length(models) == 0) {
+		return(
+			tibble::tibble(
+				name = character(),
+				pack_name = character(),
+				description = character(),
+				technique = character()
+			)
+		)
+	}
 
-  result <- tibble::tibble(
-    name = vapply(models, `[[`, character(1), "name"),
-    pack_name = vapply(models, `[[`, character(1), "pack_name"),
-    description = vapply(models, `[[`, character(1), "description"),
-    technique = vapply(
-      models,
-      function(x) x$technique %||% NA_character_,
-      character(1)
-    )
-  )
+	result <- tibble::tibble(
+		name = vapply(models, `[[`, character(1), "name"),
+		pack_name = vapply(models, `[[`, character(1), "pack_name"),
+		description = vapply(models, `[[`, character(1), "description"),
+		technique = vapply(
+			models,
+			function(x) x$technique %||% NA_character_,
+			character(1)
+		)
+	)
 
-  if (!is.null(packs)) {
-    result <- result[result$pack_name %in% packs, , drop = FALSE]
-  }
+	if (!is.null(packs)) {
+		result <- result[result$pack_name %in% packs, , drop = FALSE]
+	}
 
-  if (!is.null(techniques)) {
-    result <- result[
-      is.na(result$technique) | result$technique %in% techniques,
-      ,
-      drop = FALSE
-    ]
-  }
+	if (!is.null(techniques)) {
+		result <- result[
+			is.na(result$technique) | result$technique %in% techniques,
+			,
+			drop = FALSE
+		]
+	}
 
-  result
+	result
 }
-
 
 #' Check if a Peak Model Exists
 #'
@@ -545,9 +547,8 @@ peak_models <- function(packs = NULL, techniques = NULL) {
 #' @return Logical `TRUE` if model exists.
 #' @export
 has_peak_model <- function(name) {
-  !is.null(.measure_registry$peak_models[[name]])
+	!is.null(.measure_registry$peak_models[[name]])
 }
-
 
 #' Create a Peak Model by Name
 #'
@@ -564,15 +565,17 @@ has_peak_model <- function(name) {
 #' @seealso [peak_models()], [register_peak_model()]
 #' @export
 create_peak_model <- function(name) {
-  model_info <- .measure_registry$peak_models[[name]]
+	model_info <- .measure_registry$peak_models[[name]]
 
-  if (is.null(model_info)) {
-    available <- names(.measure_registry$peak_models)
-    cli::cli_abort(c(
-      "Peak model {.val {name}} not found.",
-      "i" = "Available models: {.val {available}}"
-    ))
-  }
+	if (is.null(model_info)) {
+		available <- names(.measure_registry$peak_models)
+		cli::cli_abort(
+			c(
+				"Peak model {.val {name}} not found.",
+				"i" = "Available models: {.val {available}}"
+			)
+		)
+	}
 
-  model_info$constructor()
+	model_info$constructor()
 }
