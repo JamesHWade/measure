@@ -331,14 +331,19 @@ find_peaks_cols <- function(data) {
 #' detects peaks in measurement data and stores them in a new `.peaks` column.
 #'
 #' @param recipe A recipe object.
-#' @param method Peak detection method. One of `"prominence"` (default) or
-#'   `"derivative"`.
+#' @param algorithm Peak detection algorithm. One of `"prominence"` (default),
+#'   `"derivative"`, `"local_maxima"`, or any algorithm registered via
+#'
+#'   [register_peak_algorithm()]. Use [peak_algorithms()] to see available
+#'   algorithms.
 #' @param min_height Minimum peak height. If `snr_threshold = TRUE`, this is
 #'   interpreted as a signal-to-noise ratio threshold.
 #' @param min_distance Minimum distance between peaks in x-axis units.
-#' @param min_prominence Minimum peak prominence (only for `method = "prominence"`).
+#' @param min_prominence Minimum peak prominence (only for `algorithm = "prominence"`).
 #' @param snr_threshold Logical. If `TRUE`, `min_height` is interpreted as a
 #'   signal-to-noise ratio. Noise is estimated as the MAD of the signal.
+#' @param algorithm_params Named list of additional algorithm-specific parameters.
+#'   These are passed to the algorithm function along with the standard parameters.
 #' @param measures Optional character vector of measure column names.
 #' @param role Not used.
 #' @param trained Logical indicating if the step has been trained.
@@ -352,13 +357,19 @@ find_peaks_cols <- function(data) {
 #' column containing the detected peaks for each sample. The original
 #' `.measures` column is preserved.
 #'
-#' **Detection methods:**
+#' **Detection algorithms:**
 #'
-#' - `"prominence"`: Finds local maxima and calculates their prominence (how
-#'   much a peak stands out from surrounding signal). More robust to noise.
+#' - `"prominence"` (default): Finds local maxima and calculates their prominence
+#'   (how much a peak stands out from surrounding signal). More robust to noise.
 #'
 #' - `"derivative"`: Finds peaks by detecting zero-crossings in the first
 #'   derivative. Faster but more sensitive to noise.
+#'
+#' - `"local_maxima"`: Finds all local maxima above a threshold. Simple and fast
+#'   but may detect many spurious peaks.
+#'
+#' Additional algorithms can be registered by technique packs using
+#' [register_peak_algorithm()].
 #'
 #' **Peak properties stored:**
 #'
@@ -368,6 +379,7 @@ find_peaks_cols <- function(data) {
 #' - `left_base`, `right_base`: X-axis positions of peak boundaries
 #' - `area`: Initially NA; use `step_measure_peaks_integrate()` to calculate
 #'
+#' @seealso [peak_algorithms()], [register_peak_algorithm()]
 #' @family peak-operations
 #' @export
 #'
@@ -382,20 +394,39 @@ find_peaks_cols <- function(data) {
 #'
 #' result <- bake(rec, new_data = NULL)
 #' # Result now has .peaks column alongside .measures
+#'
+#' # Use a different algorithm
+#' rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+#'   update_role(id, new_role = "id") |>
+#'   step_measure_input_long(transmittance, location = vars(channel)) |>
+#'   step_measure_peaks_detect(algorithm = "derivative", min_height = 0.5) |>
+#'   prep()
 step_measure_peaks_detect <- function(
   recipe,
-  method = c("prominence", "derivative"),
+  algorithm = "prominence",
   min_height = 0,
+
   min_distance = 0,
   min_prominence = 0,
   snr_threshold = FALSE,
+  algorithm_params = list(),
   measures = NULL,
   role = NA,
   trained = FALSE,
   skip = FALSE,
   id = recipes::rand_id("measure_peaks_detect")
 ) {
-  method <- rlang::arg_match(method)
+  # Validate algorithm
+  if (!is.character(algorithm) || length(algorithm) != 1) {
+    cli::cli_abort("{.arg algorithm} must be a single character string.")
+  }
+  if (!has_peak_algorithm(algorithm)) {
+    available <- peak_algorithms()$name
+    cli::cli_abort(c(
+      "Unknown peak detection algorithm {.val {algorithm}}.",
+      "i" = "Available algorithms: {.val {available}}"
+    ))
+  }
 
   if (!is.numeric(min_height) || length(min_height) != 1 || min_height < 0) {
     cli::cli_abort("{.arg min_height} must be a non-negative number.")
@@ -412,15 +443,19 @@ step_measure_peaks_detect <- function(
   ) {
     cli::cli_abort("{.arg min_prominence} must be a non-negative number.")
   }
+  if (!is.list(algorithm_params)) {
+    cli::cli_abort("{.arg algorithm_params} must be a list.")
+  }
 
   recipes::add_step(
     recipe,
     step_measure_peaks_detect_new(
-      method = method,
+      algorithm = algorithm,
       min_height = min_height,
       min_distance = min_distance,
       min_prominence = min_prominence,
       snr_threshold = snr_threshold,
+      algorithm_params = algorithm_params,
       measures = measures,
       role = role,
       trained = trained,
@@ -431,11 +466,12 @@ step_measure_peaks_detect <- function(
 }
 
 step_measure_peaks_detect_new <- function(
-  method,
+  algorithm,
   min_height,
   min_distance,
   min_prominence,
   snr_threshold,
+  algorithm_params,
   measures,
   role,
   trained,
@@ -444,11 +480,12 @@ step_measure_peaks_detect_new <- function(
 ) {
   recipes::step(
     subclass = "measure_peaks_detect",
-    method = method,
+    algorithm = algorithm,
     min_height = min_height,
     min_distance = min_distance,
     min_prominence = min_prominence,
     snr_threshold = snr_threshold,
+    algorithm_params = algorithm_params,
     measures = measures,
     role = role,
     trained = trained,
@@ -468,11 +505,12 @@ prep.step_measure_peaks_detect <- function(x, training, info = NULL, ...) {
   }
 
   step_measure_peaks_detect_new(
-    method = x$method,
+    algorithm = x$algorithm,
     min_height = x$min_height,
     min_distance = x$min_distance,
     min_prominence = x$min_prominence,
     snr_threshold = x$snr_threshold,
+    algorithm_params = x$algorithm_params,
     measures = measure_cols,
     role = x$role,
     trained = TRUE,
@@ -483,11 +521,12 @@ prep.step_measure_peaks_detect <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_peaks_detect <- function(object, new_data, ...) {
-  method <- object$method
+  algorithm <- object$algorithm
   min_height <- object$min_height
   min_distance <- object$min_distance
   min_prominence <- object$min_prominence
   snr_threshold <- object$snr_threshold
+  algorithm_params <- object$algorithm_params %||% list()
 
   # Process each measure column
   for (col in object$measures) {
@@ -509,17 +548,26 @@ bake.step_measure_peaks_detect <- function(object, new_data, ...) {
         }
       }
 
-      if (method == "derivative") {
-        .detect_peaks_derivative(loc, val, height_thresh, min_distance)
-      } else {
-        .detect_peaks_prominence(
-          loc,
-          val,
-          min_prominence,
-          height_thresh,
-          min_distance
-        )
-      }
+      # Get algorithm's default params to know what it accepts
+      algo_info <- get_peak_algorithm(algorithm)
+      algo_param_names <- names(algo_info$default_params)
+
+      # Build params for algorithm - only include supported params
+      all_params <- list(
+        min_height = height_thresh,
+        min_distance = min_distance,
+        min_prominence = min_prominence
+      )
+      # Filter to only params the algorithm supports
+      params <- all_params[names(all_params) %in% algo_param_names]
+      # Add any algorithm-specific params
+      params <- utils::modifyList(params, algorithm_params)
+
+      # Use registry-based algorithm dispatch
+      do.call(
+        .run_peak_algorithm,
+        c(list(name = algorithm, location = loc, value = val), params)
+      )
     })
 
     new_data[[peaks_col_name]] <- new_peaks_list(peaks_list)
@@ -534,7 +582,7 @@ print.step_measure_peaks_detect <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  title <- paste0("Peak detection (", x$method, ")")
+  title <- paste0("Peak detection (", x$algorithm, ")")
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
   } else {
@@ -550,7 +598,7 @@ print.step_measure_peaks_detect <- function(
 tidy.step_measure_peaks_detect <- function(x, ...) {
   tibble::tibble(
     terms = if (is_trained(x)) x$measures else "<all measure columns>",
-    method = x$method,
+    algorithm = x$algorithm,
     min_height = x$min_height,
     min_distance = x$min_distance,
     min_prominence = x$min_prominence,

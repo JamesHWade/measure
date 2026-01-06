@@ -48,7 +48,7 @@ prep_peaked_recipe <- function(steps_fn) {
 
 test_that("step_measure_peaks_detect finds peaks with derivative method", {
   rec <- prep_peaked_recipe(function(r) {
-    step_measure_peaks_detect(r, method = "derivative", min_height = 0.1)
+    step_measure_peaks_detect(r, algorithm = "derivative", min_height = 0.1)
   })
 
   result <- bake(rec, new_data = NULL)
@@ -63,7 +63,7 @@ test_that("step_measure_peaks_detect finds peaks with derivative method", {
 
 test_that("step_measure_peaks_detect finds peaks with prominence method", {
   rec <- prep_peaked_recipe(function(r) {
-    step_measure_peaks_detect(r, method = "prominence", min_prominence = 0.1)
+    step_measure_peaks_detect(r, algorithm = "prominence", min_prominence = 0.1)
   })
 
   result <- bake(rec, new_data = NULL)
@@ -75,11 +75,11 @@ test_that("step_measure_peaks_detect finds peaks with prominence method", {
 
 test_that("step_measure_peaks_detect respects min_height", {
   rec_low <- prep_peaked_recipe(function(r) {
-    step_measure_peaks_detect(r, method = "derivative", min_height = 0.1)
+    step_measure_peaks_detect(r, algorithm = "derivative", min_height = 0.1)
   })
 
   rec_high <- prep_peaked_recipe(function(r) {
-    step_measure_peaks_detect(r, method = "derivative", min_height = 0.8)
+    step_measure_peaks_detect(r, algorithm = "derivative", min_height = 0.8)
   })
 
   peaks_low <- bake(rec_low, new_data = NULL)$.peaks[[1]]
@@ -92,7 +92,7 @@ test_that("step_measure_peaks_detect respects min_distance", {
   rec <- prep_peaked_recipe(function(r) {
     step_measure_peaks_detect(
       r,
-      method = "derivative",
+      algorithm = "derivative",
       min_height = 0.05,
       min_distance = 40
     )
@@ -113,7 +113,7 @@ test_that("step_measure_peaks_detect respects min_distance", {
 
 test_that("step_measure_peaks_detect preserves .measures column", {
   rec <- prep_peaked_recipe(function(r) {
-    step_measure_peaks_detect(r, method = "prominence")
+    step_measure_peaks_detect(r, algorithm = "prominence")
   })
 
   result <- bake(rec, new_data = NULL)
@@ -126,19 +126,19 @@ test_that("step_measure_peaks_detect print method works", {
   rec <- recipe(~., data = create_peaked_data()) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(value, location = vars(location)) |>
-    step_measure_peaks_detect(method = "prominence")
+    step_measure_peaks_detect(algorithm = "prominence")
 
   expect_output(print(rec$steps[[2]]), "Peak detection")
 })
 
 test_that("step_measure_peaks_detect tidy method works", {
   rec <- prep_peaked_recipe(function(r) {
-    step_measure_peaks_detect(r, method = "prominence", min_height = 0.2)
+    step_measure_peaks_detect(r, algorithm = "prominence", min_height = 0.2)
   })
 
   tidy_result <- tidy(rec, number = 2)
   expect_s3_class(tidy_result, "tbl_df")
-  expect_true("method" %in% names(tidy_result))
+  expect_true("algorithm" %in% names(tidy_result))
 })
 
 # ==============================================================================
@@ -148,7 +148,7 @@ test_that("step_measure_peaks_detect tidy method works", {
 test_that("step_measure_peaks_integrate calculates areas", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.1) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
       step_measure_peaks_integrate()
   })
 
@@ -162,7 +162,7 @@ test_that("step_measure_peaks_integrate calculates areas", {
 test_that("step_measure_peaks_integrate with trapezoid method works", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.1) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
       step_measure_peaks_integrate(method = "trapezoid")
   })
 
@@ -174,7 +174,7 @@ test_that("step_measure_peaks_integrate with trapezoid method works", {
 test_that("step_measure_peaks_integrate with simpson method works", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.1) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
       step_measure_peaks_integrate(method = "simpson")
   })
 
@@ -186,7 +186,7 @@ test_that("step_measure_peaks_integrate with simpson method works", {
 test_that("step_measure_peaks_integrate with local baseline works", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.1) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
       step_measure_peaks_integrate(baseline = "local")
   })
 
@@ -223,7 +223,7 @@ test_that("step_measure_peaks_integrate print method works", {
 test_that("step_measure_peaks_filter by min_height works", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.05) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.05) |>
       step_measure_peaks_filter(min_height = 0.4)
   })
 
@@ -236,7 +236,7 @@ test_that("step_measure_peaks_filter by min_height works", {
 test_that("step_measure_peaks_filter by min_area works", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.05) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.05) |>
       step_measure_peaks_integrate() |>
       step_measure_peaks_filter(min_area = 1)
   })
@@ -250,7 +250,7 @@ test_that("step_measure_peaks_filter by min_area works", {
 test_that("step_measure_peaks_filter by min_area_pct works", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.05) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.05) |>
       step_measure_peaks_integrate() |>
       step_measure_peaks_filter(min_area_pct = 10)
   })
@@ -272,7 +272,7 @@ test_that("step_measure_peaks_filter by min_area_pct works", {
 test_that("step_measure_peaks_filter by max_peaks works", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.05) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.05) |>
       step_measure_peaks_integrate() |>
       step_measure_peaks_filter(max_peaks = 2)
   })
@@ -300,7 +300,7 @@ test_that("step_measure_peaks_filter print method works", {
 test_that("step_measure_peaks_to_table creates wide format", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.1) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
       step_measure_peaks_integrate() |>
       step_measure_peaks_to_table(max_peaks = 3)
   })
@@ -320,7 +320,7 @@ test_that("step_measure_peaks_to_table creates wide format", {
 test_that("step_measure_peaks_to_table respects max_peaks", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.05) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.05) |>
       step_measure_peaks_integrate() |>
       step_measure_peaks_to_table(max_peaks = 2)
   })
@@ -335,7 +335,7 @@ test_that("step_measure_peaks_to_table respects max_peaks", {
 test_that("step_measure_peaks_to_table respects prefix", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.1) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
       step_measure_peaks_integrate() |>
       step_measure_peaks_to_table(prefix = "pk_", max_peaks = 2)
   })
@@ -363,7 +363,7 @@ test_that("step_measure_peaks_to_table print method works", {
 test_that("full peak workflow works", {
   rec <- prep_peaked_recipe(function(r) {
     r |>
-      step_measure_peaks_detect(method = "prominence", min_height = 0.1) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
       step_measure_peaks_integrate(method = "trapezoid", baseline = "local") |>
       step_measure_peaks_filter(min_area_pct = 5, max_peaks = 5) |>
       step_measure_peaks_to_table(max_peaks = 5)
@@ -381,7 +381,7 @@ test_that("peak operations work with meats_long data", {
   rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
-    step_measure_peaks_detect(method = "prominence", min_height = 0.4) |>
+    step_measure_peaks_detect(algorithm = "prominence", min_height = 0.4) |>
     prep()
 
   result <- bake(rec, new_data = NULL)
@@ -392,7 +392,7 @@ test_that("peak operations work with meats_long data", {
 
 test_that("is_peaks_list and find_peaks_cols work correctly", {
   rec <- prep_peaked_recipe(function(r) {
-    step_measure_peaks_detect(r, method = "prominence")
+    step_measure_peaks_detect(r, algorithm = "prominence")
   })
 
   result <- bake(rec, new_data = NULL)

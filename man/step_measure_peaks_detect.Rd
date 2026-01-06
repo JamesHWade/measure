@@ -6,11 +6,12 @@
 \usage{
 step_measure_peaks_detect(
   recipe,
-  method = c("prominence", "derivative"),
+  algorithm = "prominence",
   min_height = 0,
   min_distance = 0,
   min_prominence = 0,
   snr_threshold = FALSE,
+  algorithm_params = list(),
   measures = NULL,
   role = NA,
   trained = FALSE,
@@ -21,18 +22,24 @@ step_measure_peaks_detect(
 \arguments{
 \item{recipe}{A recipe object.}
 
-\item{method}{Peak detection method. One of \code{"prominence"} (default) or
-\code{"derivative"}.}
+\item{algorithm}{Peak detection algorithm. One of \code{"prominence"} (default),
+\code{"derivative"}, \code{"local_maxima"}, or any algorithm registered via
+
+\code{\link[=register_peak_algorithm]{register_peak_algorithm()}}. Use \code{\link[=peak_algorithms]{peak_algorithms()}} to see available
+algorithms.}
 
 \item{min_height}{Minimum peak height. If \code{snr_threshold = TRUE}, this is
 interpreted as a signal-to-noise ratio threshold.}
 
 \item{min_distance}{Minimum distance between peaks in x-axis units.}
 
-\item{min_prominence}{Minimum peak prominence (only for \code{method = "prominence"}).}
+\item{min_prominence}{Minimum peak prominence (only for \code{algorithm = "prominence"}).}
 
 \item{snr_threshold}{Logical. If \code{TRUE}, \code{min_height} is interpreted as a
 signal-to-noise ratio. Noise is estimated as the MAD of the signal.}
+
+\item{algorithm_params}{Named list of additional algorithm-specific parameters.
+These are passed to the algorithm function along with the standard parameters.}
 
 \item{measures}{Optional character vector of measure column names.}
 
@@ -56,13 +63,18 @@ This step detects peaks in measurement data and creates a new \code{.peaks}
 column containing the detected peaks for each sample. The original
 \code{.measures} column is preserved.
 
-\strong{Detection methods:}
+\strong{Detection algorithms:}
 \itemize{
-\item \code{"prominence"}: Finds local maxima and calculates their prominence (how
-much a peak stands out from surrounding signal). More robust to noise.
+\item \code{"prominence"} (default): Finds local maxima and calculates their prominence
+(how much a peak stands out from surrounding signal). More robust to noise.
 \item \code{"derivative"}: Finds peaks by detecting zero-crossings in the first
 derivative. Faster but more sensitive to noise.
+\item \code{"local_maxima"}: Finds all local maxima above a threshold. Simple and fast
+but may detect many spurious peaks.
 }
+
+Additional algorithms can be registered by technique packs using
+\code{\link[=register_peak_algorithm]{register_peak_algorithm()}}.
 
 \strong{Peak properties stored:}
 \itemize{
@@ -84,8 +96,17 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 
 result <- bake(rec, new_data = NULL)
 # Result now has .peaks column alongside .measures
+
+# Use a different algorithm
+rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(transmittance, location = vars(channel)) |>
+  step_measure_peaks_detect(algorithm = "derivative", min_height = 0.5) |>
+  prep()
 }
 \seealso{
+\code{\link[=peak_algorithms]{peak_algorithms()}}, \code{\link[=register_peak_algorithm]{register_peak_algorithm()}}
+
 Other peak-operations: 
 \code{\link{step_measure_peaks_filter}()},
 \code{\link{step_measure_peaks_integrate}()},
