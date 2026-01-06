@@ -1416,23 +1416,26 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' library(recipes)
 #'
 #' # Create synthetic data with overlapping peaks
+#' set.seed(42)
 #' x <- seq(0, 20, by = 0.1)
 #' y <- 1.5 * exp(-0.5 * ((x - 8) / 1)^2) +
 #'   0.8 * exp(-0.5 * ((x - 12) / 1.5)^2) +
 #'   rnorm(length(x), sd = 0.02)
 #' df <- data.frame(id = "sample1", location = x, value = y)
 #'
+#' \donttest{
 #' # Deconvolve overlapping peaks
 #' rec <- recipe(~., data = df) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(value, location = vars(location)) |>
-#'   step_measure_peaks_detect(algorithm = "prominence", min_height = 0.3) |>
+#'   step_measure_peaks_detect(min_height = 0.5, min_prominence = 0.3) |>
 #'   step_measure_peaks_deconvolve(model = "gaussian") |>
 #'   prep()
 #'
 #' result <- bake(rec, new_data = NULL)
 #' # Check fitted peaks
 #' result$.peaks[[1]]
+#' }
 step_measure_peaks_deconvolve <- function(
   recipe,
   model = "gaussian",
@@ -1599,9 +1602,13 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
   peaks_col <- object$peaks_col
   measures_col <- object$measures_col
 
+  # Convert to regular list to allow schema changes during modification
+  # (list_of enforces strict type matching on assignment)
+  peaks_list <- as.list(new_data[[peaks_col]])
+
   # Process each row
   for (row_idx in seq_len(nrow(new_data))) {
-    peaks <- new_data[[peaks_col]][[row_idx]]
+    peaks <- peaks_list[[row_idx]]
     measures <- new_data[[measures_col]][[row_idx]]
 
     if (nrow(peaks) > 0) {
@@ -1621,11 +1628,12 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
         row_idx = row_idx
       )
 
-      new_data[[peaks_col]][[row_idx]] <- peaks
+      peaks_list[[row_idx]] <- peaks
     }
   }
 
-  new_data[[peaks_col]] <- new_peaks_list(new_data[[peaks_col]])
+  # Wrap back as peaks_list with updated schema
+  new_data[[peaks_col]] <- new_peaks_list(peaks_list)
 
   tibble::as_tibble(new_data)
 }
@@ -1654,7 +1662,9 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
 
   # Create peak model objects
   if (is.character(model_spec)) {
-    models <- lapply(seq_len(n_peaks), function(i) get_peak_model(model_spec))
+    models <- lapply(seq_len(n_peaks), function(i) {
+      create_peak_model(model_spec)
+    })
   } else {
     # Use provided peak_model object for all peaks
     models <- lapply(seq_len(n_peaks), function(i) model_spec)

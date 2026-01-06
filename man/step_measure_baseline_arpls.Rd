@@ -56,11 +56,13 @@ Reference: Baek et al. (2015), Analyst 140, 250-257
 \examples{
 library(recipes)
 
+\donttest{
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
   step_measure_baseline_arpls(lambda = 1e5) |>
   prep()
+}
 }
 \seealso{
 Other measure-baseline: 

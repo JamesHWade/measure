@@ -189,7 +189,7 @@ add_param_jitter <- function(
   }
 
   # Extract peak indices (column 2) and return top n
-  head(peaks_info[, 2], n)
+  utils::head(peaks_info[, 2], n)
 }
 
 

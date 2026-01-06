@@ -244,6 +244,7 @@ tidy.step_measure_baseline_rolling <- function(x, ...) {
 #' @examples
 #' library(recipes)
 #'
+#' \donttest{
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -251,6 +252,7 @@ tidy.step_measure_baseline_rolling <- function(x, ...) {
 #'   prep()
 #'
 #' bake(rec, new_data = NULL)
+#' }
 step_measure_baseline_airpls <- function(
   recipe,
   measures = NULL,
@@ -687,11 +689,13 @@ tidy.step_measure_baseline_snip <- function(x, ...) {
 #' @examples
 #' library(recipes)
 #'
+#' \donttest{
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #'   update_role(id, new_role = "id") |>
 #'   step_measure_input_long(transmittance, location = vars(channel)) |>
 #'   step_measure_baseline_arpls(lambda = 1e5) |>
 #'   prep()
+#' }
 step_measure_baseline_arpls <- function(
   recipe,
   measures = NULL,

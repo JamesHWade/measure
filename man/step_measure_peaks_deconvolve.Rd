@@ -114,23 +114,26 @@ Each fit is assessed for quality. The \code{.peaks} tibble gains columns:
 library(recipes)
 
 # Create synthetic data with overlapping peaks
+set.seed(42)
 x <- seq(0, 20, by = 0.1)
 y <- 1.5 * exp(-0.5 * ((x - 8) / 1)^2) +
   0.8 * exp(-0.5 * ((x - 12) / 1.5)^2) +
   rnorm(length(x), sd = 0.02)
 df <- data.frame(id = "sample1", location = x, value = y)
 
+\donttest{
 # Deconvolve overlapping peaks
 rec <- recipe(~., data = df) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(value, location = vars(location)) |>
-  step_measure_peaks_detect(algorithm = "prominence", min_height = 0.3) |>
+  step_measure_peaks_detect(min_height = 0.5, min_prominence = 0.3) |>
   step_measure_peaks_deconvolve(model = "gaussian") |>
   prep()
 
 result <- bake(rec, new_data = NULL)
 # Check fitted peaks
 result$.peaks[[1]]
+}
 }
 \seealso{
 \code{\link[=optimize_deconvolution]{optimize_deconvolution()}}, \code{\link[=assess_deconv_quality]{assess_deconv_quality()}},

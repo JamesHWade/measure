@@ -8,5 +8,4 @@
 
 library(testthat)
 library(measure)
-library(modeldata)
 test_check("measure")

@@ -77,6 +77,7 @@ the original columns were used to reformat the data.
 }
 
 \examples{
+\dontshow{if (rlang::is_installed("modeldata")) withAutoprint(\{ # examplesIf}
 data(meats, package = "modeldata")
 
 # Outcome data is to the right
@@ -104,6 +105,7 @@ rec <-
   prep()
 
 summary(rec)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other input/output steps: 

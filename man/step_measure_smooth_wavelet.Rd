@@ -81,6 +81,7 @@ are automatically padded to the next power of 2 and trimmed after
 processing.
 }
 \examples{
+\dontshow{if (rlang::is_installed("wavethresh")) withAutoprint(\{ # examplesIf}
 library(recipes)
 
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
@@ -90,6 +91,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   prep()
 
 bake(rec, new_data = NULL)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other measure-smoothing: 

@@ -39,7 +39,7 @@
 #' the original columns were used to reformat the data.
 #'
 #'
-#' @examples
+#' @examplesIf rlang::is_installed("modeldata")
 #' data(meats, package = "modeldata")
 #'
 #' # Outcome data is to the right

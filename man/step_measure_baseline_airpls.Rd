@@ -57,6 +57,7 @@ parameter based on the residuals. Key features:
 \examples{
 library(recipes)
 
+\donttest{
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -64,6 +65,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   prep()
 
 bake(rec, new_data = NULL)
+}
 }
 \references{
 Zhang, Z.M., Chen, S., & Liang, Y.Z. (2010). Baseline correction using

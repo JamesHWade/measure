@@ -55,7 +55,7 @@
 #' @family measure-smoothing
 #' @export
 #'
-#' @examples
+#' @examplesIf rlang::is_installed("wavethresh")
 #' library(recipes)
 #'
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
