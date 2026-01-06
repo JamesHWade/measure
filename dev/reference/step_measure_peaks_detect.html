@@ -62,11 +62,12 @@ detects peaks in measurement data and stores them in a new <code>.peaks</code> c
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">step_measure_peaks_detect</span><span class="op">(</span></span>
 <span>  <span class="va">recipe</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"prominence"</span>, <span class="st">"derivative"</span><span class="op">)</span>,</span>
+<span>  algorithm <span class="op">=</span> <span class="st">"prominence"</span>,</span>
 <span>  min_height <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  min_distance <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  min_prominence <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  snr_threshold <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  algorithm_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  measures <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  role <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  trained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -83,9 +84,11 @@ detects peaks in measurement data and stores them in a new <code>.peaks</code> c
 <dd><p>A recipe object.</p></dd>
 
 
-<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>Peak detection method. One of <code>"prominence"</code> (default) or
-<code>"derivative"</code>.</p></dd>
+<dt id="arg-algorithm">algorithm<a class="anchor" aria-label="anchor" href="#arg-algorithm"></a></dt>
+<dd><p>Peak detection algorithm. One of <code>"prominence"</code> (default),
+<code>"derivative"</code>, <code>"local_maxima"</code>, or any algorithm registered via</p>
+<p><code><a href="register_peak_algorithm.html">register_peak_algorithm()</a></code>. Use <code><a href="peak_algorithms.html">peak_algorithms()</a></code> to see available
+algorithms.</p></dd>
 
 
 <dt id="arg-min-height">min_height<a class="anchor" aria-label="anchor" href="#arg-min-height"></a></dt>
@@ -98,12 +101,17 @@ interpreted as a signal-to-noise ratio threshold.</p></dd>
 
 
 <dt id="arg-min-prominence">min_prominence<a class="anchor" aria-label="anchor" href="#arg-min-prominence"></a></dt>
-<dd><p>Minimum peak prominence (only for <code>method = "prominence"</code>).</p></dd>
+<dd><p>Minimum peak prominence (only for <code>algorithm = "prominence"</code>).</p></dd>
 
 
 <dt id="arg-snr-threshold">snr_threshold<a class="anchor" aria-label="anchor" href="#arg-snr-threshold"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, <code>min_height</code> is interpreted as a
 signal-to-noise ratio. Noise is estimated as the MAD of the signal.</p></dd>
+
+
+<dt id="arg-algorithm-params">algorithm_params<a class="anchor" aria-label="anchor" href="#arg-algorithm-params"></a></dt>
+<dd><p>Named list of additional algorithm-specific parameters.
+These are passed to the algorithm function along with the standard parameters.</p></dd>
 
 
 <dt id="arg-measures">measures<a class="anchor" aria-label="anchor" href="#arg-measures"></a></dt>
@@ -135,11 +143,15 @@ signal-to-noise ratio. Noise is estimated as the MAD of the signal.</p></dd>
     <p>This step detects peaks in measurement data and creates a new <code>.peaks</code>
 column containing the detected peaks for each sample. The original
 <code>.measures</code> column is preserved.</p>
-<p><strong>Detection methods:</strong></p><ul><li><p><code>"prominence"</code>: Finds local maxima and calculates their prominence (how
-much a peak stands out from surrounding signal). More robust to noise.</p></li>
+<p><strong>Detection algorithms:</strong></p><ul><li><p><code>"prominence"</code> (default): Finds local maxima and calculates their prominence
+(how much a peak stands out from surrounding signal). More robust to noise.</p></li>
 <li><p><code>"derivative"</code>: Finds peaks by detecting zero-crossings in the first
 derivative. Faster but more sensitive to noise.</p></li>
-</ul><p><strong>Peak properties stored:</strong></p><ul><li><p><code>peak_id</code>: Integer identifier</p></li>
+<li><p><code>"local_maxima"</code>: Finds all local maxima above a threshold. Simple and fast
+but may detect many spurious peaks.</p></li>
+</ul><p>Additional algorithms can be registered by technique packs using
+<code><a href="register_peak_algorithm.html">register_peak_algorithm()</a></code>.</p>
+<p><strong>Peak properties stored:</strong></p><ul><li><p><code>peak_id</code>: Integer identifier</p></li>
 <li><p><code>location</code>: X-axis position of peak apex</p></li>
 <li><p><code>height</code>: Y-value at peak apex</p></li>
 <li><p><code>left_base</code>, <code>right_base</code>: X-axis positions of peak boundaries</p></li>
@@ -147,7 +159,8 @@ derivative. Faster but more sensitive to noise.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other peak-operations:
+    <div class="dont-index"><p><code><a href="peak_algorithms.html">peak_algorithms()</a></code>, <code><a href="register_peak_algorithm.html">register_peak_algorithm()</a></code></p>
+<p>Other peak-operations:
 <code><a href="step_measure_peaks_filter.html">step_measure_peaks_filter()</a></code>,
 <code><a href="step_measure_peaks_integrate.html">step_measure_peaks_integrate()</a></code>,
 <code><a href="step_measure_peaks_to_table.html">step_measure_peaks_to_table()</a></code></p></div>
@@ -165,6 +178,13 @@ derivative. Faster but more sensitive to noise.</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Result now has .peaks column alongside .measures</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Use a different algorithm</span></span></span>
+<span class="r-in"><span><span class="va">rec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">step_measure_peaks_detect</span><span class="op">(</span>algorithm <span class="op">=</span> <span class="st">"derivative"</span>, min_height <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

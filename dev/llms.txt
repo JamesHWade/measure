@@ -615,6 +615,71 @@ Peak detection, integration, and analysis for chromatography
 - [`find_peaks_cols()`](https://jameshwade.github.io/measure/dev/reference/find_peaks_cols.md)
   : Find peaks columns in a data frame
 
+## Peak Algorithm Registry
+
+Registration and discovery for peak detection algorithms
+
+- [`peak_algorithms()`](https://jameshwade.github.io/measure/dev/reference/peak_algorithms.md)
+  : List Available Peak Detection Algorithms
+- [`get_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/get_peak_algorithm.md)
+  : Get a Peak Detection Algorithm
+- [`has_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/has_peak_algorithm.md)
+  : Check if a Peak Algorithm Exists
+- [`register_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/register_peak_algorithm.md)
+  : Register a Peak Detection Algorithm
+- [`unregister_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/unregister_peak_algorithm.md)
+  : Unregister a Peak Detection Algorithm
+
+## Peak Model Classes
+
+S3 class architecture for peak shape models used in deconvolution
+
+- [`new_peak_model()`](https://jameshwade.github.io/measure/dev/reference/new_peak_model.md)
+  : Create a Peak Model Object
+- [`is_peak_model()`](https://jameshwade.github.io/measure/dev/reference/is_peak_model.md)
+  : Test if Object is a Peak Model
+- [`create_peak_model()`](https://jameshwade.github.io/measure/dev/reference/create_peak_model.md)
+  : Create a Peak Model by Name
+- [`has_peak_model()`](https://jameshwade.github.io/measure/dev/reference/has_peak_model.md)
+  : Check if a Peak Model Exists
+- [`peak_models()`](https://jameshwade.github.io/measure/dev/reference/peak_models.md)
+  : List Available Peak Models
+- [`register_peak_model()`](https://jameshwade.github.io/measure/dev/reference/register_peak_model.md)
+  : Register a Peak Model
+- [`unregister_peak_model()`](https://jameshwade.github.io/measure/dev/reference/unregister_peak_model.md)
+  : Unregister a Peak Model
+- [`peak_model_value()`](https://jameshwade.github.io/measure/dev/reference/peak_model_value.md)
+  : Evaluate Peak Model
+- [`peak_model_gradient()`](https://jameshwade.github.io/measure/dev/reference/peak_model_gradient.md)
+  : Calculate Peak Model Gradient
+- [`peak_model_gradient_numerical()`](https://jameshwade.github.io/measure/dev/reference/peak_model_gradient_numerical.md)
+  : Numerical Gradient for Peak Model
+- [`peak_model_bounds()`](https://jameshwade.github.io/measure/dev/reference/peak_model_bounds.md)
+  : Get Parameter Bounds for Optimization
+- [`peak_model_initial_guess()`](https://jameshwade.github.io/measure/dev/reference/peak_model_initial_guess.md)
+  : Generate Initial Parameter Guess
+- [`peak_model_area()`](https://jameshwade.github.io/measure/dev/reference/peak_model_area.md)
+  : Calculate Peak Area
+- [`peak_model_param_names()`](https://jameshwade.github.io/measure/dev/reference/peak_model_param_names.md)
+  : Get Parameter Names from Peak Model
+- [`validate_peak_model_params()`](https://jameshwade.github.io/measure/dev/reference/validate_peak_model_params.md)
+  : Validate Peak Model Parameters
+- [`sum_peak_models()`](https://jameshwade.github.io/measure/dev/reference/sum_peak_models.md)
+  : Sum Multiple Peak Models
+
+## Built-in Peak Models
+
+Core peak shape models for deconvolution
+
+- [`gaussian_peak_model()`](https://jameshwade.github.io/measure/dev/reference/gaussian_peak_model.md)
+  : Create Gaussian Peak Model
+- [`emg_peak_model()`](https://jameshwade.github.io/measure/dev/reference/emg_peak_model.md)
+  : Create EMG Peak Model
+- [`bigaussian_peak_model()`](https://jameshwade.github.io/measure/dev/reference/bigaussian_peak_model.md)
+  : Create Bi-Gaussian Peak Model
+- [`lorentzian_peak_model()`](https://jameshwade.github.io/measure/dev/reference/lorentzian_peak_model.md)
+  : Create Lorentzian Peak Model
+
 ## Smoothing & Noise Reduction
 
 Noise reduction and spike removal steps

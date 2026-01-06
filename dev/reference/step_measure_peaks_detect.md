@@ -9,11 +9,12 @@ column.
 ``` r
 step_measure_peaks_detect(
   recipe,
-  method = c("prominence", "derivative"),
+  algorithm = "prominence",
   min_height = 0,
   min_distance = 0,
   min_prominence = 0,
   snr_threshold = FALSE,
+  algorithm_params = list(),
   measures = NULL,
   role = NA,
   trained = FALSE,
@@ -28,10 +29,15 @@ step_measure_peaks_detect(
 
   A recipe object.
 
-- method:
+- algorithm:
 
-  Peak detection method. One of `"prominence"` (default) or
-  `"derivative"`.
+  Peak detection algorithm. One of `"prominence"` (default),
+  `"derivative"`, `"local_maxima"`, or any algorithm registered via
+
+  [`register_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/register_peak_algorithm.md).
+  Use
+  [`peak_algorithms()`](https://jameshwade.github.io/measure/dev/reference/peak_algorithms.md)
+  to see available algorithms.
 
 - min_height:
 
@@ -44,12 +50,17 @@ step_measure_peaks_detect(
 
 - min_prominence:
 
-  Minimum peak prominence (only for `method = "prominence"`).
+  Minimum peak prominence (only for `algorithm = "prominence"`).
 
 - snr_threshold:
 
   Logical. If `TRUE`, `min_height` is interpreted as a signal-to-noise
   ratio. Noise is estimated as the MAD of the signal.
+
+- algorithm_params:
+
+  Named list of additional algorithm-specific parameters. These are
+  passed to the algorithm function along with the standard parameters.
 
 - measures:
 
@@ -81,14 +92,20 @@ This step detects peaks in measurement data and creates a new `.peaks`
 column containing the detected peaks for each sample. The original
 `.measures` column is preserved.
 
-**Detection methods:**
+**Detection algorithms:**
 
-- `"prominence"`: Finds local maxima and calculates their prominence
-  (how much a peak stands out from surrounding signal). More robust to
-  noise.
+- `"prominence"` (default): Finds local maxima and calculates their
+  prominence (how much a peak stands out from surrounding signal). More
+  robust to noise.
 
 - `"derivative"`: Finds peaks by detecting zero-crossings in the first
   derivative. Faster but more sensitive to noise.
+
+- `"local_maxima"`: Finds all local maxima above a threshold. Simple and
+  fast but may detect many spurious peaks.
+
+Additional algorithms can be registered by technique packs using
+[`register_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/register_peak_algorithm.md).
 
 **Peak properties stored:**
 
@@ -105,6 +122,9 @@ column containing the detected peaks for each sample. The original
   to calculate
 
 ## See also
+
+[`peak_algorithms()`](https://jameshwade.github.io/measure/dev/reference/peak_algorithms.md),
+[`register_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/register_peak_algorithm.md)
 
 Other peak-operations:
 [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md),
@@ -124,4 +144,11 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 
 result <- bake(rec, new_data = NULL)
 # Result now has .peaks column alongside .measures
+
+# Use a different algorithm
+rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(transmittance, location = vars(channel)) |>
+  step_measure_peaks_detect(algorithm = "derivative", min_height = 0.5) |>
+  prep()
 ```
