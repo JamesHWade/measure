@@ -1230,32 +1230,40 @@ Plotting and diagnostic functions for measure data
 
 # Articles
 
-### Getting Started
+### Tutorials
 
-- [Getting Started with
-  measure](https://jameshwade.github.io/measure/dev/articles/measure.md):
+Learning-oriented guides that take you through a complete workflow
 
-### In-depth Guides
+- [Tutorial: Getting Started with
+  measure](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.md):
+- [Tutorial: Bioreactor Glucose
+  Prediction](https://jameshwade.github.io/measure/dev/articles/tutorial-bioreactor.md):
 
-- [Preprocessing
-  Techniques](https://jameshwade.github.io/measure/dev/articles/preprocessing.md):
-- [Multi-Dimensional
-  Measurements](https://jameshwade.github.io/measure/dev/articles/multidimensional.md):
-- [Integrating with
-  tidymodels](https://jameshwade.github.io/measure/dev/articles/recipes.md):
-- [Data Organization and Diagnostic
-  Plots](https://jameshwade.github.io/measure/dev/articles/roles-diagnostics.md):
-- [Analytical Method
-  Validation](https://jameshwade.github.io/measure/dev/articles/validation.md):
+### How-To Guides
 
-### Examples
+Task-oriented guides for solving specific problems
 
-- [Baseline
-  Correction](https://jameshwade.github.io/measure/dev/articles/baseline.md):
-- [Case Study: Bioreactor Glucose
-  Prediction](https://jameshwade.github.io/measure/dev/articles/sec-analysis-example.md):
+- [How-To: Baseline
+  Correction](https://jameshwade.github.io/measure/dev/articles/howto-baseline.md):
+- [How-To: Integrating with
+  tidymodels](https://jameshwade.github.io/measure/dev/articles/howto-tidymodels.md):
+- [How-To: Data Organization and
+  Diagnostics](https://jameshwade.github.io/measure/dev/articles/howto-data-organization.md):
 
-### Developer
+### Reference
 
-- [Internal Class
-  System](https://jameshwade.github.io/measure/dev/articles/internals.md):
+Information-oriented technical descriptions
+
+- [Reference: Preprocessing
+  Techniques](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.md):
+- [Reference: Multi-Dimensional
+  Measurements](https://jameshwade.github.io/measure/dev/articles/reference-multidimensional.md):
+- [Reference: Analytical Method
+  Validation](https://jameshwade.github.io/measure/dev/articles/reference-validation.md):
+
+### Explanation
+
+Understanding-oriented discussion of concepts and architecture
+
+- [Explanation: Internal Class
+  System](https://jameshwade.github.io/measure/dev/articles/explanation-internals.md):

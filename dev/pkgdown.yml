@@ -2,16 +2,16 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
-  articles/baseline: baseline.html
-  internals: internals.html
-  articles/measure: measure.html
-  multidimensional: multidimensional.html
-  articles/preprocessing: preprocessing.html
-  articles/recipes: recipes.html
-  articles/roles-diagnostics: roles-diagnostics.html
-  articles/sec-analysis-example: sec-analysis-example.html
-  validation: validation.html
-last_built: 2026-01-07T19:13Z
+  explanation-internals: explanation-internals.html
+  articles/howto-baseline: howto-baseline.html
+  articles/howto-data-organization: howto-data-organization.html
+  articles/howto-tidymodels: howto-tidymodels.html
+  reference-multidimensional: reference-multidimensional.html
+  articles/reference-preprocessing: reference-preprocessing.html
+  reference-validation: reference-validation.html
+  articles/tutorial-bioreactor: tutorial-bioreactor.html
+  articles/tutorial-getting-started: tutorial-getting-started.html
+last_built: 2026-01-07T19:37Z
 urls:
   reference: https://jameshwade.github.io/measure/reference
   article: https://jameshwade.github.io/measure/articles
