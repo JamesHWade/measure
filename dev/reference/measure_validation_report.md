@@ -325,7 +325,7 @@ print(report)
 #> Method: HPLC-UV Assay
 #> Analyst: J. Smith
 #> Lab: Analytical Development Lab
-#> Date: 2026-01-06
+#> Date: 2026-01-07
 #> 
 #> 
 #> ── Validation Sections ──
@@ -342,7 +342,7 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-01-06 12:10:16.31408
+#> Generated: 2026-01-07 00:44:40.728469
 #> R version: 4.5.2
 #> measure version: 0.0.1.9001
 #> 

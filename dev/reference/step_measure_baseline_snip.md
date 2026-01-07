@@ -104,6 +104,7 @@ Other measure-baseline:
 ``` r
 library(recipes)
 
+# \donttest{
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -125,4 +126,5 @@ bake(rec, new_data = NULL)
 #>  9     9  61.4  19.9    17.7 [100 × 2] <int [100]>
 #> 10    10  61.4  19.9    17.7 [100 × 2] <int [100]>
 #> # ℹ 205 more rows
+# }
 ```

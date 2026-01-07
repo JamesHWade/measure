@@ -18,9 +18,11 @@
 <url><loc>https://jameshwade.github.io/measure/dev/articles/validation.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/authors.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/index.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/add_param_jitter.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/add_validation_section.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/align_max_shift.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/all_pass.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/assess_deconv_quality.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/augment.measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot-measure.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_bland_altman.html</loc></url>
@@ -37,6 +39,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/check_axis_consistency.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/check_for_measure.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/check_measure_recipe.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/check_quality_gates.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/create_peak_model.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/criteria_presets.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/criterion.html</loc></url>
@@ -63,6 +66,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/hplc_chromatograms.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/index.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/infer_axis_type.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/initialize_peak_params.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_list.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_nd_list.html</loc></url>
@@ -131,6 +135,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/new_measure_nd_tbl.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/new_measure_tbl.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/new_peak_model.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/optimize_deconvolution.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/outlier_threshold.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/peak_algorithms.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/peak_location_min.html</loc></url>

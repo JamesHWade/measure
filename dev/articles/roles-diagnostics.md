@@ -414,10 +414,8 @@ measure_plot_summary(baked, show_range = TRUE)
 
 ## Next Steps
 
+- See `vignette("preprocessing")` for details on all preprocessing steps
 - See
-  [`vignette("preprocessing")`](https://jameshwade.github.io/measure/dev/articles/preprocessing.md)
-  for details on all preprocessing steps
-- See
-  [`vignette("recipes")`](https://jameshwade.github.io/measure/dev/articles/recipes.md)
+  [`vignette("recipes")`](https://recipes.tidymodels.org/articles/recipes.html)
   for integration with tidymodels workflows
 - Explore hyperparameter tuning for preprocessing steps with `tune`

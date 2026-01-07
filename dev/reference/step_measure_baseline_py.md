@@ -189,6 +189,7 @@ Other measure-baseline:
 if (FALSE) { # measure:::.pybaselines_available()
 library(recipes)
 
+# \donttest{
 # Asymmetric Least Squares baseline correction
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
@@ -204,5 +205,6 @@ rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
   step_measure_baseline_py(method = "snip", max_half_window = 40) |>
   prep()
+# }
 }
 ```

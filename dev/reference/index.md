@@ -210,6 +210,21 @@ Core peak shape models for deconvolution
 - [`lorentzian_peak_model()`](https://jameshwade.github.io/measure/dev/reference/lorentzian_peak_model.md)
   : Create Lorentzian Peak Model
 
+## Peak Deconvolution Utilities
+
+Optimization, initialization, and quality assessment helpers
+
+- [`optimize_deconvolution()`](https://jameshwade.github.io/measure/dev/reference/optimize_deconvolution.md)
+  : Optimize Peak Deconvolution
+- [`initialize_peak_params()`](https://jameshwade.github.io/measure/dev/reference/initialize_peak_params.md)
+  : Smart Parameter Initialization for Peak Deconvolution
+- [`add_param_jitter()`](https://jameshwade.github.io/measure/dev/reference/add_param_jitter.md)
+  : Add Jitter to Parameters for Multi-Start Optimization
+- [`assess_deconv_quality()`](https://jameshwade.github.io/measure/dev/reference/assess_deconv_quality.md)
+  : Assess Deconvolution Quality
+- [`check_quality_gates()`](https://jameshwade.github.io/measure/dev/reference/check_quality_gates.md)
+  : Check if Fit Passes Quality Gates
+
 ## Smoothing & Noise Reduction
 
 Noise reduction and spike removal steps

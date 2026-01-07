@@ -232,9 +232,7 @@ measure provides many built-in preprocessing steps:
   [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
   for when built-in steps don’t cover your needs
 
-See
-[`vignette("preprocessing")`](https://jameshwade.github.io/measure/dev/articles/preprocessing.md)
-for details on all available options.
+See `vignette("preprocessing")` for details on all available options.
 
 Let’s see how this transforms our spectra:
 
@@ -389,7 +387,7 @@ cat("Test samples:", nrow(test_processed), "\n")
 
 measure recipes work seamlessly with the broader tidymodels ecosystem.
 See
-[`vignette("recipes")`](https://jameshwade.github.io/measure/dev/articles/recipes.md)
+[`vignette("recipes")`](https://recipes.tidymodels.org/articles/recipes.html)
 for complete examples including:
 
 - Bundling preprocessing with models using workflows
@@ -455,9 +453,8 @@ dim(NIRsoil)
 
 ## Next steps
 
-- See
-  [`vignette("preprocessing")`](https://jameshwade.github.io/measure/dev/articles/preprocessing.md)
-  for a detailed guide to each preprocessing technique, including:
+- See `vignette("preprocessing")` for a detailed guide to each
+  preprocessing technique, including:
   - Savitzky-Golay smoothing and derivatives
   - SNV and MSC scatter correction
   - Sample-wise normalization (sum, max, range, peak region)

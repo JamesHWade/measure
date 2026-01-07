@@ -54,5 +54,5 @@ tidy(report)
 #> # A tibble: 1 × 6
 #>   section limit_type value method       k uncertainty
 #>   <chr>   <chr>      <dbl> <chr>    <dbl>       <dbl>
-#> 1 LOD/LOQ LOD         91.6 blank_sd     3        14.3
+#> 1 LOD/LOQ LOD         97.9 blank_sd     3        16.7
 ```

@@ -83,13 +83,11 @@ Convert back to modeling-ready format:
 
 ## See also
 
-- [`vignette("measure")`](https://jameshwade.github.io/measure/dev/articles/measure.md)
-  for getting started
+- `vignette("measure")` for getting started
 
-- [`vignette("preprocessing")`](https://jameshwade.github.io/measure/dev/articles/preprocessing.md)
-  for detailed technique descriptions
+- `vignette("preprocessing")` for detailed technique descriptions
 
-- [`vignette("recipes")`](https://jameshwade.github.io/measure/dev/articles/recipes.md)
+- [`vignette("recipes")`](https://recipes.tidymodels.org/articles/recipes.html)
   for tidymodels integration
 
 ## Author
