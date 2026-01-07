@@ -1017,9 +1017,9 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-01-07 01:59:51.119795
+#> Generated: 2026-01-07 19:17:01.840822
 #> R version: 4.5.2
-#> measure version: 0.0.1.9001
+#> measure version: 0.0.1.9002
 #> 
 #> ℹ Use `render_validation_report()` to generate document
 ```
