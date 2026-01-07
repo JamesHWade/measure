@@ -1,5 +1,5 @@
 ---
-title: "Preprocessing Techniques"
+title: "Reference: Preprocessing Techniques"
 ---
 
 ```{r, include = FALSE}
@@ -1204,3 +1204,9 @@ new_data <- bake(prepped, new_data = meats[1:5, ])  # Not augmented
 - Savitzky, A., and Golay, M. J. E. (1964). Smoothing and Differentiation of Data by Simplified Least Squares Procedures. *Analytical Chemistry*, 36(8), 1627-1639.
 - Barnes, R. J., Dhanoa, M. S., and Lister, S. J. (1989). Standard Normal Variate Transformation and De-Trending of Near-Infrared Diffuse Reflectance Spectra. *Applied Spectroscopy*, 43(5), 772-777.
 - Geladi, P., MacDougall, D., and Martens, H. (1985). Linearization and Scatter-Correction for Near-Infrared Reflectance Spectra of Meat. *Applied Spectroscopy*, 39(3), 491-500.
+
+## See Also
+
+- [Getting Started](tutorial-getting-started.html) - Introduction to measure workflows
+- [Baseline Correction](howto-baseline.html) - Detailed guide to baseline methods
+- [Integrating with tidymodels](howto-tidymodels.html) - Use preprocessing in modeling workflows

@@ -1,5 +1,5 @@
 ---
-title: "Getting Started with measure"
+title: "Tutorial: Getting Started with measure"
 ---
 
 ```{r, include = FALSE}
@@ -133,7 +133,7 @@ measure provides many built-in preprocessing steps:
 - **Variable-wise scaling**: `step_measure_center()`, `step_measure_scale_auto()`, `step_measure_scale_pareto()`, and more
 - **Custom transformations**: `step_measure_map()` for when built-in steps don't cover your needs
 
-See `vignette("preprocessing")` for details on all available options.
+See the [Preprocessing Reference](reference-preprocessing.html) for details on all available options.
 
 Let's see how this transforms our spectra:
 
@@ -230,7 +230,7 @@ cat("Test samples:", nrow(test_processed), "\n")
 
 ## Integration with tidymodels
 
-measure recipes work seamlessly with the broader tidymodels ecosystem. See `vignette("recipes")` for complete examples including:
+measure recipes work seamlessly with the broader tidymodels ecosystem. See [Integrating with tidymodels](howto-tidymodels.html) for complete examples including:
 
 - Bundling preprocessing with models using workflows
 - Cross-validation with measure recipes
@@ -288,7 +288,7 @@ dim(NIRsoil)
 
 ## Next steps
 
-- See `vignette("preprocessing")` for a detailed guide to each preprocessing technique, including:
+- See the [Preprocessing Reference](reference-preprocessing.html) for a detailed guide to each preprocessing technique, including:
   - Savitzky-Golay smoothing and derivatives
   - SNV and MSC scatter correction
   - Sample-wise normalization (sum, max, range, peak region)

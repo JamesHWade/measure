@@ -1,8 +1,8 @@
 ---
-title: "Multi-Dimensional Measurements"
+title: "Reference: Multi-Dimensional Measurements"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Multi-Dimensional Measurements}
+  %\VignetteIndexEntry{Reference: Multi-Dimensional Measurements}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -381,3 +381,9 @@ Key functions for multi-dimensional measurement data:
 | `step_measure_parafac()` | PARAFAC decomposition |
 | `step_measure_tucker()` | Tucker decomposition |
 | `step_measure_mcr_als()` | MCR-ALS decomposition (experimental) |
+
+## See Also
+
+- [Getting Started](../articles/tutorial-getting-started.html) - Introduction to measure workflows
+- [Preprocessing Reference](../articles/reference-preprocessing.html) - Guide to preprocessing techniques
+- [Internal Class System](explanation-internals.html) - How measure data structures work

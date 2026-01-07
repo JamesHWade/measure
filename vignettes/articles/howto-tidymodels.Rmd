@@ -1,5 +1,5 @@
 ---
-title: "Integrating with tidymodels"
+title: "How-To: Integrating with tidymodels"
 ---
 
 ```{r, include = FALSE}
@@ -328,3 +328,9 @@ measure integrates naturally with tidymodels:
 - Variable-wise scaling steps (`step_measure_center()`, `step_measure_scale_*()`) learn from training data and apply consistently to new data
 
 The recipes paradigm means your preprocessing is applied consistently to training data, cross-validation folds, and new predictions - eliminating a common source of data leakage in chemometric modeling.
+
+## See Also
+
+- [Getting Started](tutorial-getting-started.html) - Learn the fundamentals of measure
+- [Bioreactor Case Study](tutorial-bioreactor.html) - Complete modeling workflow example
+- [Preprocessing Reference](reference-preprocessing.html) - Guide to all preprocessing techniques

@@ -1,8 +1,8 @@
 ---
-title: "Internal Class System"
+title: "Explanation: Internal Class System"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Internal Class System}
+  %\VignetteIndexEntry{Explanation: Internal Class System}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -246,3 +246,9 @@ rec <- rec |>
 ```
 
 If you don't specify and multiple columns exist, you'll get a helpful error message telling you which columns are available.
+
+## See Also
+
+- [Getting Started](../articles/tutorial-getting-started.html) - Learn the fundamentals of measure
+- [Multi-Dimensional Measurements](reference-multidimensional.html) - Working with nD data
+- [Preprocessing Reference](../articles/reference-preprocessing.html) - Guide to preprocessing techniques
