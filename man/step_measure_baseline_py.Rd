@@ -127,6 +127,7 @@ When you \code{\link[recipes:tidy.recipe]{tidy()}} this step, a tibble with colu
 \dontshow{if (measure:::.pybaselines_available()) withAutoprint(\{ # examplesIf}
 library(recipes)
 
+\donttest{
 # Asymmetric Least Squares baseline correction
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
@@ -142,6 +143,7 @@ rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
   step_measure_baseline_py(method = "snip", max_half_window = 40) |>
   prep()
+}
 \dontshow{\}) # examplesIf}
 }
 \seealso{

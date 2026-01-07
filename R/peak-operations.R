@@ -1348,11 +1348,25 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' peaks to have been detected first using [step_measure_peaks_detect()].
 #'
 #' @param recipe A recipe object.
-#' @param model Peak model to use: "gaussian" (symmetric), "emg" (exponentially
-#'   modified Gaussian for tailing peaks), or "bigaussian" (asymmetric).
-#'   Default is "gaussian".
-#' @param max_iter Maximum iterations for optimization. Default is 100.
+#' @param model Peak model to use. Either a character string naming a registered
+#'   model (`"gaussian"`, `"emg"`, `"bigaussian"`, `"lorentzian"`), or a
+#'   `peak_model` object created directly. Use [peak_models()] to see
+#'   all registered models. Default is `"gaussian"`.
+#' @param optimizer Optimization method: `"auto"` (default), `"lbfgsb"`,
+#'   `"multistart"`, or `"nelder_mead"`. Auto-selection chooses based on problem
+#'   complexity and signal-to-noise ratio.
+#' @param max_iter Maximum iterations for optimization. Default is 500.
 #' @param tol Convergence tolerance. Default is 1e-6.
+#' @param n_starts Number of random starts for `optimizer = "multistart"`.
+#'   Default is 5.
+#' @param constrain_positions Logical. If `TRUE`, enforce that peak centers
+#'   maintain their relative ordering. Default is `TRUE`.
+#' @param quality_threshold Minimum R-squared to accept fit. Fits below this
+#'   threshold trigger a warning. Default is 0.8.
+#' @param store_components Logical. If `TRUE`, store individual fitted peak
+#'   curves in the output. Default is `FALSE`.
+#' @param smart_init Logical. If `TRUE`, use smart initialization based on
+#'   peak properties. Default is `TRUE`.
 #' @param peaks_col Name of the peaks column. Default is ".peaks".
 #' @param measures_col Name of the measures column. Default is ".measures".
 #' @param role Not used.
@@ -1361,7 +1375,8 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' @param id Unique step identifier.
 #'
 #' @return An updated recipe with the new step added. The `.peaks` column
-#'   will be updated with deconvolved peak parameters and fitted areas.
+#'   will be updated with deconvolved peak parameters, fitted areas, and
+#'   quality metrics.
 #'
 #' @details
 #' Peak deconvolution fits mathematical models to overlapping peaks to
@@ -1370,30 +1385,68 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #'
 #' **Peak Models:**
 #'
-#' - `gaussian`: Symmetric Gaussian peak (3 params: height, center, width)
-#' - `emg`: Exponentially Modified Gaussian (4 params, handles tailing)
-#' - `bigaussian`: Bi-Gaussian (5 params, flexible asymmetry)
+#' Built-in models (use [peak_models()] to see all):
+#' - `"gaussian"`: Symmetric Gaussian (3 params: height, center, width)
+#' - `"emg"`: Exponentially Modified Gaussian (4 params, handles tailing)
+#' - `"bigaussian"`: Bi-Gaussian (4 params, flexible asymmetry)
+#' - `"lorentzian"`: Lorentzian/Cauchy peak (3 params, heavier tails)
 #'
-#' The optimization uses initial estimates from detected peak positions
-#' and refines them to minimize the residual sum of squares.
+#' Technique packs may register additional models.
 #'
-#' @family measure-chromatography
+#' **Optimizers:**
+#'
+#' - `"auto"`: Selects based on problem complexity and SNR
+#' - `"lbfgsb"`: L-BFGS-B (fast, local optimization)
+#' - `"multistart"`: Multiple L-BFGS-B runs from perturbed starts (robust)
+#' - `"nelder_mead"`: Derivative-free Nelder-Mead simplex
+#'
+#' **Quality Assessment:**
+#'
+#' Each fit is assessed for quality. The `.peaks` tibble gains columns:
+#' - `fit_r_squared`: R-squared of the overall fit
+#' - `fit_quality`: Quality grade (A/B/C/D/F)
+#' - `purity`: How much of signal at peak max comes from this peak
+#'
+#' @seealso [optimize_deconvolution()], [assess_deconv_quality()],
+#'   [peak_models()], [gaussian_peak_model()]
+#' @family peak-operations
 #' @export
 #'
 #' @examples
 #' library(recipes)
 #'
+#' # Create synthetic data with overlapping peaks
+#' set.seed(42)
+#' x <- seq(0, 20, by = 0.1)
+#' y <- 1.5 * exp(-0.5 * ((x - 8) / 1)^2) +
+#'   0.8 * exp(-0.5 * ((x - 12) / 1.5)^2) +
+#'   rnorm(length(x), sd = 0.02)
+#' df <- data.frame(id = "sample1", location = x, value = y)
+#'
+#' \donttest{
 #' # Deconvolve overlapping peaks
-#' # rec <- recipe(~., data = chromatogram_data) |>
-#' #   step_measure_input_long(signal, location = vars(time)) |>
-#' #   step_measure_peaks_detect(method = "derivative") |>
-#' #   step_measure_peaks_deconvolve(model = "gaussian") |>
-#' #   prep()
+#' rec <- recipe(~., data = df) |>
+#'   update_role(id, new_role = "id") |>
+#'   step_measure_input_long(value, location = vars(location)) |>
+#'   step_measure_peaks_detect(min_height = 0.5, min_prominence = 0.3) |>
+#'   step_measure_peaks_deconvolve(model = "gaussian") |>
+#'   prep()
+#'
+#' result <- bake(rec, new_data = NULL)
+#' # Check fitted peaks
+#' result$.peaks[[1]]
+#' }
 step_measure_peaks_deconvolve <- function(
   recipe,
-  model = c("gaussian", "emg", "bigaussian"),
-  max_iter = 100L,
+  model = "gaussian",
+  optimizer = "auto",
+  max_iter = 500L,
   tol = 1e-6,
+  n_starts = 5L,
+  constrain_positions = TRUE,
+  quality_threshold = 0.8,
+  store_components = FALSE,
+  smart_init = TRUE,
   peaks_col = ".peaks",
   measures_col = ".measures",
   role = NA,
@@ -1401,18 +1454,62 @@ step_measure_peaks_deconvolve <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_peaks_deconvolve")
 ) {
-  model <- rlang::arg_match(model)
+  # Validate model - can be character or peak_model object
+  if (is.character(model)) {
+    if (length(model) != 1) {
+      cli::cli_abort(
+        "{.arg model} must be a single string or peak_model object."
+      )
+    }
+    if (!has_peak_model(model)) {
+      available <- peak_models()$name
+      cli::cli_abort(
+        c(
+          "Unknown peak model {.val {model}}.",
+          "i" = "Available models: {.val {available}}"
+        )
+      )
+    }
+  } else if (!is_peak_model(model)) {
+    cli::cli_abort(
+      "{.arg model} must be a character string or {.cls peak_model} object."
+    )
+  }
+
+  # Validate optimizer
+  valid_optimizers <- c("auto", "lbfgsb", "multistart", "nelder_mead")
+  if (!optimizer %in% valid_optimizers) {
+    cli::cli_abort(
+      c(
+        "Unknown optimizer {.val {optimizer}}.",
+        "i" = "Valid options: {.val {valid_optimizers}}"
+      )
+    )
+  }
 
   if (!is.numeric(max_iter) || max_iter < 1) {
     cli::cli_abort("{.arg max_iter} must be a positive integer.")
+  }
+  if (
+    !is.numeric(quality_threshold) ||
+      quality_threshold < 0 ||
+      quality_threshold > 1
+  ) {
+    cli::cli_abort("{.arg quality_threshold} must be between 0 and 1.")
   }
 
   recipes::add_step(
     recipe,
     step_measure_peaks_deconvolve_new(
       model = model,
+      optimizer = optimizer,
       max_iter = as.integer(max_iter),
       tol = tol,
+      n_starts = as.integer(n_starts),
+      constrain_positions = constrain_positions,
+      quality_threshold = quality_threshold,
+      store_components = store_components,
+      smart_init = smart_init,
       peaks_col = peaks_col,
       measures_col = measures_col,
       role = role,
@@ -1425,8 +1522,14 @@ step_measure_peaks_deconvolve <- function(
 
 step_measure_peaks_deconvolve_new <- function(
   model,
+  optimizer,
   max_iter,
   tol,
+  n_starts,
+  constrain_positions,
+  quality_threshold,
+  store_components,
+  smart_init,
   peaks_col,
   measures_col,
   role,
@@ -1437,8 +1540,14 @@ step_measure_peaks_deconvolve_new <- function(
   recipes::step(
     subclass = "measure_peaks_deconvolve",
     model = model,
+    optimizer = optimizer,
     max_iter = max_iter,
     tol = tol,
+    n_starts = n_starts,
+    constrain_positions = constrain_positions,
+    quality_threshold = quality_threshold,
+    store_components = store_components,
+    smart_init = smart_init,
     peaks_col = peaks_col,
     measures_col = measures_col,
     role = role,
@@ -1462,8 +1571,14 @@ prep.step_measure_peaks_deconvolve <- function(x, training, info = NULL, ...) {
 
   step_measure_peaks_deconvolve_new(
     model = x$model,
+    optimizer = x$optimizer,
     max_iter = x$max_iter,
     tol = x$tol,
+    n_starts = x$n_starts,
+    constrain_positions = x$constrain_positions,
+    quality_threshold = x$quality_threshold,
+    store_components = x$store_components,
+    smart_init = x$smart_init,
     peaks_col = x$peaks_col,
     measures_col = x$measures_col,
     role = x$role,
@@ -1473,170 +1588,211 @@ prep.step_measure_peaks_deconvolve <- function(x, training, info = NULL, ...) {
   )
 }
 
-#' Gaussian peak function
-#' @noRd
-.gaussian_peak <- function(x, height, center, sigma) {
-  height * exp(-((x - center)^2) / (2 * sigma^2))
-}
-
-#' Sum of Gaussian peaks
-#' @noRd
-.sum_gaussians <- function(x, params) {
-  n_peaks <- length(params) / 3
-  result <- numeric(length(x))
-
-  for (i in seq_len(n_peaks)) {
-    idx <- (i - 1) * 3
-    height <- params[idx + 1]
-    center <- params[idx + 2]
-    sigma <- params[idx + 3]
-    result <- result + .gaussian_peak(x, height, center, sigma)
-  }
-
-  result
-}
-
-#' Exponentially Modified Gaussian
-#' @noRd
-.emg_peak <- function(x, height, center, sigma, tau) {
-  if (tau <= 0) {
-    tau <- 0.001
-  }
-  z <- (x - center) / sigma - sigma / tau
-  # Use pnorm-based error function: erf(x) = 2 * pnorm(x * sqrt(2)) - 1
-  # For erf(z / sqrt(2)): 2 * pnorm(z) - 1
-  erf_val <- 2 * stats::pnorm(z) - 1
-  result <- height *
-    sigma /
-    tau *
-    sqrt(pi / 2) *
-    exp(0.5 * (sigma / tau)^2 - (x - center) / tau) *
-    (1 + erf_val) /
-    2
-  # Fallback to Gaussian if tau is very small
-  result[!is.finite(result)] <- .gaussian_peak(
-    x[!is.finite(result)],
-    height,
-    center,
-    sigma
-  )
-  result
-}
-
-#' Bi-Gaussian peak
-#' @noRd
-.bigaussian_peak <- function(x, height, center, sigma_left, sigma_right) {
-  result <- numeric(length(x))
-  left <- x <= center
-  right <- x > center
-  result[left] <- height * exp(-((x[left] - center)^2) / (2 * sigma_left^2))
-  result[right] <- height * exp(-((x[right] - center)^2) / (2 * sigma_right^2))
-  result
-}
-
-#' Fit Gaussian peaks to signal
-#' @noRd
-.fit_gaussians <- function(x, y, peaks_tbl, max_iter, tol) {
-  if (nrow(peaks_tbl) == 0) {
-    return(peaks_tbl)
-  }
-
-  n_peaks <- nrow(peaks_tbl)
-
-  # Initial parameters: height, center, sigma for each peak
-  init_params <- numeric(n_peaks * 3)
-  for (i in seq_len(n_peaks)) {
-    idx <- (i - 1) * 3
-    init_params[idx + 1] <- peaks_tbl$height[i]
-    init_params[idx + 2] <- peaks_tbl$location[i]
-    # Estimate sigma from peak width
-    width <- (peaks_tbl$right_base[i] - peaks_tbl$left_base[i]) / 4
-    init_params[idx + 3] <- max(width, diff(range(x)) / 100)
-  }
-
-  # Objective function
-  objective <- function(params) {
-    # Ensure positive heights and sigmas
-    for (i in seq_len(n_peaks)) {
-      idx <- (i - 1) * 3
-      if (params[idx + 1] < 0) {
-        params[idx + 1] <- 0.001
-      }
-      if (params[idx + 3] < 0) params[idx + 3] <- 0.001
-    }
-    fitted <- .sum_gaussians(x, params)
-    sum((y - fitted)^2)
-  }
-
-  # Optimize
-  result <- tryCatch(
-    {
-      stats::optim(
-        init_params,
-        objective,
-        method = "L-BFGS-B",
-        lower = rep(c(0, min(x), 0.001), n_peaks),
-        upper = rep(c(max(y) * 2, max(x), diff(range(x))), n_peaks),
-        control = list(maxit = max_iter, factr = tol / .Machine$double.eps)
-      )
-    },
-    error = function(e) {
-      list(par = init_params)
-    }
-  )
-
-  # Update peaks with fitted parameters
-  fitted_params <- result$par
-  for (i in seq_len(n_peaks)) {
-    idx <- (i - 1) * 3
-    peaks_tbl$height[i] <- fitted_params[idx + 1]
-    peaks_tbl$location[i] <- fitted_params[idx + 2]
-    sigma <- fitted_params[idx + 3]
-    # Calculate fitted area (Gaussian integral = height * sigma * sqrt(2*pi))
-    peaks_tbl$area[i] <- fitted_params[idx + 1] * sigma * sqrt(2 * pi)
-  }
-
-  peaks_tbl
-}
-
 #' @export
 bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
-  model <- object$model
+  model_spec <- object$model
+  optimizer <- object$optimizer
   max_iter <- object$max_iter
   tol <- object$tol
+  n_starts <- object$n_starts
+  constrain_positions <- object$constrain_positions
+  quality_threshold <- object$quality_threshold
+  store_components <- object$store_components
+  smart_init <- object$smart_init
   peaks_col <- object$peaks_col
   measures_col <- object$measures_col
 
+  # Convert to regular list to allow schema changes during modification
+  # (list_of enforces strict type matching on assignment)
+  peaks_list <- as.list(new_data[[peaks_col]])
+
   # Process each row
   for (row_idx in seq_len(nrow(new_data))) {
-    peaks <- new_data[[peaks_col]][[row_idx]]
+    peaks <- peaks_list[[row_idx]]
     measures <- new_data[[measures_col]][[row_idx]]
 
     if (nrow(peaks) > 0) {
-      if (model == "gaussian") {
-        peaks <- .fit_gaussians(
-          measures$location,
-          measures$value,
-          peaks,
-          max_iter,
-          tol
-        )
-      } else {
-        cli::cli_abort(
-          c(
-            "Deconvolution for {.val {model}} model not yet implemented.",
-            "i" = "Only {.val gaussian} is currently supported."
-          )
-        )
-      }
+      peaks <- .deconvolve_peaks_with_framework(
+        x = measures$location,
+        y = measures$value,
+        peaks_tbl = peaks,
+        model_spec = model_spec,
+        optimizer = optimizer,
+        max_iter = max_iter,
+        tol = tol,
+        n_starts = n_starts,
+        constrain_positions = constrain_positions,
+        quality_threshold = quality_threshold,
+        store_components = store_components,
+        smart_init = smart_init,
+        row_idx = row_idx
+      )
 
-      new_data[[peaks_col]][[row_idx]] <- peaks
+      peaks_list[[row_idx]] <- peaks
     }
   }
 
-  new_data[[peaks_col]] <- new_peaks_list(new_data[[peaks_col]])
+  # Wrap back as peaks_list with updated schema
+  new_data[[peaks_col]] <- new_peaks_list(peaks_list)
 
   tibble::as_tibble(new_data)
+}
+
+#' Deconvolve peaks using the new framework
+#' @noRd
+.deconvolve_peaks_with_framework <- function(
+  x,
+  y,
+  peaks_tbl,
+  model_spec,
+  optimizer,
+  max_iter,
+  tol,
+  n_starts,
+  constrain_positions,
+  quality_threshold,
+  store_components,
+  smart_init,
+  row_idx
+) {
+  n_peaks <- nrow(peaks_tbl)
+  if (n_peaks == 0) {
+    return(peaks_tbl)
+  }
+
+  # Create peak model objects
+  if (is.character(model_spec)) {
+    models <- lapply(seq_len(n_peaks), function(i) {
+      create_peak_model(model_spec)
+    })
+  } else {
+    # Use provided peak_model object for all peaks
+    models <- lapply(seq_len(n_peaks), function(i) model_spec)
+  }
+
+  # Initialize parameters
+  if (smart_init) {
+    # Get peak indices from detected peaks
+    peak_indices <- vapply(
+      peaks_tbl$location,
+      function(loc) which.min(abs(x - loc)),
+      integer(1)
+    )
+
+    init_params <- initialize_peak_params(
+      x,
+      y,
+      n_peaks = n_peaks,
+      models = models,
+      peak_indices = peak_indices,
+      smooth = TRUE
+    )
+  } else {
+    # Basic initialization from peak properties
+    init_params <- lapply(seq_len(n_peaks), function(i) {
+      width <- (peaks_tbl$right_base[i] - peaks_tbl$left_base[i]) / 4
+      width <- max(width, diff(range(x)) / 100)
+
+      params <- list(
+        height = peaks_tbl$height[i],
+        center = peaks_tbl$location[i],
+        width = width
+      )
+
+      # Add extra params for EMG/bigaussian
+      if (models[[i]]$name == "emg") {
+        params$tau <- width * 0.5
+      } else if (models[[i]]$name == "bigaussian") {
+        params$width_left <- width
+        params$width_right <- width
+        params$width <- NULL
+      }
+
+      params
+    })
+  }
+
+  # Run optimization
+  opt_result <- tryCatch(
+    optimize_deconvolution(
+      x = x,
+      y = y,
+      models = models,
+      init_params = init_params,
+      optimizer = optimizer,
+      max_iter = max_iter,
+      tol = tol,
+      constrain_positions = constrain_positions,
+      n_starts = n_starts
+    ),
+    error = function(e) {
+      cli::cli_warn(
+        "Deconvolution failed for row {row_idx}: {e$message}"
+      )
+      NULL
+    }
+  )
+
+  if (is.null(opt_result)) {
+    # Return original peaks if optimization failed
+    return(peaks_tbl)
+  }
+
+  # Assess quality
+  quality <- assess_deconv_quality(x, y, opt_result, models)
+
+  # Check quality threshold
+  r_squared <- quality$goodness_of_fit$r_squared
+  if (!is.na(r_squared) && r_squared < quality_threshold) {
+    cli::cli_warn(
+      c(
+        "Deconvolution quality below threshold for row {row_idx}.",
+        "i" = "R-squared = {round(r_squared, 3)}, threshold = {quality_threshold}"
+      )
+    )
+  }
+
+  # Update peaks_tbl with fitted parameters
+  for (i in seq_len(n_peaks)) {
+    params <- opt_result$parameters[[i]]
+
+    # Update location and height from fitted params
+    peaks_tbl$location[i] <- params$center
+    peaks_tbl$height[i] <- params$height
+
+    # Update width-based bounds
+    width <- params$width %||%
+      ((params$width_left %||% 0) + (params$width_right %||% 0)) /
+      2
+    peaks_tbl$left_base[i] <- params$center - 3 * width
+    peaks_tbl$right_base[i] <- params$center + 3 * width
+
+    # Calculate area from peak model
+    peaks_tbl$area[i] <- peak_model_area(models[[i]], params, range(x))
+  }
+
+  # Add quality columns
+  peaks_tbl$fit_r_squared <- rep(r_squared, n_peaks)
+  peaks_tbl$fit_quality <- rep(quality$overall_grade, n_peaks)
+
+  # Add per-peak quality metrics
+  if (!is.null(quality$peak_quality) && nrow(quality$peak_quality) == n_peaks) {
+    peaks_tbl$purity <- quality$peak_quality$purity
+    peaks_tbl$overlap_degree <- quality$peak_quality$overlap_degree
+  }
+
+  # Store components if requested
+  if (store_components) {
+    components <- lapply(seq_len(n_peaks), function(i) {
+      peak_model_value(models[[i]], x, opt_result$parameters[[i]])
+    })
+    attr(peaks_tbl, "fitted_components") <- components
+    attr(peaks_tbl, "fitted_total") <- opt_result$fitted_values
+    attr(peaks_tbl, "residuals") <- opt_result$residuals
+  }
+
+  class(peaks_tbl) <- c("peaks_tbl", class(tibble::tibble()))
+  peaks_tbl
 }
 
 #' @export
@@ -1645,7 +1801,8 @@ print.step_measure_peaks_deconvolve <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  title <- paste0("Deconvolve peaks (", x$model, " model)")
+  model_name <- if (is.character(x$model)) x$model else x$model$name
+  title <- paste0("Deconvolve peaks (", model_name, ", ", x$optimizer, ")")
   if (x$trained) {
     cat(title, sep = "")
   } else {
@@ -1659,9 +1816,12 @@ print.step_measure_peaks_deconvolve <- function(
 #' @export
 #' @keywords internal
 tidy.step_measure_peaks_deconvolve <- function(x, ...) {
+  model_name <- if (is.character(x$model)) x$model else x$model$name
   tibble::tibble(
-    model = x$model,
+    model = model_name,
+    optimizer = x$optimizer,
     max_iter = x$max_iter,
+    quality_threshold = x$quality_threshold,
     id = x$id
   )
 }

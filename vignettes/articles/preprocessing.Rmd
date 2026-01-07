@@ -1,10 +1,5 @@
 ---
 title: "Preprocessing Techniques"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Preprocessing Techniques}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}

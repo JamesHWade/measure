@@ -1,3 +1,6 @@
+# Small dataset for fast unit tests (3 samples instead of 215)
+meats_small <- dplyr::filter(measure::meats_long, id <= 3)
+
 data_meat_long <- function() {
   skip_if_not_installed("modeldata")
   data(meats, package = "modeldata", envir = environment())

@@ -1,5 +1,5 @@
 test_that("step_measure_baseline_rf runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_rf(span = 0.5) |>
@@ -13,12 +13,12 @@ test_that("step_measure_baseline_rf runs in recipe workflow", {
 })
 
 test_that("step_measure_baseline_rf modifies values", {
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_rf <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_rf <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_rf() |>
@@ -35,7 +35,7 @@ test_that("step_measure_baseline_rf modifies values", {
 
 test_that("step_measure_baseline_rf validates span", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_rf(span = 0) |>
@@ -44,7 +44,7 @@ test_that("step_measure_baseline_rf validates span", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_rf(span = 1.5) |>
@@ -53,7 +53,7 @@ test_that("step_measure_baseline_rf validates span", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_rf(span = -0.1) |>
@@ -64,7 +64,7 @@ test_that("step_measure_baseline_rf validates span", {
 
 test_that("step_measure_baseline_rf validates maxit", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_rf(maxit = c(5)) |>
@@ -73,7 +73,7 @@ test_that("step_measure_baseline_rf validates maxit", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_rf(maxit = c(0, 5)) |>
@@ -83,7 +83,7 @@ test_that("step_measure_baseline_rf validates maxit", {
 })
 
 test_that("step_measure_baseline_rf tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_rf(span = 0.4)
@@ -101,7 +101,7 @@ test_that("step_measure_baseline_rf tidy method works", {
 })
 
 test_that("step_measure_baseline_rf print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_rf()
@@ -111,7 +111,7 @@ test_that("step_measure_baseline_rf print method works", {
 
 test_that("step_measure_baseline_rf works with different span values", {
   for (sp in c(0.3, 0.5, 0.7)) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_rf(span = sp) |>
@@ -124,7 +124,7 @@ test_that("step_measure_baseline_rf works with different span values", {
 
 test_that("required_pkgs includes measure and IDPmisc", {
   step <- step_measure_baseline_rf(
-    recipe(water + fat + protein ~ ., data = meats_long)
+    recipe(water + fat + protein ~ ., data = meats_small)
   )
   pkgs <- required_pkgs(step)
   expect_true("measure" %in% pkgs)

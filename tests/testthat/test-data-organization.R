@@ -153,10 +153,10 @@ test_that("check_measure_recipe detects missing input step", {
 test_that("check_measure_recipe detects missing output step", {
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
   # Recipe with input but no output
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel))
 
@@ -185,10 +185,10 @@ test_that("check_measure_recipe non-strict mode returns recipe", {
 test_that("check_measure_recipe detects multiple input steps", {
   skip_if_not_installed("recipes")
 
-  data(meats_long, package = "measure")
+  data(meats_small, package = "measure")
 
   # Create a recipe with two input steps (unusual but possible)
-  rec <- recipes::recipe(water ~ ., data = meats_long) |>
+  rec <- recipes::recipe(water ~ ., data = meats_small) |>
     recipes::update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel))
 

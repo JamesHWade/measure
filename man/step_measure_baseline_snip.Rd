@@ -58,6 +58,7 @@ The algorithm is particularly effective for:
 \examples{
 library(recipes)
 
+\donttest{
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -65,6 +66,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   prep()
 
 bake(rec, new_data = NULL)
+}
 }
 \references{
 Ryan, C.G., et al. (1988). SNIP, a statistics-sensitive background treatment

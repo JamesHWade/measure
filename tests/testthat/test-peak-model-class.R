@@ -164,7 +164,7 @@ test_that("emg_peak_model evaluates without errors", {
 
   expect_type(y, "double")
   expect_equal(length(y), length(x))
-  expect_false(any(is.na(y)))
+  expect_false(anyNA(y))
   expect_false(any(is.infinite(y)))
 
   # Peak should have tailing (asymmetric)
@@ -504,9 +504,9 @@ test_that("print.peak_model works", {
   output <- capture.output(print(model))
 
   expect_true(any(grepl("gaussian", output, ignore.case = TRUE)))
-  expect_true(any(grepl("height", output)))
-  expect_true(any(grepl("center", output)))
-  expect_true(any(grepl("width", output)))
+  expect_true(any(grepl("height", output, fixed = TRUE)))
+  expect_true(any(grepl("center", output, fixed = TRUE)))
+  expect_true(any(grepl("width", output, fixed = TRUE)))
 })
 
 # ==============================================================================
@@ -519,13 +519,13 @@ test_that("models handle extreme parameter values", {
   # Very small width
   params_narrow <- list(height = 1, center = 0, width = 0.01)
   y_narrow <- peak_model_value(model, x, params_narrow)
-  expect_false(any(is.na(y_narrow)))
+  expect_false(anyNA(y_narrow))
   expect_false(any(is.infinite(y_narrow)))
 
   # Very large height
   params_tall <- list(height = 1e10, center = 0, width = 1)
   y_tall <- peak_model_value(model, x, params_tall)
-  expect_false(any(is.na(y_tall)))
+  expect_false(anyNA(y_tall))
   expect_equal(max(y_tall), 1e10, tolerance = 1e-10)
 })
 

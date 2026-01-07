@@ -95,7 +95,6 @@ library(recipes)
 \seealso{
 Other measure-chromatography: 
 \code{\link{step_measure_mw_distribution}()},
-\code{\link{step_measure_mw_fractions}()},
-\code{\link{step_measure_peaks_deconvolve}()}
+\code{\link{step_measure_mw_fractions}()}
 }
 \concept{measure-chromatography}

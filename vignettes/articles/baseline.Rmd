@@ -1,10 +1,5 @@
 ---
 title: "Baseline Correction"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Baseline Correction}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}

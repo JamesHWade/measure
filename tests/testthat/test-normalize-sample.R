@@ -6,7 +6,7 @@
 # ==============================================================================
 
 test_that("step_measure_normalize_sum runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_sum() |>
@@ -20,7 +20,7 @@ test_that("step_measure_normalize_sum runs in recipe workflow", {
 })
 
 test_that("step_measure_normalize_sum makes values sum to 1", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_sum() |>
@@ -29,14 +29,14 @@ test_that("step_measure_normalize_sum makes values sum to 1", {
   result <- bake(rec, new_data = NULL)
 
   # Check that each spectrum sums to 1
-  for (i in 1:5) {
+  for (i in seq_len(nrow(result))) {
     total <- sum(result$.measures[[i]]$value)
     expect_equal(total, 1, tolerance = 1e-10)
   }
 })
 
 test_that("step_measure_normalize_sum tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_sum()
@@ -50,7 +50,7 @@ test_that("step_measure_normalize_sum tidy method works", {
 })
 
 test_that("step_measure_normalize_sum print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_sum()
@@ -80,7 +80,7 @@ test_that("step_measure_normalize_sum warns on zero sum", {
 # ==============================================================================
 
 test_that("step_measure_normalize_max runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_max() |>
@@ -93,7 +93,7 @@ test_that("step_measure_normalize_max runs in recipe workflow", {
 })
 
 test_that("step_measure_normalize_max makes max value 1", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_max() |>
@@ -102,14 +102,14 @@ test_that("step_measure_normalize_max makes max value 1", {
   result <- bake(rec, new_data = NULL)
 
   # Check that each spectrum has max = 1
-  for (i in 1:5) {
+  for (i in seq_len(nrow(result))) {
     max_val <- max(result$.measures[[i]]$value)
     expect_equal(max_val, 1, tolerance = 1e-10)
   }
 })
 
 test_that("step_measure_normalize_max tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_max()
@@ -123,7 +123,7 @@ test_that("step_measure_normalize_max tidy method works", {
 })
 
 test_that("step_measure_normalize_max print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_max()
@@ -136,7 +136,7 @@ test_that("step_measure_normalize_max print method works", {
 # ==============================================================================
 
 test_that("step_measure_normalize_range runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_range() |>
@@ -149,7 +149,7 @@ test_that("step_measure_normalize_range runs in recipe workflow", {
 })
 
 test_that("step_measure_normalize_range scales to [0, 1]", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_range() |>
@@ -158,7 +158,7 @@ test_that("step_measure_normalize_range scales to [0, 1]", {
   result <- bake(rec, new_data = NULL)
 
   # Check that each spectrum has min = 0 and max = 1
-  for (i in 1:5) {
+  for (i in seq_len(nrow(result))) {
     min_val <- min(result$.measures[[i]]$value)
     max_val <- max(result$.measures[[i]]$value)
     expect_equal(min_val, 0, tolerance = 1e-10)
@@ -167,7 +167,7 @@ test_that("step_measure_normalize_range scales to [0, 1]", {
 })
 
 test_that("step_measure_normalize_range tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_range()
@@ -181,7 +181,7 @@ test_that("step_measure_normalize_range tidy method works", {
 })
 
 test_that("step_measure_normalize_range print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_range()
@@ -211,7 +211,7 @@ test_that("step_measure_normalize_range warns on constant spectrum", {
 # ==============================================================================
 
 test_that("step_measure_normalize_vector runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_vector() |>
@@ -224,7 +224,7 @@ test_that("step_measure_normalize_vector runs in recipe workflow", {
 })
 
 test_that("step_measure_normalize_vector makes L2 norm 1", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_vector() |>
@@ -233,14 +233,14 @@ test_that("step_measure_normalize_vector makes L2 norm 1", {
   result <- bake(rec, new_data = NULL)
 
   # Check that each spectrum has L2 norm = 1
-  for (i in 1:5) {
+  for (i in seq_len(nrow(result))) {
     l2_norm <- sqrt(sum(result$.measures[[i]]$value^2))
     expect_equal(l2_norm, 1, tolerance = 1e-10)
   }
 })
 
 test_that("step_measure_normalize_vector tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_vector()
@@ -254,7 +254,7 @@ test_that("step_measure_normalize_vector tidy method works", {
 })
 
 test_that("step_measure_normalize_vector print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_vector()
@@ -267,7 +267,7 @@ test_that("step_measure_normalize_vector print method works", {
 # ==============================================================================
 
 test_that("step_measure_normalize_auc runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_auc() |>
@@ -280,12 +280,12 @@ test_that("step_measure_normalize_auc runs in recipe workflow", {
 })
 
 test_that("step_measure_normalize_auc modifies values", {
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_auc <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_auc <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_auc() |>
@@ -300,7 +300,7 @@ test_that("step_measure_normalize_auc modifies values", {
 })
 
 test_that("step_measure_normalize_auc tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_auc()
@@ -314,7 +314,7 @@ test_that("step_measure_normalize_auc tidy method works", {
 })
 
 test_that("step_measure_normalize_auc print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_auc()
@@ -327,7 +327,7 @@ test_that("step_measure_normalize_auc print method works", {
 # ==============================================================================
 
 test_that("step_measure_normalize_peak runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_peak(location_min = 40, location_max = 60) |>
@@ -341,7 +341,7 @@ test_that("step_measure_normalize_peak runs in recipe workflow", {
 
 test_that("step_measure_normalize_peak requires location bounds", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_normalize_peak() |>
@@ -352,7 +352,7 @@ test_that("step_measure_normalize_peak requires location bounds", {
 
 test_that("step_measure_normalize_peak validates location order", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_normalize_peak(location_min = 60, location_max = 40) |>
@@ -363,7 +363,7 @@ test_that("step_measure_normalize_peak validates location order", {
 
 test_that("step_measure_normalize_peak errors on empty region", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_normalize_peak(location_min = 1000, location_max = 2000) |>
@@ -376,7 +376,7 @@ test_that("step_measure_normalize_peak works with different methods", {
   methods <- c("mean", "max", "integral")
 
   for (m in methods) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_normalize_peak(
@@ -392,7 +392,7 @@ test_that("step_measure_normalize_peak works with different methods", {
 })
 
 test_that("step_measure_normalize_peak tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_peak(
@@ -415,7 +415,7 @@ test_that("step_measure_normalize_peak tidy method works", {
 })
 
 test_that("step_measure_normalize_peak print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_peak(location_min = 40, location_max = 60)
@@ -424,7 +424,7 @@ test_that("step_measure_normalize_peak print method works", {
 })
 
 test_that("step_measure_normalize_peak tunable returns correct params", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_peak(location_min = 40, location_max = 60)
@@ -449,7 +449,7 @@ test_that("all normalization steps preserve locations", {
   )
 
   for (step_fn in steps) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_fn() |>
@@ -466,7 +466,7 @@ test_that("all normalization steps preserve locations", {
 
 test_that("required_pkgs includes measure and purrr", {
   step <- step_measure_normalize_sum(
-    recipe(water + fat + protein ~ ., data = meats_long)
+    recipe(water + fat + protein ~ ., data = meats_small)
   )
   pkgs <- required_pkgs(step)
   expect_true("measure" %in% pkgs)

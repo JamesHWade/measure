@@ -451,7 +451,7 @@ tidy.step_measure_align_reference <- function(x, ...) {
 #' @family measure-align
 #' @export
 #'
-#' @examples
+#' @examplesIf rlang::is_installed("dtw")
 #' library(recipes)
 #'
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
@@ -709,7 +709,7 @@ required_pkgs.step_measure_align_dtw <- function(x, ...) {
 #' @family measure-align
 #' @export
 #'
-#' @examples
+#' @examplesIf rlang::is_installed("ptw")
 #' library(recipes)
 #'
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
@@ -920,7 +920,7 @@ required_pkgs.step_measure_align_ptw <- function(x, ...) {
 #' @family measure-align
 #' @export
 #'
-#' @examples
+#' @examplesIf rlang::is_installed("ptw")
 #' library(recipes)
 #'
 #' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>

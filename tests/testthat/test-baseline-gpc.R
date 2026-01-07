@@ -1,5 +1,5 @@
 test_that("step_measure_baseline_gpc runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_gpc(left_frac = 0.1, right_frac = 0.1) |>
@@ -13,12 +13,12 @@ test_that("step_measure_baseline_gpc runs in recipe workflow", {
 })
 
 test_that("step_measure_baseline_gpc modifies values", {
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_gpc <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_gpc <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_gpc() |>
@@ -35,7 +35,7 @@ test_that("step_measure_baseline_gpc modifies values", {
 
 test_that("step_measure_baseline_gpc validates left_frac", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_gpc(left_frac = 0) |>
@@ -44,7 +44,7 @@ test_that("step_measure_baseline_gpc validates left_frac", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_gpc(left_frac = 0.6) |>
@@ -53,7 +53,7 @@ test_that("step_measure_baseline_gpc validates left_frac", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_gpc(left_frac = -0.1) |>
@@ -64,7 +64,7 @@ test_that("step_measure_baseline_gpc validates left_frac", {
 
 test_that("step_measure_baseline_gpc validates right_frac", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_gpc(right_frac = 0) |>
@@ -73,7 +73,7 @@ test_that("step_measure_baseline_gpc validates right_frac", {
   )
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_gpc(right_frac = 0.6) |>
@@ -84,7 +84,7 @@ test_that("step_measure_baseline_gpc validates right_frac", {
 
 test_that("step_measure_baseline_gpc validates combined fractions", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_gpc(left_frac = 0.4, right_frac = 0.4) |>
@@ -95,7 +95,7 @@ test_that("step_measure_baseline_gpc validates combined fractions", {
 
 test_that("step_measure_baseline_gpc validates method", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_gpc(method = "invalid") |>
@@ -144,7 +144,7 @@ test_that("step_measure_baseline_gpc removes linear baseline", {
 })
 
 test_that("step_measure_baseline_gpc linear method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_gpc(method = "linear") |>
@@ -155,7 +155,7 @@ test_that("step_measure_baseline_gpc linear method works", {
 })
 
 test_that("step_measure_baseline_gpc median method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_gpc(method = "median") |>
@@ -166,7 +166,7 @@ test_that("step_measure_baseline_gpc median method works", {
 })
 
 test_that("step_measure_baseline_gpc spline method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_gpc(method = "spline") |>
@@ -177,7 +177,7 @@ test_that("step_measure_baseline_gpc spline method works", {
 })
 
 test_that("step_measure_baseline_gpc tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_gpc(
@@ -203,7 +203,7 @@ test_that("step_measure_baseline_gpc tidy method works", {
 })
 
 test_that("step_measure_baseline_gpc print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_gpc()
@@ -213,7 +213,7 @@ test_that("step_measure_baseline_gpc print method works", {
 
 test_that("step_measure_baseline_gpc works with different fraction values", {
   for (frac in c(0.05, 0.1, 0.2)) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_gpc(left_frac = frac, right_frac = frac) |>
@@ -226,7 +226,7 @@ test_that("step_measure_baseline_gpc works with different fraction values", {
 
 test_that("required_pkgs includes measure", {
   step <- step_measure_baseline_gpc(
-    recipe(water + fat + protein ~ ., data = meats_long)
+    recipe(water + fat + protein ~ ., data = meats_small)
   )
   expect_true("measure" %in% required_pkgs(step))
 })

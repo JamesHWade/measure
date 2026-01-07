@@ -13,7 +13,7 @@
 
 # Create test data in internal format
 create_test_data <- function() {
-  recipe(water + fat + protein ~ ., data = meats_long) |>
+  recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep() |>
@@ -34,7 +34,7 @@ test_that("step_measure_calibrate_x works with function calibration", {
   test_data <- create_test_data()
 
   # Simple log10 transformation
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_x(calibration = function(x) log10(x + 1)) |>
@@ -56,7 +56,7 @@ test_that("step_measure_calibrate_x works with calibration data.frame", {
     y = c(0, 100) # Linear transformation to 0-100
   )
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_x(
@@ -84,7 +84,7 @@ test_that("step_measure_calibrate_x works with spline method", {
     y = seq(0, 100, length.out = 5)
   )
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_x(
@@ -103,7 +103,7 @@ test_that("step_measure_calibrate_x works with spline method", {
 
 test_that("step_measure_calibrate_x requires calibration argument", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       step_measure_calibrate_x(),
     "calibration.*required"
   )
@@ -111,7 +111,7 @@ test_that("step_measure_calibrate_x requires calibration argument", {
 
 test_that("step_measure_calibrate_x errors with invalid method", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_calibrate_x(
@@ -127,7 +127,7 @@ test_that("step_measure_calibrate_x errors with missing columns in cal data", {
   cal_data <- data.frame(a = 1:5, b = 1:5)
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_calibrate_x(
@@ -144,7 +144,7 @@ test_that("step_measure_calibrate_x errors with insufficient cal points", {
   cal_data <- data.frame(x = 1, y = 1)
 
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_calibrate_x(
@@ -160,7 +160,7 @@ test_that("step_measure_calibrate_x errors with insufficient cal points", {
 test_that("step_measure_calibrate_x preserves values", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_x(calibration = function(x) x * 2) |>
@@ -175,7 +175,7 @@ test_that("step_measure_calibrate_x preserves values", {
 })
 
 test_that("step_measure_calibrate_x print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_x(calibration = function(x) x)
@@ -187,7 +187,7 @@ test_that("step_measure_calibrate_x print method works", {
 })
 
 test_that("step_measure_calibrate_x tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_x(calibration = function(x) x) |>
@@ -207,7 +207,7 @@ test_that("step_measure_calibrate_x tidy method works", {
 test_that("step_measure_calibrate_y works with response_factor", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_y(response_factor = 2.5) |>
@@ -224,7 +224,7 @@ test_that("step_measure_calibrate_y works with calibration function", {
   test_data <- create_test_data()
 
   # Log transform
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_y(calibration = function(x) log10(x + 0.01)) |>
@@ -240,7 +240,7 @@ test_that("step_measure_calibrate_y works with calibration function", {
 test_that("step_measure_calibrate_y default response_factor is 1", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_y() |>
@@ -257,7 +257,7 @@ test_that("step_measure_calibrate_y default response_factor is 1", {
 test_that("step_measure_calibrate_y preserves locations", {
   test_data <- create_test_data()
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_y(response_factor = 2.0) |>
@@ -273,7 +273,7 @@ test_that("step_measure_calibrate_y preserves locations", {
 
 test_that("step_measure_calibrate_y errors with invalid response_factor", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_calibrate_y(response_factor = c(1, 2)) |>
@@ -284,7 +284,7 @@ test_that("step_measure_calibrate_y errors with invalid response_factor", {
 
 test_that("step_measure_calibrate_y errors with non-function calibration", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_calibrate_y(calibration = "not a function") |>
@@ -294,7 +294,7 @@ test_that("step_measure_calibrate_y errors with non-function calibration", {
 })
 
 test_that("step_measure_calibrate_y print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_y(response_factor = 2.5)
@@ -306,7 +306,7 @@ test_that("step_measure_calibrate_y print method works", {
 })
 
 test_that("step_measure_calibrate_y tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_y(response_factor = 2.5) |>
@@ -326,7 +326,7 @@ test_that("step_measure_calibrate_y tidy method works", {
 # ==============================================================================
 
 test_that("step_measure_normalize_istd works as alias", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_istd(
@@ -344,7 +344,7 @@ test_that("step_measure_normalize_istd works as alias", {
 
 test_that("step_measure_normalize_istd uses integral method by default", {
   # The alias default is "mean" based on our implementation
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_normalize_istd(
@@ -358,7 +358,7 @@ test_that("step_measure_normalize_istd uses integral method by default", {
 
 test_that("step_measure_normalize_istd requires location bounds", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       step_measure_normalize_istd(location_min = 50) |>
       prep(),
     "location_max"
@@ -376,7 +376,7 @@ test_that("calibration steps work in a pipeline", {
     y = c(0, 100)
   )
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_x(
@@ -400,7 +400,7 @@ test_that("calibration steps work in a pipeline", {
 })
 
 test_that("calibration steps work with wide input format", {
-  test_data_wide <- meats_long |>
+  test_data_wide <- meats_small |>
     tidyr::pivot_wider(
       names_from = channel,
       names_prefix = "x_",
@@ -420,11 +420,11 @@ test_that("calibration steps work with wide input format", {
 })
 
 test_that("required_pkgs methods work", {
-  rec1 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec1 <- recipe(water + fat + protein ~ ., data = meats_small) |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_x(calibration = function(x) x)
 
-  rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec2 <- recipe(water + fat + protein ~ ., data = meats_small) |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_calibrate_y(response_factor = 1.0)
 

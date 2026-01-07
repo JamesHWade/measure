@@ -6,9 +6,15 @@
 \usage{
 step_measure_peaks_deconvolve(
   recipe,
-  model = c("gaussian", "emg", "bigaussian"),
-  max_iter = 100L,
+  model = "gaussian",
+  optimizer = "auto",
+  max_iter = 500L,
   tol = 1e-06,
+  n_starts = 5L,
+  constrain_positions = TRUE,
+  quality_threshold = 0.8,
+  store_components = FALSE,
+  smart_init = TRUE,
   peaks_col = ".peaks",
   measures_col = ".measures",
   role = NA,
@@ -20,13 +26,33 @@ step_measure_peaks_deconvolve(
 \arguments{
 \item{recipe}{A recipe object.}
 
-\item{model}{Peak model to use: "gaussian" (symmetric), "emg" (exponentially
-modified Gaussian for tailing peaks), or "bigaussian" (asymmetric).
-Default is "gaussian".}
+\item{model}{Peak model to use. Either a character string naming a registered
+model (\code{"gaussian"}, \code{"emg"}, \code{"bigaussian"}, \code{"lorentzian"}), or a
+\code{peak_model} object created directly. Use \code{\link[=peak_models]{peak_models()}} to see
+all registered models. Default is \code{"gaussian"}.}
 
-\item{max_iter}{Maximum iterations for optimization. Default is 100.}
+\item{optimizer}{Optimization method: \code{"auto"} (default), \code{"lbfgsb"},
+\code{"multistart"}, or \code{"nelder_mead"}. Auto-selection chooses based on problem
+complexity and signal-to-noise ratio.}
+
+\item{max_iter}{Maximum iterations for optimization. Default is 500.}
 
 \item{tol}{Convergence tolerance. Default is 1e-6.}
+
+\item{n_starts}{Number of random starts for \code{optimizer = "multistart"}.
+Default is 5.}
+
+\item{constrain_positions}{Logical. If \code{TRUE}, enforce that peak centers
+maintain their relative ordering. Default is \code{TRUE}.}
+
+\item{quality_threshold}{Minimum R-squared to accept fit. Fits below this
+threshold trigger a warning. Default is 0.8.}
+
+\item{store_components}{Logical. If \code{TRUE}, store individual fitted peak
+curves in the output. Default is \code{FALSE}.}
+
+\item{smart_init}{Logical. If \code{TRUE}, use smart initialization based on
+peak properties. Default is \code{TRUE}.}
 
 \item{peaks_col}{Name of the peaks column. Default is ".peaks".}
 
@@ -42,7 +68,8 @@ Default is "gaussian".}
 }
 \value{
 An updated recipe with the new step added. The \code{.peaks} column
-will be updated with deconvolved peak parameters and fitted areas.
+will be updated with deconvolved peak parameters, fitted areas, and
+quality metrics.
 }
 \description{
 \code{step_measure_peaks_deconvolve()} creates a \emph{specification} of a recipe step
@@ -55,29 +82,67 @@ determine their individual contributions. This is essential for
 quantitative analysis when peaks are not baseline-resolved.
 
 \strong{Peak Models:}
+
+Built-in models (use \code{\link[=peak_models]{peak_models()}} to see all):
 \itemize{
-\item \code{gaussian}: Symmetric Gaussian peak (3 params: height, center, width)
-\item \code{emg}: Exponentially Modified Gaussian (4 params, handles tailing)
-\item \code{bigaussian}: Bi-Gaussian (5 params, flexible asymmetry)
+\item \code{"gaussian"}: Symmetric Gaussian (3 params: height, center, width)
+\item \code{"emg"}: Exponentially Modified Gaussian (4 params, handles tailing)
+\item \code{"bigaussian"}: Bi-Gaussian (4 params, flexible asymmetry)
+\item \code{"lorentzian"}: Lorentzian/Cauchy peak (3 params, heavier tails)
 }
 
-The optimization uses initial estimates from detected peak positions
-and refines them to minimize the residual sum of squares.
+Technique packs may register additional models.
+
+\strong{Optimizers:}
+\itemize{
+\item \code{"auto"}: Selects based on problem complexity and SNR
+\item \code{"lbfgsb"}: L-BFGS-B (fast, local optimization)
+\item \code{"multistart"}: Multiple L-BFGS-B runs from perturbed starts (robust)
+\item \code{"nelder_mead"}: Derivative-free Nelder-Mead simplex
+}
+
+\strong{Quality Assessment:}
+
+Each fit is assessed for quality. The \code{.peaks} tibble gains columns:
+\itemize{
+\item \code{fit_r_squared}: R-squared of the overall fit
+\item \code{fit_quality}: Quality grade (A/B/C/D/F)
+\item \code{purity}: How much of signal at peak max comes from this peak
+}
 }
 \examples{
 library(recipes)
 
+# Create synthetic data with overlapping peaks
+set.seed(42)
+x <- seq(0, 20, by = 0.1)
+y <- 1.5 * exp(-0.5 * ((x - 8) / 1)^2) +
+  0.8 * exp(-0.5 * ((x - 12) / 1.5)^2) +
+  rnorm(length(x), sd = 0.02)
+df <- data.frame(id = "sample1", location = x, value = y)
+
+\donttest{
 # Deconvolve overlapping peaks
-# rec <- recipe(~., data = chromatogram_data) |>
-#   step_measure_input_long(signal, location = vars(time)) |>
-#   step_measure_peaks_detect(method = "derivative") |>
-#   step_measure_peaks_deconvolve(model = "gaussian") |>
-#   prep()
+rec <- recipe(~., data = df) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(value, location = vars(location)) |>
+  step_measure_peaks_detect(min_height = 0.5, min_prominence = 0.3) |>
+  step_measure_peaks_deconvolve(model = "gaussian") |>
+  prep()
+
+result <- bake(rec, new_data = NULL)
+# Check fitted peaks
+result$.peaks[[1]]
+}
 }
 \seealso{
-Other measure-chromatography: 
-\code{\link{step_measure_mw_averages}()},
-\code{\link{step_measure_mw_distribution}()},
-\code{\link{step_measure_mw_fractions}()}
+\code{\link[=optimize_deconvolution]{optimize_deconvolution()}}, \code{\link[=assess_deconv_quality]{assess_deconv_quality()}},
+\code{\link[=peak_models]{peak_models()}}, \code{\link[=gaussian_peak_model]{gaussian_peak_model()}}
+
+Other peak-operations: 
+\code{\link{step_measure_peaks_detect}()},
+\code{\link{step_measure_peaks_filter}()},
+\code{\link{step_measure_peaks_integrate}()},
+\code{\link{step_measure_peaks_to_table}()}
 }
-\concept{measure-chromatography}
+\concept{peak-operations}

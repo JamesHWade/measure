@@ -4,7 +4,7 @@ test_that("step_measure_baseline_custom runs in recipe workflow", {
     rep(mean(x$value, na.rm = TRUE), nrow(x))
   }
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(.fn = mean_baseline) |>
@@ -23,12 +23,12 @@ test_that("step_measure_baseline_custom modifies values", {
     predict(fit)
   }
 
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_custom <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_custom <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(.fn = poly_baseline) |>
@@ -44,7 +44,7 @@ test_that("step_measure_baseline_custom modifies values", {
 })
 
 test_that("step_measure_baseline_custom works with formula interface", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(.fn = ~ rep(mean(.x$value), nrow(.x))) |>
@@ -55,7 +55,7 @@ test_that("step_measure_baseline_custom works with formula interface", {
 })
 
 test_that("step_measure_baseline_custom passes additional arguments", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(
@@ -76,7 +76,7 @@ test_that("step_measure_baseline_custom subtract = FALSE returns baseline", {
     rep(mean(x$value, na.rm = TRUE), nrow(x))
   }
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(.fn = mean_baseline, subtract = FALSE) |>
@@ -91,7 +91,7 @@ test_that("step_measure_baseline_custom subtract = FALSE returns baseline", {
 
 test_that("step_measure_baseline_custom validates subtract argument", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_baseline_custom(.fn = ~ .x$value, subtract = "yes") |>
@@ -107,7 +107,7 @@ test_that("step_measure_baseline_custom handles function errors gracefully", {
 
   # Use minimal data (1 sample) to avoid multiple warnings
 
-  minimal_data <- meats_long[meats_long$id == 1, ]
+  minimal_data <- meats_small[meats_small$id == 1, ]
 
   # Should warn during prep but not error
   expect_warning(
@@ -130,7 +130,7 @@ test_that("step_measure_baseline_custom validates return length", {
   }
 
   # Use minimal data (1 sample) to avoid multiple warnings
-  minimal_data <- meats_long[meats_long$id == 1, ]
+  minimal_data <- meats_small[meats_small$id == 1, ]
 
   # Should warn during prep
   expect_warning(
@@ -149,7 +149,7 @@ test_that("step_measure_baseline_custom validates return type", {
   }
 
   # Use minimal data (1 sample) to avoid multiple warnings
-  minimal_data <- meats_long[meats_long$id == 1, ]
+  minimal_data <- meats_small[meats_small$id == 1, ]
 
   # Should warn during prep
   expect_warning(
@@ -204,7 +204,7 @@ test_that("step_measure_baseline_custom removes known baseline correctly", {
 test_that("step_measure_baseline_custom tidy method works", {
   mean_fn <- function(x) rep(mean(x$value), nrow(x))
 
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(.fn = mean_fn, subtract = FALSE)
@@ -222,7 +222,7 @@ test_that("step_measure_baseline_custom tidy method works", {
 })
 
 test_that("step_measure_baseline_custom print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(.fn = ~ .x$value)
@@ -231,7 +231,7 @@ test_that("step_measure_baseline_custom print method works", {
 })
 
 test_that("step_measure_baseline_custom tunable returns empty for no tunable params", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(.fn = ~ .x$value)
@@ -241,7 +241,7 @@ test_that("step_measure_baseline_custom tunable returns empty for no tunable par
 })
 
 test_that("step_measure_baseline_custom tunable works with declared params", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_baseline_custom(
@@ -264,7 +264,7 @@ test_that("step_measure_baseline_custom tunable works with declared params", {
 
 test_that("required_pkgs includes measure", {
   step <- step_measure_baseline_custom(
-    recipe(water + fat + protein ~ ., data = meats_long),
+    recipe(water + fat + protein ~ ., data = meats_small),
     .fn = ~ .x$value
   )
   expect_true("measure" %in% required_pkgs(step))

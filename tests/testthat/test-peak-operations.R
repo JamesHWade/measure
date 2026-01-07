@@ -377,8 +377,8 @@ test_that("full peak workflow works", {
   expect_false(".peaks" %in% names(result))
 })
 
-test_that("peak operations work with meats_long data", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+test_that("peak operations work with meats_small data", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_peaks_detect(algorithm = "prominence", min_height = 0.4) |>

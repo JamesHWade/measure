@@ -63,6 +63,7 @@ This is useful for:
 Requires the \code{dtw} package to be installed.
 }
 \examples{
+\dontshow{if (rlang::is_installed("dtw")) withAutoprint(\{ # examplesIf}
 library(recipes)
 
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
@@ -72,6 +73,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   prep()
 
 bake(rec, new_data = NULL)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other measure-align: 

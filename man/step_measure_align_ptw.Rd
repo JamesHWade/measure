@@ -48,6 +48,7 @@ This corrects for smooth, continuous distortions in the x-axis.
 Requires the \code{ptw} package to be installed.
 }
 \examples{
+\dontshow{if (rlang::is_installed("ptw")) withAutoprint(\{ # examplesIf}
 library(recipes)
 
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
@@ -57,6 +58,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   prep()
 
 bake(rec, new_data = NULL)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Eilers, P.H.C. (2004). Parametric Time Warping.

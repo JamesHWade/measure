@@ -42,18 +42,18 @@ development:
   mode: devel
 articles:
 - title: Getting Started
-  contents: measure
+  contents: articles/measure
 - title: In-depth Guides
   contents:
-  - preprocessing
+  - articles/preprocessing
   - multidimensional
-  - recipes
-  - roles-diagnostics
+  - articles/recipes
+  - articles/roles-diagnostics
   - validation
 - title: Examples
   contents:
-  - baseline
-  - sec-analysis-example
+  - articles/baseline
+  - articles/sec-analysis-example
 - title: Developer
   contents: internals
 reference:
@@ -160,6 +160,14 @@ reference:
   - emg_peak_model
   - bigaussian_peak_model
   - lorentzian_peak_model
+- title: Peak Deconvolution Utilities
+  desc: Optimization, initialization, and quality assessment helpers
+  contents:
+  - optimize_deconvolution
+  - initialize_peak_params
+  - add_param_jitter
+  - assess_deconv_quality
+  - check_quality_gates
 - title: Smoothing & Noise Reduction
   desc: Noise reduction and spike removal steps
   contents:
@@ -408,4 +416,3 @@ reference:
   - starts_with("fortify")
   - plot_measure_comparison
   - measure_plot_summary
-

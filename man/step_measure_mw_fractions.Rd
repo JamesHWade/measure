@@ -82,7 +82,6 @@ library(recipes)
 \seealso{
 Other measure-chromatography: 
 \code{\link{step_measure_mw_averages}()},
-\code{\link{step_measure_mw_distribution}()},
-\code{\link{step_measure_peaks_deconvolve}()}
+\code{\link{step_measure_mw_distribution}()}
 }
 \concept{measure-chromatography}

@@ -19,7 +19,7 @@ test_that("SNV transformation computes correctly", {
 
 test_that("SNV works with recipe workflow (long format)", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_snv() |>
@@ -63,7 +63,7 @@ test_that("SNV works with recipe workflow (wide format)", {
 
 test_that("SNV preserves location values", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
@@ -71,7 +71,7 @@ test_that("SNV preserves location values", {
   before <- bake(rec, new_data = NULL)
 
   rec_snv <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_snv() |>
@@ -102,7 +102,7 @@ test_that("SNV fails without measure input step", {
 
 test_that("SNV handles constant spectrum with warning", {
   # Create data with a constant spectrum
-  constant_data <- meats_long
+  constant_data <- meats_small
   # Set first sample to have constant values
   first_id <- unique(constant_data$id)[1]
   constant_data$transmittance[constant_data$id == first_id] <- 5.0
@@ -120,7 +120,7 @@ test_that("SNV handles constant spectrum with warning", {
 
 test_that("SNV print method works", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_snv()
@@ -133,7 +133,7 @@ test_that("SNV print method works", {
 
 test_that("SNV tidy method works", {
   rec <-
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_snv(id = "snv_test")
@@ -151,12 +151,13 @@ test_that("SNV tidy method works", {
 })
 
 test_that("SNV works on new data", {
-  # Split the data
-  train_ids <- unique(meats_long$id)[1:200]
-  test_ids <- unique(meats_long$id)[201:215]
+  # Split the data - use first 2 for training, last 1 for test
+  all_ids <- unique(meats_small$id)
+  train_ids <- all_ids[1:2]
+  test_ids <- all_ids[3]
 
-  train_data <- meats_long[meats_long$id %in% train_ids, ]
-  test_data <- meats_long[meats_long$id %in% test_ids, ]
+  train_data <- meats_small[meats_small$id %in% train_ids, ]
+  test_data <- meats_small[meats_small$id %in% test_ids, ]
 
   rec <-
     recipe(water + fat + protein ~ ., data = train_data) |>

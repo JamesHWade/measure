@@ -7,7 +7,7 @@
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_smooth_ma runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_ma(window = 5) |>
@@ -21,12 +21,12 @@ test_that("step_measure_smooth_ma runs in recipe workflow", {
 })
 
 test_that("step_measure_smooth_ma reduces noise", {
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_smooth <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_smooth <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_ma(window = 11) |>
@@ -47,7 +47,7 @@ test_that("step_measure_smooth_ma reduces noise", {
 
 test_that("step_measure_smooth_ma errors on even window", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_smooth_ma(window = 6) |>
@@ -58,7 +58,7 @@ test_that("step_measure_smooth_ma errors on even window", {
 
 test_that("step_measure_smooth_ma validates window", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_smooth_ma(window = 2) |>
@@ -68,7 +68,7 @@ test_that("step_measure_smooth_ma validates window", {
 })
 
 test_that("step_measure_smooth_ma tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_ma(window = 7)
@@ -87,7 +87,7 @@ test_that("step_measure_smooth_ma tidy method works", {
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_smooth_median runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_median(window = 5) |>
@@ -131,7 +131,7 @@ test_that("step_measure_smooth_median removes spikes", {
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_smooth_gaussian runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_gaussian(sigma = 2) |>
@@ -145,7 +145,7 @@ test_that("step_measure_smooth_gaussian runs in recipe workflow", {
 
 test_that("step_measure_smooth_gaussian validates sigma", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_smooth_gaussian(sigma = -1) |>
@@ -155,7 +155,7 @@ test_that("step_measure_smooth_gaussian validates sigma", {
 })
 
 test_that("step_measure_smooth_gaussian auto-calculates window", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_smooth_gaussian(sigma = 3) |>
@@ -172,7 +172,7 @@ test_that("step_measure_smooth_gaussian auto-calculates window", {
 # ------------------------------------------------------------------------------
 
 test_that("step_measure_filter_fourier runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_filter_fourier(cutoff = 0.1) |>
@@ -186,7 +186,7 @@ test_that("step_measure_filter_fourier runs in recipe workflow", {
 
 test_that("step_measure_filter_fourier validates cutoff", {
   expect_error(
-    recipe(water + fat + protein ~ ., data = meats_long) |>
+    recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_measure_filter_fourier(cutoff = 0.6) |>
@@ -196,12 +196,12 @@ test_that("step_measure_filter_fourier validates cutoff", {
 })
 
 test_that("step_measure_filter_fourier removes high frequencies", {
-  rec_original <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_original <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     prep()
 
-  rec_filtered <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_filtered <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_filter_fourier(cutoff = 0.2, type = "lowpass") |>
@@ -218,7 +218,7 @@ test_that("step_measure_filter_fourier removes high frequencies", {
 })
 
 test_that("step_measure_filter_fourier tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_filter_fourier(cutoff = 0.2, type = "lowpass")

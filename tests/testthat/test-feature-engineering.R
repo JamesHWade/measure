@@ -398,8 +398,8 @@ test_that("step_measure_bin is tunable", {
 # Integration tests
 # ==============================================================================
 
-test_that("feature engineering steps work with meats_long data", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+test_that("feature engineering steps work with meats_small data", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_integrals(regions = list(r1 = c(1, 50), r2 = c(51, 100))) |>
@@ -416,7 +416,7 @@ test_that("feature engineering steps work with meats_long data", {
 })
 
 test_that("binning followed by feature extraction works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_bin(n_bins = 20) |>

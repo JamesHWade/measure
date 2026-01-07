@@ -64,6 +64,7 @@ Larger values allow more flexibility but may introduce artifacts.
 This is a pure R implementation based on Nielsen et al. (1998).
 }
 \examples{
+\dontshow{if (rlang::is_installed("ptw")) withAutoprint(\{ # examplesIf}
 library(recipes)
 
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
@@ -73,6 +74,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   prep()
 
 bake(rec, new_data = NULL)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Nielsen, N.P.V., Carstensen, J.M., and Smedsgaard, J. (1998).

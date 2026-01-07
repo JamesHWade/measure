@@ -48,11 +48,13 @@ refine the baseline estimate for complex signals.
 \examples{
 library(recipes)
 
+\donttest{
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
   step_measure_baseline_morph(half_window = 30, iterations = 5) |>
   prep()
+}
 }
 \seealso{
 Other measure-baseline: 

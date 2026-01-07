@@ -6,7 +6,7 @@
 # ==============================================================================
 
 test_that("step_measure_center runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_center() |>
@@ -20,7 +20,7 @@ test_that("step_measure_center runs in recipe workflow", {
 })
 
 test_that("step_measure_center makes column means zero", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_center() |>
@@ -37,7 +37,7 @@ test_that("step_measure_center makes column means zero", {
 })
 
 test_that("step_measure_center stores learned parameters", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_center() |>
@@ -50,12 +50,13 @@ test_that("step_measure_center stores learned parameters", {
 })
 
 test_that("step_measure_center applies same parameters to new data", {
-  # Split data
-  train_ids <- unique(meats_long$id)[1:200]
-  test_ids <- unique(meats_long$id)[201:215]
+  # Split data - use first 2 for training, last 1 for test
+  all_ids <- unique(meats_small$id)
+  train_ids <- all_ids[1:2]
+  test_ids <- all_ids[3]
 
-  train_data <- meats_long[meats_long$id %in% train_ids, ]
-  test_data <- meats_long[meats_long$id %in% test_ids, ]
+  train_data <- meats_small[meats_small$id %in% train_ids, ]
+  test_data <- meats_small[meats_small$id %in% test_ids, ]
 
   rec <- recipe(water + fat + protein ~ ., data = train_data) |>
     update_role(id, new_role = "id") |>
@@ -75,7 +76,7 @@ test_that("step_measure_center applies same parameters to new data", {
 })
 
 test_that("step_measure_center tidy method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_center()
@@ -92,7 +93,7 @@ test_that("step_measure_center tidy method works", {
 })
 
 test_that("step_measure_center print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_center()
@@ -105,7 +106,7 @@ test_that("step_measure_center print method works", {
 # ==============================================================================
 
 test_that("step_measure_scale_auto runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_auto() |>
@@ -118,7 +119,7 @@ test_that("step_measure_scale_auto runs in recipe workflow", {
 })
 
 test_that("step_measure_scale_auto makes column means zero and SDs 1", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_auto() |>
@@ -136,7 +137,7 @@ test_that("step_measure_scale_auto makes column means zero and SDs 1", {
 })
 
 test_that("step_measure_scale_auto stores learned parameters", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_auto() |>
@@ -149,7 +150,7 @@ test_that("step_measure_scale_auto stores learned parameters", {
 })
 
 test_that("step_measure_scale_auto tidy method includes sd", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_auto() |>
@@ -162,7 +163,7 @@ test_that("step_measure_scale_auto tidy method includes sd", {
 })
 
 test_that("step_measure_scale_auto print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_auto()
@@ -175,7 +176,7 @@ test_that("step_measure_scale_auto print method works", {
 # ==============================================================================
 
 test_that("step_measure_scale_pareto runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_pareto() |>
@@ -188,7 +189,7 @@ test_that("step_measure_scale_pareto runs in recipe workflow", {
 })
 
 test_that("step_measure_scale_pareto scales by sqrt(SD)", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_pareto() |>
@@ -209,7 +210,7 @@ test_that("step_measure_scale_pareto scales by sqrt(SD)", {
 })
 
 test_that("step_measure_scale_pareto stores learned parameters", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_pareto() |>
@@ -222,7 +223,7 @@ test_that("step_measure_scale_pareto stores learned parameters", {
 })
 
 test_that("step_measure_scale_pareto print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_pareto()
@@ -235,7 +236,7 @@ test_that("step_measure_scale_pareto print method works", {
 # ==============================================================================
 
 test_that("step_measure_scale_range runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_range() |>
@@ -248,7 +249,7 @@ test_that("step_measure_scale_range runs in recipe workflow", {
 })
 
 test_that("step_measure_scale_range centers and scales by range", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_range() |>
@@ -264,7 +265,7 @@ test_that("step_measure_scale_range centers and scales by range", {
 })
 
 test_that("step_measure_scale_range stores learned parameters", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_range() |>
@@ -277,7 +278,7 @@ test_that("step_measure_scale_range stores learned parameters", {
 })
 
 test_that("step_measure_scale_range tidy method includes range", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_range() |>
@@ -289,7 +290,7 @@ test_that("step_measure_scale_range tidy method includes range", {
 })
 
 test_that("step_measure_scale_range print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_range()
@@ -302,7 +303,7 @@ test_that("step_measure_scale_range print method works", {
 # ==============================================================================
 
 test_that("step_measure_scale_vast runs in recipe workflow", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_vast() |>
@@ -315,7 +316,7 @@ test_that("step_measure_scale_vast runs in recipe workflow", {
 })
 
 test_that("step_measure_scale_vast stores learned parameters including CV", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_vast() |>
@@ -329,7 +330,7 @@ test_that("step_measure_scale_vast stores learned parameters including CV", {
 })
 
 test_that("step_measure_scale_vast tidy method includes cv", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_vast() |>
@@ -342,7 +343,7 @@ test_that("step_measure_scale_vast tidy method includes cv", {
 })
 
 test_that("step_measure_scale_vast print method works", {
-  rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_vast()
@@ -364,7 +365,7 @@ test_that("all scaling steps preserve locations", {
   )
 
   for (step_fn in steps) {
-    rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+    rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
       update_role(id, new_role = "id") |>
       step_measure_input_long(transmittance, location = vars(channel)) |>
       step_fn() |>
@@ -402,7 +403,7 @@ test_that("all scaling steps fail without measure input step", {
 
 test_that("required_pkgs includes measure", {
   step <- step_measure_center(
-    recipe(water + fat + protein ~ ., data = meats_long)
+    recipe(water + fat + protein ~ ., data = meats_small)
   )
   pkgs <- required_pkgs(step)
   expect_true("measure" %in% pkgs)
@@ -438,13 +439,13 @@ test_that("scaling steps work with wide format", {
 # ==============================================================================
 
 test_that("different scaling methods produce different results", {
-  rec_auto <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_auto <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_auto() |>
     prep()
 
-  rec_pareto <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_pareto <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_pareto() |>
@@ -460,13 +461,13 @@ test_that("different scaling methods produce different results", {
 })
 
 test_that("centering is different from auto-scaling", {
-  rec_center <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_center <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_center() |>
     prep()
 
-  rec_auto <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  rec_auto <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
     step_measure_scale_auto() |>

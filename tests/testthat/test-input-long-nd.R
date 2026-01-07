@@ -312,7 +312,7 @@ test_that("measure_grid_info returns correct information", {
 # ------------------------------------------------------------------------------
 
 test_that("single location column still creates 1D measure_list", {
-  # Use existing meats_long data pattern
+  # Use existing meats_small data pattern
   data <- tibble::tibble(
     sample_id = rep(1:3, each = 5),
     channel = rep(1:5, 3),

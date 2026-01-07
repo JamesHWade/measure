@@ -66,6 +66,7 @@ result <- bake(rec, new_data = NULL)
 }
 \seealso{
 Other peak-operations: 
+\code{\link{step_measure_peaks_deconvolve}()},
 \code{\link{step_measure_peaks_detect}()},
 \code{\link{step_measure_peaks_integrate}()},
 \code{\link{step_measure_peaks_to_table}()}
