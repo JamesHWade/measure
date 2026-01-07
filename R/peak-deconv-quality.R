@@ -379,7 +379,11 @@ summary.deconv_quality <- function(object, ...) {
 
     # Purity: how much of the signal at peak maximum comes from this peak
     total_at_peak <- sum(vapply(peak_data, function(y) y[peak_idx], numeric(1)))
-    purity[i] <- y_this_peak[peak_idx] / total_at_peak
+    if (total_at_peak == 0) {
+      purity[i] <- NA_real_
+    } else {
+      purity[i] <- y_this_peak[peak_idx] / total_at_peak
+    }
 
     # Overlap: average contribution from other peaks
     if (n_peaks > 1) {
@@ -399,7 +403,11 @@ summary.deconv_quality <- function(object, ...) {
     overlap_degree = overlap,
     area = peak_areas,
     height = peak_heights,
-    area_percent = peak_areas / sum(peak_areas) * 100
+    area_percent = if (sum(peak_areas) == 0) {
+      rep(NA_real_, n_peaks)
+    } else {
+      peak_areas / sum(peak_areas) * 100
+    }
   )
 }
 
@@ -499,11 +507,26 @@ summary.deconv_quality <- function(object, ...) {
   n_neg <- sum(signs < 0)
   n <- length(signs)
 
+  if (n_pos == 0 || n_neg == 0 || n < 2) {
+    return(list(
+      n_runs = NA_integer_,
+      expected_runs = NA_real_,
+      z_score = NA_real_,
+      p_value = NA_real_,
+      random = NA
+    ))
+  }
+
   expected_runs <- (2 * n_pos * n_neg) / n + 1
   var_runs <- (2 * n_pos * n_neg * (2 * n_pos * n_neg - n)) / (n^2 * (n - 1))
 
-  z_score <- (n_runs - expected_runs) / sqrt(var_runs)
-  p_value <- 2 * stats::pnorm(-abs(z_score))
+  if (!is.finite(var_runs) || var_runs <= 0) {
+    z_score <- NA_real_
+    p_value <- NA_real_
+  } else {
+    z_score <- (n_runs - expected_runs) / sqrt(var_runs)
+    p_value <- 2 * stats::pnorm(-abs(z_score))
+  }
 
   list(
     n_runs = n_runs,

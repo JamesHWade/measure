@@ -27,3 +27,5 @@ docs
 ^data-raw$
 ^doc$
 ^Meta$
+^AGENTS\.md$
+^\.beads$

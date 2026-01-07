@@ -317,11 +317,18 @@ optimize_deconvolution <- function(
 ) {
   # Flatten parameters
   param_vec <- .flatten_params(models, init_params)
+  bounds <- .compute_bounds(
+    models,
+    init_params,
+    range(x),
+    range(y),
+    constrain_positions = FALSE
+  )
 
   # Define objective function
   objective <- function(params) {
-    # Ensure positive parameters where needed
-    params_list <- .unflatten_params(pmax(params, 1e-10), models)
+    params_clamped <- pmin(pmax(params, bounds$lower), bounds$upper)
+    params_list <- .unflatten_params(params_clamped, models)
     y_pred <- sum_peak_models(x, models, params_list)
     sum((y - y_pred)^2)
   }

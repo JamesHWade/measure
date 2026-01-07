@@ -32,7 +32,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 21500 data points and no incomplete rows.
+      Training data contained 300 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained

@@ -17,7 +17,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -43,7 +43,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -69,7 +69,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -95,7 +95,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -123,7 +123,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -149,7 +149,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -175,7 +175,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -201,7 +201,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -227,7 +227,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -253,7 +253,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -279,7 +279,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -305,7 +305,7 @@
       id:        1
       
       -- Training information 
-      Training data contained 215 data points and no incomplete rows.
+      Training data contained 3 data points and no incomplete rows.
       
       -- Operations 
       * Collate long analytical measurements: transmittance channel | Trained
@@ -340,7 +340,7 @@
 
     Code
       tunable(step_measure_savitzky_golay(step_measure_input_long(update_role(recipe(
-        water + fat + protein ~ ., data = meats_long), id, new_role = "id"),
+        water + fat + protein ~ ., data = meats_small), id, new_role = "id"),
       transmittance, location = vars(channel))))
     Output
       # A tibble: 3 x 5

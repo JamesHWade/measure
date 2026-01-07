@@ -504,9 +504,9 @@ test_that("print.peak_model works", {
   output <- capture.output(print(model))
 
   expect_true(any(grepl("gaussian", output, ignore.case = TRUE)))
-  expect_true(any(grepl("height", output)))
-  expect_true(any(grepl("center", output)))
-  expect_true(any(grepl("width", output)))
+  expect_true(any(grepl("height", output, fixed = TRUE)))
+  expect_true(any(grepl("center", output, fixed = TRUE)))
+  expect_true(any(grepl("width", output, fixed = TRUE)))
 })
 
 # ==============================================================================
