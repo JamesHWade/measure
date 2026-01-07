@@ -14,48 +14,54 @@ navbar:
     articles:
       text: Articles
       menu:
+      - text: Tutorials
       - text: Getting Started
-        href: articles/measure.html
-      - text: '---'
-      - text: Guides
-      - text: Preprocessing Techniques
-        href: articles/preprocessing.html
-      - text: Multi-Dimensional Data
-        href: articles/multidimensional.html
-      - text: Integrating with tidymodels
-        href: articles/recipes.html
-      - text: Data Organization & Diagnostics
-        href: articles/roles-diagnostics.html
-      - text: Analytical Validation
-        href: articles/validation.html
-      - text: '---'
-      - text: Examples
-      - text: Baseline Correction
-        href: articles/baseline.html
+        href: articles/tutorial-getting-started.html
       - text: Bioreactor Case Study
-        href: articles/sec-analysis-example.html
+        href: articles/tutorial-bioreactor.html
       - text: '---'
-      - text: Developer
+      - text: How-To Guides
+      - text: Baseline Correction
+        href: articles/howto-baseline.html
+      - text: Integrating with tidymodels
+        href: articles/howto-tidymodels.html
+      - text: Data Organization & Diagnostics
+        href: articles/howto-data-organization.html
+      - text: '---'
+      - text: Reference
+      - text: Preprocessing Techniques
+        href: articles/reference-preprocessing.html
+      - text: Multi-Dimensional Data
+        href: articles/reference-multidimensional.html
+      - text: Analytical Validation
+        href: articles/reference-validation.html
+      - text: '---'
+      - text: Explanation
       - text: Internal Class System
-        href: articles/internals.html
+        href: articles/explanation-internals.html
 development:
   mode: devel
 articles:
-- title: Getting Started
-  contents: articles/measure
-- title: In-depth Guides
+- title: Tutorials
+  desc: Learning-oriented guides that take you through a complete workflow
   contents:
-  - articles/preprocessing
-  - multidimensional
-  - articles/recipes
-  - articles/roles-diagnostics
-  - validation
-- title: Examples
+  - articles/tutorial-getting-started
+  - articles/tutorial-bioreactor
+- title: How-To Guides
+  desc: Task-oriented guides for solving specific problems
   contents:
-  - articles/baseline
-  - articles/sec-analysis-example
-- title: Developer
-  contents: internals
+  - articles/howto-baseline
+  - articles/howto-tidymodels
+  - articles/howto-data-organization
+- title: Reference
+  desc: Information-oriented technical descriptions
+  contents:
+  - articles/reference-preprocessing
+  - reference-multidimensional
+  - reference-validation
+- title: Explanation
+  desc: Understanding-oriented discussion of concepts and architecture
+  contents: explanation-internals
 reference:
 - title: Input Steps
   desc: Convert raw data to measure's internal format
@@ -416,3 +422,13 @@ reference:
   - starts_with("fortify")
   - plot_measure_comparison
   - measure_plot_summary
+redirects:
+  - ["articles/measure.html", "articles/tutorial-getting-started.html"]
+  - ["articles/sec-analysis-example.html", "articles/tutorial-bioreactor.html"]
+  - ["articles/baseline.html", "articles/howto-baseline.html"]
+  - ["articles/recipes.html", "articles/howto-tidymodels.html"]
+  - ["articles/roles-diagnostics.html", "articles/howto-data-organization.html"]
+  - ["articles/preprocessing.html", "articles/reference-preprocessing.html"]
+  - ["articles/multidimensional.html", "articles/reference-multidimensional.html"]
+  - ["articles/validation.html", "articles/reference-validation.html"]
+  - ["articles/internals.html", "articles/explanation-internals.html"]

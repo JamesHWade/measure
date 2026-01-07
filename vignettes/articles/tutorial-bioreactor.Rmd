@@ -1,5 +1,5 @@
 ---
-title: "Case Study: Bioreactor Glucose Prediction"
+title: "Tutorial: Bioreactor Glucose Prediction"
 ---
 
 ```{r, include = FALSE}
@@ -237,3 +237,9 @@ For real applications, consider:
 - Using PLS or ridge regression for high-dimensional spectral data
 - Tuning preprocessing parameters with cross-validation
 - Validating on truly independent test sets
+
+## See Also
+
+- [Getting Started](tutorial-getting-started.html) - Fundamentals of measure
+- [Integrating with tidymodels](howto-tidymodels.html) - Advanced modeling workflows with tuning
+- [Preprocessing Reference](reference-preprocessing.html) - Complete guide to preprocessing techniques

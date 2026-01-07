@@ -1,5 +1,5 @@
 ---
-title: "Data Organization and Diagnostic Plots"
+title: "How-To: Data Organization and Diagnostics"
 ---
 
 ```{r, include = FALSE}
@@ -326,6 +326,6 @@ measure_plot_summary(baked, show_range = TRUE)
 
 ## Next Steps
 
-- See `vignette("preprocessing")` for details on all preprocessing steps
-- See `vignette("recipes")` for integration with tidymodels workflows
+- See the [Preprocessing Reference](reference-preprocessing.html) for details on all preprocessing steps
+- See [Integrating with tidymodels](howto-tidymodels.html) for integration with tidymodels workflows
 - Explore hyperparameter tuning for preprocessing steps with `tune`

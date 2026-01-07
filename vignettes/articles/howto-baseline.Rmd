@@ -1,5 +1,5 @@
 ---
-title: "Baseline Correction"
+title: "How-To: Baseline Correction"
 ---
 
 ```{r, include = FALSE}
@@ -378,3 +378,9 @@ final_data[1:5, 1:8]
 - **Custom functions** (`step_measure_baseline_custom()`) provide maximum flexibility
 - **pybaselines** (`step_measure_baseline_py()`) offers 50+ advanced algorithms when R options aren't sufficient
 - Combine baseline correction with normalization (SNV/MSC) for best results
+
+## See Also
+
+- [Getting Started](tutorial-getting-started.html) - Learn the fundamentals of measure
+- [Preprocessing Reference](reference-preprocessing.html) - Complete guide to all preprocessing techniques
+- [Integrating with tidymodels](howto-tidymodels.html) - Use baseline correction in modeling workflows
