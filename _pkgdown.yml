@@ -1,6 +1,24 @@
 url: https://jameshwade.github.io/measure/
 template:
   bootstrap: 5
+  bslib:
+    primary: "#4A90A4"
+    secondary: "#6BA5B8"
+    success: "#28A745"
+    info: "#17A2B8"
+    warning: "#FF9933"
+    danger: "#DC3545"
+    base_font: {google: "Open Sans"}
+    heading_font: {google: "Montserrat"}
+    code_font: {google: "Fira Code"}
+    bg: "#FFFFFF"
+    fg: "#212529"
+  theme: arrow-light
+  light-switch: true
+
+logo:
+  src: man/figures/logo.png
+  alt: "measure hex logo"
 navbar:
   structure:
     left:
