@@ -43,7 +43,7 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-01-11 17:51:43.520074
+#> Generated: 2026-01-11 17:57:35.226465
 #> R version: 4.5.2
 #> measure version: 0.0.1.9002
 #> 

@@ -76,7 +76,6 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 ``` r
 # Prep learns any parameters from training data
 prepped <- prep(rec)
-#> Dropping 1 list column for wide output: channel
 
 # Bake applies the transformations
 processed <- bake(prepped, new_data = NULL)
