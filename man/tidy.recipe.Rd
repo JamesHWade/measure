@@ -177,11 +177,7 @@
 
 \method{tidy}{step_measure_baseline_gpc}(x, ...)
 
-\method{tidy}{step_measure_baseline_tophat}(x, ...)
-
 \method{tidy}{step_measure_baseline_morphological}(x, ...)
-
-\method{tidy}{step_measure_baseline_minima}(x, ...)
 
 \method{tidy}{step_measure_baseline_aspls}(x, ...)
 
