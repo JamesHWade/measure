@@ -464,10 +464,6 @@ prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
   # First stage: coarse baseline with smaller lambda
   baseline_coarse <- .arpls_simple(y, lambda_1, max_iter = 5)
 
-  # Calculate initial weights based on coarse baseline
-  residuals <- y - baseline_coarse
-  neg_mask <- residuals < 0
-
   # Initialize refined baseline
   baseline <- baseline_coarse
 
@@ -478,8 +474,9 @@ prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
   for (iter in seq_len(max_iter)) {
     baseline_old <- baseline
 
-    # Update residuals
+    # Update residuals and mask
     residuals <- y - baseline
+    neg_mask <- residuals < 0
 
     # Improved weight function
     mad_val <- stats::mad(residuals[neg_mask], na.rm = TRUE)
