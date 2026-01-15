@@ -487,7 +487,9 @@ prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
     if (is.na(mad_val) || mad_val == 0) {
       mad_val <- stats::mad(residuals, na.rm = TRUE)
     }
-    if (mad_val == 0) mad_val <- 1
+    if (mad_val == 0) {
+      mad_val <- 1
+    }
 
     w <- rep(1, n)
     w[neg_mask] <- exp(-abs(residuals[neg_mask]) / mad_val)
