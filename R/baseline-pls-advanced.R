@@ -685,7 +685,12 @@ step_measure_baseline_fastchrom_new <- function(
 }
 
 #' @export
-prep.step_measure_baseline_fastchrom <- function(x, training, info = NULL, ...) {
+prep.step_measure_baseline_fastchrom <- function(
+  x,
+  training,
+  info = NULL,
+  ...
+) {
   check_for_measure(training)
 
   if (is.null(x$measures)) {
