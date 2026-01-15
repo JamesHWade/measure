@@ -727,7 +727,9 @@ prep.step_measure_baseline_fastchrom <- function(
 
   # Smooth local minima for initial baseline
   smooth_win <- min(21, n %/% 5)
-  if (smooth_win %% 2 == 0) smooth_win <- smooth_win + 1
+  if (smooth_win %% 2 == 0) {
+    smooth_win <- smooth_win + 1
+  }
   half_smooth <- smooth_win %/% 2
 
   baseline <- numeric(n)
