@@ -194,8 +194,12 @@ prep.step_measure_baseline_aspls <- function(x, training, info = NULL, ...) {
 
     # Update weights based on residuals
     mad_val <- stats::mad(residuals, na.rm = TRUE)
-    if (mad_val == 0) mad_val <- stats::sd(residuals, na.rm = TRUE)
-    if (mad_val == 0) mad_val <- 1
+    if (mad_val == 0) {
+      mad_val <- stats::sd(residuals, na.rm = TRUE)
+    }
+    if (mad_val == 0) {
+      mad_val <- 1
+    }
 
     w <- ifelse(
       residuals > 0,
