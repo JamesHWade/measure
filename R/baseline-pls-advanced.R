@@ -19,8 +19,11 @@
 #' @param recipe A recipe object.
 #' @param measures An optional character vector of measure column names.
 #' @param lambda Base smoothness parameter. Default is 1e6.
-#' @param alpha Adaptive weight parameter controlling smoothness adaptation.
-#'   Default is 0.5.
+#' @param alpha Adaptive weight parameter controlling smoothness adaptation
+#'   (0 = no adaptation, 1 = maximum adaptation). Higher values cause regions
+#'   with larger residuals to receive higher smoothness penalties. Note that
+#'   adaptation is applied globally via an averaged lambda. Default is 0.5.
+#'   Tunable via [baseline_alpha()].
 #' @param max_iter Maximum number of iterations. Default is 50.
 #' @param tol Convergence tolerance. Default is 1e-5.
 #' @param role Not used.
@@ -31,9 +34,10 @@
 #' @return An updated recipe with the new step added.
 #'
 #' @details
-#' aspls adapts the smoothness parameter locally based on the signal properties.
-#' Regions with larger residuals (peaks) get higher smoothness, allowing the
-#' baseline to remain flat under peaks while following gradual changes elsewhere.
+#' aspls adapts the smoothness parameter based on the signal properties.
+#' The algorithm computes a local smoothness weight based on residual magnitude,
+#' then uses the global average as the effective lambda. This provides some
+#' adaptation to peak intensity while maintaining computational efficiency.
 #'
 #' This method is particularly effective for:
 #' - Signals with varying peak widths
@@ -67,13 +71,6 @@ step_measure_baseline_aspls <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_baseline_aspls")
 ) {
-  if (!is.numeric(lambda) || lambda <= 0) {
-    cli::cli_abort("{.arg lambda} must be a positive number.")
-  }
-  if (!is.numeric(alpha) || alpha < 0 || alpha > 1) {
-    cli::cli_abort("{.arg alpha} must be between 0 and 1.")
-  }
-
   recipes::add_step(
     recipe,
     step_measure_baseline_aspls_new(
@@ -118,6 +115,30 @@ step_measure_baseline_aspls_new <- function(
 #' @export
 prep.step_measure_baseline_aspls <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
+
+  # Validate parameters
+  if (!is.numeric(x$lambda) || length(x$lambda) != 1 || x$lambda <= 0) {
+    cli::cli_abort(
+      "{.arg lambda} must be a single positive number, not {.val {x$lambda}}."
+    )
+  }
+  if (
+    !is.numeric(x$alpha) || length(x$alpha) != 1 || x$alpha < 0 || x$alpha > 1
+  ) {
+    cli::cli_abort(
+      "{.arg alpha} must be a single number between 0 and 1, not {.val {x$alpha}}."
+    )
+  }
+  if (!is.numeric(x$max_iter) || length(x$max_iter) != 1 || x$max_iter < 1) {
+    cli::cli_abort(
+      "{.arg max_iter} must be a positive integer, not {.val {x$max_iter}}."
+    )
+  }
+  if (!is.numeric(x$tol) || length(x$tol) != 1 || x$tol <= 0) {
+    cli::cli_abort(
+      "{.arg tol} must be a single positive number, not {.val {x$tol}}."
+    )
+  }
 
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
@@ -170,6 +191,20 @@ prep.step_measure_baseline_aspls <- function(x, training, info = NULL, ...) {
 .aspls_baseline <- function(y, lambda, alpha, max_iter, tol) {
   n <- length(y)
 
+  # Validate input
+  if (n < 3) {
+    cli::cli_warn("Input vector has fewer than 3 points, returning original.")
+    return(y)
+  }
+  if (anyNA(y)) {
+    cli::cli_warn(
+      "Input contains {sum(is.na(y))} NA value{?s}. NA values will propagate."
+    )
+  }
+  if (any(!is.finite(y) & !is.na(y))) {
+    cli::cli_abort("Input contains Inf/-Inf values. Cannot compute baseline.")
+  }
+
   # Create difference matrix
   D <- .create_diff_matrix(n, d = 2)
   DTD <- crossprod(D)
@@ -177,6 +212,7 @@ prep.step_measure_baseline_aspls <- function(x, training, info = NULL, ...) {
   # Initialize
   baseline <- y
   w <- rep(1, n)
+  converged <- FALSE
 
   for (iter in seq_len(max_iter)) {
     baseline_old <- baseline
@@ -216,15 +252,35 @@ prep.step_measure_baseline_aspls <- function(x, training, info = NULL, ...) {
 
     baseline <- tryCatch(
       as.vector(solve(system_matrix, w * y)),
-      error = function(e) baseline_old
+      error = function(e) {
+        cli::cli_warn(c(
+          "Matrix solve failed in aspls iteration {iter}.",
+          "i" = "Using previous iteration baseline as fallback.",
+          "x" = "Error: {conditionMessage(e)}"
+        ))
+        baseline_old
+      }
     )
 
     # Check convergence
     if (!anyNA(baseline) && !anyNA(baseline_old)) {
       if (max(abs(baseline - baseline_old)) < tol) {
+        converged <- TRUE
         break
       }
     }
+  }
+
+  if (!converged) {
+    final_change <- if (!anyNA(baseline) && !anyNA(baseline_old)) {
+      max(abs(baseline - baseline_old))
+    } else {
+      NA
+    }
+    cli::cli_warn(c(
+      "aspls did not converge after {max_iter} iterations.",
+      "i" = "Final change: {format(final_change, digits = 3)} (tol: {tol})"
+    ))
   }
 
   baseline
@@ -292,7 +348,7 @@ tunable.step_measure_baseline_aspls <- function(x, ...) {
     name = c("lambda", "alpha"),
     call_info = list(
       list(pkg = "measure", fun = "baseline_lambda"),
-      list(pkg = "dials", fun = "new_quant_param", range = c(0, 1))
+      list(pkg = "measure", fun = "baseline_alpha")
     ),
     source = "recipe",
     component = "step_measure_baseline_aspls",
@@ -358,13 +414,6 @@ step_measure_baseline_iarpls <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_baseline_iarpls")
 ) {
-  if (!is.numeric(lambda) || lambda <= 0) {
-    cli::cli_abort("{.arg lambda} must be a positive number.")
-  }
-  if (!is.numeric(lambda_1) || lambda_1 <= 0) {
-    cli::cli_abort("{.arg lambda_1} must be a positive number.")
-  }
-
   recipes::add_step(
     recipe,
     step_measure_baseline_iarpls_new(
@@ -410,6 +459,28 @@ step_measure_baseline_iarpls_new <- function(
 prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
+  # Validate parameters
+  if (!is.numeric(x$lambda) || length(x$lambda) != 1 || x$lambda <= 0) {
+    cli::cli_abort(
+      "{.arg lambda} must be a single positive number, not {.val {x$lambda}}."
+    )
+  }
+  if (!is.numeric(x$lambda_1) || length(x$lambda_1) != 1 || x$lambda_1 <= 0) {
+    cli::cli_abort(
+      "{.arg lambda_1} must be a single positive number, not {.val {x$lambda_1}}."
+    )
+  }
+  if (!is.numeric(x$max_iter) || length(x$max_iter) != 1 || x$max_iter < 1) {
+    cli::cli_abort(
+      "{.arg max_iter} must be a positive integer, not {.val {x$max_iter}}."
+    )
+  }
+  if (!is.numeric(x$tol) || length(x$tol) != 1 || x$tol <= 0) {
+    cli::cli_abort(
+      "{.arg tol} must be a single positive number, not {.val {x$tol}}."
+    )
+  }
+
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
   } else {
@@ -420,7 +491,7 @@ prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
     measures = measure_cols,
     lambda = x$lambda,
     lambda_1 = x$lambda_1,
-    max_iter = x$max_iter,
+    max_iter = as.integer(x$max_iter),
     tol = x$tol,
     role = x$role,
     trained = TRUE,
@@ -444,16 +515,21 @@ prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
     system_matrix <- W + lambda * DTD
     diag(system_matrix) <- diag(system_matrix) + 1e-6
 
+    baseline_old <- baseline
     baseline <- tryCatch(
       as.vector(solve(system_matrix, w * y)),
-      error = function(e) baseline
+      error = function(e) {
+        cli::cli_warn(c(
+          "Matrix solve failed in arpls_simple iteration {iter}.",
+          "i" = "Using previous iteration baseline as fallback.",
+          "x" = "Error: {conditionMessage(e)}"
+        ))
+        baseline_old
+      }
     )
 
+    # Update weights for next iteration
     residuals <- y - baseline
-    mad_val <- stats::mad(residuals, na.rm = TRUE)
-    if (mad_val == 0) mad_val <- 1
-
-    # arPLS weight update
     w <- ifelse(residuals > 0, 0.001, 1)
   }
 
@@ -465,11 +541,26 @@ prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
 .iarpls_baseline <- function(y, lambda, lambda_1, max_iter, tol) {
   n <- length(y)
 
+  # Validate input
+  if (n < 3) {
+    cli::cli_warn("Input vector has fewer than 3 points, returning original.")
+    return(y)
+  }
+  if (anyNA(y)) {
+    cli::cli_warn(
+      "Input contains {sum(is.na(y))} NA value{?s}. NA values will propagate."
+    )
+  }
+  if (any(!is.finite(y) & !is.na(y))) {
+    cli::cli_abort("Input contains Inf/-Inf values. Cannot compute baseline.")
+  }
+
   # First stage: coarse baseline with smaller lambda
   baseline_coarse <- .arpls_simple(y, lambda_1, max_iter = 5)
 
   # Initialize refined baseline
   baseline <- baseline_coarse
+  converged <- FALSE
 
   # Create difference matrix
   D <- .create_diff_matrix(n, d = 2)
@@ -505,15 +596,35 @@ prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
 
     baseline <- tryCatch(
       as.vector(solve(system_matrix, w * y)),
-      error = function(e) baseline_old
+      error = function(e) {
+        cli::cli_warn(c(
+          "Matrix solve failed in iarpls iteration {iter}.",
+          "i" = "Using previous iteration baseline as fallback.",
+          "x" = "Error: {conditionMessage(e)}"
+        ))
+        baseline_old
+      }
     )
 
     # Check convergence
     if (!anyNA(baseline) && !anyNA(baseline_old)) {
       if (max(abs(baseline - baseline_old)) < tol) {
+        converged <- TRUE
         break
       }
     }
+  }
+
+  if (!converged) {
+    final_change <- if (!anyNA(baseline) && !anyNA(baseline_old)) {
+      max(abs(baseline - baseline_old))
+    } else {
+      NA
+    }
+    cli::cli_warn(c(
+      "iarpls did not converge after {max_iter} iterations.",
+      "i" = "Final change: {format(final_change, digits = 3)} (tol: {tol})"
+    ))
   }
 
   baseline
@@ -645,13 +756,6 @@ step_measure_baseline_fastchrom <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_baseline_fastchrom")
 ) {
-  if (!is.numeric(lambda) || lambda <= 0) {
-    cli::cli_abort("{.arg lambda} must be a positive number.")
-  }
-  if (!is.numeric(window) || window < 3) {
-    cli::cli_abort("{.arg window} must be >= 3.")
-  }
-
   recipes::add_step(
     recipe,
     step_measure_baseline_fastchrom_new(
@@ -699,6 +803,23 @@ prep.step_measure_baseline_fastchrom <- function(
 ) {
   check_for_measure(training)
 
+  # Validate parameters
+  if (!is.numeric(x$lambda) || length(x$lambda) != 1 || x$lambda <= 0) {
+    cli::cli_abort(
+      "{.arg lambda} must be a single positive number, not {.val {x$lambda}}."
+    )
+  }
+  if (!is.numeric(x$window) || length(x$window) != 1 || x$window < 3) {
+    cli::cli_abort(
+      "{.arg window} must be a single integer >= 3, not {.val {x$window}}."
+    )
+  }
+  if (!is.numeric(x$max_iter) || length(x$max_iter) != 1 || x$max_iter < 1) {
+    cli::cli_abort(
+      "{.arg max_iter} must be a positive integer, not {.val {x$max_iter}}."
+    )
+  }
+
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
   } else {
@@ -708,8 +829,8 @@ prep.step_measure_baseline_fastchrom <- function(
   step_measure_baseline_fastchrom_new(
     measures = measure_cols,
     lambda = x$lambda,
-    window = x$window,
-    max_iter = x$max_iter,
+    window = as.integer(x$window),
+    max_iter = as.integer(x$max_iter),
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -721,6 +842,21 @@ prep.step_measure_baseline_fastchrom <- function(
 #' @noRd
 .fastchrom_baseline <- function(y, lambda, window, max_iter) {
   n <- length(y)
+
+  # Validate input
+  if (n < 3) {
+    cli::cli_warn("Input vector has fewer than 3 points, returning original.")
+    return(y)
+  }
+  if (anyNA(y)) {
+    cli::cli_warn(
+      "Input contains {sum(is.na(y))} NA value{?s}. NA values will propagate."
+    )
+  }
+  if (any(!is.finite(y) & !is.na(y))) {
+    cli::cli_abort("Input contains Inf/-Inf values. Cannot compute baseline.")
+  }
+
   half_window <- window %/% 2
 
   # Step 1: Find local minima using rolling minimum
@@ -750,6 +886,7 @@ prep.step_measure_baseline_fastchrom <- function(
   DTD <- crossprod(D)
 
   for (iter in seq_len(max_iter)) {
+    baseline_old <- baseline
     residuals <- y - baseline
 
     # Weight points based on whether they're below baseline
@@ -771,12 +908,19 @@ prep.step_measure_baseline_fastchrom <- function(
 
     # Add regularization if needed
     if (rcond(C) < 1e-10) {
-      diag(C) <- diag(C) + 1e-9
+      diag(C) <- diag(C) + 1e-6
     }
 
     baseline <- tryCatch(
       as.vector(solve(C, w * y)),
-      error = function(e) baseline
+      error = function(e) {
+        cli::cli_warn(c(
+          "Matrix solve failed in fastchrom iteration {iter}.",
+          "i" = "Using previous iteration baseline as fallback.",
+          "x" = "Error: {conditionMessage(e)}"
+        ))
+        baseline_old
+      }
     )
   }
 
@@ -844,7 +988,7 @@ tunable.step_measure_baseline_fastchrom <- function(x, ...) {
     name = c("lambda", "window"),
     call_info = list(
       list(pkg = "measure", fun = "baseline_lambda"),
-      list(pkg = "dials", fun = "new_quant_param", range = c(10, 200))
+      list(pkg = "measure", fun = "baseline_window")
     ),
     source = "recipe",
     component = "step_measure_baseline_fastchrom",

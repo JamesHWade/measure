@@ -62,13 +62,6 @@ step_measure_baseline_morphological <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_baseline_morphological")
 ) {
-  if (!is.numeric(window_size) || window_size < 3) {
-    cli::cli_abort("{.arg window_size} must be a number >= 3.")
-  }
-  if (!is.numeric(iterations) || iterations < 1) {
-    cli::cli_abort("{.arg iterations} must be a positive integer.")
-  }
-
   recipes::add_step(
     recipe,
     step_measure_baseline_morphological_new(
@@ -113,6 +106,24 @@ prep.step_measure_baseline_morphological <- function(
 ) {
   check_for_measure(training)
 
+  # Validate parameters
+  if (
+    !is.numeric(x$window_size) ||
+      length(x$window_size) != 1 ||
+      x$window_size < 3
+  ) {
+    cli::cli_abort(
+      "{.arg window_size} must be a single integer >= 3, not {.val {x$window_size}}."
+    )
+  }
+  if (
+    !is.numeric(x$iterations) || length(x$iterations) != 1 || x$iterations < 1
+  ) {
+    cli::cli_abort(
+      "{.arg iterations} must be a positive integer, not {.val {x$iterations}}."
+    )
+  }
+
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
   } else {
@@ -121,8 +132,8 @@ prep.step_measure_baseline_morphological <- function(
 
   step_measure_baseline_morphological_new(
     measures = measure_cols,
-    window_size = x$window_size,
-    iterations = x$iterations,
+    window_size = as.integer(x$window_size),
+    iterations = as.integer(x$iterations),
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -134,10 +145,25 @@ prep.step_measure_baseline_morphological <- function(
 #' @noRd
 .morphological_baseline <- function(y, window_size, iterations) {
   n <- length(y)
+
+  # Validate input
+  if (n < 3) {
+    cli::cli_warn("Input vector has fewer than 3 points, returning original.")
+    return(y)
+  }
+  if (anyNA(y)) {
+    cli::cli_warn(
+      "Input contains {sum(is.na(y))} NA value{?s}. NA values will propagate."
+    )
+  }
+  if (any(!is.finite(y) & !is.na(y))) {
+    cli::cli_abort("Input contains Inf/-Inf values. Cannot compute baseline.")
+  }
+
   baseline <- y
   half_window <- window_size %/% 2
 
-  # Multiple erosion iterations
+  # Multiple erosion iterations (local minimum)
   for (iter in seq_len(iterations)) {
     eroded <- numeric(n)
     for (i in seq_len(n)) {
@@ -148,7 +174,7 @@ prep.step_measure_baseline_morphological <- function(
     baseline <- eroded
   }
 
-  # Single dilation to smooth
+  # Dilation (local maximum) to recover baseline level after erosion
   dilated <- numeric(n)
   for (i in seq_len(n)) {
     start <- max(1, i - half_window)

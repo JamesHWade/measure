@@ -24,8 +24,11 @@ step_measure_baseline_aspls(
 
 \item{lambda}{Base smoothness parameter. Default is 1e6.}
 
-\item{alpha}{Adaptive weight parameter controlling smoothness adaptation.
-Default is 0.5.}
+\item{alpha}{Adaptive weight parameter controlling smoothness adaptation
+(0 = no adaptation, 1 = maximum adaptation). Higher values cause regions
+with larger residuals to receive higher smoothness penalties. Note that
+adaptation is applied globally via an averaged lambda. Default is 0.5.
+Tunable via \code{\link[=baseline_alpha]{baseline_alpha()}}.}
 
 \item{max_iter}{Maximum number of iterations. Default is 50.}
 
@@ -47,9 +50,10 @@ An updated recipe with the new step added.
 that applies Adaptive Smoothness Penalized Least Squares baseline correction.
 }
 \details{
-aspls adapts the smoothness parameter locally based on the signal properties.
-Regions with larger residuals (peaks) get higher smoothness, allowing the
-baseline to remain flat under peaks while following gradual changes elsewhere.
+aspls adapts the smoothness parameter based on the signal properties.
+The algorithm computes a local smoothness weight based on residual magnitude,
+then uses the global average as the effective lambda. This provides some
+adaptation to peak intensity while maintaining computational efficiency.
 
 This method is particularly effective for:
 \itemize{
