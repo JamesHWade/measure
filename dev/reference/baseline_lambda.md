@@ -17,6 +17,10 @@ baseline_degree(range = c(1L, 6L), trans = NULL)
 baseline_half_window(range = c(5L, 100L), trans = NULL)
 
 baseline_span(range = c(0.1, 0.9), trans = NULL)
+
+baseline_alpha(range = c(0, 1), trans = NULL)
+
+baseline_window(range = c(10L, 200L), trans = NULL)
 ```
 
 ## Arguments

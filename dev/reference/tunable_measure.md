@@ -20,6 +20,15 @@ tunable(x, ...)
 # S3 method for class 'step_measure_baseline_arpls'
 tunable(x, ...)
 
+# S3 method for class 'step_measure_baseline_aspls'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_baseline_iarpls'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_baseline_fastchrom'
+tunable(x, ...)
+
 # S3 method for class 'step_measure_baseline_py'
 tunable(x, ...)
 

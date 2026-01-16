@@ -282,6 +282,8 @@ Parameters for hyperparameter tuning with dials
   [`baseline_degree()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
   [`baseline_half_window()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
   [`baseline_span()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
+  [`baseline_alpha()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
+  [`baseline_window()`](https://jameshwade.github.io/measure/dev/reference/baseline_lambda.md)
   : Parameters for baseline correction steps
 - [`peak_location_min()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
   [`peak_location_max()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
@@ -335,16 +337,24 @@ Baseline correction steps and utilities
 - [`step_measure_baseline_arpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_arpls.md)
   : Asymmetrically Reweighted Penalized Least Squares Baseline
   Correction
+- [`step_measure_baseline_aspls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_aspls.md)
+  : Adaptive Smoothness Penalized Least Squares Baseline
 - [`step_measure_baseline_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_auto.md)
   : Automatic Baseline Correction Method Selection
 - [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md)
   : Custom Baseline Correction with User-Provided Function
+- [`step_measure_baseline_fastchrom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_fastchrom.md)
+  : Fast Chromatography Baseline Correction
 - [`step_measure_baseline_gpc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.md)
   **\[superseded\]** : GPC/SEC Baseline Correction
+- [`step_measure_baseline_iarpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_iarpls.md)
+  : Improved arPLS Baseline Correction (Two-Stage)
 - [`step_measure_baseline_minima()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_minima.md)
   : Local Minima Interpolation Baseline Correction
 - [`step_measure_baseline_morph()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morph.md)
   : Iterative Morphological Baseline Correction
+- [`step_measure_baseline_morphological()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morphological.md)
+  : Morphological Baseline Correction (Erosion/Dilation)
 - [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)
   : Polynomial Baseline Correction
 - [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md)

@@ -71,6 +71,18 @@ tidy(x, ...)
 # S3 method for class 'step_measure_baseline_gpc'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_baseline_morphological'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_aspls'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_iarpls'
+tidy(x, ...)
+
+# S3 method for class 'step_measure_baseline_fastchrom'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_baseline_poly'
 tidy(x, ...)
 

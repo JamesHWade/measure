@@ -201,7 +201,7 @@ train_preds |>
 #> # A tibble: 1 × 2
 #>       rmse r_squared
 #>      <dbl>     <dbl>
-#> 1 1.76e-12         1
+#> 1 8.23e-13         1
 ```
 
 ## Applying to new data
