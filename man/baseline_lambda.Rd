@@ -6,6 +6,8 @@
 \alias{baseline_degree}
 \alias{baseline_half_window}
 \alias{baseline_span}
+\alias{baseline_alpha}
+\alias{baseline_window}
 \title{Parameters for baseline correction steps}
 \usage{
 baseline_lambda(range = c(2, 9), trans = scales::transform_log10())
@@ -17,6 +19,10 @@ baseline_degree(range = c(1L, 6L), trans = NULL)
 baseline_half_window(range = c(5L, 100L), trans = NULL)
 
 baseline_span(range = c(0.1, 0.9), trans = NULL)
+
+baseline_alpha(range = c(0, 1), trans = NULL)
+
+baseline_window(range = c(10L, 200L), trans = NULL)
 }
 \arguments{
 \item{range}{A two-element vector holding the \emph{defaults} for the smallest and

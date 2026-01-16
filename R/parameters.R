@@ -126,6 +126,32 @@ baseline_span <- function(range = c(0.1, 0.9), trans = NULL) {
   )
 }
 
+#' @rdname baseline_lambda
+#' @export
+baseline_alpha <- function(range = c(0, 1), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(baseline_alpha = "Adaptive Smoothness Weight"),
+    finalize = NULL
+  )
+}
+
+#' @rdname baseline_lambda
+#' @export
+baseline_window <- function(range = c(10L, 200L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(baseline_window = "Baseline Window Size"),
+    finalize = NULL
+  )
+}
+
 #' Parameters for peak normalization
 #'
 #' `peak_location_min()` and `peak_location_max()` define the bounds for
