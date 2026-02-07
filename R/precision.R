@@ -418,9 +418,9 @@ measure_gage_rr <- function(
   raw_part <- (ms_part - ms_interaction) / (n_operators * n_replicates)
 
   clipped <- c(
-    if (raw_interaction < 0) "interaction",
-    if (raw_operator < 0) "operator",
-    if (raw_part < 0) "part"
+    if (isTRUE(raw_interaction < 0)) "interaction",
+    if (isTRUE(raw_operator < 0)) "operator",
+    if (isTRUE(raw_part < 0)) "part"
   )
   if (length(clipped) > 0) {
     cli::cli_warn(
@@ -428,9 +428,9 @@ measure_gage_rr <- function(
     )
   }
 
-  var_interaction <- max(0, raw_interaction)
-  var_operator <- max(0, raw_operator)
-  var_part <- max(0, raw_part)
+  var_interaction <- max(0, raw_interaction, na.rm = TRUE)
+  var_operator <- max(0, raw_operator, na.rm = TRUE)
+  var_part <- max(0, raw_part, na.rm = TRUE)
 
   # Combine components
   var_reproducibility <- var_operator + var_interaction
