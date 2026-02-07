@@ -97,7 +97,7 @@ measure_lod <- function(
       response_col,
       conc_col,
       calibration,
-      k = 3.3
+      k = k
     ),
     sn = .lod_signal_noise(
       data,
@@ -197,7 +197,7 @@ measure_loq <- function(
       response_col,
       conc_col,
       calibration,
-      k = 10
+      k = k
     ),
     sn = .lod_signal_noise(
       data,
