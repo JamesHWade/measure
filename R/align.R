@@ -1171,9 +1171,6 @@ tunable.step_measure_align_cow <- function(x, ...) {
     for (w in warp_options) {
       # Try all previous states
       for (prev_w in warp_options) {
-        prev_total <- (seg - 2) * 0 # Not tracking cumulative directly
-        # This approach: track segment-by-segment, each warp is local
-
         prev_state <- state_idx(prev_w)
         if (cost[seg - 1, prev_state] == Inf) {
           next

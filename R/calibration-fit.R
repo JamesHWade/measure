@@ -537,28 +537,34 @@ measure_calibration_predict <- function(
   interval_type,
   level
 ) {
-  # Simplified interval calculation using delta method approximation
-  # For rigorous intervals, would need to implement Fieller's theorem
-
   fit <- object$model
   sigma <- summary(fit)$sigma
   n <- nrow(object$data)
-
-  # Get slope for delta method
-  coefs <- stats::coef(fit)
-  slope <- coefs[object$conc_col]
-
-  # Standard error of inverse prediction (approximate)
-  se_pred <- sigma / abs(slope)
-
-  # Additional uncertainty for prediction intervals
-  if (interval_type == "prediction") {
-    se_pred <- se_pred * sqrt(1 + 1 / n)
-  }
-
-  # Critical value
   df <- summary(fit)$df[2]
   t_crit <- stats::qt((1 + level) / 2, df)
+
+  if (object$model_type == "linear") {
+    # Classical inverse prediction intervals (ISO 11843 / Draper & Smith)
+    # Confidence: SE = (sigma/|b|) * sqrt(1/n + (x0 - xbar)^2 / Sxx)
+    # Prediction: SE = (sigma/|b|) * sqrt(1 + 1/n + (x0 - xbar)^2 / Sxx)
+    coefs <- stats::coef(fit)
+    slope <- coefs[object$conc_col]
+    cal_conc <- object$data[[object$conc_col]]
+    x_bar <- mean(cal_conc)
+    sxx <- sum((cal_conc - x_bar)^2)
+
+    extra <- if (interval_type == "prediction") 1 else 0
+    se_pred <- (sigma / abs(slope)) *
+      sqrt(extra + 1 / n + (pred_conc - x_bar)^2 / sxx)
+  } else {
+    # Quadratic models: use delta method approximation
+    coefs <- stats::coef(fit)
+    slope <- coefs[object$conc_col]
+    se_pred <- sigma / abs(slope)
+    if (interval_type == "prediction") {
+      se_pred <- se_pred * sqrt(1 + 1 / n)
+    }
+  }
 
   list(
     lower = pred_conc - t_crit * se_pred,

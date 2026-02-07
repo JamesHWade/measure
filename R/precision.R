@@ -409,13 +409,28 @@ measure_gage_rr <- function(
   ms_error <- anova_table["Residuals", "Mean Sq"]
 
   # Calculate variance components (EMS method)
+  # Negative estimates are set to zero (standard practice for ANOVA-based
+
+  # variance components), but we warn since this can indicate poor model fit
   var_repeatability <- ms_error
-  var_interaction <- max(0, (ms_interaction - ms_error) / n_replicates)
-  var_operator <- max(
-    0,
-    (ms_operator - ms_interaction) / (n_parts * n_replicates)
+  raw_interaction <- (ms_interaction - ms_error) / n_replicates
+  raw_operator <- (ms_operator - ms_interaction) / (n_parts * n_replicates)
+  raw_part <- (ms_part - ms_interaction) / (n_operators * n_replicates)
+
+  clipped <- c(
+    if (raw_interaction < 0) "interaction",
+    if (raw_operator < 0) "operator",
+    if (raw_part < 0) "part"
   )
-  var_part <- max(0, (ms_part - ms_interaction) / (n_operators * n_replicates))
+  if (length(clipped) > 0) {
+    cli::cli_warn(
+      "Negative variance component{?s} set to zero for {.val {clipped}}. This may indicate insufficient variation or poor model fit."
+    )
+  }
+
+  var_interaction <- max(0, raw_interaction)
+  var_operator <- max(0, raw_operator)
+  var_part <- max(0, raw_part)
 
   # Combine components
   var_reproducibility <- var_operator + var_interaction
