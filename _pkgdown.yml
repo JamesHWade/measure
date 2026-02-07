@@ -75,8 +75,8 @@ articles:
   desc: Information-oriented technical descriptions
   contents:
   - articles/reference-preprocessing
-  - articles/reference-multidimensional
-  - articles/reference-validation
+  - reference-multidimensional
+  - reference-validation
 - title: Explanation
   desc: Understanding-oriented discussion of concepts and architecture
   contents: explanation-internals

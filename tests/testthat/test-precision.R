@@ -216,12 +216,12 @@ test_that("measure_gage_rr calculates variance components", {
     ifelse(data$operator == "A", 0.5, ifelse(data$operator == "B", -0.3, 0)) +
     rnorm(nrow(data), 0, 0.5)
 
-  result <- measure_gage_rr(
+  result <- suppressWarnings(measure_gage_rr(
     data,
     response_col = "measurement",
     part_col = "part",
     operator_col = "operator"
-  )
+  ))
 
   expect_s3_class(result, "measure_gage_rr")
   expect_equal(nrow(result), 4)
@@ -240,12 +240,12 @@ test_that("measure_gage_rr calculates percentages correctly", {
   )
   data$measurement <- rnorm(nrow(data), 100, 2)
 
-  result <- measure_gage_rr(
+  result <- suppressWarnings(measure_gage_rr(
     data,
     response_col = "measurement",
     part_col = "part",
     operator_col = "operator"
-  )
+  ))
 
   # Percentages should sum appropriately
   expect_true(all(result$pct_contribution >= 0))
@@ -261,13 +261,13 @@ test_that("measure_gage_rr calculates tolerance percentage when provided", {
   )
   data$measurement <- 50 + (data$part - 3) * 5 + rnorm(nrow(data), 0, 1)
 
-  result <- measure_gage_rr(
+  result <- suppressWarnings(measure_gage_rr(
     data,
     response_col = "measurement",
     part_col = "part",
     operator_col = "operator",
     tolerance = 20
-  )
+  ))
 
   expect_false(anyNA(result$pct_tolerance))
   expect_true(all(result$pct_tolerance >= 0))
@@ -282,12 +282,12 @@ test_that("measure_gage_rr stores metadata", {
   )
   data$measurement <- rnorm(nrow(data))
 
-  result <- measure_gage_rr(
+  result <- suppressWarnings(measure_gage_rr(
     data,
     response_col = "measurement",
     part_col = "part",
     operator_col = "operator"
-  )
+  ))
 
   expect_equal(attr(result, "n_parts"), 10)
   expect_equal(attr(result, "n_operators"), 3)
@@ -318,13 +318,13 @@ test_that("measure_gage_rr print method works", {
   )
   data$measurement <- rnorm(nrow(data), 50, 2)
 
-  result <- measure_gage_rr(
+  result <- suppressWarnings(measure_gage_rr(
     data,
     response_col = "measurement",
     part_col = "part",
     operator_col = "operator",
     tolerance = 20
-  )
+  ))
 
   expect_output(print(result), "measure_gage_rr")
   expect_output(print(result), "Variance Components")
@@ -345,12 +345,12 @@ test_that("measure_gage_rr ndc calculation is reasonable", {
     (data$part - 5) * 10 + # Large part variation
     rnorm(nrow(data), 0, 0.5) # Small measurement error
 
-  result <- measure_gage_rr(
+  result <- suppressWarnings(measure_gage_rr(
     data,
     response_col = "measurement",
     part_col = "part",
     operator_col = "operator"
-  )
+  ))
 
   # With large part variation and small error, ndc should be high
   expect_true(attr(result, "ndc") >= 5)
@@ -378,12 +378,12 @@ test_that("tidy.measure_gage_rr returns tibble", {
   )
   data$measurement <- rnorm(nrow(data))
 
-  result <- measure_gage_rr(
+  result <- suppressWarnings(measure_gage_rr(
     data,
     response_col = "measurement",
     part_col = "part",
     operator_col = "operator"
-  )
+  ))
 
   tidy_result <- tidy(result)
   expect_s3_class(tidy_result, "tbl_df")
