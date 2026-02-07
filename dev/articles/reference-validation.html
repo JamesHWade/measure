@@ -168,9 +168,9 @@ unweighted calibration curves with comprehensive diagnostics.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">unknowns</span>, <span class="va">predictions</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   sample_id response .pred_conc .pred_lower .pred_upper</span></span>
-<span><span class="co">#&gt; 1  Sample_1     52.3    49.3896    49.30708    49.47213</span></span>
-<span><span class="co">#&gt; 2  Sample_2    125.8   118.9571   118.87457   119.03962</span></span>
-<span><span class="co">#&gt; 3  Sample_3    280.5   265.3801   265.29758   265.46263</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  Sample_1     52.3    49.3896     49.3580    49.42121</span></span>
+<span><span class="co">#&gt; 2  Sample_2    125.8   118.9571    118.9279   118.98627</span></span>
+<span><span class="co">#&gt; 3  Sample_3    280.5   265.3801    265.3408   265.41938</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="calibration-verification">Calibration Verification<a class="anchor" aria-label="anchor" href="#calibration-verification"></a>
@@ -356,6 +356,8 @@ LOD/LOQ:</p>
 <span>  part_col <span class="op">=</span> <span class="st">"part"</span>,</span>
 <span>  operator_col <span class="op">=</span> <span class="st">"operator"</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Negative variance components set to zero for <span style="color: #0000BB;">"interaction"</span> and <span style="color: #0000BB;">"operator"</span>. This</span></span>
+<span><span class="co">#&gt; may indicate insufficient variation or poor model fit.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">grr_result</span><span class="op">)</span></span>
 <span><span class="co">#&gt; measure_gage_rr: Measurement System Analysis</span></span>
 <span><span class="co">#&gt; ──────────────────────────────────────────────────────────────────────────────── </span></span>
@@ -1070,7 +1072,7 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <span><span class="co">#&gt; <span style="font-weight: bold;">Method</span>: Compound X Assay</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Analyst</span>: J. Smith</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Lab</span>: Analytical Development</span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Date</span>: 2026-01-16</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Date</span>: 2026-02-07</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Validation Sections</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1091,7 +1093,7 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Provenance</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Generated: 2026-01-16 02:04:51.834407</span></span>
+<span><span class="co">#&gt; Generated: 2026-02-07 01:57:20.647449</span></span>
 <span><span class="co">#&gt; R version: 4.5.2</span></span>
 <span><span class="co">#&gt; measure version: 0.0.1.9002</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1105,7 +1107,7 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Validation Report Summary</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Method</span>: Compound X Assay</span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Date</span>: 2026-01-16</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Date</span>: 2026-02-07</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 4</span></span></span>
 <span><span class="co">#&gt;   section                 status n_results notes             </span></span>

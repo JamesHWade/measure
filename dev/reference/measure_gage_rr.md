@@ -119,6 +119,8 @@ result <- measure_gage_rr(
   operator_col = "operator",
   tolerance = 20
 )
+#> Warning: Negative variance component set to zero for "interaction". This may indicate
+#> insufficient variation or poor model fit.
 print(result)
 #> measure_gage_rr: Measurement System Analysis
 #> ──────────────────────────────────────────────────────────────────────────────── 

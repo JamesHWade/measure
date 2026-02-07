@@ -85,9 +85,9 @@ predictions <- measure_calibration_predict(
 
 cbind(unknowns, predictions)
 #>   sample_id response .pred_conc .pred_lower .pred_upper
-#> 1  Sample_1     52.3    49.3896    49.30708    49.47213
-#> 2  Sample_2    125.8   118.9571   118.87457   119.03962
-#> 3  Sample_3    280.5   265.3801   265.29758   265.46263
+#> 1  Sample_1     52.3    49.3896     49.3580    49.42121
+#> 2  Sample_2    125.8   118.9571    118.9279   118.98627
+#> 3  Sample_3    280.5   265.3801    265.3408   265.41938
 ```
 
 ### Calibration Verification
@@ -271,6 +271,8 @@ grr_result <- measure_gage_rr(
   part_col = "part",
   operator_col = "operator"
 )
+#> Warning: Negative variance components set to zero for "interaction" and "operator". This
+#> may indicate insufficient variation or poor model fit.
 print(grr_result)
 #> measure_gage_rr: Measurement System Analysis
 #> ──────────────────────────────────────────────────────────────────────────────── 
@@ -996,7 +998,7 @@ print(report)
 #> Method: Compound X Assay
 #> Analyst: J. Smith
 #> Lab: Analytical Development
-#> Date: 2026-01-16
+#> Date: 2026-02-07
 #> 
 #> ── Validation Sections ──
 #> 
@@ -1017,7 +1019,7 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-01-16 02:04:51.834407
+#> Generated: 2026-02-07 01:57:20.647449
 #> R version: 4.5.2
 #> measure version: 0.0.1.9002
 #> 
@@ -1032,7 +1034,7 @@ summary(report)
 #> 
 #> ── Validation Report Summary ───────────────────────────────────────────────────
 #> Method: Compound X Assay
-#> Date: 2026-01-16
+#> Date: 2026-02-07
 #> 
 #> # A tibble: 9 × 4
 #>   section                 status n_results notes             

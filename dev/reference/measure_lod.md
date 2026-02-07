@@ -152,7 +152,7 @@ cal <- measure_calibration_fit(
 )
 measure_lod(data, "response", method = "calibration", calibration = cal)
 #> <measure_lod>
-#>   Value: 7.71
+#>   Value: 7.009
 #>   Method: calibration
 #>   k: 3
 #>   Parameters:

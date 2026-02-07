@@ -100,6 +100,6 @@ measure_calibration_predict(cal, unknowns, interval = "prediction")
 #>   .pred_conc .pred_lower .pred_upper
 #>        <dbl>       <dbl>       <dbl>
 #> 1       30.6        27.7        33.6
-#> 2       57.7        54.8        60.7
-#> 3       81.4        78.5        84.4
+#> 2       57.7        54.7        60.8
+#> 3       81.4        78.1        84.8
 ```
