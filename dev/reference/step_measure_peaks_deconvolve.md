@@ -163,6 +163,7 @@ Other peak-operations:
 [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md),
 [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md),
 [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md),
+[`step_measure_peaks_properties()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_properties.md),
 [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md)
 
 ## Examples

@@ -134,6 +134,8 @@ Peak detection, integration, and analysis for chromatography
   : Detect Peaks in Measurements
 - [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md)
   : Integrate Peak Areas
+- [`step_measure_peaks_properties()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_properties.md)
+  : Calculate Peak Properties
 - [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md)
   : Filter Peaks by Criteria
 - [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md)

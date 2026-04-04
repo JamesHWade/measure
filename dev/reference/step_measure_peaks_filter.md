@@ -41,7 +41,9 @@ step_measure_peaks_filter(
 
 - min_prominence:
 
-  Minimum peak prominence.
+  Minimum peak prominence. Requires a `prominence` column, typically
+  added by
+  [`step_measure_peaks_properties()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_properties.md).
 
 - max_peaks:
 
@@ -78,6 +80,7 @@ Other peak-operations:
 [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md),
 [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md),
 [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md),
+[`step_measure_peaks_properties()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_properties.md),
 [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md)
 
 ## Examples

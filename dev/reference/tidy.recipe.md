@@ -227,6 +227,9 @@ tidy(x, ...)
 # S3 method for class 'step_measure_peaks_integrate'
 tidy(x, ...)
 
+# S3 method for class 'step_measure_peaks_properties'
+tidy(x, ...)
+
 # S3 method for class 'step_measure_peaks_filter'
 tidy(x, ...)
 
