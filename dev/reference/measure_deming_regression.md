@@ -140,8 +140,8 @@ print(result)
 #> # A tibble: 2 × 4
 #>   term      estimate ci_lower ci_upper
 #>   <chr>        <dbl>    <dbl>    <dbl>
-#> 1 intercept   0.0594   -0.359    0.447
-#> 2 slope       1.01      0.988    1.03 
+#> 1 intercept   0.0594   -0.333    0.431
+#> 2 slope       1.01      0.989    1.01 
 #> 
 #> Statistics:
 #>   n = 7 
@@ -154,6 +154,6 @@ tidy(result)
 #> # A tibble: 2 × 4
 #>   term      estimate ci_lower ci_upper
 #>   <chr>        <dbl>    <dbl>    <dbl>
-#> 1 intercept   0.0594   -0.359    0.447
-#> 2 slope       1.01      0.988    1.03 
+#> 1 intercept   0.0594   -0.333    0.431
+#> 2 slope       1.01      0.989    1.01 
 ```

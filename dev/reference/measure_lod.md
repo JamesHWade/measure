@@ -136,13 +136,13 @@ data <- data.frame(
 # LOD from blank SD
 measure_lod(data, "response", method = "blank_sd")
 #> <measure_lod>
-#>   Value: 0.6889
+#>   Value: 0.7884
 #>   Method: blank_sd
 #>   k: 3
-#>   Uncertainty: 0.08057
+#>   Uncertainty: 0.1011
 #>   Parameters:
-#>     blank_mean: 0.4341
-#>     blank_sd: 0.08493
+#>     blank_mean: 0.4688
+#>     blank_sd: 0.1065
 #>     n_blanks: 10
 
 # LOD from calibration curve

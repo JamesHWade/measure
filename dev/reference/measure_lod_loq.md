@@ -92,22 +92,22 @@ data <- data.frame(
 limits <- measure_lod_loq(data, "response", method = "blank_sd")
 limits$lod
 #> <measure_lod>
-#>   Value: 0.752
+#>   Value: 0.8129
 #>   Method: blank_sd
 #>   k: 3
-#>   Uncertainty: 0.06627
+#>   Uncertainty: 0.09216
 #>   Parameters:
-#>     blank_mean: 0.5424
-#>     blank_sd: 0.06986
+#>     blank_mean: 0.5215
+#>     blank_sd: 0.09714
 #>     n_blanks: 10
 limits$loq
 #> <measure_loq>
-#>   Value: 1.241
+#>   Value: 1.493
 #>   Method: blank_sd
 #>   k: 10
-#>   Uncertainty: 0.2209
+#>   Uncertainty: 0.3072
 #>   Parameters:
-#>     blank_mean: 0.5424
-#>     blank_sd: 0.06986
+#>     blank_mean: 0.5215
+#>     blank_sd: 0.09714
 #>     n_blanks: 10
 ```

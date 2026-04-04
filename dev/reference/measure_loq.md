@@ -141,12 +141,12 @@ data <- data.frame(
 # LOQ from blank SD
 measure_loq(data, "response", method = "blank_sd")
 #> <measure_loq>
-#>   Value: 1.537
+#>   Value: 1.518
 #>   Method: blank_sd
 #>   k: 10
-#>   Uncertainty: 0.3326
+#>   Uncertainty: 0.3166
 #>   Parameters:
-#>     blank_mean: 0.4853
-#>     blank_sd: 0.1052
+#>     blank_mean: 0.517
+#>     blank_sd: 0.1001
 #>     n_blanks: 10
 ```

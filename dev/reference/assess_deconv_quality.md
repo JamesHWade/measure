@@ -80,11 +80,11 @@ print(quality)
 #> Goodness of Fit:
 #>   R-squared: 0.9868
 #>   RMSE:      0.0510
-#>   MAE:       0.0400
+#>   MAE:       0.0398
 #> 
 #> Optimization:
 #>   Converged:   Yes
-#>   Iterations:  20
+#>   Iterations:  22
 #>   Optimizer:   lbfgsb
-#>   Final SSE:   0.5231
+#>   Final SSE:   0.5220
 ```
