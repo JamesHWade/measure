@@ -1153,7 +1153,9 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
       (right_base - left_base)
   corrected_y <- region_y - baseline_y
 
-  peak_idx <- which.min(abs(region_x - peak_location))
+  # Use corrected maximum rather than original peak location, since baseline
+  # subtraction can shift the true peak on sloped backgrounds
+  peak_idx <- which.max(corrected_y)
   peak_height <- corrected_y[peak_idx]
   if (!is.finite(peak_height) || peak_height <= 0) {
     return(NA_real_)
