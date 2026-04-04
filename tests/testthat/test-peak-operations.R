@@ -30,9 +30,38 @@ create_peaked_data <- function() {
   )
 }
 
+# Create a single Gaussian peak with known FWHM
+create_gaussian_peak_data <- function(
+  height = 1.2,
+  center = 50,
+  width = 2,
+  baseline = 0
+) {
+  x <- seq(0, 100, by = 0.1)
+  y <- baseline + height * exp(-0.5 * ((x - center) / width)^2)
+
+  tibble::tibble(
+    id = "sample1",
+    location = x,
+    value = y
+  )
+}
+
 # Create recipe with peaked data
 prep_peaked_recipe <- function(steps_fn) {
   data <- create_peaked_data()
+
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(value, location = vars(location))
+
+  rec <- steps_fn(rec)
+  prep(rec)
+}
+
+# Create recipe with a single Gaussian peak
+prep_gaussian_recipe <- function(steps_fn) {
+  data <- create_gaussian_peak_data()
 
   rec <- recipe(~., data = data) |>
     update_role(id, new_role = "id") |>
@@ -217,6 +246,55 @@ test_that("step_measure_peaks_integrate print method works", {
 })
 
 # ==============================================================================
+# step_measure_peaks_properties tests
+# ==============================================================================
+
+test_that("step_measure_peaks_properties calculates prominence and FWHM", {
+  rec <- prep_gaussian_recipe(function(r) {
+    r |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
+      step_measure_peaks_properties(c("prominence", "fwhm"))
+  })
+
+  result <- bake(rec, new_data = NULL)
+  peaks <- result$.peaks[[1]]
+
+  expect_equal(nrow(peaks), 1)
+  expect_true(all(c("prominence", "fwhm") %in% names(peaks)))
+  expect_equal(peaks$prominence[1], 1.2, tolerance = 0.01)
+  expect_equal(
+    peaks$fwhm[1],
+    2 * sqrt(2 * log(2)) * 2,
+    tolerance = 0.05
+  )
+})
+
+test_that("step_measure_peaks_properties supports partial property requests", {
+  rec <- prep_gaussian_recipe(function(r) {
+    r |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
+      step_measure_peaks_properties("prominence")
+  })
+
+  result <- bake(rec, new_data = NULL)
+  peaks <- result$.peaks[[1]]
+
+  expect_true("prominence" %in% names(peaks))
+  expect_false("fwhm" %in% names(peaks))
+})
+
+test_that("step_measure_peaks_properties errors without peaks", {
+  expect_error(
+    recipe(~., data = create_gaussian_peak_data()) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(value, location = vars(location)) |>
+      step_measure_peaks_properties() |>
+      prep(),
+    "No peaks column found"
+  )
+})
+
+# ==============================================================================
 # step_measure_peaks_filter tests
 # ==============================================================================
 
@@ -267,6 +345,32 @@ test_that("step_measure_peaks_filter by min_area_pct works", {
     pcts <- peaks$area / total * 100
     expect_true(all(pcts >= 10, na.rm = TRUE))
   }
+})
+
+test_that("step_measure_peaks_filter by min_prominence works", {
+  rec <- prep_peaked_recipe(function(r) {
+    r |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.05) |>
+      step_measure_peaks_properties("prominence") |>
+      step_measure_peaks_filter(min_prominence = 0.4)
+  })
+
+  result <- bake(rec, new_data = NULL)
+  peaks <- result$.peaks[[1]]
+
+  expect_true(all(peaks$prominence >= 0.4))
+})
+
+test_that("step_measure_peaks_filter min_prominence requires prominence column", {
+  expect_error(
+    recipe(~., data = create_peaked_data()) |>
+      update_role(id, new_role = "id") |>
+      step_measure_input_long(value, location = vars(location)) |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.05) |>
+      step_measure_peaks_filter(min_prominence = 0.4) |>
+      prep(),
+    "Use .*step_measure_peaks_properties"
+  )
 })
 
 test_that("step_measure_peaks_filter by max_peaks works", {
@@ -344,6 +448,23 @@ test_that("step_measure_peaks_to_table respects prefix", {
 
   expect_true("pk_1_location" %in% names(result))
   expect_false("peak_1_location" %in% names(result))
+})
+
+test_that("step_measure_peaks_to_table exports calculated properties", {
+  rec <- prep_gaussian_recipe(function(r) {
+    r |>
+      step_measure_peaks_detect(algorithm = "prominence", min_height = 0.1) |>
+      step_measure_peaks_properties(c("prominence", "fwhm")) |>
+      step_measure_peaks_to_table(
+        properties = c("location", "prominence", "fwhm"),
+        max_peaks = 1
+      )
+  })
+
+  result <- bake(rec, new_data = NULL)
+
+  expect_true("peak_1_prominence" %in% names(result))
+  expect_true("peak_1_fwhm" %in% names(result))
 })
 
 test_that("step_measure_peaks_to_table print method works", {

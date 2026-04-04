@@ -145,6 +145,7 @@ reference:
   contents:
   - step_measure_peaks_detect
   - step_measure_peaks_integrate
+  - step_measure_peaks_properties
   - step_measure_peaks_filter
   - step_measure_peaks_deconvolve
   - step_measure_peaks_to_table

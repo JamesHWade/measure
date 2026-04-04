@@ -27,7 +27,8 @@ step_measure_peaks_filter(
 \item{min_area_pct}{Minimum area as percentage of total. Peaks with area
 less than this percentage of total peak area are removed.}
 
-\item{min_prominence}{Minimum peak prominence.}
+\item{min_prominence}{Minimum peak prominence. Requires a \code{prominence}
+column, typically added by \code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}}.}
 
 \item{max_peaks}{Maximum number of peaks to keep (keeps largest by area
 or height).}
@@ -69,6 +70,7 @@ Other peak-operations:
 \code{\link{step_measure_peaks_deconvolve}()},
 \code{\link{step_measure_peaks_detect}()},
 \code{\link{step_measure_peaks_integrate}()},
+\code{\link{step_measure_peaks_properties}()},
 \code{\link{step_measure_peaks_to_table}()}
 }
 \concept{peak-operations}
