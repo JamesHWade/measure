@@ -1126,31 +1126,35 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
   left_base,
   right_base
 ) {
-  if (
-    !all(is.finite(c(peak_location, left_base, right_base))) ||
-      left_base >= right_base
-  ) {
+  if (!all(is.finite(c(peak_location, left_base, right_base)))) {
     return(NA_real_)
   }
 
-  region_idx <- which(location >= left_base & location <= right_base)
+  # Support descending axes (e.g. IR wavenumber 4000 -> 400 cm-1)
+  lo <- min(left_base, right_base)
+  hi <- max(left_base, right_base)
+  if (lo == hi) {
+    return(NA_real_)
+  }
+
+  region_idx <- which(location >= lo & location <= hi)
   if (length(region_idx) < 2) {
     return(NA_real_)
   }
 
   region_x <- sort(unique(c(
-    left_base,
+    lo,
     location[region_idx],
     peak_location,
-    right_base
+    hi
   )))
   region_y <- .peak_signal_at(location, value, region_x)
 
-  boundary_y <- .peak_signal_at(location, value, c(left_base, right_base))
+  boundary_y <- .peak_signal_at(location, value, c(lo, hi))
   baseline_y <- boundary_y[1] +
     (boundary_y[2] - boundary_y[1]) *
-      (region_x - left_base) /
-      (right_base - left_base)
+      (region_x - lo) /
+      (hi - lo)
   corrected_y <- region_y - baseline_y
 
   # Use corrected maximum rather than original peak location, since baseline
@@ -1340,6 +1344,17 @@ step_measure_peaks_filter <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_peaks_filter")
 ) {
+  if (!is.null(min_prominence)) {
+    if (
+      !is.numeric(min_prominence) ||
+        length(min_prominence) != 1 ||
+        !is.finite(min_prominence) ||
+        min_prominence < 0
+    ) {
+      cli::cli_abort("{.arg min_prominence} must be a non-negative number.")
+    }
+  }
+
   recipes::add_step(
     recipe,
     step_measure_peaks_filter_new(
