@@ -391,6 +391,9 @@ find_peaks_cols <- function(data) {
 #' - `left_base`, `right_base`: X-axis positions of peak boundaries
 #' - `area`: Initially NA; use `step_measure_peaks_integrate()` to calculate
 #'
+#' Use [step_measure_peaks_properties()] to calculate additional peak metrics
+#' such as prominence and full width at half maximum (FWHM).
+#'
 #' @seealso [peak_algorithms()], [register_peak_algorithm()]
 #' @family peak-operations
 #' @export
@@ -915,6 +918,377 @@ tidy.step_measure_peaks_integrate <- function(x, ...) {
 }
 
 # ==============================================================================
+# step_measure_peaks_properties
+# ==============================================================================
+
+#' Calculate Peak Properties
+#'
+#' `step_measure_peaks_properties()` creates a *specification* of a recipe step
+#' that calculates derived peak metrics from the measured signal and stores them
+#' in the `.peaks` tibble.
+#'
+#' @param recipe A recipe object.
+#' @param properties Character vector of peak properties to calculate. Supported
+#'   values are `"prominence"` and `"fwhm"`.
+#' @param measures Optional character vector of measure column names.
+#' @param role Not used.
+#' @param trained Logical indicating if the step has been trained.
+#' @param skip Logical. Should the step be skipped when baking?
+#' @param id Unique step identifier.
+#'
+#' @return An updated recipe with the new step added.
+#'
+#' @details
+#' This step calculates additional peak metrics from the observed signal for
+#' each detected peak:
+#'
+#' - `"prominence"`: Peak height above the higher of the left and right base
+#'   intensities.
+#'
+#' - `"fwhm"`: Full width at half maximum, estimated with linear interpolation
+#'   after subtracting a local linear baseline between the left and right bases.
+#'
+#' The calculated properties are added as new columns in the `.peaks` tibble and
+#' can be exported later with [step_measure_peaks_to_table()].
+#'
+#' @family peak-operations
+#' @export
+#'
+#' @examples
+#' library(recipes)
+#'
+#' rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
+#'   update_role(id, new_role = "id") |>
+#'   step_measure_input_long(transmittance, location = vars(channel)) |>
+#'   step_measure_peaks_detect(min_height = 0.5) |>
+#'   step_measure_peaks_properties(c("prominence", "fwhm")) |>
+#'   prep()
+#'
+#' result <- bake(rec, new_data = NULL)
+#' result$.peaks[[1]]
+step_measure_peaks_properties <- function(
+  recipe,
+  properties = c("prominence", "fwhm"),
+  measures = NULL,
+  role = NA,
+  trained = FALSE,
+  skip = FALSE,
+  id = recipes::rand_id("measure_peaks_properties")
+) {
+  valid_properties <- c("prominence", "fwhm")
+
+  if (!is.character(properties) || length(properties) == 0) {
+    cli::cli_abort("{.arg properties} must be a non-empty character vector.")
+  }
+
+  invalid_properties <- setdiff(properties, valid_properties)
+  if (length(invalid_properties) > 0) {
+    cli::cli_abort(
+      c(
+        "Unknown peak properties requested: {.val {invalid_properties}}.",
+        "i" = "Supported properties: {.val {valid_properties}}"
+      )
+    )
+  }
+
+  recipes::add_step(
+    recipe,
+    step_measure_peaks_properties_new(
+      properties = unique(properties),
+      measures = measures,
+      role = role,
+      trained = trained,
+      skip = skip,
+      id = id
+    )
+  )
+}
+
+step_measure_peaks_properties_new <- function(
+  properties,
+  measures,
+  role,
+  trained,
+  skip,
+  id
+) {
+  recipes::step(
+    subclass = "measure_peaks_properties",
+    properties = properties,
+    measures = measures,
+    role = role,
+    trained = trained,
+    skip = skip,
+    id = id
+  )
+}
+
+#' @export
+prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
+  peaks_cols <- find_peaks_cols(training)
+  if (length(peaks_cols) == 0) {
+    cli::cli_abort(
+      c(
+        "No peaks column found.",
+        "i" = "Use {.fn step_measure_peaks_detect} before calculating peak properties."
+      )
+    )
+  }
+
+  if (is.null(x$measures)) {
+    measure_cols <- find_measure_cols(training)
+  } else {
+    measure_cols <- x$measures
+  }
+
+  step_measure_peaks_properties_new(
+    properties = x$properties,
+    measures = measure_cols,
+    role = x$role,
+    trained = TRUE,
+    skip = x$skip,
+    id = x$id
+  )
+}
+
+#' @noRd
+.peak_signal_at <- function(location, value, xout) {
+  stats::approx(location, value, xout = xout, ties = "ordered", rule = 2)$y
+}
+
+#' @noRd
+.interpolate_crossing <- function(x1, y1, x2, y2, target) {
+  if (!all(is.finite(c(x1, y1, x2, y2, target)))) {
+    return(NA_real_)
+  }
+
+  if (y1 == y2) {
+    return((x1 + x2) / 2)
+  }
+
+  x1 + (target - y1) * (x2 - x1) / (y2 - y1)
+}
+
+#' @noRd
+.find_crossing <- function(x, y, target, side = c("left", "right")) {
+  side <- rlang::arg_match(side)
+
+  if (length(x) < 2) {
+    return(NA_real_)
+  }
+
+  crossings <- which((y[-length(y)] - target) * (y[-1] - target) <= 0)
+  if (length(crossings) == 0) {
+    return(NA_real_)
+  }
+
+  idx <- if (side == "left") {
+    crossings[length(crossings)]
+  } else {
+    crossings[1]
+  }
+
+  .interpolate_crossing(
+    x[idx],
+    y[idx],
+    x[idx + 1],
+    y[idx + 1],
+    target
+  )
+}
+
+#' @noRd
+.calculate_peak_prominence <- function(
+  location,
+  value,
+  peak_location,
+  left_base,
+  right_base
+) {
+  if (!all(is.finite(c(peak_location, left_base, right_base)))) {
+    return(NA_real_)
+  }
+
+  y_vals <- .peak_signal_at(
+    location,
+    value,
+    c(peak_location, left_base, right_base)
+  )
+
+  y_vals[1] - max(y_vals[2:3])
+}
+
+#' @noRd
+.calculate_peak_fwhm <- function(
+  location,
+  value,
+  peak_location,
+  left_base,
+  right_base
+) {
+  if (!all(is.finite(c(peak_location, left_base, right_base)))) {
+    return(NA_real_)
+  }
+
+  # Support descending axes (e.g. IR wavenumber 4000 -> 400 cm-1)
+  lo <- min(left_base, right_base)
+  hi <- max(left_base, right_base)
+  if (lo == hi) {
+    return(NA_real_)
+  }
+
+  region_idx <- which(location >= lo & location <= hi)
+  if (length(region_idx) < 2) {
+    return(NA_real_)
+  }
+
+  region_x <- sort(unique(c(
+    lo,
+    location[region_idx],
+    peak_location,
+    hi
+  )))
+  region_y <- .peak_signal_at(location, value, region_x)
+
+  boundary_y <- .peak_signal_at(location, value, c(lo, hi))
+  baseline_y <- boundary_y[1] +
+    (boundary_y[2] - boundary_y[1]) *
+      (region_x - lo) /
+      (hi - lo)
+  corrected_y <- region_y - baseline_y
+
+  # Use corrected maximum rather than original peak location, since baseline
+  # subtraction can shift the true peak on sloped backgrounds
+  peak_idx <- which.max(corrected_y)
+  peak_height <- corrected_y[peak_idx]
+  if (!is.finite(peak_height) || peak_height <= 0) {
+    return(NA_real_)
+  }
+
+  target <- peak_height / 2
+
+  left_cross <- .find_crossing(
+    region_x[seq_len(peak_idx)],
+    corrected_y[seq_len(peak_idx)],
+    target,
+    side = "left"
+  )
+  right_cross <- .find_crossing(
+    region_x[peak_idx:length(region_x)],
+    corrected_y[peak_idx:length(region_x)],
+    target,
+    side = "right"
+  )
+
+  if (!all(is.finite(c(left_cross, right_cross))) || right_cross < left_cross) {
+    return(NA_real_)
+  }
+
+  right_cross - left_cross
+}
+
+#' @noRd
+.add_peak_properties <- function(peaks, measures, properties) {
+  if (nrow(peaks) == 0) {
+    for (property in properties) {
+      peaks[[property]] <- numeric()
+    }
+    return(peaks)
+  }
+
+  loc <- measures$location
+  val <- measures$value
+
+  if ("prominence" %in% properties) {
+    peaks$prominence <- vapply(
+      seq_len(nrow(peaks)),
+      function(i) {
+        .calculate_peak_prominence(
+          loc,
+          val,
+          peaks$location[i],
+          peaks$left_base[i],
+          peaks$right_base[i]
+        )
+      },
+      numeric(1)
+    )
+  }
+
+  if ("fwhm" %in% properties) {
+    peaks$fwhm <- vapply(
+      seq_len(nrow(peaks)),
+      function(i) {
+        .calculate_peak_fwhm(
+          loc,
+          val,
+          peaks$location[i],
+          peaks$left_base[i],
+          peaks$right_base[i]
+        )
+      },
+      numeric(1)
+    )
+  }
+
+  peaks
+}
+
+#' @export
+bake.step_measure_peaks_properties <- function(object, new_data, ...) {
+  peaks_cols <- find_peaks_cols(new_data)
+  measure_cols <- object$measures
+
+  for (i in seq_along(peaks_cols)) {
+    peaks_col <- peaks_cols[i]
+    measure_col <- measure_cols[min(i, length(measure_cols))]
+
+    new_peaks <- purrr::map2(
+      new_data[[peaks_col]],
+      new_data[[measure_col]],
+      function(peaks, measures) {
+        .add_peak_properties(peaks, measures, object$properties)
+      }
+    )
+
+    new_data[[peaks_col]] <- new_peaks_list(new_peaks)
+  }
+
+  tibble::as_tibble(new_data)
+}
+
+#' @export
+print.step_measure_peaks_properties <- function(
+  x,
+  width = max(20, options()$width - 30),
+  ...
+) {
+  title <- paste0(
+    "Peak properties (",
+    paste(x$properties, collapse = ", "),
+    ")"
+  )
+  if (x$trained) {
+    cat(title, " on <internal measurements>", sep = "")
+  } else {
+    cat(title)
+  }
+  cat("\n")
+  invisible(x)
+}
+
+#' @rdname tidy.recipe
+#' @export
+#' @keywords internal
+tidy.step_measure_peaks_properties <- function(x, ...) {
+  tibble::tibble(
+    terms = if (is_trained(x)) x$measures else "<all measure columns>",
+    properties = list(x$properties),
+    id = x$id
+  )
+}
+
+# ==============================================================================
 # step_measure_peaks_filter
 # ==============================================================================
 
@@ -928,7 +1302,8 @@ tidy.step_measure_peaks_integrate <- function(x, ...) {
 #' @param min_area Minimum peak area. Requires prior integration.
 #' @param min_area_pct Minimum area as percentage of total. Peaks with area
 #'   less than this percentage of total peak area are removed.
-#' @param min_prominence Minimum peak prominence.
+#' @param min_prominence Minimum peak prominence. Requires a `prominence`
+#'   column, typically added by [step_measure_peaks_properties()].
 #' @param max_peaks Maximum number of peaks to keep (keeps largest by area
 #'   or height).
 #' @param role Not used.
@@ -969,6 +1344,17 @@ step_measure_peaks_filter <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_peaks_filter")
 ) {
+  if (!is.null(min_prominence)) {
+    if (
+      !is.numeric(min_prominence) ||
+        length(min_prominence) != 1 ||
+        !is.finite(min_prominence) ||
+        min_prominence < 0
+    ) {
+      cli::cli_abort("{.arg min_prominence} must be a non-negative number.")
+    }
+  }
+
   recipes::add_step(
     recipe,
     step_measure_peaks_filter_new(
@@ -1066,6 +1452,21 @@ bake.step_measure_peaks_filter <- function(object, new_data, ...) {
         }
       }
 
+      # Filter by prominence
+      if (!is.null(object$min_prominence)) {
+        if (!"prominence" %in% names(peaks)) {
+          cli::cli_abort(
+            c(
+              "Cannot filter by {.arg min_prominence} without a {.field prominence} column.",
+              "i" = "Use {.fn step_measure_peaks_properties} before prominence-based filtering."
+            )
+          )
+        }
+        keep <- keep &
+          !is.na(peaks$prominence) &
+          peaks$prominence >= object$min_prominence
+      }
+
       peaks <- peaks[keep, , drop = FALSE]
 
       # Limit number of peaks (keep largest)
@@ -1130,6 +1531,7 @@ tidy.step_measure_peaks_filter <- function(x, ...) {
     min_height = x$min_height %||% NA_real_,
     min_area = x$min_area %||% NA_real_,
     min_area_pct = x$min_area_pct %||% NA_real_,
+    min_prominence = x$min_prominence %||% NA_real_,
     max_peaks = x$max_peaks %||% NA_integer_,
     id = x$id
   )

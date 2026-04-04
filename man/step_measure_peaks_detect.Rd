@@ -84,6 +84,9 @@ Additional algorithms can be registered by technique packs using
 \item \code{left_base}, \code{right_base}: X-axis positions of peak boundaries
 \item \code{area}: Initially NA; use \code{step_measure_peaks_integrate()} to calculate
 }
+
+Use \code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}} to calculate additional peak metrics
+such as prominence and full width at half maximum (FWHM).
 }
 \examples{
 library(recipes)
@@ -111,6 +114,7 @@ Other peak-operations:
 \code{\link{step_measure_peaks_deconvolve}()},
 \code{\link{step_measure_peaks_filter}()},
 \code{\link{step_measure_peaks_integrate}()},
+\code{\link{step_measure_peaks_properties}()},
 \code{\link{step_measure_peaks_to_table}()}
 }
 \concept{peak-operations}

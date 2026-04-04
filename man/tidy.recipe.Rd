@@ -88,6 +88,7 @@
 \alias{tidy.step_measure_output_wide}
 \alias{tidy.step_measure_peaks_detect}
 \alias{tidy.step_measure_peaks_integrate}
+\alias{tidy.step_measure_peaks_properties}
 \alias{tidy.step_measure_peaks_filter}
 \alias{tidy.step_measure_peaks_to_table}
 \alias{tidy.step_measure_peaks_deconvolve}
@@ -280,6 +281,8 @@
 \method{tidy}{step_measure_peaks_detect}(x, ...)
 
 \method{tidy}{step_measure_peaks_integrate}(x, ...)
+
+\method{tidy}{step_measure_peaks_properties}(x, ...)
 
 \method{tidy}{step_measure_peaks_filter}(x, ...)
 
