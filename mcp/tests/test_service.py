@@ -121,6 +121,8 @@ def test_stdio_end_to_end(tmp_path):
                 compare = result(await client.call_tool("measurement_compare_sec", {"analysis_ids": [sec["analysis_id"], second["analysis_id"]]}))
                 assert compare["comparability"]["same_method"] and compare["comparability"]["same_detector_channel_and_units"]
                 assert compare["results"][1]["values"]["mw_g_mol"]["difference"] == pytest.approx(0)
+                assert compare["results"][0]["calibration_r_squared"] == pytest.approx(1)
+                assert "warnings" in compare["results"][0]
                 empty_range = await client.call_tool("measurement_analyze_sec", {**args, "method": method | {"integration_range": [10, 11]}})
                 assert empty_range.isError
                 text = "time,response\n1,0.1\n2,1\n3,0.1\n"

@@ -556,7 +556,9 @@ def measurement_compare_sec(analysis_ids: Annotated[list[str], Field(min_length=
             value, baseline = summary.get(field), reference.get(field)
             changes[field] = {"value": value, "difference": None if value is None or baseline is None else value - baseline,
                               "percent_difference": None if value is None or not baseline else 100 * (value - baseline) / baseline}
-        rows.append({"analysis_id": record["analysis_id"], "trace_id": record["trace_id"], "values": changes})
+        rows.append({"analysis_id": record["analysis_id"], "trace_id": record["trace_id"], "values": changes,
+                     "warnings": record["result"].get("warnings", []),
+                     "calibration_r_squared": (record["result"].get("diagnostics") or {}).get("r_squared")})
     method_matches = all(r["provenance"]["method_sha256"] == records[0]["provenance"]["method_sha256"] for r in records)
     fingerprint = records[0]["provenance"].get("installed_r_code_md5") or {}
     fingerprints_match = bool(fingerprint.get("measure") and fingerprint.get("measure.sec")) and all(
