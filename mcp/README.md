@@ -20,7 +20,7 @@ Supported axes are strictly increasing 1D numeric arrays. The generic peak and r
 2. R with `jsonlite`, `tibble`, `recipes`, and `measure` installed. Relative SEC additionally requires the corrected `measure.sec` development revision that includes `mw_col` and `mw_scale` in `step_sec_mw_averages()`. The released/default revision may have the same package version but lack these fixes; the worker checks for this capability and refuses to perform SEC when it is missing.
 3. The `R` executable on `PATH`, or its absolute path in `MEASURE_MCP_R`. It must be able to load those packages in the service process's R library environment.
 
-The integration tests in this branch ran with R 4.3.3, `measure` 0.0.1.9002, the corrected `measure.sec` 0.0.0.9000 checkout and `recipes` 1.4.0.9000. Install the precise commits you have tested; package version strings alone do not identify an unreleased development checkout.
+The integration tests in this branch ran with R 4.3.3, `measure` 0.0.1.9002, the corrected `measure.sec` 0.0.0.9000 checkout (commit `a3ff1fe965f53b6388a3ce535746ff40fdbda0c2`) and `recipes` 1.4.0.9000. Install the precise commits you have tested; package version strings alone do not identify an unreleased development checkout. Set `MEASURE_MCP_MEASURE_REVISION` and `MEASURE_MCP_SEC_REVISION` to record operator-supplied source revisions in analysis provenance.
 
 For example, from checked-out package directories, using an already configured R library:
 
