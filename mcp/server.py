@@ -76,6 +76,16 @@ class Trace(TraceMetadata):
         return self
 
 
+class CSVChannel(StrictModel):
+    column: str = Field(min_length=1, max_length=200, description="Name of the numeric signal column in the table.")
+    metadata: TraceMetadata
+
+
+class CSVGroup(StrictModel):
+    values: list[str] = Field(min_length=1, max_length=4, description="Group values in the same order as group_columns.")
+    metadata: TraceMetadata
+
+
 class Dataset(StrictModel):
     title: str = Field(min_length=1, max_length=200)
     traces: list[Trace] = Field(min_length=1, max_length=MAX_TRACES)
@@ -206,6 +216,11 @@ def connect() -> sqlite3.Connection:
       result TEXT NOT NULL, provenance TEXT NOT NULL, created_at TEXT NOT NULL,
       FOREIGN KEY(dataset_id) REFERENCES datasets(id)
     );
+    CREATE TABLE IF NOT EXISTS dataset_sources (
+      dataset_id TEXT PRIMARY KEY, kind TEXT NOT NULL, digest TEXT NOT NULL,
+      content TEXT NOT NULL, mapping TEXT NOT NULL,
+      FOREIGN KEY(dataset_id) REFERENCES datasets(id)
+    );
     """)
     return con
 
@@ -216,6 +231,102 @@ def dataset_for(owner: str, dataset_id: str) -> tuple[dict, str]:
     if row is None:
         raise ValueError("Dataset was not found or is not accessible")
     return json.loads(row[0]), row[1]
+
+
+def source_for(owner: str, dataset_id: str) -> dict[str, Any] | None:
+    with connect() as con:
+        row = con.execute("""SELECT s.kind, s.digest, s.content, s.mapping FROM dataset_sources s
+            JOIN datasets d ON s.dataset_id=d.id WHERE d.id=? AND d.owner=?""", (dataset_id, owner)).fetchone()
+    if row is None:
+        return None
+    return {"kind": row[0], "source_sha256": row[1], "content": row[2], "mapping": json.loads(row[3])}
+
+
+def register_dataset(owner: str, dataset: Dataset, source: dict[str, Any] | None = None) -> dict[str, Any]:
+    payload = dataset.model_dump(mode="json")
+    serialized = canonical(payload)
+    if len(serialized.encode("utf-8")) > MAX_PAYLOAD_BYTES:
+        raise ValueError("Dataset exceeds the request-size limit")
+    dataset_id, digest, created = str(uuid.uuid4()), sha256(payload), now()
+    with connect() as con:
+        con.execute("INSERT INTO datasets VALUES (?, ?, ?, ?, ?)", (dataset_id, owner, digest, serialized, created))
+        if source is not None:
+            con.execute("INSERT INTO dataset_sources VALUES (?, ?, ?, ?, ?)",
+                (dataset_id, source["kind"], source["source_sha256"], source["content"], canonical(source["mapping"])))
+    return {"dataset_id": dataset_id, "input_sha256": digest,
+            "source_sha256": None if source is None else source["source_sha256"], "created_at": created,
+            "trace_count": len(dataset.traces), "point_count": sum(len(t.axis) for t in dataset.traces)}
+
+
+def parse_csv(csv_text: str, axis_column: str, channels: list[CSVChannel], delimiter: str) -> tuple[list[Trace], dict[str, Any]]:
+    raw = csv_text.encode("utf-8")
+    if len(raw) > MAX_PAYLOAD_BYTES:
+        raise ValueError("CSV exceeds the request-size limit")
+    reader = csv.DictReader(io.StringIO(csv_text.lstrip("\ufeff"), newline=""), delimiter=delimiter)
+    fields = reader.fieldnames or []
+    columns = [channel.column for channel in channels]
+    if len(set(fields)) != len(fields) or len(set(columns)) != len(columns) or axis_column in columns or any(c not in fields for c in [axis_column, *columns]):
+        raise ValueError("CSV needs unique headers and distinct existing axis and signal columns")
+    axis: list[float] = []
+    signals: list[list[float]] = [[] for _ in channels]
+    for row in reader:
+        if len(axis) >= MAX_POINTS or (len(axis) + 1) * len(channels) > MAX_DATASET_POINTS:
+            raise ValueError("CSV exceeds the point limit")
+        if None in row:
+            raise ValueError("CSV contains a row with extra fields")
+        try:
+            axis.append(float(row[axis_column]))
+            for channel, values in zip(channels, signals):
+                values.append(float(row[channel.column]))
+        except (TypeError, KeyError, ValueError) as exc:
+            raise ValueError("CSV rows must have numeric values in all selected columns") from exc
+    traces = [Trace.model_validate({**channel.metadata.model_dump(), "axis": axis, "signal": signal})
+              for channel, signal in zip(channels, signals)]
+    source = {"kind": "delimited_text", "source_sha256": hashlib.sha256(raw).hexdigest(), "content": csv_text,
+              "mapping": {"delimiter": delimiter, "axis_column": axis_column,
+                          "signal_columns": [{"column": c.column, "trace_id": c.metadata.trace_id} for c in channels]}}
+    return traces, source
+
+
+def parse_long_csv(csv_text: str, axis_column: str, signal_column: str, group_columns: list[str],
+                   groups: list[CSVGroup], delimiter: str) -> tuple[list[Trace], dict[str, Any]]:
+    raw = csv_text.encode("utf-8")
+    if len(raw) > MAX_PAYLOAD_BYTES:
+        raise ValueError("CSV exceeds the request-size limit")
+    reader = csv.DictReader(io.StringIO(csv_text.lstrip("\ufeff"), newline=""), delimiter=delimiter)
+    fields = reader.fieldnames or []
+    selected = [axis_column, signal_column, *group_columns]
+    if len(set(fields)) != len(fields) or len(set(selected)) != len(selected) or any(c not in fields for c in selected):
+        raise ValueError("CSV needs unique headers and distinct existing axis, signal and group columns")
+    keys = [tuple(group.values) for group in groups]
+    if any(len(key) != len(group_columns) for key in keys) or len(set(keys)) != len(keys):
+        raise ValueError("Each group needs one unique value per group column")
+    indices = {key: i for i, key in enumerate(keys)}
+    axes: list[list[float]] = [[] for _ in groups]
+    signals: list[list[float]] = [[] for _ in groups]
+    total = 0
+    for row in reader:
+        if None in row:
+            raise ValueError("CSV contains a row with extra fields")
+        key = tuple(row.get(column) for column in group_columns)
+        if key not in indices:
+            raise ValueError("CSV contains an unmapped group; provide metadata for every group")
+        index = indices[key]
+        if len(axes[index]) >= MAX_POINTS or total >= MAX_DATASET_POINTS:
+            raise ValueError("CSV exceeds the point limit")
+        try:
+            axes[index].append(float(row[axis_column]))
+            signals[index].append(float(row[signal_column]))
+        except (TypeError, KeyError, ValueError) as exc:
+            raise ValueError("CSV rows must have numeric values in the selected axis and signal columns") from exc
+        total += 1
+    traces = [Trace.model_validate({**group.metadata.model_dump(), "axis": axis, "signal": signal})
+              for group, axis, signal in zip(groups, axes, signals)]
+    source = {"kind": "delimited_text", "source_sha256": hashlib.sha256(raw).hexdigest(), "content": csv_text,
+              "mapping": {"delimiter": delimiter, "axis_column": axis_column, "signal_column": signal_column,
+                          "group_columns": group_columns,
+                          "groups": [{"values": group.values, "trace_id": group.metadata.trace_id} for group in groups]}}
+    return traces, source
 
 
 def trace_for(dataset: dict, trace_id: str) -> dict[str, Any]:
@@ -260,7 +371,9 @@ def run_worker(payload: dict) -> dict[str, Any]:
 def save_analysis(owner: str, dataset_id: str, trace_id: str, kind: str, method: dict, result: dict, digest: str) -> dict[str, Any]:
     analysis_id = str(uuid.uuid4())
     worker_digest = hashlib.sha256((ROOT / "worker.R").read_bytes()).hexdigest()
+    source = source_for(owner, dataset_id)
     provenance = {"input_sha256": digest, "method_sha256": sha256(method), "worker_sha256": worker_digest,
+                  "source_sha256": None if source is None else source["source_sha256"],
                   "packages": result.get("packages"), "installed_r_code_md5": result.get("installed_r_code_md5"),
                   "r_version": result.get("r_version"),
                   "measure_revision": os.environ.get("MEASURE_MCP_MEASURE_REVISION"),
@@ -288,27 +401,19 @@ def measurement_capabilities(ctx: Context) -> dict[str, Any]:
     result = run_worker({"operation": "capabilities"})
     packages = result.get("packages", {})
     return {"service": "measure-separations", "qualification": "experimental", "backend": result,
+            "input_formats": ["structured_traces", "delimited_single_trace", "delimited_wide", "delimited_long"],
             "techniques": {"generic_1d_trace": bool(packages.get("measure") and packages.get("recipes")),
                            "linear_response_quantitation": bool(packages.get("measure") and packages.get("recipes")),
                            "relative_sec": bool(result.get("sec_calibrated_curve_support") and packages.get("measure") and packages.get("recipes")),
                            "relative_sec_requires_corrected_development_revision": True},
             "limits": {"traces_per_dataset": MAX_TRACES, "points_per_trace": MAX_POINTS,
-                       "points_per_dataset": MAX_DATASET_POINTS, "page_size": MAX_PAGE}}
+                       "points_per_dataset": MAX_DATASET_POINTS, "payload_bytes": MAX_PAYLOAD_BYTES, "page_size": MAX_PAGE}}
 
 
 @mcp.tool(annotations=WRITE, structured_output=True)
 def measurement_register_dataset(dataset: Dataset, ctx: Context) -> dict[str, Any]:
     """Register bounded one-dimensional traces and their sample, injection, detector and unit metadata."""
-    owner = identity(ctx)
-    payload = dataset.model_dump(mode="json")
-    serialized = canonical(payload)
-    if len(serialized.encode("utf-8")) > MAX_PAYLOAD_BYTES:
-        raise ValueError("Dataset exceeds the request-size limit")
-    dataset_id, digest, created = str(uuid.uuid4()), sha256(payload), now()
-    with connect() as con:
-        con.execute("INSERT INTO datasets VALUES (?, ?, ?, ?, ?)", (dataset_id, owner, digest, serialized, created))
-    return {"dataset_id": dataset_id, "input_sha256": digest, "created_at": created,
-            "trace_count": len(dataset.traces), "point_count": sum(len(t.axis) for t in dataset.traces)}
+    return register_dataset(identity(ctx), dataset)
 
 
 @mcp.tool(annotations=WRITE, structured_output=True)
@@ -316,38 +421,61 @@ def measurement_register_csv(title: str, csv_text: str, axis_column: str, signal
                              metadata: TraceMetadata, ctx: Context,
                              delimiter: Literal[",", "\t", ";"] = ",") -> dict[str, Any]:
     """Register one explicitly mapped numeric trace from bounded CSV/TSV text; metadata are the same as for a Trace, excluding axis and signal."""
-    if len(csv_text.encode("utf-8")) > MAX_PAYLOAD_BYTES:
-        raise ValueError("CSV exceeds the request-size limit")
-    reader = csv.DictReader(io.StringIO(csv_text.lstrip("\ufeff"), newline=""), delimiter=delimiter)
-    fields = reader.fieldnames or []
-    if len(set(fields)) != len(fields) or axis_column == signal_column or axis_column not in fields or signal_column not in fields:
-        raise ValueError("CSV needs unique headers and distinct existing axis and signal columns")
-    axis, signal = [], []
-    try:
-        for row in reader:
-            if len(axis) >= MAX_POINTS:
-                raise ValueError("CSV exceeds the point limit")
-            if None in row:
-                raise ValueError("CSV contains a row with extra fields")
-            axis.append(float(row[axis_column]))
-            signal.append(float(row[signal_column]))
-    except (TypeError, KeyError) as exc:
-        raise ValueError("CSV rows must have numeric values in both selected columns") from exc
-    trace = Trace.model_validate({**metadata.model_dump(), "axis": axis, "signal": signal})
-    return measurement_register_dataset(Dataset(title=title, traces=[trace]), ctx)
+    owner = identity(ctx)
+    traces, source = parse_csv(csv_text, axis_column, [CSVChannel(column=signal_column, metadata=metadata)], delimiter)
+    return register_dataset(owner, Dataset(title=title, traces=traces), source)
+
+
+@mcp.tool(annotations=WRITE, structured_output=True)
+def measurement_register_wide_csv(title: str, csv_text: str, axis_column: str,
+                                  channels: Annotated[list[CSVChannel], Field(min_length=1, max_length=MAX_TRACES)],
+                                  ctx: Context, delimiter: Literal[",", "\t", ";"] = ",") -> dict[str, Any]:
+    """Register multiple explicitly mapped detector columns that share one numeric axis; retain the source text and mapping."""
+    owner = identity(ctx)
+    traces, source = parse_csv(csv_text, axis_column, channels, delimiter)
+    return register_dataset(owner, Dataset(title=title, traces=traces), source)
+
+
+@mcp.tool(annotations=WRITE, structured_output=True)
+def measurement_register_long_csv(title: str, csv_text: str, axis_column: str, signal_column: str,
+                                  group_columns: Annotated[list[str], Field(min_length=1, max_length=4)],
+                                  groups: Annotated[list[CSVGroup], Field(min_length=1, max_length=MAX_TRACES)],
+                                  ctx: Context, delimiter: Literal[",", "\t", ";"] = ",") -> dict[str, Any]:
+    """Register row-oriented traces grouped by explicit column values, with a separate axis and metadata for each group."""
+    owner = identity(ctx)
+    traces, source = parse_long_csv(csv_text, axis_column, signal_column, group_columns, groups, delimiter)
+    return register_dataset(owner, Dataset(title=title, traces=traces), source)
 
 
 @mcp.tool(annotations=READ, structured_output=True)
 def measurement_inspect_dataset(dataset_id: str, ctx: Context) -> dict[str, Any]:
     """Inspect available traces, sample/injection identities, axes and units without returning raw arrays."""
-    dataset, digest = dataset_for(identity(ctx), dataset_id)
+    owner = identity(ctx)
+    dataset, digest = dataset_for(owner, dataset_id)
+    source = source_for(owner, dataset_id)
     traces = []
     for trace in dataset["traces"]:
         summary = {k: v for k, v in trace.items() if k not in ("axis", "signal")}
         summary.update({"point_count": len(trace["axis"]), "axis_range": [trace["axis"][0], trace["axis"][-1]],
                         "signal_range": [min(trace["signal"]), max(trace["signal"])]})
         traces.append(summary)
-    return {"dataset_id": dataset_id, "input_sha256": digest, "title": dataset["title"], "traces": traces}
+    source_info = None if source is None else {k: v for k, v in source.items() if k != "content"}
+    return {"dataset_id": dataset_id, "input_sha256": digest, "title": dataset["title"], "traces": traces, "source": source_info}
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_read_source(dataset_id: str, ctx: Context, offset: Annotated[int, Field(ge=0)] = 0,
+                            limit: Annotated[int, Field(ge=1, le=MAX_PAGE)] = 1000) -> dict[str, Any]:
+    """Read a bounded character page of the retained original CSV/TSV text and its import mapping."""
+    owner = identity(ctx)
+    dataset_for(owner, dataset_id)
+    source = source_for(owner, dataset_id)
+    if source is None:
+        raise ValueError("This dataset has no retained text source")
+    content = source.pop("content")
+    return {"dataset_id": dataset_id, **source, "offset": offset, "count": len(content),
+            "next_offset": offset + limit if offset + limit < len(content) else None,
+            "text": content[offset:offset + limit]}
 
 
 @mcp.tool(annotations=WRITE, structured_output=True)

@@ -1,5 +1,6 @@
 """Contract and end-to-end tests for the experimental MCP service."""
 import asyncio
+import hashlib
 import json
 import math
 import os
@@ -68,6 +69,7 @@ def test_stdio_end_to_end(tmp_path):
                 assert tools["measurement_get_analysis"].annotations.readOnlyHint is True
                 caps = result(await client.call_tool("measurement_capabilities", {}))
                 assert caps["techniques"]["generic_1d_trace"]
+                assert {"structured_traces", "delimited_wide", "delimited_long"}.issubset(caps["input_formats"])
                 assert caps["techniques"]["relative_sec"], "install the corrected measure.sec revision for this test"
                 x = [1 + i * 0.02 for i in range(101)]
                 y = [math.exp(-0.5 * ((v - 2) / 0.16) ** 2) for v in x]
@@ -126,9 +128,39 @@ def test_stdio_end_to_end(tmp_path):
                 csv_ds = result(await client.call_tool("measurement_register_csv", {"title":"CSV", "csv_text":text,
                                 "axis_column":"time", "signal_column":"response", "metadata":meta}))
                 assert csv_ds["point_count"] == 3
+                assert csv_ds["source_sha256"] == hashlib.sha256(text.encode()).hexdigest()
+                source = result(await client.call_tool("measurement_read_source", {"dataset_id": csv_ds["dataset_id"], "offset": 0, "limit": 5}))
+                assert source["text"] == text[:5] and source["next_offset"] == 5
+                csv_analysis = result(await client.call_tool("measurement_analyze_chromatogram", {"dataset_id": csv_ds["dataset_id"], "trace_id":"t1", "method":{}}))
+                assert csv_analysis["provenance"]["source_sha256"] == csv_ds["source_sha256"]
+                wide_text = "\ufefftime;ri;uv\n1;0.1;0.2\n2;1;2\n3;0.1;0.2\n"
+                uv = meta | {"trace_id":"t2", "channel":"uv", "detector":"UV"}
+                wide = result(await client.call_tool("measurement_register_wide_csv", {"title":"Two channels", "csv_text":wide_text,
+                    "axis_column":"time", "delimiter":";", "channels":[{"column":"ri", "metadata":meta}, {"column":"uv", "metadata":uv}]}))
+                assert wide["trace_count"] == 2 and wide["point_count"] == 6
+                wide_inspect = result(await client.call_tool("measurement_inspect_dataset", {"dataset_id":wide["dataset_id"]}))
+                assert [t["channel"] for t in wide_inspect["traces"]] == ["ri", "uv"]
+                assert wide_inspect["source"]["mapping"]["delimiter"] == ";"
+                wide_source = result(await client.call_tool("measurement_read_source", {"dataset_id":wide["dataset_id"]}))
+                assert wide_source["text"] == wide_text and wide_source["source_sha256"] == hashlib.sha256(wide_text.encode()).hexdigest()
+                long_text = ("sample,detector,time,response\nA,RI,1,0\nB,UV,1,0\nA,RI,2,1\n"
+                             "B,UV,2.5,2\nA,RI,3,0\nB,UV,4,0\n")
+                uv_other = uv | {"sample_id":"s2", "injection_id":"i2"}
+                long_args = {"title":"Grouped runs", "csv_text":long_text, "axis_column":"time", "signal_column":"response",
+                    "group_columns":["sample", "detector"], "groups":[{"values":["A","RI"], "metadata":meta},
+                                                                       {"values":["B","UV"], "metadata":uv_other}]}
+                long_ds = result(await client.call_tool("measurement_register_long_csv", long_args))
+                long_info = result(await client.call_tool("measurement_inspect_dataset", {"dataset_id":long_ds["dataset_id"]}))
+                assert long_ds["trace_count"] == 2 and long_info["traces"][1]["axis_range"] == [1, 4]
+                assert long_info["source"]["mapping"]["group_columns"] == ["sample", "detector"]
+                unmapped = await client.call_tool("measurement_register_long_csv", long_args | {"groups":long_args["groups"][:1]})
+                assert unmapped.isError
                 bad = await client.call_tool("measurement_register_csv", {"title":"CSV", "csv_text":"x,x\n1,2\n",
                                 "axis_column":"x", "signal_column":"x", "metadata":meta})
                 assert bad.isError
+                missing = await client.call_tool("measurement_register_wide_csv", {"title":"missing", "csv_text":"time;ri;uv\n1;0;0\n2;1;\n3;0;0\n",
+                    "axis_column":"time", "delimiter":";", "channels":[{"column":"ri", "metadata":meta}, {"column":"uv", "metadata":uv}]})
+                assert missing.isError
     asyncio.run(exercise())
 
 
@@ -165,6 +197,11 @@ def test_http_user_isolation_and_missing_identity(tmp_path):
         assert not (await call_as(user_a, "measurement_inspect_dataset", {"dataset_id": registered["dataset_id"]})).isError
         assert (await call_as(user_b, "measurement_inspect_dataset", {"dataset_id": registered["dataset_id"]})).isError
         assert (await call_as(None, "measurement_inspect_dataset", {"dataset_id": registered["dataset_id"]})).isError
+        meta = {k:v for k,v in trace().items() if k not in ("axis", "signal")}
+        csv_ds = result(await call_as(user_a, "measurement_register_csv", {"title":"private CSV", "csv_text":"x,y\n1,1\n2,2\n3,1\n",
+            "axis_column":"x", "signal_column":"y", "metadata":meta}))
+        assert not (await call_as(user_a, "measurement_read_source", {"dataset_id":csv_ds["dataset_id"]})).isError
+        assert (await call_as(user_b, "measurement_read_source", {"dataset_id":csv_ds["dataset_id"]})).isError
     try:
         asyncio.run(exercise())
     finally:

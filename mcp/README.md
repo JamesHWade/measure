@@ -4,7 +4,8 @@ This is a first end-to-end service for agents that work with one-dimensional ana
 
 ## What it does
 
-- Registers numeric traces with separate sample, injection and detector-channel identities, units, batch, sample type and run order. It also accepts a single CSV/TSV trace with explicit column mapping. The caller supplies the data; the server does not open caller-supplied file paths.
+- Registers numeric traces with separate sample, injection and detector-channel identities, units, batch, sample type and run order. Delimited text may contain a single signal, multiple detector columns sharing an axis, or row-oriented groups with independent axes. Map columns and each trace's metadata explicitly. Comma, tab and semicolon delimiters are supported; unmapped columns are ignored, while unmapped row groups or missing numeric values are rejected. The caller supplies the data; the server does not open caller-supplied file paths.
+- Retains the original delimited text, its exact UTF-8 digest and the column mapping, alongside the normalized numeric dataset. The source text can be retrieved in bounded pages. Structured trace input is retained as its canonical dataset instead.
 - Inspects trace metadata without returning full arrays; detects and integrates chromatogram peaks using configurable baseline, smoothing and peak parameters.
 - Quantifies a caller-assigned peak with supplied linear response standards, reporting fit diagnostics and whether the estimate falls outside their concentration range. The caller must establish the peak identity and declare comparable response units and integration methods.
 - Calculates relative SEC molecular-weight averages and distributions using supplied calibration standards, a specified calibration fit and a concentration-proportional, baseline-corrected signal. The result includes calibration fit diagnostics, warnings and assumptions.
@@ -50,7 +51,7 @@ Configure an MCP client with the absolute paths to the Python interpreter and th
 }
 ```
 
-`measurement_capabilities` reports available backend support. Register a dataset with `measurement_register_dataset` or `measurement_register_csv`, inspect it, and then call `measurement_analyze_chromatogram` or `measurement_analyze_sec`. An explicitly identified chromatogram peak can be passed to `measurement_quantify_peak` with known response standards. Use `measurement_get_analysis`, `measurement_read_analysis_data` and `measurement_compare_sec` to retrieve results. Each completed analysis is an immutable record; re-running a method creates another record.
+`measurement_capabilities` reports available backend support. Register a dataset with `measurement_register_dataset`, `measurement_register_csv`, `measurement_register_wide_csv` or `measurement_register_long_csv`, inspect it, and then call `measurement_analyze_chromatogram` or `measurement_analyze_sec`. An explicitly identified chromatogram peak can be passed to `measurement_quantify_peak` with known response standards. Use `measurement_get_analysis`, `measurement_read_analysis_data` and `measurement_compare_sec` to retrieve results, or `measurement_read_source` for retained text. Each completed analysis is an immutable record; re-running a method creates another record.
 
 Stdio defaults to one `local` principal. Data are stored in `measure.sqlite3` under `MEASURE_MCP_DATA_DIR` (default `~/.local/share/measure-mcp`). Protect this directory as analytical data. There is no deletion/retention UI, backup policy, multi-node storage, quota per user, or request idempotency mechanism yet.
 
