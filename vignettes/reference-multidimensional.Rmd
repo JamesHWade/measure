@@ -51,6 +51,40 @@ lc_dad_data <- tibble(
 head(lc_dad_data, 12)
 ```
 
+The channel examples use a second small wide dataset. The UV and RI channels
+have slightly different location grids, and each row is one sample with a
+stable identifier.
+
+```{r multi-channel-data}
+channel_wide <- tibble::tibble(
+  sample_id = 101:103,
+  concentration = c(10, 25, 50),
+  uv_1 = c(1.0, 1.5, 2.0),
+  uv_2 = c(2.0, 2.5, 3.0),
+  uv_3 = c(1.2, 1.7, 2.2),
+  ri_1 = c(0.8, 1.0, 1.2),
+  ri_2 = c(1.8, 2.0, 2.2),
+  ri_3 = c(1.0, 1.2, 1.4)
+)
+uv_locations <- c(0, 1, 2)
+ri_locations <- c(0, 1.25, 2)
+
+channel_input_recipe <- function() {
+  recipe(concentration ~ ., data = channel_wide) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_wide(
+      starts_with("uv_"),
+      col_name = "uv",
+      location_values = uv_locations
+    ) |>
+    step_measure_input_wide(
+      starts_with("ri_"),
+      col_name = "ri",
+      location_values = ri_locations
+    )
+}
+```
+
 This is the typical "long format" for 2D analytical data, where each row represents a single measurement at a specific (time, wavelength) coordinate.
 
 ## Ingesting 2D Data
@@ -250,13 +284,17 @@ When working with multiple detector channels (e.g., UV + RI in SEC, or multiple 
 
 `step_measure_channel_align()` aligns multiple measure columns to a common grid:
 
-```{r channel-align, eval = FALSE}
-# Align UV and RI detector signals to the same time grid
-rec <- recipe(outcome ~ ., data = sec_data) |>
- step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
- step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
- step_measure_channel_align(uv, ri, method = "intersection") |>
- prep()
+```{r channel-align}
+channel_fit <- channel_input_recipe() |>
+  step_measure_channel_align(method = "union") |>
+  prep()
+
+aligned_channels <- bake(channel_fit, new_data = NULL)
+identical(
+  aligned_channels$uv[[1]]$location,
+  aligned_channels$ri[[1]]$location
+)
+aligned_channels$sample_id
 ```
 
 Methods include:
@@ -268,14 +306,15 @@ Methods include:
 
 `step_measure_channel_combine()` merges multiple channels:
 
-```{r channel-combine, eval = FALSE}
-# Stack channels into a single 2D measure (location x channel)
-rec <- recipe(outcome ~ ., data = multi_detector_data) |>
- step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
- step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
- step_measure_channel_align(uv, ri) |>
- step_measure_channel_combine(uv, ri, strategy = "stack") |>
- prep()
+```{r channel-combine}
+combined_fit <- channel_input_recipe() |>
+  step_measure_channel_align(method = "union") |>
+  step_measure_channel_combine(strategy = "stack") |>
+  prep()
+
+combined_channels <- bake(combined_fit, new_data = NULL)
+measure_ndim(combined_channels$.measures)
+combined_channels$sample_id
 ```
 
 Strategies include:
@@ -287,14 +326,15 @@ Strategies include:
 
 `step_measure_channel_ratio()` computes ratios between channels:
 
-```{r channel-ratio, eval = FALSE}
-# Compute UV/RI ratio for each sample
-rec <- recipe(outcome ~ ., data = sec_data) |>
- step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
- step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
- step_measure_channel_align(uv, ri) |>
- step_measure_channel_ratio(numerator = uv, denominator = ri) |>
- prep()
+```{r channel-ratio}
+ratio_fit <- channel_input_recipe() |>
+  step_measure_channel_align(method = "union") |>
+  step_measure_channel_ratio(numerator = "uv", denominator = "ri") |>
+  prep()
+
+channel_ratios <- bake(ratio_fit, new_data = NULL)
+find_measure_cols(channel_ratios)
+channel_ratios$sample_id
 ```
 
 ## Multi-Way Analysis
@@ -304,18 +344,29 @@ For extracting interpretable components from 2D or 3D measurement data, the pack
 ### PARAFAC Decomposition
 
 `step_measure_parafac()` performs Parallel Factor Analysis, extracting trilinear components:
-```{r parafac, eval = FALSE}
-# Extract 3 PARAFAC components from EEM fluorescence data
-rec <- recipe(concentration ~ ., data = eem_data) |>
- step_measure_input_long(
-   fluorescence,
-   location = vars(excitation, emission)
- ) |>
- step_measure_parafac(n_components = 3) |>
- prep()
+```{r parafac}
+if (requireNamespace("multiway", quietly = TRUE)) {
+  eem_data <- lc_dad_data |>
+    rename(
+      excitation = retention_time,
+      emission = wavelength,
+      fluorescence = absorbance
+    )
 
-# Result contains parafac_1, parafac_2, parafac_3 score columns
-baked <- bake(rec, new_data = NULL)
+  rec_parafac <- recipe(concentration ~ ., data = eem_data) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      fluorescence,
+      location = vars(excitation, emission)
+    ) |>
+    step_measure_parafac(n_components = 2, max_iter = 50) |>
+    prep()
+
+  bake(rec_parafac, new_data = NULL) |>
+    select(sample_id, starts_with("parafac_"))
+} else {
+  message("PARAFAC example skipped: install the optional multiway package.")
+}
 ```
 
 PARAFAC is particularly useful for:
@@ -327,33 +378,44 @@ PARAFAC is particularly useful for:
 
 `step_measure_tucker()` provides more flexibility with independent ranks per mode:
 
-```{r tucker, eval = FALSE}
-# Tucker decomposition with different ranks for each dimension
-rec <- recipe(concentration ~ ., data = lc_dad_data) |>
- step_measure_input_long(
-   absorbance,
-   location = vars(time, wavelength)
- ) |>
- step_measure_tucker(ranks = c(5, 3)) |>  # 5 time, 3 wavelength components
- prep()
+```{r tucker}
+if (requireNamespace("multiway", quietly = TRUE)) {
+  rec_tucker <- recipe(concentration ~ ., data = lc_dad_data) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      absorbance,
+      location = vars(retention_time, wavelength)
+    ) |>
+    step_measure_tucker(ranks = c(2, 2), max_iter = 50) |>
+    prep()
+
+  bake(rec_tucker, new_data = NULL) |>
+    select(sample_id, starts_with("tucker_"))
+} else {
+  message("Tucker example skipped: install the optional multiway package.")
+}
 ```
 
 ### MCR-ALS (Experimental)
 
 `step_measure_mcr_als()` implements Multivariate Curve Resolution with Alternating Least Squares:
 
-```{r mcr-als, eval = FALSE}
-# MCR-ALS with non-negativity constraints
-rec <- recipe(concentration ~ ., data = chrom_data) |>
- step_measure_input_long(
-   absorbance,
-   location = vars(time, wavelength)
- ) |>
- step_measure_mcr_als(
-   n_components = 3,
-   non_negativity = TRUE
- ) |>
- prep()
+```{r mcr-als}
+rec_mcr <- recipe(concentration ~ ., data = lc_dad_data) |>
+  update_role(sample_id, new_role = "id") |>
+  step_measure_input_long(
+    absorbance,
+    location = vars(retention_time, wavelength)
+  ) |>
+  step_measure_mcr_als(
+    n_components = 2,
+    max_iter = 50,
+    non_negativity = TRUE
+  ) |>
+  prep()
+
+bake(rec_mcr, new_data = NULL) |>
+  select(sample_id, starts_with("mcr_"))
 ```
 > **Note:** MCR-ALS is marked as experimental. The implementation uses a simple ALS algorithm suitable for exploratory analysis.
 
