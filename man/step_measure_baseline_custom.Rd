@@ -42,7 +42,9 @@ process. If \code{NULL} (the default), all measure columns (columns with class
 
 \item{tunable}{An optional named list specifying which arguments in \code{...}
 are tunable. Each element should be a list with \code{pkg}, \code{fun}, and
-optionally \code{range}. See Details.}
+optionally \code{range}. Each name must match exactly one named argument in
+\code{...}, and \code{pkg} and \code{fun} must be non-empty character strings. Fixed
+unnamed arguments are allowed but cannot be declared tunable.}
 
 \item{role}{Not used by this step since no new variables are created.}
 
