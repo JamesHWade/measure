@@ -29,3 +29,4 @@ docs
 ^Meta$
 ^AGENTS\.md$
 ^\.beads$
+^[.]git$

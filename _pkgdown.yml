@@ -149,6 +149,8 @@ reference:
   - step_measure_peaks_filter
   - step_measure_peaks_deconvolve
   - step_measure_peaks_to_table
+  - new_peaks_tbl
+  - new_peaks_list
   - is_peaks_list
   - find_peaks_cols
 - title: Peak Algorithm Registry
@@ -223,6 +225,12 @@ reference:
   - window_side
   - baseline_lambda
   - peak_location_min
+  - peak_min_height
+  - peak_min_distance
+  - peak_min_prominence
+  - peak_snr_threshold
+  - peak_fit_r_squared
+  - peak_fit_iterations
   - derivative_order
   - smooth_window
   - smooth_sigma

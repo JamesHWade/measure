@@ -1,0 +1,39 @@
+name: R quality checks
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Air
+        uses: posit-dev/setup-air@v1
+        with:
+          version: "0.12.0"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Jarl
+        run: python -m pip install --disable-pip-version-check "jarl-linter==0.7.1"
+
+      - name: Verify tool versions
+        run: |
+          test "$(air --version)" = "air 0.12.0"
+          test "$(jarl --version)" = "jarl 0.7.1"
+
+      - name: Check formatting
+        run: air format --check .
+
+      - name: Check R code
+        run: jarl check .

@@ -15,8 +15,21 @@ height, center, width (sigma), and tau (exponential decay constant).
 }
 \details{
 The EMG function models asymmetric peaks with tailing, common in
-chromatography. It is the convolution of a Gaussian with an exponential
-decay function.
+chromatography. It is the convolution of a precursor Gaussian with a
+one-sided exponential decay density. For positive \code{tau}, its value is:
+
+\deqn{
+f(x) = \frac{h \sigma \sqrt{2\pi}}{\tau}
+\exp\left(\frac{\sigma^2}{2\tau^2} - \frac{x-c}{\tau}\right)
+\Phi\left(\frac{x-c}{\sigma} - \frac{\sigma}{\tau}\right)
+}
+
+Here, \code{height} is the peak height of the precursor Gaussian, not the
+observed EMG maximum. The integrated area is therefore
+\code{height * width * sqrt(2 * pi)}. A non-positive \code{tau} returns the Gaussian
+limit. Fitting constrains precursor height to be nonnegative but leaves its
+upper bound unbounded because a long tail can make the observed apex much
+smaller than the precursor height.
 }
 \examples{
 model <- emg_peak_model()

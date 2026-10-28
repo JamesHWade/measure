@@ -450,18 +450,6 @@ tidy.step_measure_baseline_airpls <- function(x, ...) {
   )
 }
 
-#' @rdname tunable_measure
-#' @export
-tunable.step_measure_baseline_airpls <- function(x, ...) {
-  tibble::tibble(
-    name = "lambda",
-    call_info = list(list(pkg = "measure", fun = "baseline_lambda")),
-    source = "recipe",
-    component = "step_measure_baseline_airpls",
-    component_id = x$id
-  )
-}
-
 # ==============================================================================
 # step_measure_baseline_snip
 # ==============================================================================
@@ -876,18 +864,6 @@ tidy.step_measure_baseline_arpls <- function(x, ...) {
     lambda = x$lambda,
     ratio = x$ratio,
     id = x$id
-  )
-}
-
-#' @rdname tunable_measure
-#' @export
-tunable.step_measure_baseline_arpls <- function(x, ...) {
-  tibble::tibble(
-    name = "lambda",
-    call_info = list(list(pkg = "measure", fun = "baseline_lambda")),
-    source = "recipe",
-    component = "step_measure_baseline_arpls",
-    component_id = x$id
   )
 }
 

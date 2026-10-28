@@ -12,6 +12,40 @@
 # Test Helpers
 # ==============================================================================
 
+test_that("peak constructors expose the shared extensible data shape", {
+  peaks <- new_peaks_tbl(
+    peak_id = 1L,
+    location = 2,
+    height = 3,
+    left_base = 1,
+    right_base = 3,
+    area = 2,
+    algorithm_score = 0.95
+  )
+
+  expect_true("new_peaks_tbl" %in% getNamespaceExports("measure"))
+  expect_s3_class(peaks, "peaks_tbl")
+  expect_named(
+    peaks,
+    c(
+      "peak_id",
+      "location",
+      "height",
+      "left_base",
+      "right_base",
+      "area",
+      "algorithm_score"
+    )
+  )
+
+  peaks_list <- new_peaks_list(list(peaks))
+
+  expect_true("new_peaks_list" %in% getNamespaceExports("measure"))
+  expect_s3_class(peaks_list, "peaks_list")
+  expect_equal(peaks_list[[1]], peaks)
+  expect_equal(peaks_list[[1]]$algorithm_score, 0.95)
+})
+
 # Create test data with clear peaks
 create_peaked_data <- function() {
   # Create synthetic data with known peaks

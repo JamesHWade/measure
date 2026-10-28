@@ -716,7 +716,7 @@ measure_summarize <- function(
   )
 
   for (i in seq_len(n_samples)) {
-    tryCatch(
+    outcome <- tryCatch(
       {
         out <- .f(x[[i]], ...)
 
@@ -728,25 +728,23 @@ measure_summarize <- function(
           stop("Invalid output structure")
         }
 
-        result[[i]] <- out
+        list(result = out, error = NULL)
       },
       error = function(e) {
-        errors <<- rbind(
-          errors,
-          tibble::tibble(
-            column = .col_name,
-            sample = i,
-            error = conditionMessage(e)
-          )
-        )
-
-        if (is.null(.otherwise)) {
-          result[[i]] <<- x[[i]]
-        } else {
-          result[[i]] <<- .otherwise
-        }
+        fallback <- if (is.null(.otherwise)) x[[i]] else .otherwise
+        list(result = fallback, error = conditionMessage(e))
       }
     )
+
+    result[[i]] <- outcome$result
+    if (!is.null(outcome$error)) {
+      errors <- tibble::add_row(
+        errors,
+        column = .col_name,
+        sample = i,
+        error = outcome$error
+      )
+    }
   }
 
   list(

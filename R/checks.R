@@ -1,16 +1,3 @@
-check_missing_measures <- function(.data, loc) {
-  if (!is.na(loc)) {
-    return(invisible(NULL))
-  }
-  has_na <- !all(vctrs::vec_detect_complete(.data))
-  if (has_na) {
-    cli::cli_abort(
-      "Missing data are only allowed when the wave number is supplied."
-    )
-  }
-  invisible(NULL)
-}
-
 check_single_selector <- function(res, arg) {
   if (length(res) != 1) {
     cli::cli_abort(

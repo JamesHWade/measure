@@ -367,8 +367,8 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
     message = character()
   )
 
-  add_issue <- function(level, check, message) {
-    issues <<- tibble::add_row(
+  add_issue <- function(issues, level, check, message) {
+    tibble::add_row(
       issues,
       level = level,
       check = check,
@@ -382,13 +382,15 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
   # Check for input step
   input_steps <- grep("^step_measure_input", step_classes)
   if (length(input_steps) == 0) {
-    add_issue(
+    issues <- add_issue(
+      issues,
       "error",
       "no_input",
       "Recipe has no input step. Add step_measure_input_wide() or step_measure_input_long()."
     )
   } else if (length(input_steps) > 1) {
-    add_issue(
+    issues <- add_issue(
+      issues,
       "error",
       "multiple_inputs",
       paste(
@@ -402,7 +404,8 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
   # Check for output step
   output_steps <- grep("^step_measure_output", step_classes)
   if (length(output_steps) == 0) {
-    add_issue(
+    issues <- add_issue(
+      issues,
       "warning",
       "no_output",
       "Recipe has no output step. Data will remain in internal .measures format."
@@ -412,7 +415,8 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
   # Check step order
   if (length(input_steps) > 0 && length(output_steps) > 0) {
     if (min(output_steps) < max(input_steps)) {
-      add_issue(
+      issues <- add_issue(
+        issues,
         "error",
         "step_order",
         "Output step appears before input step. Reorder your recipe steps."
@@ -427,7 +431,8 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
     )
     if (length(processing_steps) > 0 && length(output_steps) > 0) {
       if (any(processing_steps > min(output_steps))) {
-        add_issue(
+        issues <- add_issue(
+          issues,
           "warning",
           "post_output_processing",
           "Processing steps found after output step. These won't affect the output."
@@ -444,7 +449,8 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
     has_id <- any(var_info$role == "id", na.rm = TRUE)
 
     if (n_predictors == 0 && length(input_steps) == 0) {
-      add_issue(
+      issues <- add_issue(
+        issues,
         "warning",
         "no_predictors",
         "No predictor columns identified. Check your recipe formula."
@@ -452,7 +458,8 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
     }
 
     if (!has_id) {
-      add_issue(
+      issues <- add_issue(
+        issues,
         "info",
         "no_id",
         "No ID column identified. Consider using update_role(col, new_role = 'id')."
@@ -461,7 +468,8 @@ check_measure_recipe <- function(recipe, strict = TRUE) {
 
     # Large number of columns warning
     if (n_predictors > 1000) {
-      add_issue(
+      issues <- add_issue(
+        issues,
         "info",
         "many_predictors",
         paste0(
