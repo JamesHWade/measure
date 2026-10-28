@@ -1,0 +1,31 @@
+name: MCP registry and HTTP contracts
+
+on:
+  pull_request:
+    paths:
+      - 'mcp/**'
+      - '.github/workflows/mcp-registry.yaml'
+  push:
+    branches: [main, master]
+    paths:
+      - 'mcp/**'
+      - '.github/workflows/mcp-registry.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install service and test dependencies
+        run: python -m pip install -r mcp/requirements.txt pytest
+      - name: Registry, local MCP and simulated HTTP ownership
+        # The numerical R integration is a separate prerequisite; these contracts
+        # deliberately test registry operation without an installed R backend.
+        run: python -m pytest -q mcp/tests -k 'not test_stdio_end_to_end'

@@ -96,6 +96,23 @@ def test_stdio_end_to_end(tmp_path):
                 outside = result(await client.call_tool("measurement_quantify_peak", {"analysis_id": chrom["analysis_id"],
                     "peak_id": peaks["data"][0]["peak_id"], "method": outside_method}))
                 assert outside["summary"]["outside_standard_range"] and outside["warnings"]
+                experiment = result(await client.call_tool("measurement_create_experiment", {
+                    "spec": {"title": "Synthetic quantitation experiment", "source": "synthetic-reference",
+                             "intended_conditions": [{"name": "sample_concentration", "value": 1, "unit": "mg/L"}]},
+                    "idempotency_key": "create-experiment"}))
+                attempt = result(await client.call_tool("measurement_record_attempt", {
+                    "experiment_id": experiment["experiment_id"], "spec": {"status": "completed",
+                    "measurements": [{"dataset_id": ds["dataset_id"], "trace_id": "t1"}]}, "idempotency_key": "record-attempt"}))
+                outcome_args = {"attempt_id": attempt["attempt_id"], "expected_attempt_revision": 1,
+                    "results": [{"metric": "assigned_A_concentration", "analyte_reference": "assigned A", "status": "observed",
+                                 "unit": "mg/L", "analysis_id": outside["analysis_id"], "summary_field": "concentration"}],
+                    "idempotency_key": "record-outcome"}
+                outcomes = result(await client.call_tool("measurement_record_results", outcome_args))
+                assert result(await client.call_tool("measurement_record_results", outcome_args)) == outcomes
+                outcome = result(await client.call_tool("measurement_get_result", {"result_id": outcomes["results"][0]["result_id"]}))
+                assert outcome["outcome"]["value"] == outside["summary"]["concentration"]
+                assert outcome["outcome"]["provenance"]["analysis_provenance"] == outside["provenance"]
+                assert outcome["outcome"]["provenance"]["analysis_warnings"] == outside["warnings"]
                 page = result(await client.call_tool("measurement_read_analysis_data", {"analysis_id": chrom["analysis_id"], "kind": "processed_trace", "offset": 5, "limit": 3}))
                 assert page["count"] == 101 and page["next_offset"] == 8 and len(page["data"]["axis"]) == 3
                 standards = [{"location": v, "molecular_weight_g_mol": 10 ** (6 - 0.4*v + 0.03*v*v)} for v in [1, 1.5, 2, 2.5, 3]]
@@ -204,6 +221,25 @@ def test_http_user_isolation_and_missing_identity(tmp_path):
             "axis_column":"x", "signal_column":"y", "metadata":meta}))
         assert not (await call_as(user_a, "measurement_read_source", {"dataset_id":csv_ds["dataset_id"]})).isError
         assert (await call_as(user_b, "measurement_read_source", {"dataset_id":csv_ds["dataset_id"]})).isError
+        exp = result(await call_as(user_a, "measurement_create_experiment", {
+            "spec": {"title": "Owner-scoped experiment", "source": "manual"}, "idempotency_key": "experiment"}))
+        assert (await call_as(user_b, "measurement_get_experiment", {"experiment_id": exp["experiment_id"]})).isError
+        assert (await call_as(None, "measurement_registry_capabilities", {})).isError
+        attempt = result(await call_as(user_a, "measurement_record_attempt", {
+            "experiment_id": exp["experiment_id"], "spec": {"status": "completed",
+            "measurements": [{"dataset_id": csv_ds["dataset_id"], "trace_id": "t1"}]}, "idempotency_key": "attempt"}))
+        outcomes = result(await call_as(user_a, "measurement_record_results", {
+            "attempt_id": attempt["attempt_id"], "expected_attempt_revision": 1,
+            "results": [{"metric": "zero", "status": "observed", "value": 0, "unit": "1"}], "idempotency_key": "outcome"}))
+        assert (await call_as(user_b, "measurement_get_attempt", {"attempt_id": attempt["attempt_id"]})).isError
+        assert (await call_as(user_b, "measurement_get_result", {"result_id": outcomes["results"][0]["result_id"]})).isError
+        assert (await call_as(user_b, "measurement_list_results", {"attempt_id": attempt["attempt_id"]})).isError
+        other_exp = result(await call_as(user_b, "measurement_create_experiment", {
+            "spec": {"title": "Other experiment", "source": "manual"}, "idempotency_key": "experiment"}))
+        assert other_exp["experiment_id"] != exp["experiment_id"]
+        assert (await call_as(user_b, "measurement_record_attempt", {"experiment_id": other_exp["experiment_id"],
+            "spec": {"status": "completed", "measurements": [{"dataset_id": csv_ds["dataset_id"], "trace_id": "t1"}]},
+            "idempotency_key": "cross-owner-attempt"})).isError
     try:
         asyncio.run(exercise())
     finally:

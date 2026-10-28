@@ -30,3 +30,5 @@ docs
 ^AGENTS\.md$
 ^\.beads$
 ^mcp$
+^\.pytest_cache$
+^\.git$

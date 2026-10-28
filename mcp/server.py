@@ -12,10 +12,8 @@ import io
 import json
 import math
 import os
-import sqlite3
 import subprocess
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
@@ -23,24 +21,16 @@ from mcp.server.fastmcp import Context, FastMCP
 from mcp.types import ToolAnnotations
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+import experiments as registry
+from experiments import AttemptSpec, ExperimentSpec, ResultSpec
+from storage import canonical, connect, db_path, now, sha256
+
 ROOT = Path(__file__).resolve().parent
 MAX_TRACES = 32
 MAX_POINTS = 50_000
 MAX_DATASET_POINTS = 150_000
 MAX_PAYLOAD_BYTES = 4_000_000
 MAX_PAGE = 1000
-
-
-def canonical(value: object) -> str:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
-
-
-def sha256(value: object) -> str:
-    return hashlib.sha256(canonical(value).encode("utf-8")).hexdigest()
-
-
-def now() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 
 class StrictModel(BaseModel):
@@ -194,35 +184,6 @@ def identity(ctx: Context) -> str:
     except (ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
         raise ValueError("Connect credentials must contain a unique user GUID") from exc
     return "connect:" + principal
-
-
-def db_path() -> Path:
-    root = Path(os.environ.get("MEASURE_MCP_DATA_DIR", str(Path.home() / ".local" / "share" / "measure-mcp")))
-    root.mkdir(mode=0o700, parents=True, exist_ok=True)
-    return root / "measure.sqlite3"
-
-
-def connect() -> sqlite3.Connection:
-    con = sqlite3.connect(db_path(), timeout=30)
-    con.execute("PRAGMA foreign_keys=ON")
-    con.executescript("""
-    CREATE TABLE IF NOT EXISTS datasets (
-      id TEXT PRIMARY KEY, owner TEXT NOT NULL, digest TEXT NOT NULL,
-      payload TEXT NOT NULL, created_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS analyses (
-      id TEXT PRIMARY KEY, owner TEXT NOT NULL, dataset_id TEXT NOT NULL,
-      trace_id TEXT NOT NULL, kind TEXT NOT NULL, method TEXT NOT NULL,
-      result TEXT NOT NULL, provenance TEXT NOT NULL, created_at TEXT NOT NULL,
-      FOREIGN KEY(dataset_id) REFERENCES datasets(id)
-    );
-    CREATE TABLE IF NOT EXISTS dataset_sources (
-      dataset_id TEXT PRIMARY KEY, kind TEXT NOT NULL, digest TEXT NOT NULL,
-      content TEXT NOT NULL, mapping TEXT NOT NULL,
-      FOREIGN KEY(dataset_id) REFERENCES datasets(id)
-    );
-    """)
-    return con
 
 
 def dataset_for(owner: str, dataset_id: str) -> tuple[dict, str]:
@@ -392,6 +353,93 @@ def save_analysis(owner: str, dataset_id: str, trace_id: str, kind: str, method:
 mcp = FastMCP("measure-separations", stateless_http=True, json_response=True, streamable_http_path="/mcp")
 READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=False, openWorldHint=False)
+RETRY_WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False)
+RequestKey = Annotated[str, Field(min_length=1, max_length=100)]
+RecordId = Annotated[str, Field(min_length=1, max_length=100)]
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_registry_capabilities(ctx: Context) -> dict[str, Any]:
+    """Describe the local experiment registry without requiring an R backend."""
+    identity(ctx)
+    return {"schema_version": registry.SCHEMA_VERSION, "qualification": "experimental",
+            "storage": "single_node_sqlite", "experiment_specs": "immutable",
+            "attempts": "append_only_revisions", "results": "immutable_with_explicit_supersession",
+            "conditions": ["numeric_with_units", "categorical", "boolean"],
+            "outcome_statuses": ["observed", "not_detected", "below_limit", "censored", "missing", "failed", "infeasible"],
+            "idempotency": "required_key_per_owner_for_registry_writes",
+            "bo_suggestions": False, "instrument_actuation": False,
+            "limits": {"record_bytes": registry.MAX_RECORD_BYTES, "page_size": registry.MAX_REGISTRY_PAGE,
+                       "conditions_per_set": 64, "measurements_per_attempt": 32, "results_per_batch": 50}}
+
+
+@mcp.tool(annotations=RETRY_WRITE, structured_output=True)
+def measurement_create_experiment(spec: ExperimentSpec, idempotency_key: RequestKey, ctx: Context) -> dict[str, Any]:
+    """Record an immutable experiment design with intended conditions; does not execute it or create an optimizer campaign."""
+    return registry.create_experiment(identity(ctx), spec, idempotency_key)
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_get_experiment(experiment_id: RecordId, ctx: Context) -> dict[str, Any]:
+    """Retrieve an experiment's intended conditions and caller-declared origin."""
+    return registry.get_experiment(identity(ctx), experiment_id)
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_list_experiments(ctx: Context, offset: Annotated[int, Field(ge=0)] = 0,
+                                 limit: Annotated[int, Field(ge=1, le=50)] = 20) -> dict[str, Any]:
+    """List a bounded page of the current owner's experiments."""
+    return registry.list_experiments(identity(ctx), offset, limit)
+
+
+@mcp.tool(annotations=RETRY_WRITE, structured_output=True)
+def measurement_record_attempt(experiment_id: RecordId, spec: AttemptSpec, idempotency_key: RequestKey, ctx: Context) -> dict[str, Any]:
+    """Record one attempted experiment, its reported status/actual conditions and owned dataset/trace links; no instrument action occurs."""
+    return registry.record_attempt(identity(ctx), experiment_id, spec, idempotency_key)
+
+
+@mcp.tool(annotations=RETRY_WRITE, structured_output=True)
+def measurement_revise_attempt(attempt_id: RecordId, expected_revision: Annotated[int, Field(ge=1)], spec: AttemptSpec,
+                                reason: Annotated[str, Field(min_length=1, max_length=2000)],
+                                idempotency_key: RequestKey, ctx: Context) -> dict[str, Any]:
+    """Append a corrected or updated reported attempt snapshot with an explanation and optimistic version check; earlier revisions remain available."""
+    return registry.revise_attempt(identity(ctx), attempt_id, expected_revision, spec, reason, idempotency_key)
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_get_attempt(attempt_id: RecordId, ctx: Context,
+                            revision: Annotated[int | None, Field(ge=1)] = None) -> dict[str, Any]:
+    """Read the latest or a specific historical attempt revision, including sample/injection metadata from its linked traces."""
+    return registry.get_attempt(identity(ctx), attempt_id, revision)
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_list_attempts(experiment_id: RecordId, ctx: Context, offset: Annotated[int, Field(ge=0)] = 0,
+                              limit: Annotated[int, Field(ge=1, le=50)] = 20) -> dict[str, Any]:
+    """List a bounded page of attempts and latest reported statuses for an owned experiment."""
+    return registry.list_attempts(identity(ctx), experiment_id, offset, limit)
+
+
+@mcp.tool(annotations=RETRY_WRITE, structured_output=True)
+def measurement_record_results(attempt_id: RecordId, expected_attempt_revision: Annotated[int, Field(ge=1)],
+                               results: Annotated[list[ResultSpec], Field(min_length=1, max_length=50)],
+                               idempotency_key: RequestKey, ctx: Context) -> dict[str, Any]:
+    """Atomically record outcomes against an exact attempt revision; copy numeric analysis-summary values or record explicit caller-reported outcomes. Units are caller-declared."""
+    return registry.record_results(identity(ctx), attempt_id, expected_attempt_revision, results, idempotency_key)
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_get_result(result_id: RecordId, ctx: Context) -> dict[str, Any]:
+    """Retrieve an immutable outcome with evidence provenance, attempt revision and any later superseding result."""
+    return registry.get_result(identity(ctx), result_id)
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_list_results(attempt_id: RecordId, ctx: Context, include_superseded: bool = False,
+                             offset: Annotated[int, Field(ge=0)] = 0,
+                             limit: Annotated[int, Field(ge=1, le=50)] = 20) -> dict[str, Any]:
+    """List compact current outcome heads or the full result history for an owned attempt; no missing outcome is converted to zero."""
+    return registry.list_results(identity(ctx), attempt_id, include_superseded, offset, limit)
 
 
 @mcp.tool(annotations=READ, structured_output=True)
