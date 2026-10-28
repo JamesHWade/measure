@@ -12,7 +12,6 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 MCP_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(MCP_DIR))
 import experiments
 import method_registry as registry
 from methods import MethodConstraints, MethodDeclaration
