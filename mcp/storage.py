@@ -8,7 +8,7 @@ import json
 import os
 from pathlib import Path
 import sqlite3
-from typing import Iterator
+from typing import Any, Callable, Iterator
 
 
 def canonical(value: object) -> str:
@@ -48,6 +48,13 @@ def connect() -> sqlite3.Connection:
       content TEXT NOT NULL, mapping TEXT NOT NULL,
       FOREIGN KEY(dataset_id) REFERENCES datasets(id)
     );
+    CREATE TABLE IF NOT EXISTS executable_methods (
+      id TEXT PRIMARY KEY, owner TEXT NOT NULL, title TEXT NOT NULL,
+      payload TEXT NOT NULL, input_digest TEXT NOT NULL,
+      program_digest TEXT NOT NULL, created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS methods_owner_order
+      ON executable_methods(owner, created_at, id);
     CREATE TABLE IF NOT EXISTS experiments (
       id TEXT PRIMARY KEY, owner TEXT NOT NULL, payload TEXT NOT NULL,
       digest TEXT NOT NULL, created_at TEXT NOT NULL
@@ -99,3 +106,23 @@ def registry_connection(write: bool = False) -> Iterator[sqlite3.Connection]:
         raise
     finally:
         con.close()
+
+
+def registry_mutation(owner: str, key: str, request: dict,
+                      action: Callable[[sqlite3.Connection], dict]) -> dict[str, Any]:
+    """Commit a bounded registry mutation and its retry receipt in one transaction."""
+    if not isinstance(key, str) or not 1 <= len(key) <= 100 or not key.strip():
+        raise ValueError("A nonempty idempotency key of at most 100 characters is required")
+    serialized = canonical(request)
+    if len(serialized.encode("utf-8")) > 64_000:
+        raise ValueError("Registry record or result batch exceeds the byte limit")
+    digest = sha256(request)
+    with registry_connection(write=True) as con:
+        receipt = con.execute("SELECT digest, response FROM registry_receipts WHERE owner=? AND request_key=?", (owner, key)).fetchone()
+        if receipt is not None:
+            if receipt["digest"] != digest:
+                raise ValueError("Idempotency key was already used for a different registry request")
+            return json.loads(receipt["response"])
+        response = action(con)
+        con.execute("INSERT INTO registry_receipts VALUES (?, ?, ?, ?, ?)", (owner, key, digest, canonical(response), now()))
+        return response

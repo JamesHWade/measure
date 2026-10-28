@@ -22,6 +22,9 @@ from mcp.types import ToolAnnotations
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 import experiments as registry
+import method_registry
+from methods import (MAX_CONSTRAINTS_BYTES, MAX_GRADIENT_POINTS, MAX_SOLVENTS, MAX_VIOLATIONS,
+                     MethodConstraints, MethodDeclaration, evaluate_method)
 from experiments import AttemptSpec, ExperimentSpec, ResultSpec
 from storage import canonical, connect, db_path, now, sha256
 
@@ -369,8 +372,59 @@ def measurement_registry_capabilities(ctx: Context) -> dict[str, Any]:
             "outcome_statuses": ["observed", "not_detected", "below_limit", "censored", "missing", "failed", "infeasible"],
             "idempotency": "required_key_per_owner_for_registry_writes",
             "bo_suggestions": False, "instrument_actuation": False,
+            "executable_method_links": "owned_immutable_methods_with_digests",
             "limits": {"record_bytes": registry.MAX_RECORD_BYTES, "page_size": registry.MAX_REGISTRY_PAGE,
                        "conditions_per_set": 64, "measurements_per_attempt": 32, "results_per_batch": 50}}
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_method_capabilities(ctx: Context) -> dict[str, Any]:
+    """Describe executable LC method validation and storage without an R backend."""
+    identity(ctx)
+    return {"schema_version": "1.0", "qualification": "experimental",
+            "programs": ["isocratic", "gradient_absolute", "gradient_duration"],
+            "interpolation": "piecewise_linear_flow_and_solvent_fractions",
+            "canonical_units": {"time": "min", "flow": "mL/min", "volume": "mL"},
+            "solvent_use": "exact_integral_of_linear_flow_times_linear_fraction",
+            "overheads": "separate_constant_pre_and_post_acquisition_phases",
+            "equipment_compatibility": "caller_declared_references_and_allowed_values",
+            "records": "immutable_owner_scoped_with_retry_receipts",
+            "optimizer_search_space": False, "pressure_prediction": False,
+            "instrument_actuation": False, "hardware_qualification": False,
+            "limits": {"record_bytes": method_registry.MAX_METHOD_BYTES,
+                       "page_size": method_registry.MAX_METHOD_PAGE,
+                       "solvents": MAX_SOLVENTS, "gradient_points": MAX_GRADIENT_POINTS,
+                       "constraint_bytes": MAX_CONSTRAINTS_BYTES, "violations": MAX_VIOLATIONS}}
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_validate_method(declaration: MethodDeclaration, ctx: Context,
+                                constraints: MethodConstraints | None = None) -> dict[str, Any]:
+    """Normalize a declared LC method, calculate time/solvent use and report feasibility; performs no execution or storage."""
+    identity(ctx)
+    evaluation = evaluate_method(declaration, constraints)
+    return evaluation.model_dump(mode="json")
+
+
+@mcp.tool(annotations=RETRY_WRITE, structured_output=True)
+def measurement_register_method(title: Annotated[str, Field(min_length=1, max_length=200)],
+                                declaration: MethodDeclaration, idempotency_key: RequestKey,
+                                ctx: Context, constraints: MethodConstraints | None = None) -> dict[str, Any]:
+    """Retain an immutable method that meets its declared constraints, with original units, canonical program and digests; does not run an instrument."""
+    return method_registry.register_method(identity(ctx), title, declaration, constraints, idempotency_key)
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_get_method(method_id: RecordId, ctx: Context) -> dict[str, Any]:
+    """Retrieve an owned immutable executable method and its declared limits."""
+    return method_registry.get_method(identity(ctx), method_id)
+
+
+@mcp.tool(annotations=READ, structured_output=True)
+def measurement_list_methods(ctx: Context, offset: Annotated[int, Field(ge=0)] = 0,
+                             limit: Annotated[int, Field(ge=1, le=50)] = 20) -> dict[str, Any]:
+    """List compact method identities in a bounded owner-scoped page."""
+    return method_registry.list_methods(identity(ctx), offset, limit)
 
 
 @mcp.tool(annotations=RETRY_WRITE, structured_output=True)
