@@ -33,9 +33,9 @@ preprocessing have been estimated.}
 
 \item{degree}{An integer for the polynomial degree to use for smoothing.}
 
-\item{window_side}{An integer for how many units there are on each side of
-the window. This means that \code{window_side = 1} has a total window width of
-3 (e.g., width is \code{2 * window_side + 1}).}
+\item{window_side}{An integer for how many measurement points there are on
+each side of the center point. This means that \code{window_side = 1} has a
+total window width of 3 (e.g., width is \code{2 * window_side + 1}).}
 
 \item{differentiation_order}{An integer for the degree of filtering (zero
 indicates no differentiation).}
@@ -60,8 +60,13 @@ step that smooths and filters the measurement sequence.
 \details{
 This method can both smooth out random noise and reduce between-predictor
 correlation. It fits a polynomial to a window of measurements and this results
-in fewer measurements than the input. Measurements are assumed to be equally
-spaced.
+in fewer measurements than the input. Measurements must be equally spaced,
+and all measurements processed together must have identical locations. The
+output retains the original location labels at the centers of each window.
+Calculations use unit spacing between measurement indices. Differentiation
+therefore follows \code{prospectr::savitzkyGolay()} with \code{delta.wav = 1}
+and is scaled per index step, without adjustment for the numeric spacing
+between location labels.
 
 The polynomial degree should be less than the window size. Also, window
 size must be greater than polynomial degree. If either case is true, the
@@ -71,8 +76,6 @@ warning).
 \strong{No selectors should be supplied to this step function}. The data should be in
 a special internal format produced by \code{\link[=step_measure_input_wide]{step_measure_input_wide()}} or
 \code{\link[=step_measure_input_long]{step_measure_input_long()}}.
-
-The measurement locations are reset to integer indices starting at one.
 }
 \section{Tidying}{
 When you \code{\link[recipes:tidy.recipe]{tidy()}} this step, a tibble with columns

@@ -14,9 +14,9 @@
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
 #' @param degree An integer for the polynomial degree to use for smoothing.
-#' @param window_side An integer for how many units there are on each side of
-#' the window. This means that `window_side = 1` has a total window width of
-#' 3 (e.g., width is `2 * window_side + 1`).
+#' @param window_side An integer for how many measurement points there are on
+#' each side of the center point. This means that `window_side = 1` has a total
+#' window width of 3 (e.g., width is `2 * window_side + 1`).
 #' @param differentiation_order An integer for the degree of filtering (zero
 #' indicates no differentiation).
 #' @param skip A logical. Should the step be skipped when the
@@ -35,8 +35,13 @@
 #' @details
 #' This method can both smooth out random noise and reduce between-predictor
 #' correlation. It fits a polynomial to a window of measurements and this results
-#' in fewer measurements than the input. Measurements are assumed to be equally
-#' spaced.
+#' in fewer measurements than the input. Measurements must be equally spaced,
+#' and all measurements processed together must have identical locations. The
+#' output retains the original location labels at the centers of each window.
+#' Calculations use unit spacing between measurement indices. Differentiation
+#' therefore follows `prospectr::savitzkyGolay()` with `delta.wav = 1` and is
+#' scaled per index step, without adjustment for the numeric spacing between
+#' location labels.
 #'
 #' The polynomial degree should be less than the window size. Also, window
 #' size must be greater than polynomial degree. If either case is true, the
@@ -46,8 +51,6 @@
 #' **No selectors should be supplied to this step function**. The data should be in
 #' a special internal format produced by [step_measure_input_wide()] or
 #' [step_measure_input_long()].
-#'
-#' The measurement locations are reset to integer indices starting at one.
 #'
 #' # Tidying
 #'
@@ -209,7 +212,6 @@ bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
         degree = object$degree,
         window = 2 * object$window_side + 1
       )
-    # TODO try to approximate the wave numbers that were input.
     new_data[[col]] <- new_measure_list(res)
   }
   tibble::as_tibble(new_data)
@@ -261,6 +263,23 @@ required_pkgs.step_measure_savitzky_golay <- function(x, ...) {
 .comp_savitzky_golay <- function(dat, diffs = 1, degree = 2, window = 3, ...) {
   rlang::check_installed("prospectr")
   loc <- dat[[1]]$location
+
+  same_locations <- vapply(
+    dat,
+    function(measure) {
+      measure_locations <- measure$location
+      length(measure_locations) == length(loc) &&
+        isTRUE(all(measure_locations == loc))
+    },
+    logical(1)
+  )
+
+  if (!all(same_locations)) {
+    cli::cli_abort(
+      "Savitzky-Golay processing requires all measurements to have identical locations."
+    )
+  }
+
   dat <- measure_to_matrix(dat)
 
   cl <-
@@ -282,10 +301,13 @@ required_pkgs.step_measure_savitzky_golay <- function(x, ...) {
     cli::cli_abort("Savitzky-Golay computations failed with error: {msg}")
   }
 
-  if (ncol(res) != ncol(dat)) {
-    # TODO Prob can do better; can we approximate what the wave numbers should be?
-    loc <- seq_len(ncol(res))
+  edge_points <- (ncol(dat) - ncol(res)) / 2
+  if (edge_points < 0 || edge_points != floor(edge_points)) {
+    cli::cli_abort(
+      "Savitzky-Golay output cannot be centered on the input measurement locations."
+    )
   }
+  loc <- loc[seq_len(ncol(res)) + edge_points]
 
   matrix_to_measure(res, loc)
 }
