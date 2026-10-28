@@ -123,6 +123,7 @@ test_that("Savitzky-Golay rejects measurements with different axes", {
 })
 
 test_that("Savitzky-Golay preserves locations through long recipe steps", {
+  skip_if_not_installed("prospectr")
   locations <- seq(30, 14, by = -2)
   index <- seq_along(locations)
   data <- tibble::tibble(

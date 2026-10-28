@@ -60,7 +60,8 @@ step that smooths and filters the measurement sequence.
 \details{
 This method can both smooth out random noise and reduce between-predictor
 correlation. It fits a polynomial to a window of measurements and this results
-in fewer measurements than the input. Measurements must be equally spaced,
+in fewer measurements than the input. Measurements are assumed to be equally
+spaced,
 and all measurements processed together must have identical locations. The
 output retains the original location labels at the centers of each window.
 Calculations use unit spacing between measurement indices. Differentiation
