@@ -41,8 +41,9 @@ step_measure_peaks_detect(
 
 - min_height:
 
-  Minimum peak height. If `snr_threshold = TRUE`, this is interpreted as
-  a signal-to-noise ratio threshold.
+  Minimum peak height in the measurement's signal units. If
+  `snr_threshold = TRUE`, the existing logical mode interprets this as a
+  multiple of the signal's median absolute deviation (MAD).
 
 - min_distance:
 
@@ -54,8 +55,12 @@ step_measure_peaks_detect(
 
 - snr_threshold:
 
-  Logical. If `TRUE`, `min_height` is interpreted as a signal-to-noise
-  ratio. Noise is estimated as the MAD of the signal.
+  `FALSE` (default) disables SNR filtering; `TRUE` retains the legacy
+  behavior of interpreting `min_height` as an SNR multiple. A
+  non-negative number sets an additional minimum SNR threshold in MAD
+  units. In numeric mode, a candidate must meet both the absolute
+  `min_height` and SNR thresholds. A numeric value of zero adds no SNR
+  filtering.
 
 - algorithm_params:
 
@@ -106,6 +111,19 @@ column containing the detected peaks for each sample. The original
 
 Additional algorithms can be registered by technique packs using
 [`register_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/register_peak_algorithm.md).
+
+The detection thresholds are tunable with
+[`peak_min_height()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md),
+[`peak_min_distance()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md),
+[`peak_min_prominence()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md),
+and
+[`peak_snr_threshold()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md).
+The default search ranges are only starting points: height and
+prominence use signal units, distance uses x-axis units, and SNR uses
+MAD units. Adjust the ranges to the measurement scale. Prominence is
+offered as a tunable threshold only for the built-in prominence
+algorithm. Tuning covers these direct scalar arguments; values inside
+`algorithm_params` are not extracted as recipe tuning parameters.
 
 **Peak properties stored:**
 

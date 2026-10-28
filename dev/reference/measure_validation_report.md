@@ -325,7 +325,7 @@ print(report)
 #> Method: HPLC-UV Assay
 #> Analyst: J. Smith
 #> Lab: Analytical Development Lab
-#> Date: 2026-04-04
+#> Date: 2026-10-28
 #> 
 #> 
 #> ── Validation Sections ──
@@ -342,9 +342,9 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-04-04 17:56:20.451235
-#> R version: 4.5.3
-#> measure version: 0.0.1.9002
+#> Generated: 2026-10-28 08:17:17.380763
+#> R version: 4.6.1
+#> measure version: 0.0.1.9003
 #> 
 #> ℹ Use `render_validation_report()` to generate document
 ```

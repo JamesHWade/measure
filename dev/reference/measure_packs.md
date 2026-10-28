@@ -33,5 +33,5 @@ measure_packs()
 #> # A tibble: 1 × 4
 #>   name    technique version    description                         
 #>   <chr>   <chr>     <chr>      <chr>                               
-#> 1 measure general   0.0.1.9002 Core measurement preprocessing steps
+#> 1 measure general   0.0.1.9003 Core measurement preprocessing steps
 ```

@@ -27,6 +27,7 @@ You can install the development version of measure from
 [GitHub](https://github.com/):
 
 ``` r
+
 # install.packages("pak")
 pak::pak("JamesHWade/measure")
 ```
@@ -37,6 +38,7 @@ The measure workflow follows the familiar recipes pattern: define a
 recipe, add steps, prep, and bake.
 
 ``` r
+
 library(measure)
 library(recipes)
 library(ggplot2)
@@ -58,6 +60,7 @@ head(meats_long)
 ### Building a preprocessing recipe
 
 ``` r
+
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   # Assign sample ID role (not used as predictor)
   update_role(id, new_role = "id") |>
@@ -74,6 +77,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 ### Preparing and applying the recipe
 
 ``` r
+
 # Prep learns any parameters from training data
 prepped <- prep(rec)
 #> Dropping 1 list column for wide output: channel
@@ -96,6 +100,7 @@ processed[1:5, 1:8]
 ### Visualizing the preprocessing
 
 ``` r
+
 # Get data at intermediate step (before output conversion)
 rec_for_viz <- recipe(water + fat + protein ~ ., data = meats_long) |>
 update_role(id, new_role = "id") |>
@@ -133,163 +138,163 @@ ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor
 
 ### Input/Output Steps
 
-| Step                                                                                                           | Description                                                      |
-|----------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)   | Convert wide format (measurements in columns) to internal format |
-| [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md)   | Convert long format (measurements in rows) to internal format    |
-| [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md) | Convert back to wide format for modeling                         |
-| [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md) | Convert back to long format                                      |
+| Step | Description |
+|----|----|
+| [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md) | Convert wide format (measurements in columns) to internal format |
+| [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md) | Convert long format (measurements in rows) to internal format |
+| [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md) | Convert back to wide format for modeling |
+| [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md) | Convert back to long format |
 
 ### Spectral Math
 
-| Step                                                                                                                 | Description                                      |
-|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
-| [`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md)         | Convert transmittance to absorbance              |
-| [`step_measure_transmittance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.md)   | Convert absorbance to transmittance              |
-| [`step_measure_log()`](https://jameshwade.github.io/measure/dev/reference/step_measure_log.md)                       | Log transformation with configurable base/offset |
-| [`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md)     | Kubelka-Munk transformation for reflectance      |
-| [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md)         | Simple finite difference derivatives             |
-| [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md) | Gap (Norris-Williams) derivatives                |
+| Step | Description |
+|----|----|
+| [`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md) | Convert transmittance to absorbance |
+| [`step_measure_transmittance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.md) | Convert absorbance to transmittance |
+| [`step_measure_log()`](https://jameshwade.github.io/measure/dev/reference/step_measure_log.md) | Log transformation with configurable base/offset |
+| [`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md) | Kubelka-Munk transformation for reflectance |
+| [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md) | Simple finite difference derivatives |
+| [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md) | Gap (Norris-Williams) derivatives |
 
 ### Filtering & Scatter Correction
 
-| Step                                                                                                                 | Description                                       |
-|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------|
-| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Smoothing and/or differentiation                  |
-| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md)                       | Standard Normal Variate normalization             |
-| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)                       | Multiplicative Scatter Correction                 |
-| [`step_measure_emsc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_emsc.md)                     | Extended MSC with wavelength-dependent correction |
-| [`step_measure_osc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_osc.md)                       | Orthogonal Signal Correction                      |
+| Step | Description |
+|----|----|
+| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Smoothing and/or differentiation |
+| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Standard Normal Variate normalization |
+| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Multiplicative Scatter Correction |
+| [`step_measure_emsc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_emsc.md) | Extended MSC with wavelength-dependent correction |
+| [`step_measure_osc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_osc.md) | Orthogonal Signal Correction |
 
 ### Smoothing & Noise Reduction
 
-| Step                                                                                                                   | Description                          |
-|------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
-| [`step_measure_smooth_ma()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_ma.md)             | Moving average smoothing             |
-| [`step_measure_smooth_median()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_median.md)     | Median filter (robust to spikes)     |
-| [`step_measure_smooth_gaussian()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_gaussian.md) | Gaussian kernel smoothing            |
-| [`step_measure_smooth_wavelet()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_wavelet.md)   | Wavelet denoising                    |
-| [`step_measure_filter_fourier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_filter_fourier.md)   | Fourier low-pass/high-pass filtering |
-| [`step_measure_despike()`](https://jameshwade.github.io/measure/dev/reference/step_measure_despike.md)                 | Spike/outlier detection and removal  |
+| Step | Description |
+|----|----|
+| [`step_measure_smooth_ma()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_ma.md) | Moving average smoothing |
+| [`step_measure_smooth_median()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_median.md) | Median filter (robust to spikes) |
+| [`step_measure_smooth_gaussian()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_gaussian.md) | Gaussian kernel smoothing |
+| [`step_measure_smooth_wavelet()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_wavelet.md) | Wavelet denoising |
+| [`step_measure_filter_fourier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_filter_fourier.md) | Fourier low-pass/high-pass filtering |
+| [`step_measure_despike()`](https://jameshwade.github.io/measure/dev/reference/step_measure_despike.md) | Spike/outlier detection and removal |
 
 ### Sample-wise Normalization
 
-| Step                                                                                                                     | Description                        |
-|--------------------------------------------------------------------------------------------------------------------------|------------------------------------|
-| [`step_measure_normalize_sum()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.md)       | Divide by sum (total intensity)    |
-| [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md)       | Divide by maximum value            |
-| [`step_measure_normalize_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.md)   | Scale to 0-1 range                 |
-| [`step_measure_normalize_vector()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.md) | L2/Euclidean normalization         |
-| [`step_measure_normalize_auc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.md)       | Divide by area under curve         |
-| [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md)     | Normalize by peak region (tunable) |
+| Step | Description |
+|----|----|
+| [`step_measure_normalize_sum()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.md) | Divide by sum (total intensity) |
+| [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md) | Divide by maximum value |
+| [`step_measure_normalize_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.md) | Scale to 0-1 range |
+| [`step_measure_normalize_vector()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.md) | L2/Euclidean normalization |
+| [`step_measure_normalize_auc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.md) | Divide by area under curve |
+| [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md) | Normalize by peak region (tunable) |
 
 ### Variable-wise Scaling
 
-| Step                                                                                                             | Description            |
-|------------------------------------------------------------------------------------------------------------------|------------------------|
-| [`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md)             | Mean centering         |
-| [`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md)     | Auto-scaling (z-score) |
-| [`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md) | Pareto scaling         |
-| [`step_measure_scale_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_range.md)   | Range scaling          |
-| [`step_measure_scale_vast()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.md)     | VAST scaling           |
+| Step | Description |
+|----|----|
+| [`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md) | Mean centering |
+| [`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md) | Auto-scaling (z-score) |
+| [`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md) | Pareto scaling |
+| [`step_measure_scale_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_range.md) | Range scaling |
+| [`step_measure_scale_vast()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.md) | VAST scaling |
 
 ### Baseline Correction
 
-| Step                                                                                                                     | Description                                                    |
-|--------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
-| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)         | Asymmetric least squares                                       |
-| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)       | Polynomial baseline fitting                                    |
-| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)           | Rolling ball/LOESS baseline                                    |
-| [`step_measure_baseline_rolling()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rolling.md) | Rolling ball algorithm                                         |
-| [`step_measure_baseline_airpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_airpls.md)   | Adaptive Iteratively Reweighted PLS                            |
-| [`step_measure_baseline_arpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_arpls.md)     | Asymmetrically Reweighted PLS                                  |
-| [`step_measure_baseline_snip()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_snip.md)       | SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping) |
-| [`step_measure_baseline_tophat()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_tophat.md)   | Top-hat morphological filter                                   |
-| [`step_measure_baseline_morph()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morph.md)     | Iterative morphological correction                             |
-| [`step_measure_baseline_minima()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_minima.md)   | Local minima interpolation                                     |
-| [`step_measure_baseline_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_auto.md)       | Automatic method selection                                     |
-| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)                   | Polynomial detrending                                          |
+| Step | Description |
+|----|----|
+| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md) | Asymmetric least squares |
+| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md) | Polynomial baseline fitting |
+| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md) | Rolling ball/LOESS baseline |
+| [`step_measure_baseline_rolling()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rolling.md) | Rolling ball algorithm |
+| [`step_measure_baseline_airpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_airpls.md) | Adaptive Iteratively Reweighted PLS |
+| [`step_measure_baseline_arpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_arpls.md) | Asymmetrically Reweighted PLS |
+| [`step_measure_baseline_snip()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_snip.md) | SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping) |
+| [`step_measure_baseline_tophat()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_tophat.md) | Top-hat morphological filter |
+| [`step_measure_baseline_morph()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morph.md) | Iterative morphological correction |
+| [`step_measure_baseline_minima()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_minima.md) | Local minima interpolation |
+| [`step_measure_baseline_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_auto.md) | Automatic method selection |
+| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md) | Polynomial detrending |
 
 ### Reference Corrections
 
-| Step                                                                                                                         | Description                         |
-|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
-| [`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md)         | Blank/background subtraction        |
-| [`step_measure_subtract_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.md) | Reference spectrum subtraction      |
-| [`step_measure_ratio_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.md)       | Reference ratio with optional blank |
+| Step | Description |
+|----|----|
+| [`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md) | Blank/background subtraction |
+| [`step_measure_subtract_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.md) | Reference spectrum subtraction |
+| [`step_measure_ratio_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.md) | Reference ratio with optional blank |
 
 ### Region Operations
 
-| Step                                                                                                     | Description                                   |
-|----------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-| [`step_measure_trim()`](https://jameshwade.github.io/measure/dev/reference/step_measure_trim.md)         | Keep measurements within specified x-range    |
-| [`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md)   | Remove measurements within specified range(s) |
-| [`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md) | Interpolate to new regular grid               |
+| Step | Description |
+|----|----|
+| [`step_measure_trim()`](https://jameshwade.github.io/measure/dev/reference/step_measure_trim.md) | Keep measurements within specified x-range |
+| [`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md) | Remove measurements within specified range(s) |
+| [`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md) | Interpolate to new regular grid |
 
 ### Alignment & Registration
 
-| Step                                                                                                                   | Description                             |
-|------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| [`step_measure_align_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_shift.md)         | Cross-correlation shift alignment       |
-| [`step_measure_align_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_reference.md) | Align to external reference spectrum    |
-| [`step_measure_align_dtw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_dtw.md)             | Dynamic Time Warping alignment          |
-| [`step_measure_align_ptw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_ptw.md)             | Parametric Time Warping                 |
-| [`step_measure_align_cow()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_cow.md)             | Correlation Optimized Warping (tunable) |
+| Step | Description |
+|----|----|
+| [`step_measure_align_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_shift.md) | Cross-correlation shift alignment |
+| [`step_measure_align_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_reference.md) | Align to external reference spectrum |
+| [`step_measure_align_dtw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_dtw.md) | Dynamic Time Warping alignment |
+| [`step_measure_align_ptw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_ptw.md) | Parametric Time Warping |
+| [`step_measure_align_cow()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_cow.md) | Correlation Optimized Warping (tunable) |
 
 ### Quality Control
 
-| Step                                                                                                             | Description                     |
-|------------------------------------------------------------------------------------------------------------------|---------------------------------|
-| [`step_measure_qc_snr()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_snr.md)             | Calculate signal-to-noise ratio |
-| [`step_measure_qc_saturated()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_saturated.md) | Detect saturated measurements   |
-| [`step_measure_qc_outlier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_outlier.md)     | Detect outlier samples          |
-| [`step_measure_impute()`](https://jameshwade.github.io/measure/dev/reference/step_measure_impute.md)             | Interpolate missing values      |
+| Step | Description |
+|----|----|
+| [`step_measure_qc_snr()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_snr.md) | Calculate signal-to-noise ratio |
+| [`step_measure_qc_saturated()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_saturated.md) | Detect saturated measurements |
+| [`step_measure_qc_outlier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_outlier.md) | Detect outlier samples |
+| [`step_measure_impute()`](https://jameshwade.github.io/measure/dev/reference/step_measure_impute.md) | Interpolate missing values |
 
 ### Peak Operations
 
-| Step                                                                                                                     | Description                                         |
-|--------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md)         | Detect peaks using prominence or derivative methods |
-| [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md)   | Calculate peak areas                                |
-| [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md)         | Filter peaks by height, area, or count              |
-| [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md) | Deconvolve overlapping peaks                        |
-| [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md)     | Convert peaks to wide format for modeling           |
+| Step | Description |
+|----|----|
+| [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md) | Detect peaks using prominence or derivative methods |
+| [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md) | Calculate peak areas |
+| [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md) | Filter peaks by height, area, or count |
+| [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md) | Deconvolve overlapping peaks |
+| [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md) | Convert peaks to wide format for modeling |
 
 ### SEC/GPC Analysis
 
-| Step                                                                                                                   | Description                                  |
-|------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| [`step_measure_mw_averages()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.md)         | Calculate Mn, Mw, Mz, Mp, and dispersity     |
+| Step | Description |
+|----|----|
+| [`step_measure_mw_averages()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_averages.md) | Calculate Mn, Mw, Mz, Mp, and dispersity |
 | [`step_measure_mw_distribution()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_distribution.md) | Generate molecular weight distribution curve |
-| [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md)       | Calculate molecular weight fractions         |
+| [`step_measure_mw_fractions()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mw_fractions.md) | Calculate molecular weight fractions |
 
 ### Feature Engineering
 
-| Step                                                                                                       | Description                                      |
-|------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
+| Step | Description |
+|----|----|
 | [`step_measure_integrals()`](https://jameshwade.github.io/measure/dev/reference/step_measure_integrals.md) | Calculate integrated areas for specified regions |
-| [`step_measure_ratios()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratios.md)       | Calculate ratios between integrated regions      |
-| [`step_measure_moments()`](https://jameshwade.github.io/measure/dev/reference/step_measure_moments.md)     | Calculate statistical moments from spectra       |
-| [`step_measure_bin()`](https://jameshwade.github.io/measure/dev/reference/step_measure_bin.md)             | Reduce spectrum to fewer points via binning      |
+| [`step_measure_ratios()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratios.md) | Calculate ratios between integrated regions |
+| [`step_measure_moments()`](https://jameshwade.github.io/measure/dev/reference/step_measure_moments.md) | Calculate statistical moments from spectra |
+| [`step_measure_bin()`](https://jameshwade.github.io/measure/dev/reference/step_measure_bin.md) | Reduce spectrum to fewer points via binning |
 
 ### Data Augmentation
 
-| Step                                                                                                               | Description                                |
-|--------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| Step | Description |
+|----|----|
 | [`step_measure_augment_noise()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_noise.md) | Add random noise for training augmentation |
-| [`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md) | Random x-axis shifts for shift invariance  |
-| [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md) | Random intensity scaling                   |
+| [`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md) | Random x-axis shifts for shift invariance |
+| [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md) | Random intensity scaling |
 
 ### Drift & Batch Correction
 
-| Step/Function                                                                                                          | Description                            |
-|------------------------------------------------------------------------------------------------------------------------|----------------------------------------|
-| [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md)   | QC-RLSC drift correction using LOESS   |
-| [`step_measure_drift_linear()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_linear.md)       | Linear drift correction                |
-| [`step_measure_drift_spline()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_spline.md)       | Spline-based drift correction          |
-| [`step_measure_qc_bracket()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_bracket.md)           | QC bracketing interpolation            |
-| [`step_measure_batch_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_batch_reference.md) | Reference-based batch correction       |
-| [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md)                 | Detect significant drift in QC samples |
+| Step/Function | Description |
+|----|----|
+| [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md) | QC-RLSC drift correction using LOESS |
+| [`step_measure_drift_linear()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_linear.md) | Linear drift correction |
+| [`step_measure_drift_spline()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_spline.md) | Spline-based drift correction |
+| [`step_measure_qc_bracket()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_bracket.md) | QC bracketing interpolation |
+| [`step_measure_batch_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_batch_reference.md) | Reference-based batch correction |
+| [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md) | Detect significant drift in QC samples |
 
 ## Analytical Validation Functions
 
@@ -299,61 +304,61 @@ method validation, designed for compatibility with ICH Q2(R2), ISO
 
 ### Calibration & Quantitation
 
-| Function                                                                                                                                                                    | Description                                        |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
-| [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md)                                                                | Fit weighted calibration curves (linear/quadratic) |
-| [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md)                                                        | Predict concentrations with uncertainty            |
-| [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)                                                          | Continuing calibration verification                |
-| [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md) / [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md) | Detection and quantitation limits                  |
+| Function | Description |
+|----|----|
+| [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md) | Fit weighted calibration curves (linear/quadratic) |
+| [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md) | Predict concentrations with uncertainty |
+| [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md) | Continuing calibration verification |
+| [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md) / [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md) | Detection and quantitation limits |
 
 ### Precision & Accuracy
 
-| Function                                                                                                                   | Description                                    |
-|----------------------------------------------------------------------------------------------------------------------------|------------------------------------------------|
-| [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md)                   | Within-run precision                           |
+| Function | Description |
+|----|----|
+| [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md) | Within-run precision |
 | [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md) | Between-run precision with variance components |
-| [`measure_reproducibility()`](https://jameshwade.github.io/measure/dev/reference/measure_reproducibility.md)               | Between-lab precision                          |
-| [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md)                               | Gage R&R / Measurement System Analysis         |
-| [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md)                             | Bias, recovery, and accuracy assessment        |
-| [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md)                           | Linearity with lack-of-fit testing             |
-| [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md)                           | Carryover evaluation                           |
+| [`measure_reproducibility()`](https://jameshwade.github.io/measure/dev/reference/measure_reproducibility.md) | Between-lab precision |
+| [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md) | Gage R&R / Measurement System Analysis |
+| [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md) | Bias, recovery, and accuracy assessment |
+| [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md) | Linearity with lack-of-fit testing |
+| [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md) | Carryover evaluation |
 
 ### Method Comparison
 
-| Function                                                                                                         | Description                                    |
-|------------------------------------------------------------------------------------------------------------------|------------------------------------------------|
-| [`measure_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.md)           | Bland-Altman analysis with limits of agreement |
-| [`measure_deming_regression()`](https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.md) | Deming regression for method comparison        |
-| [`measure_passing_bablok()`](https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.md)       | Passing-Bablok non-parametric regression       |
-| [`measure_proficiency_score()`](https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.md) | z-scores, En scores, zeta scores for PT        |
+| Function | Description |
+|----|----|
+| [`measure_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.md) | Bland-Altman analysis with limits of agreement |
+| [`measure_deming_regression()`](https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.md) | Deming regression for method comparison |
+| [`measure_passing_bablok()`](https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.md) | Passing-Bablok non-parametric regression |
+| [`measure_proficiency_score()`](https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.md) | z-scores, En scores, zeta scores for PT |
 
 ### Matrix Effects & Sample Prep QC
 
-| Function/Step                                                                                                                | Description                           |
-|------------------------------------------------------------------------------------------------------------------------------|---------------------------------------|
-| [`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md)                     | Quantify ion suppression/enhancement  |
-| [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md)   | Standard addition correction          |
-| [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md)     | Back-calculate diluted concentrations |
-| [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md) | Surrogate/internal standard recovery  |
+| Function/Step | Description |
+|----|----|
+| [`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md) | Quantify ion suppression/enhancement |
+| [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md) | Standard addition correction |
+| [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md) | Back-calculate diluted concentrations |
+| [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md) | Surrogate/internal standard recovery |
 
 ### Uncertainty & Quality Control
 
-| Function                                                                                                           | Description                        |
-|--------------------------------------------------------------------------------------------------------------------|------------------------------------|
-| [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md) | ISO GUM uncertainty budgets        |
-| [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md)               | Combined and expanded uncertainty  |
-| [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md)         | Shewhart, EWMA, or CUSUM limits    |
-| [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md)           | Westgard multi-rule control charts |
-| [`measure_system_suitability()`](https://jameshwade.github.io/measure/dev/reference/measure_system_suitability.md) | System suitability testing         |
+| Function | Description |
+|----|----|
+| [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md) | ISO GUM uncertainty budgets |
+| [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md) | Combined and expanded uncertainty |
+| [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md) | Shewhart, EWMA, or CUSUM limits |
+| [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md) | Westgard multi-rule control charts |
+| [`measure_system_suitability()`](https://jameshwade.github.io/measure/dev/reference/measure_system_suitability.md) | System suitability testing |
 
 ### Criteria System
 
-| Function                                                                                             | Description                    |
-|------------------------------------------------------------------------------------------------------|--------------------------------|
-| [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md)       | Define acceptance criteria     |
-| [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md)           | Evaluate data against criteria |
-| [`criteria_bioanalytical()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) | FDA/EMA bioanalytical presets  |
-| [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md)        | ICH Q2 validation presets      |
+| Function | Description |
+|----|----|
+| [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md) | Define acceptance criteria |
+| [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md) | Evaluate data against criteria |
+| [`criteria_bioanalytical()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) | FDA/EMA bioanalytical presets |
+| [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) | ICH Q2 validation presets |
 
 ## Learning more
 
@@ -373,17 +378,18 @@ method validation, designed for compatibility with ICH Q2(R2), ISO
 
 The package includes datasets for examples and testing:
 
-| Dataset              | Technique | Samples | Description                                                |
-|----------------------|-----------|---------|------------------------------------------------------------|
-| `meats_long`         | NIR       | 215     | NIR transmittance spectra of meat samples (from modeldata) |
-| `bioreactors_small`  | Raman     | 210     | Raman spectra from 15 small-scale bioreactors              |
-| `bioreactors_large`  | Raman     | 42      | Raman spectra from 3 large-scale bioreactors               |
-| `hplc_chromatograms` | HPLC-UV   | 20      | Simulated HPLC chromatograms with 5 compounds              |
-| `sec_chromatograms`  | SEC/GPC   | 10      | Simulated SEC chromatograms (5 standards + 5 polymers)     |
-| `sec_calibration`    | SEC/GPC   | 5       | Calibration standards for molecular weight curves          |
-| `maldi_spectra`      | MALDI-TOF | 16      | Simulated mass spectra (4 groups × 4 replicates)           |
+| Dataset | Technique | Samples | Description |
+|----|----|----|----|
+| `meats_long` | NIR | 215 | NIR transmittance spectra of meat samples (from modeldata) |
+| `bioreactors_small` | Raman | 210 | Raman spectra from 15 small-scale bioreactors |
+| `bioreactors_large` | Raman | 42 | Raman spectra from 3 large-scale bioreactors |
+| `hplc_chromatograms` | HPLC-UV | 20 | Simulated HPLC chromatograms with 5 compounds |
+| `sec_chromatograms` | SEC/GPC | 10 | Simulated SEC chromatograms (5 standards + 5 polymers) |
+| `sec_calibration` | SEC/GPC | 5 | Calibration standards for molecular weight curves |
+| `maldi_spectra` | MALDI-TOF | 16 | Simulated mass spectra (4 groups × 4 replicates) |
 
 ``` r
+
 # Load datasets
 data(meats_long)
 data(glucose_bioreactors)  # loads bioreactors_small and bioreactors_large
@@ -400,14 +406,15 @@ sources provide publicly available analytical measurement data:
 
 **R Packages with Spectral Data:**
 
-| Package                                                   | Dataset   | Technique | Description                            |
-|-----------------------------------------------------------|-----------|-----------|----------------------------------------|
-| [modeldata](https://modeldata.tidymodels.org/)            | `meats`   | NIR       | Meat composition (wide format version) |
-| [prospectr](https://github.com/l-ramirez-lopez/prospectr) | `NIRsoil` | NIR       | Soil analysis with 825 samples         |
-| [ChemoSpec](https://bryanhanson.github.io/ChemoSpec/)     | Various   | IR, NMR   | Multiple spectroscopy datasets         |
-| [hyperSpec](http://hyperspec.r-forge.r-project.org/)      | Various   | Raman, IR | Hyperspectral data examples            |
+| Package | Dataset | Technique | Description |
+|----|----|----|----|
+| [modeldata](https://modeldata.tidymodels.org/) | `meats` | NIR | Meat composition (wide format version) |
+| [prospectr](https://github.com/l-ramirez-lopez/prospectr) | `NIRsoil` | NIR | Soil analysis with 825 samples |
+| [ChemoSpec](https://bryanhanson.github.io/ChemoSpec/) | Various | IR, NMR | Multiple spectroscopy datasets |
+| [hyperSpec](http://hyperspec.r-forge.r-project.org/) | Various | Raman, IR | Hyperspectral data examples |
 
 ``` r
+
 # Example: Load NIRsoil from prospectr
 # install.packages("prospectr")
 data(NIRsoil, package = "prospectr")
@@ -427,12 +434,12 @@ data(NIRsoil, package = "prospectr")
 
 **Domain-Specific Databases:**
 
-| Database                      | Data Type            | URL                                    |
-|-------------------------------|----------------------|----------------------------------------|
-| MassBank                      | Mass spectra         | <https://massbank.eu/MassBank/>        |
-| HMDB                          | NMR, MS metabolomics | <https://hmdb.ca/>                     |
-| NMRShiftDB                    | NMR spectra          | <https://nmrshiftdb.nmr.uni-koeln.de/> |
-| Crystallography Open Database | XRD patterns         | <https://www.crystallography.net/cod/> |
+| Database | Data Type | URL |
+|----|----|----|
+| MassBank | Mass spectra | <https://massbank.eu/MassBank/> |
+| HMDB | NMR, MS metabolomics | <https://hmdb.ca/> |
+| NMRShiftDB | NMR spectra | <https://nmrshiftdb.nmr.uni-koeln.de/> |
+| Crystallography Open Database | XRD patterns | <https://www.crystallography.net/cod/> |
 
 ## Related packages
 
@@ -613,6 +620,10 @@ Peak detection, integration, and analysis for chromatography
   : Deconvolve Overlapping Peaks
 - [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md)
   : Convert Peaks to Tidy Table
+- [`new_peaks_tbl()`](https://jameshwade.github.io/measure/dev/reference/new_peaks_tbl.md)
+  : Create a new peaks tibble
+- [`new_peaks_list()`](https://jameshwade.github.io/measure/dev/reference/new_peaks_list.md)
+  : Create a new peaks list
 - [`is_peaks_list()`](https://jameshwade.github.io/measure/dev/reference/is_peaks_list.md)
   : Test if object is a peaks list
 - [`find_peaks_cols()`](https://jameshwade.github.io/measure/dev/reference/find_peaks_cols.md)
@@ -761,6 +772,13 @@ Parameters for hyperparameter tuning with dials
 - [`peak_location_min()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
   [`peak_location_max()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
   : Parameters for peak normalization
+- [`peak_min_height()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_min_distance()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_min_prominence()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_snr_threshold()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_fit_r_squared()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_fit_iterations()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  : Peak detection and deconvolution tuning parameters
 - [`derivative_order()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
   [`derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
   [`derivative_segment()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)

@@ -1,6 +1,7 @@
 # Explanation: Internal Class System
 
 ``` r
+
 library(measure)
 library(recipes)
 ```
@@ -39,6 +40,7 @@ measure uses a two-level class hierarchy:
 A single measurement - a tibble with `location` and `value` columns:
 
 ``` r
+
 # After preprocessing, each row's .measures element is a measure_tbl
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
@@ -79,6 +81,7 @@ A list column containing multiple `measure_tbl` objects - one per row in
 your data:
 
 ``` r
+
 # The .measures column itself is a measure_list
 class(result$.measures)
 #> [1] "measure_list"  "vctrs_list_of" "vctrs_vctr"    "list"
@@ -112,6 +115,7 @@ measure provides helper functions to find and validate measure columns:
 Test if an object has the appropriate class:
 
 ``` r
+
 is_measure_list(result$.measures)
 #> [1] TRUE
 is_measure_tbl(result$.measures[[1]])
@@ -129,6 +133,7 @@ is_measure_tbl(tibble::tibble(location = 1:5, value = rnorm(5)))
 Find all measure columns in a data frame:
 
 ``` r
+
 find_measure_cols(result)
 #> [1] ".measures"
 ```
@@ -139,6 +144,7 @@ Check that a data frame has at least one measure column, erroring if
 not:
 
 ``` r
+
 has_measure_col(result)
 ```
 
@@ -162,6 +168,7 @@ The class-based approach provides several benefits:
 If you’re writing functions that work with measure data:
 
 ``` r
+
 my_function <- function(data) {
   # Validate input has measure columns
   has_measure_col(data)
@@ -194,6 +201,7 @@ When developing a custom transformation, use
 to test it interactively:
 
 ``` r
+
 # Apply a transformation to each sample's measurements
 centered <- measure_map(result, ~ {
   .x$value <- .x$value - mean(.x$value)
@@ -212,6 +220,7 @@ is for exploration only. Once your transformation works, move it to
 for reproducible pipelines:
 
 ``` r
+
 # For production use
 rec <- recipe(...) |>
   step_measure_input_long(...) |>
@@ -224,6 +233,7 @@ When exploring data that might have problematic samples, use the safer
 variant:
 
 ``` r
+
 result <- measure_map_safely(data, risky_function)
 
 # Check which samples failed
@@ -239,6 +249,7 @@ Compute summary statistics across all samples at each measurement
 location:
 
 ``` r
+
 # Default: mean and SD at each location
 stats <- measure_summarize(result)
 head(stats)
@@ -270,6 +281,7 @@ spectra) that need separate processing.
 Use the `col_name` parameter in input steps:
 
 ``` r
+
 rec <- recipe(outcome ~ ., data = my_data) |>
   step_measure_input_wide(
     starts_with("uv_"),
@@ -286,6 +298,7 @@ rec <- recipe(outcome ~ ., data = my_data) |>
 By default, processing steps operate on **all** measure columns:
 
 ``` r
+
 rec <- rec |>
   step_measure_snv()  # Applies to both .uv_spectrum and .ms_spectrum
 ```
@@ -293,6 +306,7 @@ rec <- rec |>
 To process specific columns, use the `measures` parameter:
 
 ``` r
+
 rec <- rec |>
   step_measure_snv(measures = ".uv_spectrum")  # Only UV
 ```
@@ -303,6 +317,7 @@ When multiple measure columns exist, output steps require you to specify
 which column to output:
 
 ``` r
+
 rec <- rec |>
   step_measure_output_wide(measures = ".uv_spectrum", prefix = "uv_") |>
   step_measure_output_wide(measures = ".ms_spectrum", prefix = "ms_")

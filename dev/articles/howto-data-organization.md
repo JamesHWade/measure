@@ -1,6 +1,7 @@
 # How-To: Data Organization and Diagnostics
 
 ``` r
+
 library(measure)
 library(recipes)
 library(dplyr)
@@ -41,6 +42,7 @@ function automatically detects these patterns:
 ### Example: Identifying columns in wide-format data
 
 ``` r
+
 # Create example wide-format spectral data
 spec_data <- data.frame(
  sample_id = paste0("S", 1:5),
@@ -80,6 +82,7 @@ For a quick overview, use
 [`measure_column_summary()`](https://jameshwade.github.io/measure/dev/reference/measure_column_summary.md):
 
 ``` r
+
 measure_column_summary(spec_data)
 #> # A tibble: 2 × 3
 #>   type       n_columns example_cols                   
@@ -110,6 +113,7 @@ The
 function provides a convenient way to assign multiple roles at once:
 
 ``` r
+
 rec <- recipe(concentration ~ ., data = spec_data) |>
   set_measure_roles(
     id_cols = sample_id,
@@ -141,6 +145,7 @@ For analytical chemistry workflows, you might want to identify special
 sample types and metadata columns:
 
 ``` r
+
 # Example with metadata columns
 analytical_data <- data.frame(
   sample_id = c("S1", "S2", "S3", "S4", "S5", "S6"),
@@ -178,6 +183,7 @@ Before running a preprocessing pipeline,
 validates the recipe structure and identifies potential issues:
 
 ``` r
+
 # A well-structured recipe
 data(meats_long)
 
@@ -206,6 +212,7 @@ after output step
 **Info** (suggestions): - No ID column - Large number of predictors
 
 ``` r
+
 # A recipe with issues
 bad_rec <- recipe(water ~ ., data = meats_long) |>
   step_measure_snv()
@@ -227,6 +234,7 @@ Use `strict = FALSE` for interactive feedback that prints directly to
 the console:
 
 ``` r
+
 check_measure_recipe(bad_rec, strict = FALSE)
 #> ✖ Recipe has no input step. Add step_measure_input_wide() or step_measure_input_long().
 #> ! Recipe has no output step. Data will remain in internal .measures format.
@@ -242,6 +250,7 @@ methods for quick visualization of spectral data.
 ### Plotting a single spectrum
 
 ``` r
+
 # Create a single spectrum
 spec <- new_measure_tbl(
   location = seq(1000, 1100, by = 1),
@@ -256,6 +265,7 @@ autoplot(spec)
 ### Plotting multiple spectra
 
 ``` r
+
 # Process some data to get a measure_list
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
@@ -275,6 +285,7 @@ autoplot(baked$.measures, max_spectra = 20)
 Use `summary = TRUE` to overlay mean ± standard deviation:
 
 ``` r
+
 autoplot(baked$.measures, summary = TRUE, max_spectra = 30, alpha = 0.2)
 ```
 
@@ -289,6 +300,7 @@ The
 method for recipes shows preprocessing effects:
 
 ``` r
+
 # Create a preprocessing recipe
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
@@ -310,6 +322,7 @@ autoplot(rec, n_samples = 10)
 ### Summary statistics view
 
 ``` r
+
 autoplot(rec, which = "summary", n_samples = 50)
 ```
 
@@ -322,6 +335,7 @@ Use
 to compare different preprocessing approaches side-by-side:
 
 ``` r
+
 # Define different preprocessing strategies
 base_rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
@@ -359,6 +373,7 @@ plot_measure_comparison(
 For a cleaner comparison, use `summary_only = TRUE`:
 
 ``` r
+
 plot_measure_comparison(
   "SNV" = snv_rec,
   "SG + SNV" = sg_snv_rec,
@@ -377,6 +392,7 @@ The
 function creates publication-ready summary plots:
 
 ``` r
+
 baked <- bake(sg_snv_rec, new_data = NULL)
 measure_plot_summary(baked)
 ```
@@ -386,6 +402,7 @@ measure_plot_summary(baked)
 Show the full range with `show_range = TRUE`:
 
 ``` r
+
 measure_plot_summary(baked, show_range = TRUE)
 ```
 

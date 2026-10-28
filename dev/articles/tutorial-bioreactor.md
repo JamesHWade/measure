@@ -1,6 +1,7 @@
 # Tutorial: Bioreactor Glucose Prediction
 
 ``` r
+
 library(measure)
 library(recipes)
 library(dplyr)
@@ -21,6 +22,7 @@ experiments described in Kuhn and Johnson’s *Feature Engineering and
 Selection* (2020).
 
 ``` r
+
 data(glucose_bioreactors)
 
 # Small-scale bioreactors (15 reactors, 14 days)
@@ -41,6 +43,7 @@ Each dataset has: - 2,651 spectral channels (Raman wavenumbers) -
 Let’s visualize some spectra from the small-scale reactors:
 
 ``` r
+
 # Get spectral column names (numeric wavenumbers)
 spec_cols <- names(bioreactors_small)[sapply(names(bioreactors_small), function(x) !is.na(suppressWarnings(as.numeric(x))))]
 
@@ -80,6 +83,7 @@ For Raman spectroscopy, a typical preprocessing pipeline includes:
 3.  Normalization for instrument variations
 
 ``` r
+
 # Use first 500 spectral columns for faster example
 spec_cols_subset <- spec_cols[1:500]
 wavenumbers <- as.numeric(spec_cols_subset)
@@ -127,6 +131,7 @@ rec
 ## Preparing the data
 
 ``` r
+
 # Prep the recipe (learns parameters from training data)
 rec_prepped <- prep(rec)
 
@@ -145,6 +150,7 @@ columns have been transformed and renamed with prefix `raman_`
 ## Visualize preprocessed spectra
 
 ``` r
+
 # Get preprocessed spectral columns
 proc_cols <- names(train_processed)[grepl("^raman_", names(train_processed))]
 
@@ -179,6 +185,7 @@ ggplot(proc_viz, aes(x = wavenumber, y = value, group = sample_id, color = gluco
 Now we can fit a model to predict glucose:
 
 ``` r
+
 library(parsnip)
 
 # Simple linear model (PLS would be better for real applications)
@@ -201,7 +208,7 @@ train_preds |>
 #> # A tibble: 1 × 2
 #>       rmse r_squared
 #>      <dbl>     <dbl>
-#> 1 1.76e-12         1
+#> 1 8.23e-13         1
 ```
 
 ## Applying to new data
@@ -210,6 +217,7 @@ The key advantage of the recipes framework is consistent preprocessing
 of new data:
 
 ``` r
+
 # Prepare test data from large-scale bioreactors
 test_data <- bioreactors_large |>
   select(glucose, day, batch_id, all_of(spec_cols_subset))

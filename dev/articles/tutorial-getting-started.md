@@ -1,6 +1,7 @@
 # Tutorial: Getting Started with measure
 
 ``` r
+
 library(measure)
 library(recipes)
 library(dplyr)
@@ -47,6 +48,7 @@ NIR (Near-Infrared) transmittance spectra of meat samples, with the goal
 of predicting water, fat, and protein content.
 
 ``` r
+
 data(meats_long)
 
 # Each sample has 100 spectral channels
@@ -71,6 +73,7 @@ The data is in “long” format where each row represents one measurement
 at one channel for one sample. Let’s visualize a few spectra:
 
 ``` r
+
 meats_long |>
   filter(id <= 10) |>
   ggplot(aes(x = channel, y = transmittance, group = id, color = factor(id))) +
@@ -92,6 +95,7 @@ We start by creating a recipe that specifies the outcome variables and
 predictors:
 
 ``` r
+
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   # Mark 'id' as an identifier, not a predictor
   update_role(id, new_role = "id")
@@ -115,6 +119,7 @@ This converts the `transmittance` values (indexed by `channel`) into
 measure’s internal format:
 
 ``` r
+
 rec <- rec |>
   step_measure_input_long(transmittance, location = vars(channel))
 
@@ -137,6 +142,7 @@ and `channel` columns are replaced by a `.measures` column containing
 nested tibbles:
 
 ``` r
+
 rec_prepped <- prep(rec)
 internal_format <- bake(rec_prepped, new_data = NULL)
 
@@ -182,6 +188,7 @@ Now we can add spectral preprocessing steps. These operate on the
 internal `.measures` column:
 
 ``` r
+
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -239,6 +246,7 @@ for details on all available options.
 Let’s see how this transforms our spectra:
 
 ``` r
+
 processed <- bake(prep(rec), new_data = NULL)
 
 # Unnest for plotting
@@ -267,6 +275,7 @@ For most modeling workflows, you’ll want data in wide format (one column
 per spectral feature):
 
 ``` r
+
 rec_full <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
@@ -280,7 +289,7 @@ modeling_data <- bake(prep(rec_full), new_data = NULL)
 # Ready for modeling!
 modeling_data[1:5, 1:10]
 #> # A tibble: 5 × 10
-#>      id water   fat protein  nir_01  nir_02  nir_03  nir_04  nir_05  nir_06
+#>      id water   fat protein  nir_06  nir_07  nir_08  nir_09  nir_10  nir_11
 #>   <int> <dbl> <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
 #> 1     1  60.5  22.5    16.7 -0.126  -0.110  -0.0928 -0.0745 -0.0553 -0.0346
 #> 2     2  46    40.1    13.5  0.0184  0.0381  0.0601  0.0841  0.110   0.137 
@@ -296,6 +305,7 @@ If your data starts in wide format (measurements as columns), use
 instead. Here’s an example using data from modeldata:
 
 ``` r
+
 library(modeldata)
 data(meats)
 
@@ -346,6 +356,7 @@ bake(prep(rec_wide), new_data = NULL)[1:5, 1:8]
 Like any recipe, you prep once on training data, then bake on new data:
 
 ``` r
+
 # Split the data
 set.seed(123)
 train_idx <- sample(nrow(meats), 180)
@@ -404,6 +415,7 @@ for complete examples including:
 The measure package includes several datasets for testing and examples:
 
 ``` r
+
 # NIR spectroscopy
 data(meats_long)
 # 215 meat samples, long format
@@ -430,6 +442,7 @@ data(maldi_spectra)
 For additional test data, several R packages provide spectral datasets:
 
 ``` r
+
 # modeldata - meats dataset in wide format
 library(modeldata)
 data(meats)

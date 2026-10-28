@@ -38,14 +38,14 @@ print(report)
 #> Title: Test Report
 #> Method: HPLC Assay
 #> Analyst: J. Smith
-#> Date: 2026-04-04
+#> Date: 2026-10-28
 #> 
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-04-04 17:56:24.182377
-#> R version: 4.5.3
-#> measure version: 0.0.1.9002
+#> Generated: 2026-10-28 08:17:21.053955
+#> R version: 4.6.1
+#> measure version: 0.0.1.9003
 #> 
 #> ℹ Use `render_validation_report()` to generate document
 ```

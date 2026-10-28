@@ -142,6 +142,10 @@ Peak detection, integration, and analysis for chromatography
   : Deconvolve Overlapping Peaks
 - [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md)
   : Convert Peaks to Tidy Table
+- [`new_peaks_tbl()`](https://jameshwade.github.io/measure/dev/reference/new_peaks_tbl.md)
+  : Create a new peaks tibble
+- [`new_peaks_list()`](https://jameshwade.github.io/measure/dev/reference/new_peaks_list.md)
+  : Create a new peaks list
 - [`is_peaks_list()`](https://jameshwade.github.io/measure/dev/reference/is_peaks_list.md)
   : Test if object is a peaks list
 - [`find_peaks_cols()`](https://jameshwade.github.io/measure/dev/reference/find_peaks_cols.md)
@@ -290,6 +294,13 @@ Parameters for hyperparameter tuning with dials
 - [`peak_location_min()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
   [`peak_location_max()`](https://jameshwade.github.io/measure/dev/reference/peak_location_min.md)
   : Parameters for peak normalization
+- [`peak_min_height()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_min_distance()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_min_prominence()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_snr_threshold()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_fit_r_squared()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  [`peak_fit_iterations()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
+  : Peak detection and deconvolution tuning parameters
 - [`derivative_order()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
   [`derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
   [`derivative_segment()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)

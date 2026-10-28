@@ -14,12 +14,6 @@ tunable(x, ...)
 # S3 method for class 'step_measure_baseline_custom'
 tunable(x, ...)
 
-# S3 method for class 'step_measure_baseline_airpls'
-tunable(x, ...)
-
-# S3 method for class 'step_measure_baseline_arpls'
-tunable(x, ...)
-
 # S3 method for class 'step_measure_baseline_aspls'
 tunable(x, ...)
 
@@ -84,6 +78,12 @@ tunable(x, ...)
 tunable(x, ...)
 
 # S3 method for class 'step_measure_qc_outlier'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_peaks_detect'
+tunable(x, ...)
+
+# S3 method for class 'step_measure_peaks_deconvolve'
 tunable(x, ...)
 
 # S3 method for class 'step_measure_emsc'

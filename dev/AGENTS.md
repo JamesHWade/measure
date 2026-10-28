@@ -67,6 +67,7 @@ preprocessing techniques.
 ## Development Commands
 
 ``` r
+
 # Generate documentation from roxygen2 comments
 devtools::document()
 
@@ -276,6 +277,7 @@ When adding new exported functions, ensure they are included in
 After the PR is merged:
 
 ``` r
+
 # Clean up: switch to main, pull changes, delete local/remote feature branch
 usethis::pr_finish()
 ```

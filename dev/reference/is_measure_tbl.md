@@ -22,7 +22,7 @@ Logical indicating if `x` inherits from `measure_tbl`.
 
 ``` r
 # Create a measure tibble
-mt <- measure:::new_measure_tbl(location = 1:5, value = rnorm(5))
+mt <- new_measure_tbl(location = 1:5, value = rnorm(5))
 is_measure_tbl(mt)
 #> [1] TRUE
 

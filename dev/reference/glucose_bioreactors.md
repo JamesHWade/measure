@@ -34,6 +34,7 @@ accurately predict what is happening in the large-scale bioreactors.
 ## Examples
 
 ``` r
+
 data(glucose_bioreactors)
 dim(bioreactors_small)
 #> [1]  210 2655

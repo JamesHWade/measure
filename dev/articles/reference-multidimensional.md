@@ -1,6 +1,7 @@
 # Reference: Multi-Dimensional Measurements
 
 ``` r
+
 library(measure)
 #> Loading required package: recipes
 #> Loading required package: dplyr
@@ -45,6 +46,7 @@ Let’s create synthetic LC-DAD data with retention time and wavelength
 dimensions:
 
 ``` r
+
 set.seed(42)
 
 # Simulate 3 samples with LC-DAD measurements
@@ -86,6 +88,7 @@ Use
 with multiple location columns to create a 2D measure column:
 
 ``` r
+
 rec <- recipe(concentration ~ ., data = lc_dad_data) |>
   update_role(sample_id, new_role = "id") |>
   step_measure_input_long(
@@ -110,6 +113,7 @@ The `.measures` column now contains `measure_nd_list` objects - one 2D
 measurement per sample:
 
 ``` r
+
 class(result$.measures)
 #> [1] "measure_nd_list" "measure_list"    "vctrs_list_of"   "vctrs_vctr"     
 #> [5] "list"
@@ -122,6 +126,7 @@ measure_ndim(result$.measures)
 Each element of the measure column is a `measure_nd_tbl`:
 
 ``` r
+
 # First sample's measurement
 m1 <- result$.measures[[1]]
 class(m1)
@@ -149,6 +154,7 @@ m1
 Dimension metadata is preserved:
 
 ``` r
+
 measure_dim_names(m1)
 #> [1] "time"       "wavelength"
 measure_dim_units(m1)
@@ -162,6 +168,7 @@ The
 function provides detailed information about the measurement grid:
 
 ``` r
+
 info <- measure_grid_info(m1)
 info$ndim
 #> [1] 2
@@ -185,6 +192,7 @@ function enables existing 1D preprocessing operations to work on
 n-dimensional data by applying them along specified dimensions.
 
 ``` r
+
 # Define a simple 1D smoothing function
 smooth_1d <- function(x, window = 3) {
   if (nrow(x) < window) return(x)
@@ -200,6 +208,7 @@ smooth_1d <- function(x, window = 3) {
 Apply smoothing along the time dimension (dimension 1):
 
 ``` r
+
 # Apply to a single 2D measurement
 smoothed <- measure_apply(m1, smooth_1d, along = 1, window = 3)
 
@@ -222,6 +231,7 @@ Use
 to convert the nested measure back to long format:
 
 ``` r
+
 output_rec <- recipe(concentration ~ ., data = lc_dad_data) |>
   update_role(sample_id, new_role = "id") |>
   step_measure_input_long(
@@ -256,6 +266,7 @@ Not all 2D data forms a regular rectangular grid. The package handles
 irregular grids gracefully:
 
 ``` r
+
 # Create irregular data (different wavelengths sampled at different times)
 irregular_data <- tibble(
   sample_id = rep(1, 7),
@@ -289,6 +300,7 @@ converts nD data to 1D for use with modeling techniques that expect
 vectors:
 
 ``` r
+
 # Unfold 2D to 1D
 m1d <- measure_unfold(m1)
 m1d
@@ -317,6 +329,7 @@ attr(m1d, "fold_info")$ndim
 reconstructs the original nD structure:
 
 ``` r
+
 # Reconstruct 2D from 1D
 m2d_restored <- measure_fold(m1d)
 measure_ndim(m2d_restored)
@@ -329,6 +342,7 @@ measure_ndim(m2d_restored)
 extracts subsets at specific coordinates:
 
 ``` r
+
 # Extract data at wavelength = 254
 slice_254 <- measure_slice(m1, wavelength = 254)
 slice_254
@@ -359,6 +373,7 @@ measure_ndim(slice_uv)
 aggregates across dimensions:
 
 ``` r
+
 # Average across wavelengths to get time trace
 time_trace <- measure_project(m1, along = "wavelength")
 time_trace
@@ -402,6 +417,7 @@ aligning, combining, and computing ratios between channels.
 aligns multiple measure columns to a common grid:
 
 ``` r
+
 # Align UV and RI detector signals to the same time grid
 rec <- recipe(outcome ~ ., data = sec_data) |>
  step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
@@ -420,6 +436,7 @@ values - `"reference"`: Align all channels to a reference channel’s grid
 merges multiple channels:
 
 ``` r
+
 # Stack channels into a single 2D measure (location x channel)
 rec <- recipe(outcome ~ ., data = multi_detector_data) |>
  step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
@@ -439,6 +456,7 @@ or `"weighted_sum"`: Combine into a single channel
 computes ratios between channels:
 
 ``` r
+
 # Compute UV/RI ratio for each sample
 rec <- recipe(outcome ~ ., data = sec_data) |>
  step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
@@ -459,6 +477,7 @@ the package provides multi-way decomposition methods.
 performs Parallel Factor Analysis, extracting trilinear components:
 
 ``` r
+
 # Extract 3 PARAFAC components from EEM fluorescence data
 rec <- recipe(concentration ~ ., data = eem_data) |>
  step_measure_input_long(
@@ -482,6 +501,7 @@ Identifying underlying chemical species in mixtures
 provides more flexibility with independent ranks per mode:
 
 ``` r
+
 # Tucker decomposition with different ranks for each dimension
 rec <- recipe(concentration ~ ., data = lc_dad_data) |>
  step_measure_input_long(
@@ -498,6 +518,7 @@ rec <- recipe(concentration ~ ., data = lc_dad_data) |>
 implements Multivariate Curve Resolution with Alternating Least Squares:
 
 ``` r
+
 # MCR-ALS with non-negativity constraints
 rec <- recipe(concentration ~ ., data = chrom_data) |>
  step_measure_input_long(
@@ -518,26 +539,26 @@ rec <- recipe(concentration ~ ., data = chrom_data) |>
 
 Key functions for multi-dimensional measurement data:
 
-| Function                                                                                                               | Purpose                                       |
-|------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-| [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md)           | Ingest nD data with multiple location columns |
-| [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md)         | Convert nD data back to long format           |
-| [`measure_ndim()`](https://jameshwade.github.io/measure/dev/reference/measure_ndim.md)                                 | Get number of dimensions                      |
-| [`measure_dim_names()`](https://jameshwade.github.io/measure/dev/reference/measure_dim_names.md)                       | Get semantic dimension names                  |
-| [`measure_dim_units()`](https://jameshwade.github.io/measure/dev/reference/measure_dim_units.md)                       | Get dimension units                           |
-| [`measure_is_regular()`](https://jameshwade.github.io/measure/dev/reference/measure_is_regular.md)                     | Check if grid is regular/rectangular          |
-| [`measure_grid_info()`](https://jameshwade.github.io/measure/dev/reference/measure_grid_info.md)                       | Get detailed grid information                 |
-| [`measure_apply()`](https://jameshwade.github.io/measure/dev/reference/measure_apply.md)                               | Apply 1D functions along specified dimensions |
-| [`measure_unfold()`](https://jameshwade.github.io/measure/dev/reference/measure_unfold.md)                             | Convert nD to 1D with fold metadata           |
-| [`measure_fold()`](https://jameshwade.github.io/measure/dev/reference/measure_fold.md)                                 | Reconstruct nD from unfolded 1D               |
-| [`measure_slice()`](https://jameshwade.github.io/measure/dev/reference/measure_slice.md)                               | Extract slices at specific coordinates        |
-| [`measure_project()`](https://jameshwade.github.io/measure/dev/reference/measure_project.md)                           | Aggregate across dimensions                   |
-| [`step_measure_channel_align()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_align.md)     | Align channels to common grid                 |
-| [`step_measure_channel_combine()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_combine.md) | Combine multiple channels                     |
-| [`step_measure_channel_ratio()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_ratio.md)     | Compute ratios between channels               |
-| [`step_measure_parafac()`](https://jameshwade.github.io/measure/dev/reference/step_measure_parafac.md)                 | PARAFAC decomposition                         |
-| [`step_measure_tucker()`](https://jameshwade.github.io/measure/dev/reference/step_measure_tucker.md)                   | Tucker decomposition                          |
-| [`step_measure_mcr_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mcr_als.md)                 | MCR-ALS decomposition (experimental)          |
+| Function | Purpose |
+|----|----|
+| [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md) | Ingest nD data with multiple location columns |
+| [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md) | Convert nD data back to long format |
+| [`measure_ndim()`](https://jameshwade.github.io/measure/dev/reference/measure_ndim.md) | Get number of dimensions |
+| [`measure_dim_names()`](https://jameshwade.github.io/measure/dev/reference/measure_dim_names.md) | Get semantic dimension names |
+| [`measure_dim_units()`](https://jameshwade.github.io/measure/dev/reference/measure_dim_units.md) | Get dimension units |
+| [`measure_is_regular()`](https://jameshwade.github.io/measure/dev/reference/measure_is_regular.md) | Check if grid is regular/rectangular |
+| [`measure_grid_info()`](https://jameshwade.github.io/measure/dev/reference/measure_grid_info.md) | Get detailed grid information |
+| [`measure_apply()`](https://jameshwade.github.io/measure/dev/reference/measure_apply.md) | Apply 1D functions along specified dimensions |
+| [`measure_unfold()`](https://jameshwade.github.io/measure/dev/reference/measure_unfold.md) | Convert nD to 1D with fold metadata |
+| [`measure_fold()`](https://jameshwade.github.io/measure/dev/reference/measure_fold.md) | Reconstruct nD from unfolded 1D |
+| [`measure_slice()`](https://jameshwade.github.io/measure/dev/reference/measure_slice.md) | Extract slices at specific coordinates |
+| [`measure_project()`](https://jameshwade.github.io/measure/dev/reference/measure_project.md) | Aggregate across dimensions |
+| [`step_measure_channel_align()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_align.md) | Align channels to common grid |
+| [`step_measure_channel_combine()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_combine.md) | Combine multiple channels |
+| [`step_measure_channel_ratio()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_ratio.md) | Compute ratios between channels |
+| [`step_measure_parafac()`](https://jameshwade.github.io/measure/dev/reference/step_measure_parafac.md) | PARAFAC decomposition |
+| [`step_measure_tucker()`](https://jameshwade.github.io/measure/dev/reference/step_measure_tucker.md) | Tucker decomposition |
+| [`step_measure_mcr_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mcr_als.md) | MCR-ALS decomposition (experimental) |
 
 ## See Also
 

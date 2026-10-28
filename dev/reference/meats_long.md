@@ -41,6 +41,7 @@ Included here are the meats data transformed to a long format with
 ## Examples
 
 ``` r
+
 data(meats_long)
 str(meats_long)
 #> tibble [21,500 × 6] (S3: tbl_df/tbl/data.frame)

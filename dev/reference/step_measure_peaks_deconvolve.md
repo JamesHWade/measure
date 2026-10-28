@@ -50,7 +50,8 @@ step_measure_peaks_deconvolve(
 
 - max_iter:
 
-  Maximum iterations for optimization. Default is 500.
+  Maximum iterations for optimization. Default is 500. Tune this with
+  [`peak_fit_iterations()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md).
 
 - tol:
 
@@ -68,7 +69,8 @@ step_measure_peaks_deconvolve(
 - quality_threshold:
 
   Minimum R-squared to accept fit. Fits below this threshold trigger a
-  warning. Default is 0.8.
+  warning. Default is 0.8. Tune this with
+  [`peak_fit_r_squared()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md).
 
 - store_components:
 
@@ -142,6 +144,14 @@ Technique packs may register additional models.
 
 - `"nelder_mead"`: Derivative-free Nelder-Mead simplex
 
+**Reported Peak Properties:**
+
+For EMG fits, `location` and `height` report the apex of the fitted
+component within the measured axis range. They use the continuous fitted
+curve, including on irregular axes, and differ from the precursor
+Gaussian parameters returned by
+[`optimize_deconvolution()`](https://jameshwade.github.io/measure/dev/reference/optimize_deconvolution.md).
+
 **Quality Assessment:**
 
 Each fit is assessed for quality. The `.peaks` tibble gains columns:
@@ -151,6 +161,12 @@ Each fit is assessed for quality. The `.peaks` tibble gains columns:
 - `fit_quality`: Quality grade (A/B/C/D/F)
 
 - `purity`: How much of signal at peak max comes from this peak
+
+`max_iter` and `quality_threshold` are tunable. The R-squared range is
+bounded by 0 and 1; choose iteration ranges that fit the model and
+runtime budget for your data. Before finalization,
+[`tidy()`](https://generics.r-lib.org/reference/tidy.html) retains
+unresolved tuning calls in list columns.
 
 ## See also
 

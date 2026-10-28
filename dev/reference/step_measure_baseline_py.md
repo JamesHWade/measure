@@ -190,7 +190,7 @@ Other measure-baseline:
 ## Examples
 
 ``` r
-if (FALSE) { # measure:::.pybaselines_available()
+if (FALSE) { # requireNamespace("reticulate", quietly = TRUE) && reticulate::py_module_available("pybaselines")
 library(recipes)
 
 # \donttest{

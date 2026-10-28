@@ -1,6 +1,7 @@
 # How-To: Baseline Correction
 
 ``` r
+
 library(measure)
 library(recipes)
 library(dplyr)
@@ -25,6 +26,7 @@ pybaselines library.
 Let’s visualize baseline issues in NIR spectra:
 
 ``` r
+
 data(meats)
 
 # Convert to long format for visualization
@@ -66,6 +68,7 @@ spectra where peaks are predominantly in one direction (e.g., absorption
 peaks going up or emission peaks going down).
 
 ``` r
+
 rec_als <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_baseline_als(lambda = 1e6, p = 0.01)
@@ -105,6 +108,7 @@ fits a polynomial to the spectrum and subtracts it. Simple and fast,
 works well for gentle baseline curvature.
 
 ``` r
+
 rec_poly <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_baseline_poly(degree = 2)
@@ -137,6 +141,7 @@ uses robust local regression (LOESS with iterative reweighting) to
 estimate the baseline. Good for complex baseline shapes.
 
 ``` r
+
 rec_rf <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_baseline_rf(span = 0.5) |>
@@ -159,6 +164,7 @@ removes polynomial trends from spectra. The simplest baseline
 correction - just removes the overall trend.
 
 ``` r
+
 rec_detrend <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_detrend(degree = 1) |>
@@ -181,6 +187,7 @@ is specialized for chromatography data where baseline regions exist at
 the start and end of the chromatogram.
 
 ``` r
+
 # For chromatography data
 rec_gpc <- recipe(outcome ~ ., data = chromatogram_data) |>
 
@@ -198,6 +205,7 @@ and should return a numeric vector of baseline values.
 ### Using a function
 
 ``` r
+
 # Simple moving minimum baseline
 moving_min_baseline <- function(x, window = 51) {
   y <- x$value
@@ -235,6 +243,7 @@ For quick one-liners, use the formula interface where `.x` is the
 `measure_tbl`:
 
 ``` r
+
 # LOESS baseline using formula
 rec_loess <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
@@ -264,6 +273,7 @@ set `subtract = FALSE` to get the baseline itself instead of the
 corrected signal:
 
 ``` r
+
 # Use custom baseline with subtract = FALSE to extract the baseline
 rec_extract <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
@@ -301,6 +311,7 @@ Python [pybaselines](https://pybaselines.readthedocs.io/) library.
 First, install pybaselines:
 
 ``` r
+
 # Install reticulate if needed
 install.packages("reticulate")
 
@@ -311,6 +322,7 @@ reticulate::py_require("pybaselines")
 ### Using pybaselines methods
 
 ``` r
+
 # Asymmetric Least Squares
 rec_py_asls <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
@@ -356,6 +368,7 @@ Savitzky-Golay derivatives remain a powerful approach for baseline
 correction, especially in NIR spectroscopy:
 
 ``` r
+
 # First derivative removes constant baseline
 rec_d1 <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
@@ -371,16 +384,16 @@ rec_d2 <- recipe(water + fat + protein ~ ., data = meats) |>
 
 ## Choosing a method
 
-| Method                                                                                                                 | Best for            | Tunable  | Notes                           |
-|------------------------------------------------------------------------------------------------------------------------|---------------------|----------|---------------------------------|
-| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)       | Most spectroscopy   | Yes      | Good general-purpose choice     |
-| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)     | Gentle curvature    | Yes      | Simple and fast                 |
-| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)         | Complex baselines   | Yes      | Robust to outliers              |
-| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md)                 | Simple trends       | Yes      | Fastest option                  |
-| [`step_measure_baseline_gpc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.md)       | Chromatography      | No       | Uses baseline regions           |
-| [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md) | Special cases       | Optional | Maximum flexibility             |
-| [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md)         | Advanced algorithms | Yes      | 50+ methods available           |
-| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md)   | NIR/IR spectra      | Yes      | Also smooths and differentiates |
+| Method | Best for | Tunable | Notes |
+|----|----|----|----|
+| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md) | Most spectroscopy | Yes | Good general-purpose choice |
+| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md) | Gentle curvature | Yes | Simple and fast |
+| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md) | Complex baselines | Yes | Robust to outliers |
+| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md) | Simple trends | Yes | Fastest option |
+| [`step_measure_baseline_gpc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.md) | Chromatography | No | Uses baseline regions |
+| [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md) | Special cases | Optional | Maximum flexibility |
+| [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md) | Advanced algorithms | Yes | 50+ methods available |
+| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | NIR/IR spectra | Yes | Also smooths and differentiates |
 
 ## Hyperparameter tuning
 
@@ -388,6 +401,7 @@ Most baseline correction steps are tunable with the tidymodels tuning
 framework:
 
 ``` r
+
 library(tune)
 
 # Create tunable recipe
@@ -408,6 +422,7 @@ For
 you can declare tunable parameters explicitly:
 
 ``` r
+
 rec_custom_tunable <- recipe(water ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_baseline_custom(
@@ -425,6 +440,7 @@ Baseline correction often works best as part of a complete preprocessing
 pipeline:
 
 ``` r
+
 rec_complete <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   # Baseline correction
@@ -446,7 +462,7 @@ final_data <- bake(prep(rec_complete), new_data = NULL)
 #>   dplyr::filter(n > 1L)
 final_data[1:5, 1:8]
 #> # A tibble: 5 × 8
-#>   water   fat protein nir_01    nir_02    nir_03    nir_04    nir_05   
+#>   water   fat protein nir_06    nir_07    nir_08    nir_09    nir_10   
 #>   <dbl> <dbl>   <dbl> <list>    <list>    <list>    <list>    <list>   
 #> 1  60.5  22.5    16.7 <dbl [1]> <dbl [1]> <dbl [1]> <dbl [1]> <dbl [1]>
 #> 2  46    40.1    13.5 <dbl [1]> <dbl [1]> <dbl [1]> <dbl [1]> <dbl [1]>

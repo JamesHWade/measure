@@ -1,5 +1,5 @@
-pandoc: 3.1.11
-pkgdown: 2.2.0
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   explanation-internals: explanation-internals.html
@@ -11,7 +11,7 @@ articles:
   reference-validation: reference-validation.html
   articles/tutorial-bioreactor: tutorial-bioreactor.html
   articles/tutorial-getting-started: tutorial-getting-started.html
-last_built: 2026-04-04T17:55Z
+last_built: 2026-10-28T08:16Z
 urls:
   reference: https://jameshwade.github.io/measure/reference
   article: https://jameshwade.github.io/measure/articles

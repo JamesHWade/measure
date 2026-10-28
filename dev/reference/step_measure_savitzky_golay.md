@@ -48,9 +48,9 @@ step_measure_savitzky_golay(
 
 - window_side:
 
-  An integer for how many units there are on each side of the window.
-  This means that `window_side = 1` has a total window width of 3 (e.g.,
-  width is `2 * window_side + 1`).
+  An integer for how many measurement points there are on each side of
+  the center point. This means that `window_side = 1` has a total window
+  width of 3 (e.g., width is `2 * window_side + 1`).
 
 - differentiation_order:
 
@@ -82,7 +82,14 @@ of any existing operations.
 This method can both smooth out random noise and reduce
 between-predictor correlation. It fits a polynomial to a window of
 measurements and this results in fewer measurements than the input.
-Measurements are assumed to be equally spaced.
+Measurements are assumed to be equally spaced, and all measurements
+processed together must have identical locations. The output retains the
+original location labels at the centers of each window. Calculations use
+unit spacing between measurement indices. Differentiation therefore
+follows
+[`prospectr::savitzkyGolay()`](https://l-ramirez-lopez.github.io/prospectr/reference/savitzkyGolay.html)
+with `delta.wav = 1` and is scaled per index step, without adjustment
+for the numeric spacing between location labels.
 
 The polynomial degree should be less than the window size. Also, window
 size must be greater than polynomial degree. If either case is true, the
@@ -94,8 +101,6 @@ should be in a special internal format produced by
 [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)
 or
 [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md).
-
-The measurement locations are reset to integer indices starting at one.
 
 ## Tidying
 
