@@ -124,7 +124,7 @@ When you \code{\link[recipes:tidy.recipe]{tidy()}} this step, a tibble with colu
 }
 
 \examples{
-\dontshow{if (measure:::.pybaselines_available()) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("reticulate", quietly = TRUE) && reticulate::py_module_available("pybaselines")) withAutoprint(\{ # examplesIf}
 library(recipes)
 
 \donttest{

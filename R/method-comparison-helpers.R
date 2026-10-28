@@ -200,18 +200,24 @@
 
   for (i in seq_len(n_boot)) {
     idx <- sample(n, n, replace = TRUE)
-    tryCatch(
-      {
-        boot_fit <- .deming_regression_manual(x[idx], y[idx], error_ratio)
-        boot_intercept[i] <- boot_fit$intercept
-        boot_slope[i] <- boot_fit$slope
-      },
+    outcome <- tryCatch(
+      list(
+        fit = .deming_regression_manual(x[idx], y[idx], error_ratio),
+        error = NULL
+      ),
       error = function(e) {
-        boot_intercept[i] <<- NA
-        boot_slope[i] <<- NA
-        error_messages <<- c(error_messages, e$message)
+        list(fit = NULL, error = conditionMessage(e))
       }
     )
+
+    if (is.null(outcome$error)) {
+      boot_intercept[i] <- outcome$fit$intercept
+      boot_slope[i] <- outcome$fit$slope
+    } else {
+      boot_intercept[i] <- NA
+      boot_slope[i] <- NA
+      error_messages <- c(error_messages, outcome$error)
+    }
   }
 
   # Remove failed bootstraps
@@ -289,24 +295,6 @@
   }
 
   (measured - reference) / combined_u
-}
-
-#' Calculate zeta score for proficiency testing
-#' @param measured Measured value
-#' @param reference Reference/assigned value
-#' @param u_measured Standard uncertainty of measured value
-#' @param u_reference Standard uncertainty of reference value (may include shared component)
-#' @return zeta score (same as En when no shared uncertainty)
-#' @noRd
-.calculate_zeta_score <- function(
-  measured,
-  reference,
-  u_measured,
-  u_reference
-) {
-  # zeta is similar to En but used when uncertainties may be correlated
-  # For independent uncertainties, it's the same as En
-  .calculate_en_score(measured, reference, u_measured, u_reference)
 }
 
 #' Flag proficiency scores

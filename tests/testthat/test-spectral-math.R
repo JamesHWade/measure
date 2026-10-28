@@ -36,15 +36,13 @@ get_locations <- function() {
 }
 
 # Create synthetic reflectance data with values in (0, 1) for Kubelka-Munk tests
-local({
-  set.seed(123)
-  reflectance_data <<- tibble::tibble(
-    sample_id = rep(1:5, each = 100),
-    wavelength = rep(seq(400, 700, length.out = 100), 5),
-    reflectance = runif(500, min = 0.1, max = 0.9),
-    outcome = rep(rnorm(5), each = 100)
-  )
-})
+set.seed(123)
+reflectance_data <- tibble::tibble(
+  sample_id = rep(1:5, each = 100),
+  wavelength = rep(seq(400, 700, length.out = 100), 5),
+  reflectance = runif(500, min = 0.1, max = 0.9),
+  outcome = rep(rnorm(5), each = 100)
+)
 
 # ==============================================================================
 # step_measure_absorbance tests

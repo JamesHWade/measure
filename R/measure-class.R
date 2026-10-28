@@ -107,7 +107,7 @@ as_measure_tbl <- function(x) {
 #'
 #' @examples
 #' # Create a measure tibble
-#' mt <- measure:::new_measure_tbl(location = 1:5, value = rnorm(5))
+#' mt <- new_measure_tbl(location = 1:5, value = rnorm(5))
 #' is_measure_tbl(mt)
 #'
 #' # Regular tibbles are not measure tibbles

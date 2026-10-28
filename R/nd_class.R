@@ -362,22 +362,6 @@ new_measure_nd_list <- function(x = list()) {
 }
 
 
-#' Coerce to n-dimensional measure list
-#'
-#' Converts a plain list to a measure_nd_list.
-#'
-#' @param x A list of data frames with `location_*` and `value` columns.
-#'
-#' @return A list with class `measure_nd_list`.
-#' @noRd
-as_measure_nd_list <- function(x) {
-  if (is_measure_nd_list(x)) {
-    return(x)
-  }
-  new_measure_nd_list(x)
-}
-
-
 #' Test if object is an n-dimensional measure list
 #'
 #' @param x Object to test.

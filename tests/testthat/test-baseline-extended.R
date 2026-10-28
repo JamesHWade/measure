@@ -87,6 +87,35 @@ test_that("step_measure_baseline_airpls removes baseline", {
   expect_true(is_measure_list(result$.measures))
 })
 
+test_that("step_measure_baseline_airpls retains its numerical output", {
+  data <- tibble::tibble(
+    id = 1L,
+    outcome = 1,
+    value = c(1, 2, 1.1, 4.2, 2.8, 3),
+    location = seq_len(6)
+  )
+
+  result <- recipe(outcome ~ ., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(value, location = vars(location)) |>
+    step_measure_baseline_airpls(lambda = 10, max_iter = 3, tol = 1e-6) |>
+    prep() |>
+    bake(new_data = NULL)
+
+  expect_equal(
+    result$.measures[[1]]$value,
+    c(
+      1.166605148,
+      1.533284521,
+      -0.000036223338,
+      2.466642646,
+      0.433321437,
+      0.000000209470899
+    ),
+    tolerance = 1e-8
+  )
+})
+
 test_that("step_measure_baseline_airpls preserves locations", {
   rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
     update_role(id, new_role = "id") |>
@@ -127,6 +156,18 @@ test_that("step_measure_baseline_airpls is tunable", {
 
   tunable_params <- tunable(rec$steps[[2]])
   expect_true("lambda" %in% tunable_params$name)
+})
+
+test_that("step_measure_baseline_arpls is tunable", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_arpls(lambda = 1e5)
+
+  tunable_params <- tunable(rec$steps[[2]])
+
+  expect_equal(tunable_params$name, "lambda")
+  expect_equal(tunable_params$component, "step_measure_baseline_arpls")
 })
 
 # ==============================================================================

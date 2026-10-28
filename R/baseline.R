@@ -27,7 +27,7 @@ subtract_rf_baseline <- function(data, yvar, span = 2 / 3, maxit = c(5, 5)) {
     dplyr::mutate(
       raw = {{ yvar }},
       baseline = IDPmisc::rfbaseline(
-        x = 1:length({{ yvar }}),
+        x = seq_along({{ yvar }}),
         y = {{ yvar }},
         span = span,
         maxit = maxit
