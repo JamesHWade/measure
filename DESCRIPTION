@@ -50,13 +50,17 @@ Suggests:
     quarto,
     reticulate,
     rmarkdown,
+    rsample,
     roxygen2,
     testthat (>= 3.0.0),
     tidymodels,
     tidyverse,
+    tune,
     wavethresh,
     withr,
-    workflows
+    workflows,
+    workflowsets,
+    yardstick
 VignetteBuilder:
     knitr
 Config/reticulate:list( packages = list( list(package = "pybaselines") )

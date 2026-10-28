@@ -13,16 +13,13 @@ knitr::opts_chunk$set(
 
 ```{r setup, message = FALSE}
 library(measure)
-library(tidymodels)
-library(modeldata)
-
-tidymodels_prefer()
-set.seed(42)
 ```
 
 ## Introduction
 
-One of measure's key design goals is seamless integration with the tidymodels ecosystem. This vignette shows how to use measure preprocessing within complete modeling workflows, including:
+One of measure's key design goals is integration with the tidymodels ecosystem.
+This article shows how to use measure preprocessing in complete modeling
+workflows, including:
 
 - Bundling preprocessing with models using workflows
 - Cross-validation with measure recipes
@@ -31,199 +28,227 @@ One of measure's key design goals is seamless integration with the tidymodels ec
 
 ## Setup: The meats dataset
 
-We'll use the NIR spectroscopy dataset from modeldata to predict water content in meat samples. We'll focus on just predicting `water` to keep the example simple.
+We'll use the NIR spectroscopy dataset from `modeldata` to predict water
+content in meat samples. The example uses a training partition for resampling
+and keeps the held-out partition for one final evaluation.
 
 ```{r data}
-data(meats)
+data("meats", package = "modeldata")
 
-# Keep only water as outcome and spectral columns
-meats_water <- meats |>
-  select(water, starts_with("x_"))
+meats_water <- dplyr::select(meats, water, dplyr::starts_with("x_")) |>
+  dplyr::mutate(sample_id = dplyr::row_number())
 
-# Create train/test split
-split <- initial_split(meats_water, prop = 0.75)
-train <- training(split)
-test <- testing(split)
+set.seed(42)
+split <- rsample::initial_split(meats_water, prop = 0.75, strata = water)
+train <- rsample::training(split)
 
 cat("Training samples:", nrow(train), "\n")
-cat("Test samples:", nrow(test), "\n")
+```
+
+The dataset has no sample identifier, so `sample_id` gives each spectrum a
+unique key. The recipe marks it as an ID rather than a predictor. This also
+lets `step_measure_output_wide()` restore one row per sample when spectral
+measurements are converted back to ordinary columns.
+
+```{r recipe-helper}
+make_measure_recipe <- function(data) {
+  recipes::recipe(water ~ ., data = data) |>
+    recipes::update_role(sample_id, new_role = "id") |>
+    measure::step_measure_input_wide(tidyselect::starts_with("x_"))
+}
+
+set.seed(42)
+folds <- rsample::vfold_cv(train, v = 3, strata = water)
 ```
 
 ## Basic workflow
 
-The simplest way to use measure with tidymodels is through a workflow that bundles preprocessing and modeling:
+The recipe below converts the 100 wavelength columns to measure's internal
+format, preprocesses each spectrum, converts the result back to numeric
+columns, and reduces those columns to five principal components. `step_pca()`
+is an ordinary `recipes` step, so it follows `step_measure_output_wide()`.
 
 ```{r basic-workflow}
-# Define preprocessing recipe
-rec <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_savitzky_golay(window_side = 5, differentiation_order = 1) |>
-  step_measure_snv() |>
-  step_measure_output_wide()
+rec <- make_measure_recipe(train) |>
+  measure::step_measure_savitzky_golay(
+    window_side = 3,
+    differentiation_order = 1,
+    degree = 2
+  ) |>
+  measure::step_measure_snv() |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
 
-# Define model - simple linear regression
-# (For real applications, use regularization like glmnet or PLS)
-lm_spec <- linear_reg() |>
-  set_engine("lm")
+lm_spec <- parsnip::linear_reg() |>
+  parsnip::set_engine("lm")
 
-# Create workflow
-wf <- workflow() |>
-  add_recipe(rec) |>
-  add_model(lm_spec)
+wf <- workflows::workflow() |>
+  workflows::add_recipe(rec) |>
+  workflows::add_model(lm_spec)
 
 wf
 ```
 
-### Fit and evaluate
+### Fit and evaluate with resampling
 
-```{r fit-evaluate, eval = FALSE}
-# Fit the workflow
-wf_fit <- fit(wf, data = train)
+Assess the workflow on the training partition first. `fit_resamples()` fits
+the recipe using each fold's analysis rows and applies it to that fold's
+assessment rows.
 
-# Predict on test data
-predictions <- predict(wf_fit, test) |>
-  bind_cols(test |> select(water))
-
-# Evaluate
-metrics(predictions, truth = water, estimate = .pred)
+```{r fit-evaluate}
+metrics <- yardstick::metric_set(yardstick::rmse, yardstick::rsq)
+baseline_resamples <- tune::fit_resamples(
+  wf,
+  resamples = folds,
+  metrics = metrics
+)
+baseline_metrics <- tune::collect_metrics(baseline_resamples)
+stopifnot(all(baseline_metrics$n == nrow(folds)))
+baseline_metrics
 ```
 
 ## Cross-validation
 
-Cross-validation is straightforward with workflows:
+`folds` contains three resamples made only from the training partition. The
+recipe stays inside the workflow so data-dependent preprocessing is estimated
+within each analysis fold.
 
-```{r cv, eval = FALSE}
-# Create folds
-folds <- vfold_cv(train, v = 5)
-
-# Fit resamples
-cv_results <- fit_resamples(wf, resamples = folds)
-
-# Collect metrics
-collect_metrics(cv_results)
+```{r cv}
+folds
 ```
 
 ## Tuning preprocessing parameters
 
-Several measure steps have tunable parameters:
+The Savitzky-Golay step exposes `window_side`, `differentiation_order`, and
+`degree` for tuning. This example tunes window size and derivative order while
+fixing the polynomial degree at 2. A four-row grid and three folds keep the
+demonstration compact.
 
-- `step_measure_savitzky_golay()`: `window_side`, `differentiation_order`, `degree`
-- `step_measure_normalize_peak()`: `location_min`, `location_max`
-- Baseline correction steps: `lambda`, `p`, `degree`, etc.
+```{r tuning-recipe}
+sg_parameters <- tune::tunable(
+  make_measure_recipe(train) |>
+    measure::step_measure_savitzky_golay()
+) |>
+  dplyr::select(name, component)
+stopifnot(
+  setequal(
+    sg_parameters$name,
+    c("window_side", "differentiation_order", "degree")
+  )
+)
+sg_parameters
 
-Let's find the optimal Savitzky-Golay parameters:
-
-```{r tuning-recipe, eval = FALSE}
-# Create a tunable recipe
-rec_tune <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_savitzky_golay(
-    window_side = tune(),
-    differentiation_order = tune()
+rec_tune <- make_measure_recipe(train) |>
+  measure::step_measure_savitzky_golay(
+    window_side = tune::tune("window_side"),
+    differentiation_order = tune::tune("differentiation_order"),
+    degree = 2
   ) |>
-  step_measure_snv() |>
-  step_measure_output_wide()
+  measure::step_measure_snv() |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
 
-# Create tunable workflow
-wf_tune <- workflow() |>
-  add_recipe(rec_tune) |>
-  add_model(lm_spec)
+wf_tune <- workflows::workflow() |>
+  workflows::add_recipe(rec_tune) |>
+  workflows::add_model(lm_spec)
+
+parameter_set <- tune::extract_parameter_set_dials(wf_tune)
+stopifnot(
+  setequal(parameter_set$name, c("window_side", "differentiation_order"))
+)
+parameter_set
 ```
 
 ### Define the parameter grid
 
-```{r grid, eval = FALSE}
-# Create a grid
-grid <- grid_regular(
-  window_side(range = c(3L, 11L)),
-  differentiation_order(range = c(0L, 2L)),
-  levels = c(5, 3)
-)
+The selected ranges keep every combination valid with `degree = 2`: the
+differentiation order is no greater than the polynomial degree, and the
+window is wider than the polynomial degree.
 
+```{r grid}
+parameter_set$object[[match("window_side", parameter_set$id)]] <-
+  measure::window_side(range = c(2L, 4L))
+parameter_set$object[[match("differentiation_order", parameter_set$id)]] <-
+  measure::differentiation_order(range = c(0L, 2L))
+
+grid <- dials::grid_regular(parameter_set, levels = 2)
+stopifnot(nrow(grid) == 4L)
 grid
 ```
 
 ### Run the tuning
 
-```{r tune-grid, eval = FALSE}
-tune_results <- tune_grid(
+Each of the four parameter combinations is evaluated on the same three
+training folds. The returned table shows the measured resampling performance.
+
+```{r tune-grid}
+tune_results <- tune::tune_grid(
   wf_tune,
   resamples = folds,
-  grid = grid
+  grid = grid,
+  metrics = metrics
 )
+tuning_metrics <- tune::collect_metrics(tune_results)
+stopifnot(all(tuning_metrics$n == nrow(folds)))
 
-# Show best results
-show_best(tune_results, metric = "rmse", n = 5)
+tune::show_best(tune_results, metric = "rmse", n = 4)
 ```
 
 ### Visualize tuning results
 
-```{r tune-viz, eval = FALSE}
-autoplot(tune_results)
-```
-
-### Finalize the workflow
-
-```{r finalize, eval = FALSE}
-# Select best parameters
-best_params <- select_best(tune_results, metric = "rmse")
-best_params
-
-# Finalize workflow
-final_wf <- finalize_workflow(wf_tune, best_params)
-
-# Fit on full training data and evaluate on test
-final_fit <- last_fit(final_wf, split)
-
-collect_metrics(final_fit)
+```{r tune-viz}
+tune::autoplot(tune_results, metric = "rmse")
 ```
 
 ## Comparing preprocessing strategies
 
-A common workflow is comparing different preprocessing approaches. Here's how to set up a fair comparison:
+This comparison keeps the model and the number of principal components fixed
+while changing spectral preprocessing. Every recipe is evaluated on the
+training folds; no test-set metric is used to rank these strategies.
 
-```{r compare-strategies, eval = FALSE}
-# Strategy 1: SNV only
-rec_snv <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_snv() |>
-  step_measure_output_wide()
+```{r compare-strategies}
+rec_snv <- make_measure_recipe(train) |>
+  measure::step_measure_snv() |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
 
-# Strategy 2: First derivative + SNV
-rec_d1_snv <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_savitzky_golay(window_side = 7, differentiation_order = 1) |>
-  step_measure_snv() |>
-  step_measure_output_wide()
+rec_d1_snv <- make_measure_recipe(train) |>
+  measure::step_measure_savitzky_golay(
+    window_side = 3,
+    differentiation_order = 1,
+    degree = 2
+  ) |>
+  measure::step_measure_snv() |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
 
-# Strategy 3: MSC
-rec_msc <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_msc() |>
-  step_measure_output_wide()
+rec_msc <- make_measure_recipe(train) |>
+  measure::step_measure_msc() |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
 
-# Strategy 4: Second derivative only
-rec_d2 <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_savitzky_golay(window_side = 7, differentiation_order = 2) |>
-  step_measure_output_wide()
+rec_d2 <- make_measure_recipe(train) |>
+  measure::step_measure_savitzky_golay(
+    window_side = 3,
+    differentiation_order = 2,
+    degree = 2
+  ) |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
 
-# Strategy 5: SNV + centering (good for PLS)
-rec_snv_center <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_snv() |>
-  step_measure_center() |>
-  step_measure_output_wide()
+rec_snv_center <- make_measure_recipe(train) |>
+  measure::step_measure_snv() |>
+  measure::step_measure_center() |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
 
-# Strategy 6: Sum normalization + auto-scaling
-rec_norm_scale <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_normalize_sum() |>
-  step_measure_scale_auto() |>
-  step_measure_output_wide()
+rec_norm_scale <- make_measure_recipe(train) |>
+  measure::step_measure_normalize_sum() |>
+  measure::step_measure_scale_auto() |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
 
-# Create workflow set
-wf_set <- workflow_set(
+wf_set <- workflowsets::workflow_set(
   preproc = list(
     snv = rec_snv,
     d1_snv = rec_d1_snv,
@@ -240,65 +265,99 @@ wf_set
 
 ### Evaluate all strategies
 
-```{r eval-strategies, eval = FALSE}
-# Fit all workflows with cross-validation
-comparison <- workflow_map(
+```{r eval-strategies}
+comparison <- workflowsets::workflow_map(
   wf_set,
   fn = "fit_resamples",
-  resamples = folds
+  resamples = folds,
+  metrics = metrics
 )
 
-# Rank by performance
-rank_results(comparison, rank_metric = "rmse")
+strategy_results <- workflowsets::rank_results(comparison, rank_metric = "rmse") |>
+  dplyr::filter(.metric == "rmse")
+stopifnot(
+  nrow(strategy_results) == 6L,
+  all(strategy_results$n == nrow(folds))
+)
+strategy_results
 ```
 
 ### Visualize comparison
 
-```{r compare-viz, eval = FALSE}
-autoplot(comparison) +
-  labs(title = "Preprocessing Strategy Comparison")
+```{r compare-viz}
+workflowsets::autoplot(comparison, metric = "rmse") +
+  ggplot2::labs(title = "Preprocessing Strategy Comparison")
+```
+
+## Finalize and evaluate on the held-out set
+
+Use the training resamples to choose the tuning values, then evaluate the
+finalized workflow on the reserved test partition once with `last_fit()`.
+
+```{r finalize}
+best_params <- tune::select_best(tune_results, metric = "rmse")
+best_params
+
+final_wf <- tune::finalize_workflow(wf_tune, best_params)
+final_fit <- tune::last_fit(final_wf, split, metrics = metrics)
+final_metrics <- tune::collect_metrics(final_fit)
+stopifnot(nrow(final_metrics) > 0L)
+final_metrics
 ```
 
 ## Working with workflows and new data
 
-Once you've selected your final workflow, here's how to use it for predictions on new data:
+`last_fit()` retains a workflow fitted on the training partition. After the
+final evaluation, it can be extracted and used to predict new spectra. The
+example below uses only the held-out predictors to demonstrate prediction; it
+does not feed predictions back into model selection.
 
-```{r new-data, eval = FALSE}
-# Use the finalized workflow from tuning
-final_trained <- fit(final_wf, train)
+```{r new-data}
+final_trained <- tune::extract_workflow(final_fit)
+new_spectra <- rsample::testing(split) |>
+  dplyr::select(sample_id, dplyr::starts_with("x_")) |>
+  dplyr::slice_head(n = 3)
 
-# Predict on new data
-new_predictions <- predict(final_trained, test)
-
-# Or use augment for predictions with original data
-augment(final_trained, test) |>
-  select(water, .pred) |>
-  head()
+new_predictions <- stats::predict(final_trained, new_data = new_spectra)
+dplyr::bind_cols(
+  dplyr::select(new_spectra, sample_id),
+  new_predictions
+)
 ```
 
 ## Tips for spectral modeling
 
 ### High-dimensional data
 
-Spectral data is typically high-dimensional (many features, fewer samples). Consider:
+The `meats` training partition has about 160 samples and 100 wavelength
+columns. In smaller studies, the number of wavelengths can exceed the number
+of samples, and spectral predictors are often strongly correlated. This
+example reduces the linear fit to five principal components. Other options
+include:
 
-1. **Regularization**: Use ridge or elastic net regression (`linear_reg(penalty = tune(), mixture = tune())`)
-2. **PLS regression**: Use `pls()` from parsnip with the mixOmics engine
-3. **Feature selection**: Consider variable importance after initial modeling
+1. **Regularization**: Use ridge or elastic net with an available parsnip
+   engine, and tune its penalty within resampling.
+2. **Feature selection**: Choose a selection method that matches the scientific
+   question and perform selection inside the resampling workflow.
 
-### Preprocessing for PCA/PLS
+### Preprocessing for PCA
 
-For multivariate methods like PCA and PLS, centering is essential:
+`step_pca()` expects ordinary numeric columns, so place it after
+`step_measure_output_wide()`. In a workflow, the PCA rotation is estimated
+within each analysis fold.
 
-```{r pca-prep, eval = FALSE}
-rec_for_pls <- recipe(water ~ ., data = train) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_snv() |>
-  step_measure_center() |>  # Essential for PCA/PLS
-  step_measure_output_wide()
+```{r pca-prep}
+rec_for_pca <- make_measure_recipe(train) |>
+  measure::step_measure_snv() |>
+  measure::step_measure_output_wide() |>
+  recipes::step_pca(recipes::all_predictors(), num_comp = 5)
+
+rec_for_pca
 ```
 
-Use `step_measure_scale_auto()` if you want to give equal weight to all wavelengths, or `step_measure_scale_pareto()` for a compromise that preserves some magnitude information.
+Use `step_measure_scale_auto()` if you want to give equal weight to all
+wavelengths, or `step_measure_scale_pareto()` for a compromise that preserves
+some magnitude information.
 
 ### Memory considerations
 
@@ -306,28 +365,34 @@ For very large spectral datasets:
 
 - The internal `.measures` format is memory-efficient
 - Consider processing in batches if memory is limited
-- Use `step_measure_output_wide()` only when needed for modeling
+- Use `step_measure_output_wide()` when standard modeling steps need numeric
+  predictor columns
 
 ### Reproducibility
 
-Always set a seed before cross-validation or tuning:
+Set a seed before creating resamples or random tuning grids:
 
-```{r reproducibility, eval = FALSE}
+```{r reproducibility}
 set.seed(123)
-folds <- vfold_cv(train, v = 10)
+reproducible_folds <- rsample::vfold_cv(train, v = 3, strata = water)
+reproducible_folds
 ```
 
 ## Summary
 
-measure integrates naturally with tidymodels:
+measure integrates with tidymodels workflows:
 
-- Use `workflow()` to bundle preprocessing and modeling
-- Cross-validate with `fit_resamples()` or `vfold_cv()`
-- Tune preprocessing parameters (Savitzky-Golay, peak normalization, baseline) with `tune_grid()`
-- Compare strategies with `workflow_set()`
-- Variable-wise scaling steps (`step_measure_center()`, `step_measure_scale_*()`) learn from training data and apply consistently to new data
+- Use workflows to bundle measure preprocessing and a model
+- Use `fit_resamples()` or `tune_grid()` on the training partition
+- Tune measure step parameters through the recipe interface
+- Compare preprocessing strategies on the same resamples
+- Use `last_fit()` for one final evaluation on a reserved test partition
 
-The recipes paradigm means your preprocessing is applied consistently to training data, cross-validation folds, and new predictions - eliminating a common source of data leakage in chemometric modeling.
+Workflow resampling prepares each recipe from the analysis portion of a fold,
+then applies it to that fold's assessment portion. This keeps learned
+preprocessing estimates out of assessment data in these workflows. Steps
+performed before resampling can still leak information, so keep learned
+preprocessing inside the resampled recipe.
 
 ## See Also
 
