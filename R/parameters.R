@@ -189,6 +189,106 @@ peak_location_max <- function(range = c(0, 100), trans = NULL) {
   )
 }
 
+#' Peak detection and deconvolution tuning parameters
+#'
+#' `peak_min_height()` and `peak_min_prominence()` set signal-height thresholds.
+#' `peak_min_distance()` is in x-axis units, and `peak_snr_threshold()` is a
+#' threshold in median absolute deviation units. `peak_fit_r_squared()` sets a
+#' deconvolution fit-quality threshold, while `peak_fit_iterations()` sets the
+#' optimizer's iteration limit.
+#'
+#' The default search ranges are starting points only. Height and prominence
+#' ranges depend on signal units and scale; distance ranges depend on the
+#' measurement axis. Set `range` to values appropriate for the data being
+#' analyzed.
+#'
+#' @inheritParams window_side
+#'
+#' @return A function with classes `"quant_param"` and `"param"`.
+#' @examples
+#' peak_min_height()
+#' peak_min_distance()
+#' peak_min_prominence()
+#' peak_snr_threshold()
+#' peak_fit_r_squared()
+#' peak_fit_iterations()
+#' @export
+peak_min_height <- function(range = c(0, 1), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(peak_min_height = "Minimum Peak Height"),
+    finalize = NULL
+  )
+}
+
+#' @rdname peak_min_height
+#' @export
+peak_min_distance <- function(range = c(0, 10), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(peak_min_distance = "Minimum Peak Distance"),
+    finalize = NULL
+  )
+}
+
+#' @rdname peak_min_height
+#' @export
+peak_min_prominence <- function(range = c(0, 1), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(peak_min_prominence = "Minimum Peak Prominence"),
+    finalize = NULL
+  )
+}
+
+#' @rdname peak_min_height
+#' @export
+peak_snr_threshold <- function(range = c(0, 10), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(peak_snr_threshold = "Peak Signal-to-noise Threshold"),
+    finalize = NULL
+  )
+}
+
+#' @rdname peak_min_height
+#' @export
+peak_fit_r_squared <- function(range = c(0.8, 1), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(peak_fit_r_squared = "Minimum Peak Fit R-squared"),
+    finalize = NULL
+  )
+}
+
+#' @rdname peak_min_height
+#' @export
+peak_fit_iterations <- function(range = c(100L, 1000L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(peak_fit_iterations = "Peak Fit Maximum Iterations"),
+    finalize = NULL
+  )
+}
+
 #' Parameters for derivative steps
 #'
 #' `derivative_order()` controls the order of differentiation in
@@ -636,6 +736,49 @@ tunable.step_measure_qc_outlier <- function(x, ...) {
     ),
     source = "recipe",
     component = "step_measure_qc_outlier",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_peaks_detect <- function(x, ...) {
+  names <- c("min_height", "min_distance", "snr_threshold")
+  call_info <- list(
+    list(pkg = "measure", fun = "peak_min_height"),
+    list(pkg = "measure", fun = "peak_min_distance"),
+    list(pkg = "measure", fun = "peak_snr_threshold")
+  )
+
+  if (identical(x$algorithm, "prominence")) {
+    names <- append(names, "min_prominence", after = 2L)
+    call_info <- append(
+      call_info,
+      list(list(pkg = "measure", fun = "peak_min_prominence")),
+      after = 2L
+    )
+  }
+
+  tibble::tibble(
+    name = names,
+    call_info = call_info,
+    source = "recipe",
+    component = "step_measure_peaks_detect",
+    component_id = x$id
+  )
+}
+
+#' @rdname tunable_measure
+#' @export
+tunable.step_measure_peaks_deconvolve <- function(x, ...) {
+  tibble::tibble(
+    name = c("quality_threshold", "max_iter"),
+    call_info = list(
+      list(pkg = "measure", fun = "peak_fit_r_squared"),
+      list(pkg = "measure", fun = "peak_fit_iterations")
+    ),
+    source = "recipe",
+    component = "step_measure_peaks_deconvolve",
     component_id = x$id
   )
 }

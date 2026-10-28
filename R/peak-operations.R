@@ -373,6 +373,94 @@ find_peaks_cols <- function(data) {
 # step_measure_peaks_detect
 # ==============================================================================
 
+.is_peak_tune_parameter <- function(x) {
+  rlang::is_call(x, "tune")
+}
+
+.validate_peak_nonnegative <- function(x, arg, allow_logical = FALSE) {
+  if (.is_peak_tune_parameter(x)) {
+    return(invisible(NULL))
+  }
+
+  if (allow_logical && is.logical(x) && length(x) == 1L && !is.na(x)) {
+    return(invisible(NULL))
+  }
+
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) || x < 0) {
+    if (allow_logical) {
+      cli::cli_abort(
+        "{.arg {arg}} must be `FALSE`, `TRUE`, or a single finite, non-negative number."
+      )
+    }
+    cli::cli_abort(
+      "{.arg {arg}} must be a single finite, non-negative number."
+    )
+  }
+
+  invisible(NULL)
+}
+
+.validate_peak_fit_iterations <- function(x) {
+  if (.is_peak_tune_parameter(x)) {
+    return(invisible(NULL))
+  }
+
+  if (
+    !is.numeric(x) ||
+      length(x) != 1L ||
+      !is.finite(x) ||
+      x < 1 ||
+      x != trunc(x) ||
+      x > .Machine$integer.max
+  ) {
+    cli::cli_abort(
+      "{.arg max_iter} must be a single finite positive integer."
+    )
+  }
+
+  invisible(NULL)
+}
+
+.validate_peak_fit_r_squared <- function(x) {
+  if (.is_peak_tune_parameter(x)) {
+    return(invisible(NULL))
+  }
+
+  if (
+    !is.numeric(x) ||
+      length(x) != 1L ||
+      !is.finite(x) ||
+      x < 0 ||
+      x > 1
+  ) {
+    cli::cli_abort(
+      paste(
+        "{.arg quality_threshold} must be a single finite number",
+        "between 0 and 1."
+      )
+    )
+  }
+
+  invisible(NULL)
+}
+
+.validate_peak_detection_parameters <- function(
+  min_height,
+  min_distance,
+  min_prominence,
+  snr_threshold
+) {
+  .validate_peak_nonnegative(min_height, "min_height")
+  .validate_peak_nonnegative(min_distance, "min_distance")
+  .validate_peak_nonnegative(min_prominence, "min_prominence")
+  .validate_peak_nonnegative(
+    snr_threshold,
+    "snr_threshold",
+    allow_logical = TRUE
+  )
+  invisible(NULL)
+}
+
 #' Detect Peaks in Measurements
 #'
 #' `step_measure_peaks_detect()` creates a *specification* of a recipe step that
@@ -384,12 +472,16 @@ find_peaks_cols <- function(data) {
 #'
 #'   [register_peak_algorithm()]. Use [peak_algorithms()] to see available
 #'   algorithms.
-#' @param min_height Minimum peak height. If `snr_threshold = TRUE`, this is
-#'   interpreted as a signal-to-noise ratio threshold.
+#' @param min_height Minimum peak height in the measurement's signal units. If
+#'   `snr_threshold = TRUE`, the existing logical mode interprets this as a
+#'   multiple of the signal's median absolute deviation (MAD).
 #' @param min_distance Minimum distance between peaks in x-axis units.
 #' @param min_prominence Minimum peak prominence (only for `algorithm = "prominence"`).
-#' @param snr_threshold Logical. If `TRUE`, `min_height` is interpreted as a
-#'   signal-to-noise ratio. Noise is estimated as the MAD of the signal.
+#' @param snr_threshold `FALSE` (default) disables SNR filtering; `TRUE` retains
+#'   the legacy behavior of interpreting `min_height` as an SNR multiple. A
+#'   non-negative number sets an additional minimum SNR threshold in MAD units.
+#'   In numeric mode, a candidate must meet both the absolute `min_height` and
+#'   SNR thresholds. A numeric value of zero adds no SNR filtering.
 #' @param algorithm_params Named list of additional algorithm-specific parameters.
 #'   These are passed to the algorithm function along with the standard parameters.
 #' @param measures Optional character vector of measure column names.
@@ -418,6 +510,15 @@ find_peaks_cols <- function(data) {
 #'
 #' Additional algorithms can be registered by technique packs using
 #' [register_peak_algorithm()].
+#'
+#' The detection thresholds are tunable with [peak_min_height()],
+#' [peak_min_distance()], [peak_min_prominence()], and
+#' [peak_snr_threshold()]. The default search ranges are only starting points:
+#' height and prominence use signal units, distance uses x-axis units, and SNR
+#' uses MAD units. Adjust the ranges to the measurement scale. Prominence is
+#' offered as a tunable threshold only for the built-in prominence algorithm.
+#' Tuning covers these direct scalar arguments; values inside
+#' `algorithm_params` are not extracted as recipe tuning parameters.
 #'
 #' **Peak properties stored:**
 #'
@@ -481,21 +582,13 @@ step_measure_peaks_detect <- function(
     )
   }
 
-  if (!is.numeric(min_height) || length(min_height) != 1 || min_height < 0) {
-    cli::cli_abort("{.arg min_height} must be a non-negative number.")
-  }
-  if (
-    !is.numeric(min_distance) || length(min_distance) != 1 || min_distance < 0
-  ) {
-    cli::cli_abort("{.arg min_distance} must be a non-negative number.")
-  }
-  if (
-    !is.numeric(min_prominence) ||
-      length(min_prominence) != 1 ||
-      min_prominence < 0
-  ) {
-    cli::cli_abort("{.arg min_prominence} must be a non-negative number.")
-  }
+  .validate_peak_detection_parameters(
+    min_height,
+    min_distance,
+    min_prominence,
+    snr_threshold
+  )
+
   if (!is.list(algorithm_params)) {
     cli::cli_abort("{.arg algorithm_params} must be a list.")
   }
@@ -549,6 +642,13 @@ step_measure_peaks_detect_new <- function(
 
 #' @export
 prep.step_measure_peaks_detect <- function(x, training, info = NULL, ...) {
+  .validate_peak_detection_parameters(
+    x$min_height,
+    x$min_distance,
+    x$min_prominence,
+    x$snr_threshold
+  )
+
   check_for_measure(training)
 
   if (is.null(x$measures)) {
@@ -594,10 +694,16 @@ bake.step_measure_peaks_detect <- function(object, new_data, ...) {
 
       # Calculate height threshold
       height_thresh <- min_height
-      if (snr_threshold && min_height > 0) {
+      if (isTRUE(snr_threshold) && min_height > 0) {
         noise <- stats::mad(val, constant = 1)
-        if (noise > 0) {
+        if (is.finite(noise) && noise > 0) {
           height_thresh <- min_height * noise
+        }
+      }
+      if (is.numeric(snr_threshold) && snr_threshold > 0) {
+        noise <- stats::mad(val, constant = 1)
+        if (is.finite(noise) && noise > 0) {
+          height_thresh <- max(height_thresh, snr_threshold * noise)
         }
       }
 
@@ -668,6 +774,7 @@ tidy.step_measure_peaks_detect <- function(x, ...) {
     min_height = x$min_height,
     min_distance = x$min_distance,
     min_prominence = x$min_prominence,
+    snr_threshold = x$snr_threshold,
     id = x$id
   )
 }
@@ -1793,14 +1900,16 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' @param optimizer Optimization method: `"auto"` (default), `"lbfgsb"`,
 #'   `"multistart"`, or `"nelder_mead"`. Auto-selection chooses based on problem
 #'   complexity and signal-to-noise ratio.
-#' @param max_iter Maximum iterations for optimization. Default is 500.
+#' @param max_iter Maximum iterations for optimization. Default is 500. Tune
+#'   this with [peak_fit_iterations()].
 #' @param tol Convergence tolerance. Default is 1e-6.
 #' @param n_starts Number of random starts for `optimizer = "multistart"`.
 #'   Default is 5.
 #' @param constrain_positions Logical. If `TRUE`, enforce that peak centers
 #'   maintain their relative ordering. Default is `TRUE`.
 #' @param quality_threshold Minimum R-squared to accept fit. Fits below this
-#'   threshold trigger a warning. Default is 0.8.
+#'   threshold trigger a warning. Default is 0.8. Tune this with
+#'   [peak_fit_r_squared()].
 #' @param store_components Logical. If `TRUE`, store individual fitted peak
 #'   curves in the output. Default is `FALSE`.
 #' @param smart_init Logical. If `TRUE`, use smart initialization based on
@@ -1844,6 +1953,10 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' - `fit_r_squared`: R-squared of the overall fit
 #' - `fit_quality`: Quality grade (A/B/C/D/F)
 #' - `purity`: How much of signal at peak max comes from this peak
+#'
+#' `max_iter` and `quality_threshold` are tunable. The R-squared range is
+#' bounded by 0 and 1; choose iteration ranges that fit the model and runtime
+#' budget for your data.
 #'
 #' @seealso [optimize_deconvolution()], [assess_deconv_quality()],
 #'   [peak_models()], [gaussian_peak_model()]
@@ -1925,23 +2038,19 @@ step_measure_peaks_deconvolve <- function(
     )
   }
 
-  if (!is.numeric(max_iter) || max_iter < 1) {
-    cli::cli_abort("{.arg max_iter} must be a positive integer.")
-  }
-  if (
-    !is.numeric(quality_threshold) ||
-      quality_threshold < 0 ||
-      quality_threshold > 1
-  ) {
-    cli::cli_abort("{.arg quality_threshold} must be between 0 and 1.")
-  }
+  .validate_peak_fit_iterations(max_iter)
+  .validate_peak_fit_r_squared(quality_threshold)
 
   recipes::add_step(
     recipe,
     step_measure_peaks_deconvolve_new(
       model = model,
       optimizer = optimizer,
-      max_iter = as.integer(max_iter),
+      max_iter = if (.is_peak_tune_parameter(max_iter)) {
+        max_iter
+      } else {
+        as.integer(max_iter)
+      },
       tol = tol,
       n_starts = as.integer(n_starts),
       constrain_positions = constrain_positions,
@@ -1997,6 +2106,9 @@ step_measure_peaks_deconvolve_new <- function(
 
 #' @export
 prep.step_measure_peaks_deconvolve <- function(x, training, info = NULL, ...) {
+  .validate_peak_fit_iterations(x$max_iter)
+  .validate_peak_fit_r_squared(x$quality_threshold)
+
   # Verify peaks column exists
   if (!x$peaks_col %in% names(training)) {
     cli::cli_abort(
@@ -2010,7 +2122,7 @@ prep.step_measure_peaks_deconvolve <- function(x, training, info = NULL, ...) {
   step_measure_peaks_deconvolve_new(
     model = x$model,
     optimizer = x$optimizer,
-    max_iter = x$max_iter,
+    max_iter = as.integer(x$max_iter),
     tol = x$tol,
     n_starts = x$n_starts,
     constrain_positions = x$constrain_positions,

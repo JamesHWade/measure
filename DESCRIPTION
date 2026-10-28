@@ -54,6 +54,7 @@ Suggests:
     testthat (>= 3.0.0),
     tidymodels,
     tidyverse,
+    tune,
     wavethresh,
     withr,
     workflows

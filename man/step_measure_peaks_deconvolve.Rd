@@ -35,7 +35,8 @@ all registered models. Default is \code{"gaussian"}.}
 \code{"multistart"}, or \code{"nelder_mead"}. Auto-selection chooses based on problem
 complexity and signal-to-noise ratio.}
 
-\item{max_iter}{Maximum iterations for optimization. Default is 500.}
+\item{max_iter}{Maximum iterations for optimization. Default is 500. Tune
+this with \code{\link[=peak_fit_iterations]{peak_fit_iterations()}}.}
 
 \item{tol}{Convergence tolerance. Default is 1e-6.}
 
@@ -46,7 +47,8 @@ Default is 5.}
 maintain their relative ordering. Default is \code{TRUE}.}
 
 \item{quality_threshold}{Minimum R-squared to accept fit. Fits below this
-threshold trigger a warning. Default is 0.8.}
+threshold trigger a warning. Default is 0.8. Tune this with
+\code{\link[=peak_fit_r_squared]{peak_fit_r_squared()}}.}
 
 \item{store_components}{Logical. If \code{TRUE}, store individual fitted peak
 curves in the output. Default is \code{FALSE}.}
@@ -109,6 +111,10 @@ Each fit is assessed for quality. The \code{.peaks} tibble gains columns:
 \item \code{fit_quality}: Quality grade (A/B/C/D/F)
 \item \code{purity}: How much of signal at peak max comes from this peak
 }
+
+\code{max_iter} and \code{quality_threshold} are tunable. The R-squared range is
+bounded by 0 and 1; choose iteration ranges that fit the model and runtime
+budget for your data.
 }
 \examples{
 library(recipes)
@@ -139,11 +145,11 @@ result$.peaks[[1]]
 \code{\link[=optimize_deconvolution]{optimize_deconvolution()}}, \code{\link[=assess_deconv_quality]{assess_deconv_quality()}},
 \code{\link[=peak_models]{peak_models()}}, \code{\link[=gaussian_peak_model]{gaussian_peak_model()}}
 
-Other peak-operations: 
-\code{\link{step_measure_peaks_detect}()},
-\code{\link{step_measure_peaks_filter}()},
-\code{\link{step_measure_peaks_integrate}()},
-\code{\link{step_measure_peaks_properties}()},
-\code{\link{step_measure_peaks_to_table}()}
+Other peak-operations:
+\code{\link[=step_measure_peaks_detect]{step_measure_peaks_detect()}},
+\code{\link[=step_measure_peaks_filter]{step_measure_peaks_filter()}},
+\code{\link[=step_measure_peaks_integrate]{step_measure_peaks_integrate()}},
+\code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}},
+\code{\link[=step_measure_peaks_to_table]{step_measure_peaks_to_table()}}
 }
 \concept{peak-operations}

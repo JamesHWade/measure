@@ -28,15 +28,19 @@ step_measure_peaks_detect(
 \code{\link[=register_peak_algorithm]{register_peak_algorithm()}}. Use \code{\link[=peak_algorithms]{peak_algorithms()}} to see available
 algorithms.}
 
-\item{min_height}{Minimum peak height. If \code{snr_threshold = TRUE}, this is
-interpreted as a signal-to-noise ratio threshold.}
+\item{min_height}{Minimum peak height in the measurement's signal units. If
+\code{snr_threshold = TRUE}, the existing logical mode interprets this as a
+multiple of the signal's median absolute deviation (MAD).}
 
 \item{min_distance}{Minimum distance between peaks in x-axis units.}
 
 \item{min_prominence}{Minimum peak prominence (only for \code{algorithm = "prominence"}).}
 
-\item{snr_threshold}{Logical. If \code{TRUE}, \code{min_height} is interpreted as a
-signal-to-noise ratio. Noise is estimated as the MAD of the signal.}
+\item{snr_threshold}{\code{FALSE} (default) disables SNR filtering; \code{TRUE} retains
+the legacy behavior of interpreting \code{min_height} as an SNR multiple. A
+non-negative number sets an additional minimum SNR threshold in MAD units.
+In numeric mode, a candidate must meet both the absolute \code{min_height} and
+SNR thresholds. A numeric value of zero adds no SNR filtering.}
 
 \item{algorithm_params}{Named list of additional algorithm-specific parameters.
 These are passed to the algorithm function along with the standard parameters.}
@@ -76,6 +80,15 @@ but may detect many spurious peaks.
 Additional algorithms can be registered by technique packs using
 \code{\link[=register_peak_algorithm]{register_peak_algorithm()}}.
 
+The detection thresholds are tunable with \code{\link[=peak_min_height]{peak_min_height()}},
+\code{\link[=peak_min_distance]{peak_min_distance()}}, \code{\link[=peak_min_prominence]{peak_min_prominence()}}, and
+\code{\link[=peak_snr_threshold]{peak_snr_threshold()}}. The default search ranges are only starting points:
+height and prominence use signal units, distance uses x-axis units, and SNR
+uses MAD units. Adjust the ranges to the measurement scale. Prominence is
+offered as a tunable threshold only for the built-in prominence algorithm.
+Tuning covers these direct scalar arguments; values inside
+\code{algorithm_params} are not extracted as recipe tuning parameters.
+
 \strong{Peak properties stored:}
 \itemize{
 \item \code{peak_id}: Integer identifier
@@ -110,11 +123,11 @@ rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
 \seealso{
 \code{\link[=peak_algorithms]{peak_algorithms()}}, \code{\link[=register_peak_algorithm]{register_peak_algorithm()}}
 
-Other peak-operations: 
-\code{\link{step_measure_peaks_deconvolve}()},
-\code{\link{step_measure_peaks_filter}()},
-\code{\link{step_measure_peaks_integrate}()},
-\code{\link{step_measure_peaks_properties}()},
-\code{\link{step_measure_peaks_to_table}()}
+Other peak-operations:
+\code{\link[=step_measure_peaks_deconvolve]{step_measure_peaks_deconvolve()}},
+\code{\link[=step_measure_peaks_filter]{step_measure_peaks_filter()}},
+\code{\link[=step_measure_peaks_integrate]{step_measure_peaks_integrate()}},
+\code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}},
+\code{\link[=step_measure_peaks_to_table]{step_measure_peaks_to_table()}}
 }
 \concept{peak-operations}
