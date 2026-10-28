@@ -18,21 +18,34 @@ Supported axes are strictly increasing 1D numeric arrays. The generic peak and r
 
 ## Prerequisites
 
-1. Python 3.10+ and the dependencies in `requirements.txt`.
-2. For numerical analysis, R with `jsonlite`, `tibble`, `recipes`, and `measure` installed. Relative SEC additionally requires the corrected `measure.sec` development revision that includes `mw_col` and `mw_scale` in `step_sec_mw_averages()`. The released/default revision may have the same package version but lack these fixes; the worker checks for this capability and refuses to perform SEC when it is missing.
-3. For numerical analysis, the `R` executable on `PATH`, or its absolute path in `MEASURE_MCP_R`. It must be able to load those packages in the service process's R library environment. Registry-only operations do not require R.
+1. Python 3.10+ and the runtime dependencies in `requirements.txt`.
+2. Numerical analysis requires R, `jsonlite`, `tibble`, `recipes`, and `measure`. Relative SEC also requires the corrected `measure.sec` implementation with calibrated-curve support. The worker checks for the required SEC capabilities and refuses the calculation when they are absent.
+3. Set `MEASURE_MCP_R` to the `R` executable when it is not on `PATH`. The executable must see the same R library containing the required packages. Registry-only calls do not require R.
 
-The integration tests in this branch ran with R 4.3.3, `measure` 0.0.1.9002, the corrected `measure.sec` 0.0.0.9000 checkout (commit `a3ff1fe965f53b6388a3ce535746ff40fdbda0c2`) and `recipes` 1.4.0.9000. Install the precise commits you have tested; package version strings alone do not identify an unreleased development checkout. Set `MEASURE_MCP_MEASURE_REVISION` and `MEASURE_MCP_SEC_REVISION` to record operator-supplied source revisions in analysis provenance.
+## Numerical service CI and reproducibility
 
-For example, from checked-out package directories, using an already configured R library:
+`.github/workflows/mcp-numerical.yaml` runs the complete `python -m pytest -q mcp/tests` suite. The stdio end-to-end test starts the actual Python MCP server and its R worker, then exercises chromatography, calibration, and corrected SEC analysis. The CI job uses Python 3.12, the current R release, and a fresh R user library for each run. It installs `measure` from the checked-out Measure source and follows the active `fix/separations-sec-correctness` branch for `measure.sec` until issue #61 is merged.
+
+Before testing, the job records the checked-out Measure commit, the SEC branch head seen at job start, and the actual `RemoteSha` of the installed `measure.sec`. The branch SHA at job start is evidence only; installation follows the branch name so CI exercises its current head. The job prints the Python, R, MCP, pytest, recipes, measure, and measure.sec versions and checks that the installed Measure package matches this checkout, both numerical packages came from the isolated R user library, and the SEC calibration APIs required by the worker are present. The SEC package declares `Remotes: JamesHWade/measure`; CI installs the hard dependencies of this checkout first, verifies every hard dependency declared by the installed SEC package is loadable, and disables recursive dependency installation for SEC so it cannot replace the local Measure build.
+
+The numerical expectations are small synthetic known-answer cases: a Gaussian peak area is compared with its analytic integral; a linear calibration is checked against its known line; and SEC moments are compared with direct calculations from a synthetic calibration curve and signal weights. These tests exercise Python-to-MCP-to-R integration and deterministic calculations. They do not reproduce a literature protocol, qualify an instrument, or validate against measured reference traces.
+
+To reproduce the service suite locally with an isolated R user library:
 
 ```sh
-R CMD INSTALL ../measure
-R CMD INSTALL ../measure.sec
-python -m venv .venv
-.venv/bin/pip install -r mcp/requirements.txt pytest
-MEASURE_MCP_TEST_R="$(command -v R)" .venv/bin/pytest -q mcp/tests
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r mcp/requirements.txt 'pytest>=9,<10'
+export R_LIBS_USER="$(mktemp -d)"
+Rscript -e 'install.packages("remotes"); remotes::install_deps(".", dependencies = "hard", upgrade = TRUE)'
+R CMD INSTALL --library="$R_LIBS_USER" .
+Rscript -e 'remotes::install_github("JamesHWade/measure.sec@fix/separations-sec-correctness", dependencies = FALSE)'
+export MEASURE_MCP_R="$(command -v R)"
+export MEASURE_MCP_TEST_R="$MEASURE_MCP_R"
+export MEASURE_MCP_MEASURE_REVISION="$(git rev-parse HEAD)"
+export MEASURE_MCP_SEC_REVISION="$(Rscript -e 'cat(packageDescription("measure.sec")$RemoteSha)')"
+.venv/bin/python -m pytest -q mcp/tests
 ```
+
 
 ## Local stdio use
 

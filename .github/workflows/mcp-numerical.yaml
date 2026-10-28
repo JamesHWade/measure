@@ -1,0 +1,174 @@
+name: MCP numerical service integration
+
+on:
+  pull_request:
+    paths:
+      - 'mcp/**'
+      - 'R/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.github/workflows/mcp-numerical.yaml'
+  push:
+    branches: [main, master]
+    paths:
+      - 'mcp/**'
+      - 'R/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.github/workflows/mcp-numerical.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  numerical:
+    name: Python to MCP to R to corrected SEC
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Follow the active SEC correction branch until issue #61 is merged.
+      MEASURE_MCP_SEC_REF: fix/separations-sec-correctness
+      MEASURE_MCP_DATA_DIR: ${{ runner.temp }}/measure-mcp-data
+      R_LIBS_USER: ${{ runner.temp }}/measure-r-library
+      R_LIBS_SITE: ${{ runner.temp }}/measure-r-site
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Record the checked-out Measure revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          measure_sha="$(git rev-parse HEAD)"
+          test "$measure_sha" = "$GITHUB_SHA"
+          echo "MEASURE_MCP_MEASURE_REVISION=$measure_sha" >> "$GITHUB_ENV"
+          echo "Measure checkout: $measure_sha"
+          echo "Measure checkout: \`$measure_sha\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Record SEC branch head at job start
+        shell: bash
+        run: |
+          set -euo pipefail
+          sec_head="$(git ls-remote --exit-code --heads \
+            https://github.com/JamesHWade/measure.sec.git \
+            "refs/heads/${MEASURE_MCP_SEC_REF}" | awk 'NR == 1 {print $1}')"
+          [[ "$sec_head" =~ ^[0-9a-f]{40}$ ]]
+          echo "MEASURE_MCP_SEC_HEAD_AT_START=$sec_head" >> "$GITHUB_ENV"
+          echo "SEC branch at start ($MEASURE_MCP_SEC_REF): $sec_head"
+          echo "SEC branch head at start ($MEASURE_MCP_SEC_REF): \`$sec_head\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install MCP runtime and compatible test dependencies
+        run: |
+          python -m pip install -r mcp/requirements.txt
+          python -m pip install 'pytest>=9,<10'
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - name: Set the R executable and isolated package libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$R_LIBS_USER" "$R_LIBS_SITE" "$MEASURE_MCP_DATA_DIR"
+          r_path="$(command -v R)"
+          test -x "$r_path"
+          echo "MEASURE_MCP_R=$r_path" >> "$GITHUB_ENV"
+          echo "MEASURE_MCP_TEST_R=$r_path" >> "$GITHUB_ENV"
+          echo "R executable: $r_path"
+          "$r_path" --version
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::remotes any::jsonlite
+          dependencies: '"hard"'
+          upgrade: 'TRUE'
+          cache: false
+
+      - name: Install this checkout and the active SEC correction branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          R CMD INSTALL --library="$R_LIBS_USER" .
+          Rscript - <<'RS'
+          remotes::install_github(
+            paste0("JamesHWade/measure.sec@", Sys.getenv("MEASURE_MCP_SEC_REF")),
+            dependencies = FALSE
+          )
+          RS
+
+      - name: Verify and record numerical backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import importlib.metadata
+          import sys
+
+          assert sys.version_info[:2] == (3, 12), sys.version
+          print(f"Python {sys.version.split()[0]}")
+          for package in ("mcp", "pytest", "httpx", "uvicorn"):
+              print(f"{package} {importlib.metadata.version(package)}")
+          PY
+          Rscript - <<'RS'
+          user_lib <- normalizePath(Sys.getenv("R_LIBS_USER"), mustWork = TRUE)
+          in_user_lib <- function(package) {
+            installed <- normalizePath(find.package(package), mustWork = TRUE)
+            startsWith(installed, paste0(user_lib, .Platform$file.sep))
+          }
+
+          stopifnot(in_user_lib("measure"), in_user_lib("measure.sec"))
+          expected_measure_version <- unname(read.dcf("DESCRIPTION", fields = "Version")[1, "Version"])
+          measure_version <- as.character(utils::packageVersion("measure"))
+          stopifnot(identical(measure_version, expected_measure_version))
+          stopifnot(requireNamespace("jsonlite", quietly = TRUE))
+          stopifnot(requireNamespace("recipes", quietly = TRUE))
+
+          sec_description <- utils::packageDescription("measure.sec", lib.loc = user_lib)
+          dependency_fields <- unlist(sec_description[c("Depends", "Imports", "LinkingTo")], use.names = FALSE)
+          dependency_fields <- dependency_fields[!is.na(dependency_fields) & nzchar(dependency_fields)]
+          dependency_names <- unique(unlist(lapply(dependency_fields, function(field) {
+            field <- gsub("\\s*\\([^)]*\\)", "", field)
+            trimws(strsplit(field, ",", fixed = TRUE)[[1]])
+          }), use.names = FALSE))
+          dependency_names <- setdiff(dependency_names, "R")
+          available_dependencies <- vapply(
+            dependency_names,
+            function(package) requireNamespace(package, quietly = TRUE),
+            logical(1)
+          )
+          stopifnot(all(available_dependencies))
+          for (package in dependency_names) {
+            cat("measure.sec dependency", package,
+                as.character(utils::packageVersion(package)), "\n")
+          }
+
+          sec_revision <- sec_description$RemoteSha
+          stopifnot(length(sec_revision) == 1L, grepl("^[0-9a-f]{40}$", sec_revision))
+          stopifnot(identical(sec_description$RemoteRef, Sys.getenv("MEASURE_MCP_SEC_REF")))
+
+          required_average <- c("mw_col", "mw_scale")
+          required_distribution <- c("mw_col", "mw_scale", "integration_range")
+          stopifnot(all(required_average %in% names(formals(measure.sec::step_sec_mw_averages))))
+          stopifnot(all(required_distribution %in% names(formals(measure.sec::step_sec_mw_distribution))))
+
+          cat("R", as.character(getRversion()), "\n")
+          cat("measure", measure_version, "from", find.package("measure"), "\n")
+          cat("recipes", as.character(utils::packageVersion("recipes")), "\n")
+          cat("measure.sec", as.character(utils::packageVersion("measure.sec")),
+              "RemoteRef", sec_description$RemoteRef,
+              "installed RemoteSha", sec_revision,
+              "branch head at job start", Sys.getenv("MEASURE_MCP_SEC_HEAD_AT_START"), "\n")
+          cat(paste0("MEASURE_MCP_SEC_REVISION=", sec_revision, "\n"),
+              file = Sys.getenv("GITHUB_ENV"), append = TRUE)
+          cat(paste0("Installed measure.sec revision: `", sec_revision, "`\n"),
+              file = Sys.getenv("GITHUB_STEP_SUMMARY"), append = TRUE)
+          RS
+
+      - name: Run complete MCP, HTTP, R, and SEC contracts
+        run: python -m pytest -q mcp/tests
