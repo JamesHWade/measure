@@ -28,6 +28,9 @@ has_pybaselines <- if (requireNamespace("reticulate", quietly = TRUE)) {
   FALSE
 }
 
+```
+
+```{r optional-python-status}
 if (!has_pybaselines) {
   message("Skipping optional pybaselines example (not available in selected Python).")
 }
@@ -278,7 +281,9 @@ baselines |>
 
 First, make reticulate available in R and declare pybaselines for the Python
 environment used by reticulate. These commands are for you to run when you want
-to use the backend; vignette rendering does not install packages:
+to use the backend. The availability check initializes the selected Python
+runtime; reticulate may create a managed environment according to its
+configuration. measure preserves an explicitly selected interpreter:
 
 ```r
 if (!requireNamespace("reticulate", quietly = TRUE)) {

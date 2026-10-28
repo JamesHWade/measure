@@ -1,5 +1,11 @@
 # measure 0.0.1.9003
 
+* The preprocessing, baseline, internal-class, and multidimensional guides now
+  run their examples. A new technique-pack guide demonstrates public extension
+  APIs. Python examples check the optional backend, and loading measure no
+  longer overwrites `RETICULATE_PYTHON`. The baseline guide uses fixed custom
+  arguments while nested custom-argument tuning is tracked in #124.
+
 * `step_measure_peaks_detect(algorithm = "cwt")` now detects peaks through
   Mexican-hat wavelets and persistent scale ridges, with local noise scoring,
   explicit sample-width controls, missing-data separation, and bounded work.
