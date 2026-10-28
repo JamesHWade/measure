@@ -71,6 +71,62 @@ test_that("step_measure_baseline_custom passes additional arguments", {
   expect_true(is_measure_list(result$.measures))
 })
 
+test_that("step_measure_baseline_custom preserves callback lexical bindings", {
+  offset <- 99
+  callback <- function(x, offset) {
+    rep(offset, nrow(x))
+  }
+
+  rec_input <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    prep()
+  original <- bake(rec_input, new_data = NULL)
+
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_custom(.fn = callback, offset = 2) |>
+    prep()
+
+  result <- bake(rec, new_data = NULL)
+  result_again <- bake(rec, new_data = NULL)
+
+  expect_identical(get("offset", envir = environment(callback)), 99)
+  expect_equal(
+    result$.measures[[1]]$value,
+    original$.measures[[1]]$value - 2
+  )
+  expect_equal(result_again, result)
+})
+
+test_that("formula callback arguments use a private invocation environment", {
+  scale <- 99
+  baseline_formula <- ~ rep(scale, nrow(.x))
+
+  rec_input <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    prep()
+  original <- bake(rec_input, new_data = NULL)
+
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_custom(.fn = baseline_formula, scale = 2) |>
+    prep()
+
+  result <- bake(rec, new_data = NULL)
+  result_again <- bake(rec, new_data = NULL)
+
+  expect_identical(get("scale", envir = environment(baseline_formula)), 99)
+  expect_equal(
+    result$.measures[[1]]$value,
+    original$.measures[[1]]$value - 2
+  )
+  expect_equal(result_again, result)
+})
+
 test_that("step_measure_baseline_custom subtract = FALSE returns baseline", {
   mean_baseline <- function(x) {
     rep(mean(x$value, na.rm = TRUE), nrow(x))
@@ -260,6 +316,123 @@ test_that("step_measure_baseline_custom tunable works with declared params", {
   expect_equal(tunable_params$name, "degree")
   expect_equal(tunable_params$call_info[[1]]$pkg, "dials")
   expect_equal(tunable_params$call_info[[1]]$fun, "degree_int")
+})
+
+test_that("custom baseline parameters are discovered and finalized by tune", {
+  rec_tuned <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_custom(
+      .fn = ~ {
+        fit <- lm(.x$value ~ poly(.x$location, degree))
+        predict(fit)
+      },
+      degree = tune::tune(id = "baseline_degree"),
+      tunable = list(
+        degree = list(
+          pkg = "dials",
+          fun = "degree_int",
+          range = c(1L, 4L)
+        )
+      )
+    )
+
+  tune_args <- generics::tune_args(rec_tuned, full = TRUE)
+  degree_arg <- tune_args[tune_args$name == "degree", ]
+  parameters <- tune::extract_parameter_set_dials(rec_tuned)
+
+  expect_equal(nrow(degree_arg), 1)
+  expect_true(degree_arg$tunable)
+  expect_identical(degree_arg$id, "baseline_degree")
+  expect_identical(parameters$id, "baseline_degree")
+
+  rec_final <- tune::finalize_recipe(
+    rec_tuned,
+    list(baseline_degree = 2L)
+  )
+  finalized_args <- generics::tune_args(rec_final, full = TRUE)
+  rec_fixed <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_custom(
+      .fn = ~ {
+        fit <- lm(.x$value ~ poly(.x$location, degree))
+        predict(fit)
+      },
+      degree = 2L
+    )
+
+  result_final <- bake(prep(rec_final), new_data = NULL)
+  result_fixed <- bake(prep(rec_fixed), new_data = NULL)
+  result_serialized <- bake(
+    prep(unserialize(serialize(rec_final, NULL))),
+    new_data = NULL
+  )
+
+  expect_equal(result_final$.measures, result_fixed$.measures)
+  expect_equal(result_serialized$.measures, result_fixed$.measures)
+  expect_false(
+    finalized_args$tunable[finalized_args$name == "degree"]
+  )
+})
+
+test_that("custom baseline tuning supports callback names matching step fields", {
+  rec_tuned <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_custom(
+      .fn = ~ rep(tunable_params, nrow(.x)),
+      tunable_params = tune::tune(id = "custom_value"),
+      subtract = FALSE,
+      tunable = list(
+        tunable_params = list(
+          pkg = "dials",
+          fun = "degree_int",
+          range = c(1L, 4L)
+        )
+      )
+    )
+
+  args <- generics::tune_args(rec_tuned, full = TRUE)
+  custom_arg <- args[args$name == "tunable_params", ]
+  rec_final <- tune::finalize_recipe(
+    rec_tuned,
+    list(custom_value = 2L)
+  )
+  result <- bake(prep(rec_final), new_data = NULL)
+
+  expect_true(custom_arg$tunable)
+  expect_identical(custom_arg$id, "custom_value")
+  expect_equal(unique(result$.measures[[1]]$value), 2)
+})
+
+test_that("unresolved custom baseline tuning markers abort during prep", {
+  rec <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_custom(
+      .fn = ~ rep(degree, nrow(.x)),
+      degree = tune::tune(),
+      tunable = list(
+        degree = list(
+          pkg = "dials",
+          fun = "degree_int",
+          range = c(1L, 4L)
+        )
+      )
+    )
+
+  expect_error(prep(rec), "unresolved tuning markers")
+
+  rec_unnamed <- recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_baseline_custom(
+      .fn = ~ .x$value,
+      tune::tune()
+    )
+
+  expect_error(prep(rec_unnamed), "unresolved tuning markers")
 })
 
 test_that("required_pkgs includes measure", {

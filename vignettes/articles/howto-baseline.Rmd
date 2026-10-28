@@ -366,24 +366,53 @@ rec_tunable <- recipe(water ~ ., data = meats) |>
 tune::tunable(rec_tunable)
 ```
 
-`step_measure_baseline_custom()` accepts fixed arguments for the callback. Its
-`tunable` metadata is not currently discovered as an operational recipe
-parameter when the value is nested inside the callback arguments, so tune a
-built-in baseline step such as ALS instead. Here `span` is a fixed argument:
+`step_measure_baseline_custom()` can expose callback arguments to the tuning
+framework. Declare a parameter in `tunable`, capture `tune::tune()` in the
+matching callback argument, then extract and finalize it through the public
+tuning API:
 
 ```{r tunable-custom}
-rec_custom <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
+rec_custom_tuned <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(transmittance, location = vars(channel)) |>
   step_measure_baseline_custom(
-    .fn = ~ stats::loess(.x$value ~ .x$location, span = span)$fitted,
-    span = 0.5
-  ) |>
-  step_measure_output_wide(prefix = "nir_") |>
-  prep()
+    .fn = ~ {
+      fit <- lm(.x$value ~ poly(.x$location, degree))
+      predict(fit)
+    },
+    degree = tune::tune(id = "baseline_degree"),
+    tunable = list(
+      degree = list(
+        pkg = "dials",
+        fun = "degree_int",
+        range = c(1L, 5L)
+      )
+    )
+  )
 
-bake(rec_custom, new_data = NULL) |>
-  dplyr::select(water, dplyr::starts_with("nir_")) |>
-  head()
+custom_parameters <- tune::extract_parameter_set_dials(rec_custom_tuned)
+custom_parameters
+
+rec_custom_final <- tune::finalize_recipe(
+  rec_custom_tuned,
+  list(baseline_degree = 2L)
+)
+
+rec_custom_fixed <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(transmittance, location = vars(channel)) |>
+  step_measure_baseline_custom(
+    .fn = ~ {
+      fit <- lm(.x$value ~ poly(.x$location, degree))
+      predict(fit)
+    },
+    degree = 2L
+  )
+
+all.equal(
+  bake(prep(rec_custom_final), new_data = NULL)$.measures,
+  bake(prep(rec_custom_fixed), new_data = NULL)$.measures
+)
 ```
 
 ## Complete preprocessing pipeline

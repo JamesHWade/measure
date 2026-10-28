@@ -28,7 +28,9 @@ input. Formulas are converted to functions via \code{\link[rlang:as_function]{rl
 where \code{.x} represents the \code{measure_tbl}.}
 
 \item{...}{Additional arguments passed to \code{.fn}. These are captured as
-quosures and evaluated at bake time.}
+quosures and evaluated at bake time. For formulas, named arguments are
+available as names in the formula body. For functions, they are passed as
+ordinary function arguments.}
 
 \item{subtract}{If \code{TRUE} (default), the baseline is subtracted from the
 signal. If \code{FALSE}, the baseline values replace the original values
@@ -91,13 +93,23 @@ step_measure_baseline_custom(.fn = ~ mean(.x$value))
 To make parameters tunable with \code{dials}, provide a \code{tunable} argument:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{step_measure_baseline_custom(
-  .fn = ~ stats::loess(.x$value ~ .x$location, span = span)$fitted,
-  span = 0.5,
+  .fn = ~ \{
+    fit <- stats::lm(.x$value ~ poly(.x$location, degree))
+    stats::predict(fit)
+  \},
+  degree = tune::tune(),
   tunable = list(
-    span = list(pkg = "dials", fun = "degree", range = c(0.1, 0.9))
+    degree = list(
+      pkg = "dials",
+      fun = "degree_int",
+      range = c(1L, 5L)
+    )
   )
 )
 }\if{html}{\out{</div>}}
+
+In a recipe, \code{\link[tune:reexports]{tune::extract_parameter_set_dials()}} discovers this argument.
+Finalize it with \code{\link[tune:finalize_model]{tune::finalize_recipe()}} before calling \code{\link[recipes:prep]{recipes::prep()}}.
 
 \strong{No selectors should be supplied to this step function}. The data should be
 in the internal format produced by \code{\link[=step_measure_input_wide]{step_measure_input_wide()}} or

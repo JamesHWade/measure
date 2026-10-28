@@ -12,7 +12,9 @@
 #'   input. Formulas are converted to functions via [rlang::as_function()],
 #'   where `.x` represents the `measure_tbl`.
 #' @param ... Additional arguments passed to `.fn`. These are captured as
-#'   quosures and evaluated at bake time.
+#'   quosures and evaluated at bake time. For formulas, named arguments are
+#'   available as names in the formula body. For functions, they are passed as
+#'   ordinary function arguments.
 #' @param subtract If `TRUE` (default), the baseline is subtracted from the
 #'   signal. If `FALSE`, the baseline values replace the original values
 #'   (useful for extracting baselines).
@@ -62,13 +64,24 @@
 #'
 #' ```r
 #' step_measure_baseline_custom(
-#'   .fn = ~ stats::loess(.x$value ~ .x$location, span = span)$fitted,
-#'   span = 0.5,
+#'   .fn = ~ {
+#'     fit <- stats::lm(.x$value ~ poly(.x$location, degree))
+#'     stats::predict(fit)
+#'   },
+#'   degree = tune::tune(),
 #'   tunable = list(
-#'     span = list(pkg = "dials", fun = "degree", range = c(0.1, 0.9))
+#'     degree = list(
+#'       pkg = "dials",
+#'       fun = "degree_int",
+#'       range = c(1L, 5L)
+#'     )
 #'   )
 #' )
 #' ```
+#'
+#'
+#' In a recipe, [tune::extract_parameter_set_dials()] discovers this argument.
+#' Finalize it with [tune::finalize_recipe()] before calling [recipes::prep()].
 #'
 #' **No selectors should be supplied to this step function**. The data should be
 #' in the internal format produced by [step_measure_input_wide()] or
@@ -123,6 +136,7 @@ step_measure_baseline_custom <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_baseline_custom")
 ) {
+  fn_formula <- rlang::is_formula(.fn)
   .fn <- rlang::as_function(.fn)
   fn_args <- rlang::enquos(...)
 
@@ -130,6 +144,7 @@ step_measure_baseline_custom <- function(
     recipe,
     step_measure_baseline_custom_new(
       fn = .fn,
+      fn_formula = fn_formula,
       fn_args = fn_args,
       subtract = subtract,
       measures = measures,
@@ -144,6 +159,7 @@ step_measure_baseline_custom <- function(
 
 step_measure_baseline_custom_new <- function(
   fn,
+  fn_formula,
   fn_args,
   subtract,
   measures,
@@ -156,6 +172,7 @@ step_measure_baseline_custom_new <- function(
   recipes::step(
     subclass = "measure_baseline_custom",
     fn = fn,
+    fn_formula = fn_formula,
     fn_args = fn_args,
     subtract = subtract,
     measures = measures,
@@ -194,6 +211,7 @@ prep.step_measure_baseline_custom <- function(x, training, info = NULL, ...) {
 
   step_measure_baseline_custom_new(
     fn = x$fn,
+    fn_formula = x$fn_formula,
     fn_args = x$fn_args,
     subtract = x$subtract,
     measures = measure_cols,
@@ -209,13 +227,36 @@ prep.step_measure_baseline_custom <- function(x, training, info = NULL, ...) {
 bake.step_measure_baseline_custom <- function(object, new_data, ...) {
   # Evaluate quosures to get actual argument values
   fn_args <- lapply(object$fn_args, rlang::eval_tidy)
+  unresolved <- which(vapply(
+    fn_args,
+    .contains_tune_marker,
+    logical(1)
+  ))
+  if (length(unresolved) > 0) {
+    unresolved_names <- names(fn_args)[unresolved]
+    if (is.null(unresolved_names)) {
+      unresolved_names <- rep("", length(unresolved))
+    }
+    unnamed <- is.na(unresolved_names) | !nzchar(unresolved_names)
+    unresolved_names[unnamed] <- paste("unnamed argument", unresolved[unnamed])
+    cli::cli_abort(c(
+      "Custom baseline arguments still contain unresolved tuning markers: {.val {unresolved_names}}.",
+      "i" = "Finalize the recipe before {.fn prep} or {.fn bake}."
+    ))
+  }
+  # Steps serialized before fn_formula was recorded used environment injection
+  # for any callback arguments. Preserve that behavior without mutating the
+  # callback environment while those steps are still in circulation.
+  fn_formula <- isTRUE(object$fn_formula) ||
+    (is.null(object$fn_formula) && length(fn_args) > 0)
 
   for (col in object$measures) {
     result <- .compute_baseline_custom(
       new_data[[col]],
       fn = object$fn,
       fn_args = fn_args,
-      subtract = object$subtract
+      subtract = object$subtract,
+      fn_formula = fn_formula
     )
     new_data[[col]] <- new_measure_list(result)
   }
@@ -296,6 +337,105 @@ tunable.step_measure_baseline_custom <- function(x, ...) {
   )
 }
 
+#' @importFrom generics tune_args
+#' @export
+tune_args.step_measure_baseline_custom <- function(object, full = FALSE, ...) {
+  # The tuning method expects arguments on the step itself. Make the captured
+  # callback arguments visible to the public generic while tunable() continues
+  # to describe which names are supported.
+  fn_args <- object$fn_args
+  tunable_params <- object$tunable_params
+  arg_names <- names(fn_args)
+  proxy_names <- arg_names
+  if (!is.null(arg_names)) {
+    for (i in seq_along(fn_args)) {
+      nm <- arg_names[[i]]
+      if (nzchar(nm)) {
+        # Keep the step's tunable metadata available to tunable() when a
+        # callback happens to use the same argument name as this field.
+        proxy_nm <- if (identical(nm, "tunable_params")) {
+          ".measure_custom_arg_tunable_params"
+        } else {
+          nm
+        }
+        proxy_names[[i]] <- proxy_nm
+        object[[nm]] <- tryCatch(
+          rlang::eval_tidy(fn_args[[i]]),
+          error = function(e) rlang::quo_get_expr(fn_args[[i]])
+        )
+        if (!identical(proxy_nm, nm)) {
+          object[[proxy_nm]] <- object[[nm]]
+          object$tunable_params <- tunable_params
+        }
+      }
+    }
+  }
+
+  res <- NextMethod()
+  if (!is.null(arg_names) && "tunable_params" %in% arg_names) {
+    metadata_row <- res$name == "tunable_params" & is.na(res$id)
+    res <- res[!metadata_row, , drop = FALSE]
+  }
+  tunable_names <- generics::tunable(object)$name
+  if (!is.null(arg_names)) {
+    for (i in seq_along(arg_names)) {
+      nm <- arg_names[[i]]
+      if (!nzchar(nm)) {
+        next
+      }
+      proxy_nm <- proxy_names[[i]]
+      rows <- res$name == proxy_nm
+      res$name[rows] <- nm
+      res$tunable[rows] <- nm %in% tunable_names & !is.na(res$id[rows])
+    }
+  }
+  res
+}
+
+#' @export
+update.step_measure_baseline_custom <- function(object, ...) {
+  changes <- list(...)
+  fn_args <- object$fn_args
+  arg_names <- names(fn_args)
+  if (is.null(arg_names)) {
+    arg_names <- rep("", length(fn_args))
+  }
+
+  nested <- names(changes) %in% arg_names
+  nested[is.na(nested)] <- FALSE
+  nested_changes <- changes[nested]
+  step_changes <- changes[!nested]
+
+  # Let recipes' public update generic apply ordinary step-field changes. The
+  # temporary class removes this method from dispatch and selects update.step.
+  step_object <- object
+  step_class <- class(step_object)
+  class(step_object) <- c("step_measure_baseline_custom_update_proxy", "step")
+  if (length(step_changes) > 0) {
+    step_object <- do.call(
+      stats::update,
+      c(list(object = step_object), step_changes)
+    )
+  } else {
+    step_object <- stats::update(step_object)
+  }
+  class(step_object) <- step_class
+
+  if (length(nested_changes) > 0) {
+    for (nm in names(nested_changes)) {
+      value_env <- new.env(parent = emptyenv())
+      value_env$.value <- nested_changes[[nm]]
+      fn_args[[nm]] <- rlang::new_quosure(
+        rlang::sym(".value"),
+        env = value_env
+      )
+    }
+    step_object$fn_args <- fn_args
+  }
+
+  step_object
+}
+
 # ------------------------------------------------------------------------------
 # Internal computation
 
@@ -307,13 +447,20 @@ tunable.step_measure_baseline_custom <- function(x, ...) {
 #' @param subtract Whether to subtract the baseline.
 #' @return A list of measure_tbl objects with baseline-corrected values.
 #' @noRd
-.compute_baseline_custom <- function(dat, fn, fn_args, subtract) {
+.compute_baseline_custom <- function(
+  dat,
+  fn,
+  fn_args,
+  subtract,
+  fn_formula = FALSE
+) {
   purrr::map(
     dat,
     .custom_baseline_single,
     fn = fn,
     fn_args = fn_args,
-    subtract = subtract
+    subtract = subtract,
+    fn_formula = fn_formula
   )
 }
 
@@ -325,7 +472,13 @@ tunable.step_measure_baseline_custom <- function(x, ...) {
 #' @param subtract Whether to subtract the baseline.
 #' @return A measure_tbl with baseline-corrected values.
 #' @noRd
-.custom_baseline_single <- function(x, fn, fn_args, subtract) {
+.custom_baseline_single <- function(
+  x,
+  fn,
+  fn_args,
+  subtract,
+  fn_formula = FALSE
+) {
   n <- nrow(x)
 
   # Handle edge cases
@@ -341,18 +494,25 @@ tunable.step_measure_baseline_custom <- function(x, ...) {
     return(x)
   }
 
-  # Call the user function with the measure_tbl and additional args
-  # For formula-based functions, inject fn_args into the function's environment
-  # so that variables referenced in the formula body are accessible
-  if (length(fn_args) > 0) {
-    fn_env <- rlang::fn_env(fn)
-    for (nm in names(fn_args)) {
-      fn_env[[nm]] <- fn_args[[nm]]
+  # Formula shorthand refers to named arguments through lexical lookup rather
+  # than explicit formals. Give each invocation a private child environment so
+  # those names are available without changing the formula's captured scope.
+  if (isTRUE(fn_formula) && length(fn_args) > 0 && !is.null(names(fn_args))) {
+    fn_invocation <- fn
+    fn_env <- new.env(parent = environment(fn))
+    for (i in seq_along(fn_args)) {
+      nm <- names(fn_args)[[i]]
+      if (!is.na(nm) && nzchar(nm)) {
+        fn_env[[nm]] <- fn_args[[i]]
+      }
     }
+    environment(fn_invocation) <- fn_env
+  } else {
+    fn_invocation <- fn
   }
 
   baseline <- tryCatch(
-    do.call(fn, c(list(x), fn_args)),
+    do.call(fn_invocation, c(list(x), fn_args)),
     error = function(e) {
       cli::cli_warn(
         "Custom baseline function failed: {e$message}; returning unchanged."
@@ -388,4 +548,27 @@ tunable.step_measure_baseline_custom <- function(x, ...) {
   }
 
   x
+}
+
+.contains_tune_marker <- function(x) {
+  if (is.call(x)) {
+    if (identical(x[[1L]], as.name("tune"))) {
+      return(TRUE)
+    }
+    if (
+      identical(x[[1L]], as.name("::")) &&
+        length(x) >= 3L &&
+        identical(x[[2L]], as.name("tune")) &&
+        identical(x[[3L]], as.name("tune"))
+    ) {
+      return(TRUE)
+    }
+    return(any(vapply(as.list(x)[-1L], .contains_tune_marker, logical(1))))
+  }
+
+  if (is.list(x) || is.expression(x)) {
+    return(any(vapply(as.list(x), .contains_tune_marker, logical(1))))
+  }
+
+  FALSE
 }
