@@ -136,8 +136,19 @@ peak_model_area.gaussian_peak_model <- function(model, params, x_range = NULL) {
 #'
 #' @details
 #' The EMG function models asymmetric peaks with tailing, common in
-#' chromatography. It is the convolution of a Gaussian with an exponential
-#' decay function.
+#' chromatography. It is the convolution of a precursor Gaussian with a
+#' one-sided exponential decay density. For positive `tau`, its value is:
+#'
+#' \deqn{
+#' f(x) = \frac{h \sigma \sqrt{2\pi}}{\tau}
+#' \exp\left(\frac{\sigma^2}{2\tau^2} - \frac{x-c}{\tau}\right)
+#' \Phi\left(\frac{x-c}{\sigma} - \frac{\sigma}{\tau}\right)
+#' }
+#'
+#' Here, `height` is the peak height of the precursor Gaussian, not the
+#' observed EMG maximum. The integrated area is therefore
+#' `height * width * sqrt(2 * pi)`. A non-positive `tau` returns the Gaussian
+#' limit.
 #'
 #' @examples
 #' model <- emg_peak_model()
@@ -164,28 +175,164 @@ peak_model_value.emg_peak_model <- function(model, x, params) {
     return(params$height * exp(-0.5 * ((x - params$center) / params$width)^2))
   }
 
-  # EMG formula using log-space for numerical stability
-  # log(result) = log(coef) + exp_term + log(pnorm_term)
-  z <- (x - params$center) / params$width + params$width / params$tau
-  exp_term <- 0.5 *
-    (params$width / params$tau)^2 -
-    (x - params$center) / params$tau
+  height <- params$height
+  if (height == 0) {
+    return(rep(0, length(x)))
+  }
 
-  # Clamp exp_term to avoid overflow (exp(709) is ~max for double)
-  exp_term <- pmin(exp_term, 700)
+  delta <- x - params$center
+  z <- delta / params$width
+  overflow_delta <- is.infinite(delta) & is.finite(x) & is.finite(params$center)
+  if (any(overflow_delta)) {
+    z[overflow_delta] <- x[overflow_delta] /
+      params$width -
+      params$center / params$width
+  }
+  log_k <- log(params$width) - log(params$tau)
+  result <- rep(NA_real_, length(x))
+  result[is.infinite(z)] <- 0
 
-  coef <- params$height * params$width * sqrt(2 * pi) / params$tau
-  result <- coef * exp(exp_term) * stats::pnorm(z)
+  finite_z <- is.finite(z)
+  positive_infinite_z <- which(
+    is.infinite(z) &
+      z > 0 &
+      is.finite(x) &
+      is.finite(params$center)
+  )
+  if (!any(finite_z) && length(positive_infinite_z) == 0) {
+    return(result)
+  }
 
-  # For very negative z, pnorm is essentially 0, so result should be 0
-  # For very large exp_term that was clamped, fallback to Gaussian tail
-  gaussian_fallback <- params$height *
-    exp(-0.5 * ((x - params$center) / params$width)^2)
+  z_finite <- z[finite_z]
+  log_height <- log(abs(height))
 
-  # Use Gaussian where EMG formula has numerical issues
-  result[is.nan(result) | is.infinite(result)] <- gaussian_fallback[
-    is.nan(result) | is.infinite(result)
-  ]
+  # If width / tau is beyond the finite double range, the exponential
+  # displacement is below floating-point resolution and the model is Gaussian.
+  if (log_k >= log(.Machine$double.xmax)) {
+    result[finite_z] <- height * exp(-0.5 * z_finite^2)
+    return(result)
+  }
+
+  k <- exp(log_k)
+
+  if (length(positive_infinite_z) > 0) {
+    log_delta <- .log_positive_difference(
+      x[positive_infinite_z],
+      params$center
+    )
+    log_offset <- log_delta - log(params$tau)
+    finite_offset <- log_offset < log(.Machine$double.xmax)
+
+    if (any(finite_offset)) {
+      offset <- exp(log_offset[finite_offset])
+      log_value <- log_height +
+        log_k +
+        0.5 * log(2 * pi) +
+        0.5 * k^2 -
+        offset
+      result[positive_infinite_z[finite_offset]] <- sign(height) *
+        exp(log_value)
+    }
+  }
+
+  if (!any(finite_z)) {
+    return(result)
+  }
+
+  on_gaussian_side <- z_finite <= k
+  log_value <- numeric(length(z_finite))
+
+  if (any(on_gaussian_side)) {
+    z_left <- z_finite[on_gaussian_side]
+    q <- k - z_left
+    log_q <- log(q)
+
+    # k - z can overflow when both terms are large. In that case, compute
+    # log(k - z) as log(k + abs(z)) without constructing the sum.
+    overflow <- is.infinite(q)
+    if (any(overflow)) {
+      log_abs_z <- log(-z_left[overflow])
+      larger <- pmax(log_k, log_abs_z)
+      log_q[overflow] <- larger +
+        log1p(
+          exp(-abs(log_k - log_abs_z))
+        )
+    }
+
+    log_mills <- .log_normal_mills_ratio(q, log_q)
+    log_value[on_gaussian_side] <- log_height +
+      log_k -
+      0.5 * z_left^2 +
+      log_mills
+  }
+
+  on_exponential_side <- !on_gaussian_side
+  if (any(on_exponential_side)) {
+    z_right <- z_finite[on_exponential_side]
+    log_value[on_exponential_side] <- log_height +
+      log_k +
+      0.5 * log(2 * pi) +
+      k * (0.5 * k - z_right) +
+      stats::pnorm(z_right - k, log.p = TRUE)
+  }
+
+  result[finite_z] <- sign(height) * exp(log_value)
+  result
+}
+
+.log_positive_difference <- function(x, center) {
+  center <- rep_len(center, length(x))
+  delta <- x - center
+  result <- rep(NA_real_, length(delta))
+  finite_positive <- is.finite(delta) & delta > 0
+  result[finite_positive] <- log(delta[finite_positive])
+
+  overflow_positive <- is.infinite(delta) &
+    delta > 0 &
+    is.finite(x) &
+    is.finite(center)
+  if (any(overflow_positive)) {
+    log_x <- log(x[overflow_positive])
+    log_negative_center <- log(-center[overflow_positive])
+    larger <- pmax(log_x, log_negative_center)
+    result[overflow_positive] <- larger +
+      log1p(exp(-abs(log_x - log_negative_center)))
+  }
+
+  result
+}
+
+.log_normal_mills_ratio <- function(q, log_q) {
+  result <- numeric(length(q))
+  use_log_cdf <- q <= 20
+
+  if (any(use_log_cdf)) {
+    q_moderate <- q[use_log_cdf]
+    result[use_log_cdf] <- 0.5 *
+      log(2 * pi) +
+      0.5 * q_moderate^2 +
+      stats::pnorm(-q_moderate, log.p = TRUE)
+  }
+
+  # For large q, the asymptotic expansion avoids cancellation in log(Phi(-q)).
+  if (!all(use_log_cdf)) {
+    inverse_q <- exp(-log_q[!use_log_cdf])
+    inverse_q_squared <- inverse_q^2
+    correction <- 1 +
+      inverse_q_squared *
+        (-1 +
+          inverse_q_squared *
+            (3 +
+              inverse_q_squared *
+                (-15 +
+                  inverse_q_squared *
+                    (105 +
+                      inverse_q_squared *
+                        (-945 +
+                          inverse_q_squared *
+                            (10395 - 135135 * inverse_q_squared))))))
+    result[!use_log_cdf] <- -log_q[!use_log_cdf] + log(correction)
+  }
 
   result
 }
