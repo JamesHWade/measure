@@ -119,8 +119,72 @@ peak_model_initial_guess.gaussian_peak_model <- function(
 
 #' @export
 peak_model_area.gaussian_peak_model <- function(model, params, x_range = NULL) {
-  # Analytical integral of Gaussian: height * width * sqrt(2 * pi)
-  params$height * params$width * sqrt(2 * pi)
+  if (is.null(x_range)) {
+    return(params$height * params$width * sqrt(2 * pi))
+  }
+
+  bounds <- .validate_peak_area_range(x_range)
+  .gaussian_peak_area(
+    height = params$height,
+    center = params$center,
+    width = params$width,
+    lower = bounds[1],
+    upper = bounds[2]
+  )
+}
+
+.gaussian_peak_area <- function(height, center, width, lower, upper) {
+  if (!is.finite(width) || width <= 0) {
+    cli::cli_abort("{.arg width} must be a finite, positive number.")
+  }
+  if (height == 0 || lower == upper) {
+    return(0)
+  }
+
+  z_lower <- (lower - center) / width
+  z_upper <- (upper - center) / width
+  probability <- .normal_interval_probability(z_lower, z_upper)
+  height * width * sqrt(2 * pi) * probability
+}
+
+.normal_interval_probability <- function(lower, upper) {
+  if (lower >= upper) {
+    return(0)
+  }
+
+  if (lower >= 0) {
+    log_lower <- stats::pnorm(lower, lower.tail = FALSE, log.p = TRUE)
+    log_upper <- stats::pnorm(upper, lower.tail = FALSE, log.p = TRUE)
+    probability <- .exp_log_difference(log_lower, log_upper)
+  } else if (upper <= 0) {
+    log_upper <- stats::pnorm(upper, log.p = TRUE)
+    log_lower <- stats::pnorm(lower, log.p = TRUE)
+    probability <- .exp_log_difference(log_upper, log_lower)
+  } else {
+    probability <- stats::pnorm(upper) - stats::pnorm(lower)
+  }
+
+  if (probability == 0 && is.finite(lower) && is.finite(upper)) {
+    probability <- stats::integrate(
+      stats::dnorm,
+      lower = lower,
+      upper = upper,
+      rel.tol = 1e-10,
+      abs.tol = 0
+    )$value
+  }
+  probability
+}
+
+.exp_log_difference <- function(log_larger, log_smaller) {
+  if (is.infinite(log_larger) && log_larger < 0) {
+    return(0)
+  }
+  if (log_smaller >= log_larger) {
+    return(0)
+  }
+
+  exp(log_larger + log(-expm1(log_smaller - log_larger)))
 }
 
 # ==============================================================================
@@ -453,6 +517,71 @@ peak_model_initial_guess.emg_peak_model <- function(model, x, y, peak_idx) {
   )
 }
 
+#' @export
+peak_model_area.emg_peak_model <- function(model, params, x_range = NULL) {
+  if (is.null(x_range)) {
+    return(params$height * params$width * sqrt(2 * pi))
+  }
+
+  bounds <- .validate_peak_area_range(x_range)
+  if (!is.finite(params$tau)) {
+    cli::cli_abort("{.arg tau} must be finite.")
+  }
+  if (params$tau <= 0) {
+    return(
+      .gaussian_peak_area(
+        height = params$height,
+        center = params$center,
+        width = params$width,
+        lower = bounds[1],
+        upper = bounds[2]
+      )
+    )
+  }
+  if (params$height == 0 || bounds[1] == bounds[2]) {
+    return(0)
+  }
+  if (!is.finite(params$width) || params$width <= 0) {
+    cli::cli_abort("{.arg width} must be a finite, positive number.")
+  }
+
+  center <- params$center
+  # Split at both shape scales so adaptive quadrature resolves the narrow
+  # Gaussian core and broad exponential tail across large scale ratios.
+  breaks <- bounds
+  if (center > bounds[1] && center < bounds[2]) {
+    breaks <- c(breaks, center)
+  }
+  for (scale in c(params$width, params$tau)) {
+    offsets <- c(-64, -32, -16, -8, -4, -2, -1, 1, 2, 4, 8, 16, 32, 64) *
+      scale
+    candidates <- center + offsets
+    breaks <- c(
+      breaks,
+      candidates[
+        is.finite(candidates) & candidates > bounds[1] & candidates < bounds[2]
+      ]
+    )
+  }
+  breaks <- sort(unique(breaks))
+
+  areas <- vapply(
+    seq_len(length(breaks) - 1L),
+    function(i) {
+      stats::integrate(
+        function(x) peak_model_value(model, x, params),
+        lower = breaks[i],
+        upper = breaks[i + 1L],
+        subdivisions = 1000L,
+        rel.tol = 1e-9,
+        abs.tol = 0
+      )$value
+    },
+    numeric(1)
+  )
+  sum(areas)
+}
+
 # ==============================================================================
 # Bi-Gaussian Model
 # ==============================================================================
@@ -571,6 +700,46 @@ peak_model_initial_guess.bigaussian_peak_model <- function(
   )
 }
 
+#' @export
+peak_model_area.bigaussian_peak_model <- function(
+  model,
+  params,
+  x_range = NULL
+) {
+  if (is.null(x_range)) {
+    return(
+      params$height * sqrt(pi / 2) * (params$width_left + params$width_right)
+    )
+  }
+
+  bounds <- .validate_peak_area_range(x_range)
+  center <- params$center
+  area <- 0
+
+  if (bounds[1] < center) {
+    area <- area +
+      .gaussian_peak_area(
+        height = params$height,
+        center = center,
+        width = params$width_left,
+        lower = bounds[1],
+        upper = min(bounds[2], center)
+      )
+  }
+  if (bounds[2] > center) {
+    area <- area +
+      .gaussian_peak_area(
+        height = params$height,
+        center = center,
+        width = params$width_right,
+        lower = max(bounds[1], center),
+        upper = bounds[2]
+      )
+  }
+
+  area
+}
+
 # ==============================================================================
 # Lorentzian Model
 # ==============================================================================
@@ -682,8 +851,23 @@ peak_model_area.lorentzian_peak_model <- function(
   params,
   x_range = NULL
 ) {
-  # Analytical integral: height * gamma * pi
-  params$height * params$gamma * pi
+  gamma <- params$gamma
+  if (!is.finite(gamma) || gamma <= 0) {
+    cli::cli_abort("{.arg gamma} must be a finite, positive number.")
+  }
+  if (is.null(x_range)) {
+    return(params$height * gamma * pi)
+  }
+
+  bounds <- .validate_peak_area_range(x_range)
+  if (params$height == 0 || bounds[1] == bounds[2]) {
+    return(0)
+  }
+
+  lower <- bounds[1] - params$center
+  upper <- bounds[2] - params$center
+  angle <- atan2(gamma * (bounds[2] - bounds[1]), gamma^2 + lower * upper)
+  params$height * gamma * angle
 }
 
 # ==============================================================================

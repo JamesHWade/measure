@@ -62,6 +62,13 @@ peak bases before integration.
 \item \code{"none"}: Integrates directly to y=0.
 \item \code{"global"}: Subtracts the minimum value in the peak region.
 }
+
+Peaks with fitted model metadata from
+\code{\link[=step_measure_peaks_deconvolve]{step_measure_peaks_deconvolve()}} are integrated from their individual fitted
+component over the finite bounds stored in \code{left_base} and \code{right_base}.
+The method and baseline settings apply only to observed-signal integration.
+The \code{area_basis} column records whether each area came from the fitted
+component or the observed signal.
 }
 \examples{
 library(recipes)

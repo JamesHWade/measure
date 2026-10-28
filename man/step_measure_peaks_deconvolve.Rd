@@ -50,8 +50,9 @@ maintain their relative ordering. Default is \code{TRUE}.}
 threshold trigger a warning. Default is 0.8. Tune this with
 \code{\link[=peak_fit_r_squared]{peak_fit_r_squared()}}.}
 
-\item{store_components}{Logical. If \code{TRUE}, store individual fitted peak
-curves in the output. Default is \code{FALSE}.}
+\item{store_components}{Logical. If \code{TRUE}, also store sampled fitted peak
+curves for diagnostics. Fitted models and parameters are always retained
+for subsequent component integration. Default is \code{FALSE}.}
 
 \item{smart_init}{Logical. If \code{TRUE}, use smart initialization based on
 peak properties. Default is \code{TRUE}.}
@@ -123,6 +124,15 @@ Each fit is assessed for quality. The \code{.peaks} tibble gains columns:
 bounded by 0 and 1; choose iteration ranges that fit the model and runtime
 budget for your data.
 Before finalization, \code{tidy()} retains unresolved tuning calls in list columns.
+
+The columns \code{fit_model} and \code{fit_params} retain each fitted component. The
+\code{detected_left_base} and \code{detected_right_base} columns retain original detected
+minima. The \code{area_basis} column identifies fitted-component areas.
+
+\code{left_base} and \code{right_base} define a finite integration interval within the
+measured axis. The interval retains detected minima where possible and
+expands as needed to contain the reported fitted apex. Fitted areas integrate
+each component over this interval without adding a physical baseline.
 }
 \examples{
 library(recipes)
@@ -154,10 +164,10 @@ result$.peaks[[1]]
 \code{\link[=peak_models]{peak_models()}}, \code{\link[=gaussian_peak_model]{gaussian_peak_model()}}
 
 Other peak-operations:
-\code{\link[=step_measure_peaks_detect]{step_measure_peaks_detect()}},
-\code{\link[=step_measure_peaks_filter]{step_measure_peaks_filter()}},
-\code{\link[=step_measure_peaks_integrate]{step_measure_peaks_integrate()}},
-\code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}},
-\code{\link[=step_measure_peaks_to_table]{step_measure_peaks_to_table()}}
+\code{\link{step_measure_peaks_detect}()},
+\code{\link{step_measure_peaks_filter}()},
+\code{\link{step_measure_peaks_integrate}()},
+\code{\link{step_measure_peaks_properties}()},
+\code{\link{step_measure_peaks_to_table}()}
 }
 \concept{peak-operations}

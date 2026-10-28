@@ -252,8 +252,10 @@ peak_model_initial_guess.default <- function(model, x, y, peak_idx) {
 #' @return Numeric scalar giving the peak area.
 #'
 #' @details
-#' For models with analytical integrals (e.g., Gaussian), this can return
-#' an exact value. Otherwise, numerical integration is used.
+#' A finite x_range is treated as the integration interval for every model.
+#' With x_range = NULL, built-in models return their whole-domain area when
+#' it is defined. Other models use adaptive numerical integration when a finite
+#' interval is supplied.
 #'
 #' @examples
 #' model <- create_peak_model("gaussian")
@@ -269,16 +271,40 @@ peak_model_area <- function(model, params, x_range = NULL) {
 
 #' @export
 peak_model_area.default <- function(model, params, x_range = NULL) {
-  # Default: numerical integration
   if (is.null(x_range)) {
     cli::cli_abort(
       "{.arg x_range} is required for numerical integration."
     )
   }
-  x <- seq(x_range[1], x_range[2], length.out = 1000)
-  y <- peak_model_value(model, x, params)
-  # Trapezoidal integration
-  sum(diff(x) * (y[-1] + y[-length(y)]) / 2)
+
+  bounds <- .validate_peak_area_range(x_range)
+  if (bounds[1] == bounds[2]) {
+    return(0)
+  }
+
+  result <- stats::integrate(
+    function(x) peak_model_value(model, x, params),
+    lower = bounds[1],
+    upper = bounds[2],
+    subdivisions = 1000L,
+    rel.tol = 1e-9,
+    abs.tol = 0
+  )
+  result$value
+}
+
+.validate_peak_area_range <- function(x_range) {
+  if (
+    !is.numeric(x_range) ||
+      length(x_range) != 2L ||
+      !all(is.finite(x_range))
+  ) {
+    cli::cli_abort(
+      "{.arg x_range} must be a pair of finite numeric endpoints."
+    )
+  }
+
+  sort(as.double(x_range))
 }
 
 #' Get Parameter Names from Peak Model

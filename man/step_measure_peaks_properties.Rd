@@ -50,6 +50,9 @@ after subtracting a local linear baseline between the left and right bases.
 
 The calculated properties are added as new columns in the \code{.peaks} tibble and
 can be exported later with \code{\link[=step_measure_peaks_to_table]{step_measure_peaks_to_table()}}.
+
+For fitted peaks, prominence uses the original detected minima, while FWHM
+is calculated from the stored component model without a baseline correction.
 }
 \examples{
 library(recipes)
