@@ -27,7 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      # Follow the active SEC correction branch until issue #61 is merged.
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # Follow the active SEC correction branch until PR #61 is merged.
       MEASURE_MCP_SEC_REF: fix/separations-sec-correctness
       MEASURE_MCP_DATA_DIR: ${{ runner.temp }}/measure-mcp-data
       R_LIBS_USER: ${{ runner.temp }}/measure-r-library
