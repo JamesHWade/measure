@@ -354,7 +354,7 @@ peak_model_value.emg_peak_model <- function(model, x, params) {
     # Write the normal Mills ratio as C(q) / q, q = k - z. The mode solves
     # z = k * (1 - C(q)). Solve for s = k * z near 1 to avoid cancellation
     # and losing a small standardized displacement with a large physical width.
-    equation <- function(s) {
+    scaled_equation <- function(s) {
       inverse_q <- 1 / (k - s / k)
       u <- inverse_q^2
       correction <- 1 +
@@ -363,7 +363,7 @@ peak_model_value.emg_peak_model <- function(model, x, params) {
     }
     # The root is below 1; leave slack above it so endpoint roundoff cannot
     # remove the sign change in the near-Gaussian limit.
-    s <- stats::uniroot(equation, c(0, 2), tol = 1e-12)$root
+    s <- stats::uniroot(scaled_equation, c(0, 2), tol = 1e-12)$root
     return(params$center + params$tau * s)
   }
 
