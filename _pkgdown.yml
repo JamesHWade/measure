@@ -41,6 +41,8 @@ navbar:
       - text: How-To Guides
       - text: Baseline Correction
         href: articles/howto-baseline.html
+      - text: Technique Pack Extensions
+        href: articles/howto-technique-packs.html
       - text: Integrating with tidymodels
         href: articles/howto-tidymodels.html
       - text: Data Organization & Diagnostics
@@ -69,6 +71,7 @@ articles:
   desc: Task-oriented guides for solving specific problems
   contents:
   - articles/howto-baseline
+  - articles/howto-technique-packs
   - articles/howto-tidymodels
   - articles/howto-data-organization
 - title: Reference
