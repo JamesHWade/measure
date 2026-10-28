@@ -125,54 +125,18 @@ The peak steps are public recipe constructors. A technique pack can register a
 wrapper that applies domain-specific defaults, validation, or metadata while
 continuing to use these shared steps where they fit.
 
-## Inspect the registry without leaving a demo pack behind
+## Inspect registered packs and steps
 
-The public registry API supports registration and discovery, but has no
-unregister operation. This example takes a snapshot of the in-memory registry
-and restores it after the synthetic pack demonstration. The private snapshot
-helper is only for keeping this vignette's temporary example from changing the
-interactive R session; a real extension package should register itself once
-from `.onLoad()`.
+The public registry functions list packs and their registered steps. This
+example inspects the registry as it exists in the current session; it does not
+register a demonstration pack or change registry state.
 
-```{r registry-demo}
-with_registry_snapshot <- function(code) {
-  registry <- get(".measure_registry", envir = asNamespace("measure"))
-  before <- list(packs = registry$packs, steps = registry$steps)
+```{r registry-discovery}
+registered_packs <- measure_packs()
+registered_steps <- measure_steps()
 
-  on.exit({
-    registry$packs <- before$packs
-    registry$steps <- before$steps
-  }, add = TRUE)
-
-  force(code)
-}
-
-synthetic_registry <- with_registry_snapshot({
-  register_measure_pack(
-    pack_name = "measure.example",
-    technique = "LC-MS",
-    version = "0.1.0",
-    description = "Synthetic pack used by this vignette"
-  )
-  register_measure_step(
-    step_name = "step_example_center_spectrum",
-    pack_name = "measure.example",
-    category = "preprocessing",
-    description = "Center each spectrum before peak analysis"
-  )
-
-  list(
-    packs = measure_packs() |>
-      filter(name == "measure.example"),
-    steps = measure_steps(packs = "measure.example")
-  )
-})
-
-synthetic_registry
-stopifnot(
-  !"measure.example" %in% measure_packs()$name,
-  !any(measure_steps()$pack_name == "measure.example")
-)
+registered_packs
+registered_steps
 ```
 
 ## A real pack: `measure.sec`
