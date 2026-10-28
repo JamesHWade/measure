@@ -1,5 +1,11 @@
 # measure 0.0.1.9003
 
+* Fitted peak areas now integrate the fitted component over explicit finite
+  bounds. Detected bases remain available separately, and stored row metadata
+  preserves component-aware reintegration after filtering or serialization.
+  Built-in models respect finite area ranges, including translated narrow EMG
+  and Lorentzian peaks (#121).
+
 * `optimize_deconvolution()` now preserves the initial component order with
   every optimizer when `constrain_positions = TRUE`, including model-specific
   bounds and fixed parameters. Final centers may coincide; component identities
