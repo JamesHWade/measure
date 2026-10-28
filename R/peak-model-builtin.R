@@ -148,7 +148,9 @@ peak_model_area.gaussian_peak_model <- function(model, params, x_range = NULL) {
 #' Here, `height` is the peak height of the precursor Gaussian, not the
 #' observed EMG maximum. The integrated area is therefore
 #' `height * width * sqrt(2 * pi)`. A non-positive `tau` returns the Gaussian
-#' limit.
+#' limit. Fitting constrains precursor height to be nonnegative but leaves its
+#' upper bound unbounded because a long tail can make the observed apex much
+#' smaller than the precursor height.
 #'
 #' @examples
 #' model <- emg_peak_model()
@@ -337,17 +339,66 @@ peak_model_value.emg_peak_model <- function(model, x, params) {
   result
 }
 
+.emg_peak_mode <- function(params) {
+  if (params$tau <= 0) {
+    return(params$center)
+  }
+
+  log_k <- log(params$width) - log(params$tau)
+  if (log_k >= log(.Machine$double.xmax)) {
+    return(params$center)
+  }
+  k <- exp(log_k)
+
+  if (k > 21) {
+    # Write the normal Mills ratio as C(q) / q, q = k - z. The mode solves
+    # z = k * (1 - C(q)). Solve for s = k * z near 1 to avoid cancellation
+    # and losing a small standardized displacement with a large physical width.
+    equation <- function(s) {
+      inverse_q <- 1 / (k - s / k)
+      u <- inverse_q^2
+      correction <- 1 +
+        u * (-3 + u * (15 + u * (-105 + u * (945 + u * (-10395 + 135135 * u)))))
+      s - (k * inverse_q)^2 * correction
+    }
+    # The root is below 1; leave slack above it so endpoint roundoff cannot
+    # remove the sign change in the near-Gaussian limit.
+    s <- stats::uniroot(equation, c(0, 2), tol = 1e-12)$root
+    return(params$center + params$tau * s)
+  }
+
+  # For a positive exponential convolution the mode is right of the Gaussian
+  # center. In standardized coordinates it solves R(k - z) = 1 / k.
+  equation <- function(z) {
+    q <- k - z
+    .log_normal_mills_ratio(q, log(abs(q))) + log_k
+  }
+  upper <- 1
+  while (equation(upper) < 0) {
+    upper <- 2 * upper
+  }
+  z <- stats::uniroot(equation, c(0, upper), tol = 1e-12)$root
+  location <- params$center + params$width * z
+  if (is.infinite(location) && params$center < 0) {
+    location <- params$width * (params$center / params$width + z)
+  }
+  location
+}
+
 #' @export
 peak_model_bounds.emg_peak_model <- function(model, x_range, y_range) {
   list(
     lower = c(
-      height = max(0, y_range[1]),
+      height = 0,
       center = x_range[1],
       width = 0.001,
       tau = 0.001
     ),
     upper = c(
-      height = y_range[2] * 1.5,
+      # EMG height is the precursor Gaussian height. Its observed apex can be
+      # substantially lower when the exponential tail is long, so it has no
+      # finite upper bound derived from the observed y range.
+      height = Inf,
       center = x_range[2],
       width = diff(x_range) / 2,
       tau = diff(x_range)

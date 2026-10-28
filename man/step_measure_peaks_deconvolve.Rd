@@ -103,6 +103,13 @@ Technique packs may register additional models.
 \item \code{"nelder_mead"}: Derivative-free Nelder-Mead simplex
 }
 
+\strong{Reported Peak Properties:}
+
+For EMG fits, \code{location} and \code{height} report the apex of the fitted
+component within the measured axis range. They use the continuous fitted
+curve, including on irregular axes, and differ from the precursor Gaussian
+parameters returned by \code{\link[=optimize_deconvolution]{optimize_deconvolution()}}.
+
 \strong{Quality Assessment:}
 
 Each fit is assessed for quality. The \code{.peaks} tibble gains columns:

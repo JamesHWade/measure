@@ -1955,6 +1955,13 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' - `"multistart"`: Multiple L-BFGS-B runs from perturbed starts (robust)
 #' - `"nelder_mead"`: Derivative-free Nelder-Mead simplex
 #'
+#' **Reported Peak Properties:**
+#'
+#' For EMG fits, `location` and `height` report the apex of the fitted
+#' component within the measured axis range. They use the continuous fitted
+#' curve, including on irregular axes, and differ from the precursor Gaussian
+#' parameters returned by [optimize_deconvolution()].
+#'
 #' **Quality Assessment:**
 #'
 #' Each fit is assessed for quality. The `.peaks` tibble gains columns:
@@ -2315,9 +2322,16 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
   for (i in seq_len(n_peaks)) {
     params <- opt_result$parameters[[i]]
 
-    # Update location and height from fitted params
-    peaks_tbl$location[i] <- params$center
-    peaks_tbl$height[i] <- params$height
+    # EMG parameters describe the precursor Gaussian, whose center and height
+    # differ from the apex of the fitted component.
+    if (inherits(models[[i]], "emg_peak_model")) {
+      apex <- .fitted_emg_apex(models[[i]], params, x)
+      peaks_tbl$location[i] <- apex$location
+      peaks_tbl$height[i] <- apex$height
+    } else {
+      peaks_tbl$location[i] <- params$center
+      peaks_tbl$height[i] <- params$height
+    }
 
     # Update width-based bounds
     width <- params$width %||%
@@ -2352,6 +2366,14 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
 
   class(peaks_tbl) <- c("peaks_tbl", class(tibble::tibble()))
   peaks_tbl
+}
+
+.fitted_emg_apex <- function(model, params, x) {
+  location <- min(max(.emg_peak_mode(params), min(x)), max(x))
+  list(
+    location = location,
+    height = peak_model_value(model, location, params)
+  )
 }
 
 #' @export

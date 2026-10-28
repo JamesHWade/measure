@@ -26,8 +26,10 @@ f(x) = \frac{h \sigma \sqrt{2\pi}}{\tau}
 
 Here, \code{height} is the peak height of the precursor Gaussian, not the
 observed EMG maximum. The integrated area is therefore
-\code{height * width * sqrt(2 * pi)}. A non-positive \code{tau} returns the
-Gaussian limit.
+\code{height * width * sqrt(2 * pi)}. A non-positive \code{tau} returns the Gaussian
+limit. Fitting constrains precursor height to be nonnegative but leaves its
+upper bound unbounded because a long tail can make the observed apex much
+smaller than the precursor height.
 }
 \examples{
 model <- emg_peak_model()

@@ -1,5 +1,7 @@
 # measure 0.0.1.9003
 
+* EMG deconvolution no longer caps precursor amplitude using the observed apex. Reported `location` and `height` now describe the fitted component apex within the measured range.
+
 * `emg_peak_model()` now evaluates the correctly signed Gaussian-exponential
   convolution and remains numerically stable as `tau` approaches zero (#119).
 * `new_peaks_tbl()` and `new_peaks_list()` are now public constructors for
