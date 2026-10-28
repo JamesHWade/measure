@@ -193,7 +193,13 @@ peak_model_value.emg_peak_model <- function(model, x, params) {
   result[is.infinite(z)] <- 0
 
   finite_z <- is.finite(z)
-  if (!any(finite_z)) {
+  positive_infinite_z <- which(
+    is.infinite(z) &
+      z > 0 &
+      is.finite(x) &
+      is.finite(params$center)
+  )
+  if (!any(finite_z) && length(positive_infinite_z) == 0) {
     return(result)
   }
 
@@ -208,6 +214,31 @@ peak_model_value.emg_peak_model <- function(model, x, params) {
   }
 
   k <- exp(log_k)
+
+  if (length(positive_infinite_z) > 0) {
+    log_delta <- .log_positive_difference(
+      x[positive_infinite_z],
+      params$center
+    )
+    log_offset <- log_delta - log(params$tau)
+    finite_offset <- log_offset < log(.Machine$double.xmax)
+
+    if (any(finite_offset)) {
+      offset <- exp(log_offset[finite_offset])
+      log_value <- log_height +
+        log_k +
+        0.5 * log(2 * pi) +
+        0.5 * k^2 -
+        offset
+      result[positive_infinite_z[finite_offset]] <- sign(height) *
+        exp(log_value)
+    }
+  }
+
+  if (!any(finite_z)) {
+    return(result)
+  }
+
   on_gaussian_side <- z_finite <= k
   log_value <- numeric(length(z_finite))
 
@@ -246,6 +277,28 @@ peak_model_value.emg_peak_model <- function(model, x, params) {
   }
 
   result[finite_z] <- sign(height) * exp(log_value)
+  result
+}
+
+.log_positive_difference <- function(x, center) {
+  center <- rep_len(center, length(x))
+  delta <- x - center
+  result <- rep(NA_real_, length(delta))
+  finite_positive <- is.finite(delta) & delta > 0
+  result[finite_positive] <- log(delta[finite_positive])
+
+  overflow_positive <- is.infinite(delta) &
+    delta > 0 &
+    is.finite(x) &
+    is.finite(center)
+  if (any(overflow_positive)) {
+    log_x <- log(x[overflow_positive])
+    log_negative_center <- log(-center[overflow_positive])
+    larger <- pmax(log_x, log_negative_center)
+    result[overflow_positive] <- larger +
+      log1p(exp(-abs(log_x - log_negative_center)))
+  }
+
   result
 }
 

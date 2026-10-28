@@ -76,6 +76,29 @@ test_that("EMG evaluation preserves finite axis differences that overflow", {
   expect_equal(peak_model_value(model, x, params), reference, tolerance = 1e-8)
 })
 
+test_that("EMG retains representable right tails after z overflows", {
+  model <- emg_peak_model()
+  params <- list(height = 1e300, center = 0, width = 1e-100, tau = 1e250)
+  x <- c(1e250, 1.1e250)
+  convolution_integral <- stats::integrate(
+    function(u) {
+      exp(-0.5 * u^2 + (params$width / params$tau) * u)
+    },
+    lower = -10,
+    upper = 10,
+    rel.tol = 1e-10
+  )$value
+  reference <- params$height *
+    params$width /
+    params$tau *
+    exp(-(x - params$center) / params$tau) *
+    convolution_integral
+  predicted <- peak_model_value(model, x, params)
+
+  expect_true(all(predicted > 0))
+  expect_equal(predicted, reference, tolerance = 1e-10)
+})
+
 test_that("Nelder-Mead returns its bounded fit and matching objective", {
   withr::local_seed(42)
   x <- seq(8, 20, by = 0.05)
