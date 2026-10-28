@@ -348,8 +348,10 @@ optimize_deconvolution <- function(
 
   elapsed <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
 
-  # Unpack results
-  final_params <- .unflatten_params(opt_result$par, models)
+  # The objective clamps each candidate because Nelder-Mead is unconstrained.
+  # Project the returned candidate through those same bounds before saving it.
+  final_param_vec <- pmin(pmax(opt_result$par, bounds$lower), bounds$upper)
+  final_params <- .unflatten_params(final_param_vec, models)
   y_fitted <- sum_peak_models(x, models, final_params)
   residuals <- y - y_fitted
 
@@ -359,7 +361,7 @@ optimize_deconvolution <- function(
     residuals = residuals,
     convergence = opt_result$convergence == 0,
     n_iterations = as.integer(opt_result$counts["function"]),
-    final_value = opt_result$value,
+    final_value = sum(residuals^2),
     optimizer = "nelder_mead",
     elapsed_time = elapsed
   )
