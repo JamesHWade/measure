@@ -1,5 +1,11 @@
 # measure 0.0.1.9003
 
+* `step_measure_baseline_custom()` now supports declared custom arguments
+  through tuning discovery, custom IDs, parameter extraction, finalization,
+  and prep/bake. Unresolved markers and malformed declarations fail clearly.
+  Formula arguments use a private invocation environment, preserving caller
+  bindings and ordinary function scoping across repeated baking (#124).
+
 * The preprocessing, baseline, internal-class, and multidimensional guides now
   run their examples. A new technique-pack guide demonstrates public extension
   APIs. Python examples check the optional backend, and loading measure no
