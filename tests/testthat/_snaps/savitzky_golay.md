@@ -1,3 +1,11 @@
+# Savitzky-Golay rejects measurements with different axes
+
+    Code
+      .comp_savitzky_golay(measures, diffs = 0, degree = 2, window = 3)
+    Condition
+      Error in `.comp_savitzky_golay()`:
+      ! Savitzky-Golay processing requires all measurements to have identical locations.
+
 # savitzky-golay inputs
 
     Code
