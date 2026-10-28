@@ -11,11 +11,12 @@ import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-MCP_DIR = Path(__file__).resolve().parents[1]
 import experiments
 import method_registry as registry
 from methods import MethodConstraints, MethodDeclaration
 from storage import canonical, sha256
+
+MCP_DIR = Path(__file__).resolve().parents[1]
 
 
 def method_payload(flow=1000):
