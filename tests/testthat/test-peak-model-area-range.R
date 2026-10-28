@@ -248,3 +248,23 @@ test_that("finite EMG area is stable under large translations of narrow axes", {
     )
   }
 })
+
+
+test_that("Lorentzian finite areas retain encoded offsets on translated axes", {
+  model <- lorentzian_peak_model()
+  center <- 1e12
+  gamma <- 0.01
+  bounds <- center + c(-1, 2) * gamma
+  offsets <- bounds - center
+  expected <- gamma * (atan(offsets[2] / gamma) - atan(offsets[1] / gamma))
+
+  expect_equal(
+    peak_model_area(
+      model,
+      list(height = 1, center = center, gamma = gamma),
+      bounds
+    ),
+    expected,
+    tolerance = 1e-14
+  )
+})

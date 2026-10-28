@@ -907,9 +907,19 @@ peak_model_area.lorentzian_peak_model <- function(
     cli::cli_abort("{.arg center} must be finite.")
   }
 
-  coordinate_scale <- max(abs(bounds), abs(params$center), gamma)
-  lower <- bounds[1] / coordinate_scale - params$center / coordinate_scale
-  upper <- bounds[2] / coordinate_scale - params$center / coordinate_scale
+  offsets <- bounds - params$center
+  coordinate_scale <- if (all(is.finite(offsets))) {
+    max(abs(offsets), gamma)
+  } else {
+    max(abs(bounds), abs(params$center), gamma)
+  }
+  coordinates <- .scale_area_endpoint_difference(
+    bounds,
+    params$center,
+    coordinate_scale
+  )
+  lower <- coordinates[1]
+  upper <- coordinates[2]
   gamma_scaled <- gamma / coordinate_scale
 
   numerator <- gamma_scaled * (upper - lower)
