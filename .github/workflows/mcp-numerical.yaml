@@ -30,12 +30,20 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       # Follow the active SEC correction branch until PR #61 is merged.
       MEASURE_MCP_SEC_REF: fix/separations-sec-correctness
-      MEASURE_MCP_DATA_DIR: ${{ runner.temp }}/measure-mcp-data
-      R_LIBS_USER: ${{ runner.temp }}/measure-r-library
-      R_LIBS_SITE: ${{ runner.temp }}/measure-r-site
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Prepare isolated numerical libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/measure-r-library" "$RUNNER_TEMP/measure-r-site" "$RUNNER_TEMP/measure-mcp-data"
+          {
+            echo "R_LIBS_USER=$RUNNER_TEMP/measure-r-library"
+            echo "R_LIBS_SITE=$RUNNER_TEMP/measure-r-site"
+            echo "MEASURE_MCP_DATA_DIR=$RUNNER_TEMP/measure-mcp-data"
+          } >> "$GITHUB_ENV"
 
       - name: Record the checked-out Measure revision
         shell: bash
