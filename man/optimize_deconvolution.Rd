@@ -32,10 +32,12 @@ or \code{"nelder_mead"}.}
 
 \item{tol}{Convergence tolerance.}
 
-\item{constrain_positions}{Logical. If \code{TRUE}, fitted centers preserve
-the rank of their starting centers while remaining within each model's
-center bounds. Duplicate starting centers and incompatible bounds are
-rejected.}
+\item{constrain_positions}{Logical. If \code{TRUE}, fitted centers are
+nondecreasing in the rank of their starting centers and remain within each
+model's center bounds. Tied final centers are allowed. Duplicate starting
+centers, models without exactly one center parameter, and incompatible
+bounds are rejected. Optimization is local and does not guarantee a global
+minimum.}
 
 \item{...}{Additional arguments passed to specific optimizers.}
 }

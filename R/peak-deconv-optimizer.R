@@ -17,10 +17,12 @@
 #'   or `"nelder_mead"`.
 #' @param max_iter Maximum number of iterations.
 #' @param tol Convergence tolerance.
-#' @param constrain_positions Logical. If `TRUE`, fitted centers preserve
-#'   the rank of their starting centers while remaining within each model's
-#'   center bounds. Duplicate starting centers and incompatible bounds are
-#'   rejected.
+#' @param constrain_positions Logical. If `TRUE`, fitted centers are
+#'   nondecreasing in the rank of their starting centers and remain within each
+#'   model's center bounds. Tied final centers are allowed. Duplicate starting
+#'   centers, models without exactly one center parameter, and incompatible
+#'   bounds are rejected. Optimization is local and does not guarantee a global
+#'   minimum.
 #' @param ... Additional arguments passed to specific optimizers.
 #'
 #' @return A list containing:
@@ -94,6 +96,21 @@ optimize_deconvolution <- function(
   for (i in seq_along(models)) {
     if (!is_peak_model(models[[i]])) {
       cli::cli_abort("Element {i} of {.arg models} is not a peak_model object.")
+    }
+  }
+
+  if (constrain_positions) {
+    center_counts <- vapply(
+      models,
+      function(model) {
+        sum(model$param_names == "center")
+      },
+      integer(1)
+    )
+    if (any(center_counts != 1L)) {
+      cli::cli_abort(
+        "Constrained fitting requires each peak model to define exactly one {.field center} parameter."
+      )
     }
   }
 
@@ -207,38 +224,49 @@ optimize_deconvolution <- function(
   }
 
   param_vec <- .prepare_deconv_start(models, init_params, fit_context)
+  start_time <- Sys.time()
+
+  if (length(param_vec) == 0L) {
+    elapsed <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    return(
+      .deconv_fit_result(
+        param_vec,
+        x,
+        y,
+        models,
+        fit_context,
+        optimizer = "lbfgsb",
+        elapsed_time = elapsed,
+        convergence = TRUE,
+        n_iterations = 0L
+      )
+    )
+  }
+
   objective <- function(params) {
     .deconv_objective(params, x, y, models, fit_context)
   }
 
-  start_time <- Sys.time()
-  opt_result <- stats::optim(
-    par = param_vec,
-    fn = objective,
+  opt_result <- .optim_with_projection_restarts(
+    param_vec,
+    objective,
+    fit_context,
     method = "L-BFGS-B",
-    lower = fit_context$lower,
-    upper = fit_context$upper,
-    control = list(
-      maxit = max_iter,
-      factr = tol / .Machine$double.eps
-    )
+    max_iter = max_iter,
+    tol = tol
   )
   elapsed <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
 
-  final_param_vec <- .transform_deconv_params(opt_result$par, fit_context)
-  final_params <- .unflatten_params(final_param_vec, models)
-  y_fitted <- sum_peak_models(x, models, final_params)
-  residuals <- y - y_fitted
-
-  list(
-    parameters = final_params,
-    fitted_values = y_fitted,
-    residuals = residuals,
-    convergence = opt_result$convergence == 0,
-    n_iterations = as.integer(opt_result$counts["function"]),
-    final_value = sum(residuals^2),
+  .deconv_fit_result(
+    opt_result$par,
+    x,
+    y,
+    models,
+    fit_context,
     optimizer = "lbfgsb",
-    elapsed_time = elapsed
+    elapsed_time = elapsed,
+    convergence = opt_result$convergence == 0,
+    n_iterations = opt_result$n_iterations
   )
 }
 
@@ -333,36 +361,49 @@ optimize_deconvolution <- function(
     constrain_positions
   )
   param_vec <- .prepare_deconv_start(models, init_params, fit_context)
+  start_time <- Sys.time()
+
+  if (length(param_vec) == 0L) {
+    elapsed <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+    return(
+      .deconv_fit_result(
+        param_vec,
+        x,
+        y,
+        models,
+        fit_context,
+        optimizer = "nelder_mead",
+        elapsed_time = elapsed,
+        convergence = TRUE,
+        n_iterations = 0L
+      )
+    )
+  }
+
   objective <- function(params) {
     .deconv_objective(params, x, y, models, fit_context)
   }
 
-  start_time <- Sys.time()
-  opt_result <- stats::optim(
-    par = param_vec,
-    fn = objective,
+  opt_result <- .optim_with_projection_restarts(
+    param_vec,
+    objective,
+    fit_context,
     method = "Nelder-Mead",
-    control = list(
-      maxit = max_iter,
-      reltol = tol
-    )
+    max_iter = max_iter,
+    tol = tol
   )
   elapsed <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
 
-  final_param_vec <- .transform_deconv_params(opt_result$par, fit_context)
-  final_params <- .unflatten_params(final_param_vec, models)
-  y_fitted <- sum_peak_models(x, models, final_params)
-  residuals <- y - y_fitted
-
-  list(
-    parameters = final_params,
-    fitted_values = y_fitted,
-    residuals = residuals,
-    convergence = opt_result$convergence == 0,
-    n_iterations = as.integer(opt_result$counts["function"]),
-    final_value = sum(residuals^2),
+  .deconv_fit_result(
+    opt_result$par,
+    x,
+    y,
+    models,
+    fit_context,
     optimizer = "nelder_mead",
-    elapsed_time = elapsed
+    elapsed_time = elapsed,
+    convergence = opt_result$convergence == 0,
+    n_iterations = opt_result$n_iterations
   )
 }
 
@@ -400,7 +441,7 @@ optimize_deconvolution <- function(
   params_list
 }
 
-#' Build a Shared Deconvolution Parameter Transform
+#' Build a Deconvolution Fit Context
 #'
 #' @noRd
 .new_deconv_optimizer_context <- function(
@@ -411,11 +452,14 @@ optimize_deconvolution <- function(
   constrain_positions
 ) {
   bounds <- .compute_bounds(models, x_range, y_range)
+  model_lower <- bounds$lower
+  model_upper <- bounds$upper
+
   if (
-    length(bounds$lower) != length(bounds$upper) ||
-      anyNA(bounds$lower) ||
-      anyNA(bounds$upper) ||
-      any(bounds$lower > bounds$upper)
+    length(model_lower) != length(model_upper) ||
+      anyNA(model_lower) ||
+      anyNA(model_upper) ||
+      any(model_lower > model_upper)
   ) {
     cli::cli_abort("Peak model parameter bounds must be valid and non-empty.")
   }
@@ -442,12 +486,13 @@ optimize_deconvolution <- function(
   rank_slots <- integer(0)
   rank_lower <- numeric(0)
   rank_upper <- numeric(0)
-  model_lower <- bounds$lower
-  model_upper <- bounds$upper
-  fit_lower <- model_lower
-  fit_upper <- model_upper
+  if (constrain_positions) {
+    if (length(center_slots) != length(models)) {
+      cli::cli_abort(
+        "Constrained fitting requires each peak model to define exactly one {.field center} parameter."
+      )
+    }
 
-  if (constrain_positions && length(center_slots) > 0L) {
     initial_centers <- vapply(
       center_components,
       function(i) {
@@ -484,24 +529,24 @@ optimize_deconvolution <- function(
         "The model-specific center bounds cannot satisfy the requested peak position order."
       )
     }
-    if (any(rank_lower == rank_upper & !is.finite(rank_lower))) {
-      cli::cli_abort(
-        "A constrained center cannot have identical infinite lower and upper bounds."
-      )
-    }
-
-    fit_lower[center_slots] <- -Inf
-    fit_upper[center_slots] <- Inf
-    fixed <- rank_lower == rank_upper
-    fit_lower[rank_slots[fixed]] <- 0
-    fit_upper[rank_slots[fixed]] <- 0
   }
 
+  fixed_slots <- which(model_lower == model_upper)
+  if (!all(is.finite(model_lower[fixed_slots]))) {
+    cli::cli_abort("Fixed peak parameter bounds must be finite.")
+  }
+  free_slots <- which(model_lower < model_upper)
+  fixed_values <- rep(NA_real_, length(model_lower))
+  fixed_values[fixed_slots] <- model_lower[fixed_slots]
+
   list(
-    lower = fit_lower,
-    upper = fit_upper,
+    lower = model_lower[free_slots],
+    upper = model_upper[free_slots],
     model_lower = model_lower,
     model_upper = model_upper,
+    fixed_slots = fixed_slots,
+    fixed_values = fixed_values,
+    free_slots = free_slots,
     constrain_positions = constrain_positions,
     center_slots = center_slots,
     rank_slots = rank_slots,
@@ -513,112 +558,291 @@ optimize_deconvolution <- function(
 .prepare_deconv_start <- function(models, init_params, fit_context) {
   param_vec <- .flatten_params(models, init_params)
   if (
-    length(param_vec) != length(fit_context$lower) ||
+    length(param_vec) != length(fit_context$model_lower) ||
       !all(is.finite(param_vec))
   ) {
     cli::cli_abort("Initial peak parameters must be finite and complete.")
-  }
-
-  if (!fit_context$constrain_positions) {
-    return(
-      pmin(
-        pmax(param_vec, fit_context$model_lower),
-        fit_context$model_upper
-      )
-    )
   }
 
   start <- pmin(
     pmax(param_vec, fit_context$model_lower),
     fit_context$model_upper
   )
-  previous_center <- -Inf
-  for (i in seq_along(fit_context$rank_slots)) {
-    slot <- fit_context$rank_slots[[i]]
-    lower <- max(fit_context$rank_lower[[i]], previous_center)
-    upper <- fit_context$rank_upper[[i]]
-    center <- min(max(start[[slot]], lower), upper)
-    start[[slot]] <- .encode_ordered_center(center, lower, upper)
-    previous_center <- center
+  start[fit_context$fixed_slots] <- fit_context$fixed_values[
+    fit_context$fixed_slots
+  ]
+  start <- start[fit_context$free_slots]
+  if (fit_context$constrain_positions) {
+    start <- .transform_deconv_params(start, fit_context)[
+      fit_context$free_slots
+    ]
   }
-
-  pmin(pmax(start, fit_context$lower), fit_context$upper)
+  start
 }
 
-.encode_ordered_center <- function(center, lower, upper) {
-  if (lower == upper) {
-    return(0)
+.expand_deconv_params <- function(param_vec, fit_context) {
+  if (length(param_vec) != length(fit_context$free_slots)) {
+    cli::cli_abort("The optimizer returned an incomplete parameter vector.")
   }
-  if (is.finite(lower) && is.finite(upper)) {
-    fraction <- (center - lower) / (upper - lower)
-    fraction <- min(max(fraction, 1e-8), 1 - 1e-8)
-    return(stats::qlogis(fraction))
-  }
-  if (is.finite(lower)) {
-    distance <- max(center - lower, 1e-8)
-    return(if (distance > 30) distance else log(expm1(distance)))
-  }
-  if (is.finite(upper)) {
-    distance <- max(upper - center, 1e-8)
-    inverse <- if (distance > 30) distance else log(expm1(distance))
-    return(-inverse)
-  }
-  center
+
+  full_params <- fit_context$fixed_values
+  full_params[fit_context$free_slots] <- param_vec
+  full_params
 }
 
-.ordered_center_value <- function(latent, lower, upper) {
-  if (lower == upper) {
-    return(lower)
+.bounded_isotonic_projection <- function(centers, lower, upper) {
+  if (
+    !is.numeric(centers) ||
+      !is.numeric(lower) ||
+      !is.numeric(upper) ||
+      length(centers) != length(lower) ||
+      length(centers) != length(upper) ||
+      !all(is.finite(centers)) ||
+      anyNA(lower) ||
+      anyNA(upper) ||
+      any(lower > upper)
+  ) {
+    cli::cli_abort(
+      "Ordered center projection requires finite centers and valid bounds."
+    )
   }
-  if (is.finite(lower) && is.finite(upper)) {
-    fraction <- stats::plogis(max(min(latent, 36), -36))
-    return(lower + (upper - lower) * fraction)
+  if (length(centers) == 0L) {
+    return(centers)
   }
-  if (is.finite(lower)) {
-    softplus <- if (latent > 30) latent else log1p(exp(latent))
-    return(lower + softplus)
+
+  lower <- cummax(lower)
+  upper <- rev(cummin(rev(upper)))
+  if (any(lower > upper)) {
+    cli::cli_abort(
+      "The model-specific center bounds cannot satisfy the requested peak position order."
+    )
   }
-  if (is.finite(upper)) {
-    negative_latent <- -latent
-    softplus <- if (negative_latent > 30) {
-      negative_latent
-    } else {
-      log1p(exp(negative_latent))
+
+  n <- length(centers)
+  block_start <- integer(n)
+  block_end <- integer(n)
+  block_weight <- numeric(n)
+  block_sum <- numeric(n)
+  block_lower <- numeric(n)
+  block_upper <- numeric(n)
+  block_value <- numeric(n)
+  n_blocks <- 0L
+
+  for (i in seq_len(n)) {
+    n_blocks <- n_blocks + 1L
+    block_start[[n_blocks]] <- i
+    block_end[[n_blocks]] <- i
+    block_weight[[n_blocks]] <- 1
+    block_sum[[n_blocks]] <- centers[[i]]
+    block_lower[[n_blocks]] <- lower[[i]]
+    block_upper[[n_blocks]] <- upper[[i]]
+    block_value[[n_blocks]] <- min(
+      max(centers[[i]], lower[[i]]),
+      upper[[i]]
+    )
+
+    while (
+      n_blocks > 1L &&
+        block_value[[n_blocks - 1L]] > block_value[[n_blocks]]
+    ) {
+      left <- n_blocks - 1L
+      block_end[[left]] <- block_end[[n_blocks]]
+      block_weight[[left]] <- block_weight[[left]] +
+        block_weight[[n_blocks]]
+      block_sum[[left]] <- block_sum[[left]] + block_sum[[n_blocks]]
+      block_lower[[left]] <- max(
+        block_lower[[left]],
+        block_lower[[n_blocks]]
+      )
+      block_upper[[left]] <- min(
+        block_upper[[left]],
+        block_upper[[n_blocks]]
+      )
+
+      if (block_lower[[left]] > block_upper[[left]]) {
+        cli::cli_abort(
+          "A violated center block has incompatible model-specific bounds."
+        )
+      }
+
+      block_value[[left]] <- min(
+        max(
+          block_sum[[left]] / block_weight[[left]],
+          block_lower[[left]]
+        ),
+        block_upper[[left]]
+      )
+      n_blocks <- n_blocks - 1L
     }
-    return(upper - softplus)
   }
-  latent
+
+  projected <- numeric(n)
+  for (i in seq_len(n_blocks)) {
+    projected[seq.int(block_start[[i]], block_end[[i]])] <-
+      block_value[[i]]
+  }
+
+  names(projected) <- names(centers)
+  projected
 }
 
 .transform_deconv_params <- function(param_vec, fit_context) {
-  if (!fit_context$constrain_positions) {
-    return(
-      pmin(
-        pmax(param_vec, fit_context$model_lower),
-        fit_context$model_upper
-      )
-    )
-  }
-
+  raw_params <- .expand_deconv_params(param_vec, fit_context)
   transformed <- pmin(
-    pmax(param_vec, fit_context$model_lower),
+    pmax(raw_params, fit_context$model_lower),
     fit_context$model_upper
   )
-  transformed[fit_context$center_slots] <- param_vec[fit_context$center_slots]
 
-  previous_center <- -Inf
-  for (i in seq_along(fit_context$rank_slots)) {
-    slot <- fit_context$rank_slots[[i]]
-    lower <- max(fit_context$rank_lower[[i]], previous_center)
-    center <- .ordered_center_value(
-      param_vec[[slot]],
-      lower,
-      fit_context$rank_upper[[i]]
+  if (fit_context$constrain_positions) {
+    transformed[fit_context$rank_slots] <- .bounded_isotonic_projection(
+      raw_params[fit_context$rank_slots],
+      fit_context$rank_lower,
+      fit_context$rank_upper
     )
-    transformed[[slot]] <- center
-    previous_center <- center
   }
+
   transformed
+}
+
+.deconv_projection_changed <- function(param_vec, fit_context) {
+  if (!fit_context$constrain_positions) {
+    return(FALSE)
+  }
+
+  raw_params <- .expand_deconv_params(param_vec, fit_context)
+  transformed <- .transform_deconv_params(param_vec, fit_context)
+  any(raw_params != transformed)
+}
+
+.optim_with_projection_restarts <- function(
+  param_vec,
+  objective,
+  fit_context,
+  method,
+  max_iter,
+  tol,
+  max_restarts = 5L
+) {
+  if (!fit_context$constrain_positions) {
+    control <- if (identical(method, "L-BFGS-B")) {
+      list(maxit = max_iter, factr = tol / .Machine$double.eps)
+    } else {
+      list(maxit = max_iter, reltol = tol)
+    }
+    opt_result <- if (identical(method, "L-BFGS-B")) {
+      stats::optim(
+        par = param_vec,
+        fn = objective,
+        method = method,
+        lower = fit_context$lower,
+        upper = fit_context$upper,
+        control = control
+      )
+    } else {
+      stats::optim(
+        par = param_vec,
+        fn = objective,
+        method = method,
+        control = control
+      )
+    }
+    opt_result$n_iterations <- as.integer(opt_result$counts["function"])
+    return(opt_result)
+  }
+
+  current_params <- param_vec
+  total_function_evaluations <- 0L
+  total_iterations <- 0L
+  convergence <- FALSE
+  final_params <- current_params
+  max_attempts <- if (fit_context$constrain_positions) {
+    max_restarts + 1L
+  } else {
+    1L
+  }
+
+  for (attempt in seq_len(max_attempts)) {
+    remaining_iterations <- max_iter - total_iterations
+    if (remaining_iterations <= 0) {
+      break
+    }
+
+    control <- if (identical(method, "L-BFGS-B")) {
+      list(
+        maxit = remaining_iterations,
+        factr = tol / .Machine$double.eps
+      )
+    } else {
+      list(maxit = remaining_iterations, reltol = tol)
+    }
+
+    opt_result <- if (identical(method, "L-BFGS-B")) {
+      stats::optim(
+        par = current_params,
+        fn = objective,
+        method = method,
+        lower = fit_context$lower,
+        upper = fit_context$upper,
+        control = control
+      )
+    } else {
+      stats::optim(
+        par = current_params,
+        fn = objective,
+        method = method,
+        control = control
+      )
+    }
+
+    function_evaluations <- as.integer(opt_result$counts[["function"]])
+    iteration_count <- if (identical(method, "L-BFGS-B")) {
+      as.integer(opt_result$counts[["gradient"]])
+    } else {
+      function_evaluations
+    }
+    total_function_evaluations <- total_function_evaluations +
+      function_evaluations
+    total_iterations <- total_iterations + iteration_count
+
+    candidate_value <- objective(opt_result$par)
+    start_value <- objective(current_params)
+    worse_tolerance <- sqrt(.Machine$double.eps) *
+      max(
+        1,
+        abs(candidate_value),
+        abs(start_value)
+      )
+    if (candidate_value > start_value + worse_tolerance) {
+      final_params <- current_params
+      convergence <- FALSE
+      break
+    }
+
+    final_params <- opt_result$par
+    if (!.deconv_projection_changed(opt_result$par, fit_context)) {
+      convergence <- opt_result$convergence == 0
+      break
+    }
+
+    final_params <- .transform_deconv_params(opt_result$par, fit_context)[
+      fit_context$free_slots
+    ]
+    if (
+      attempt == max_attempts ||
+        total_iterations >= max_iter
+    ) {
+      convergence <- FALSE
+      break
+    }
+
+    current_params <- final_params
+  }
+
+  list(
+    par = final_params,
+    convergence = if (convergence) 0L else 1L,
+    n_iterations = total_function_evaluations
+  )
 }
 
 .deconv_objective <- function(param_vec, x, y, models, fit_context) {
@@ -626,6 +850,34 @@ optimize_deconvolution <- function(
   params_list <- .unflatten_params(transformed, models)
   y_pred <- sum_peak_models(x, models, params_list)
   sum((y - y_pred)^2)
+}
+
+.deconv_fit_result <- function(
+  param_vec,
+  x,
+  y,
+  models,
+  fit_context,
+  optimizer,
+  elapsed_time,
+  convergence,
+  n_iterations
+) {
+  final_param_vec <- .transform_deconv_params(param_vec, fit_context)
+  final_params <- .unflatten_params(final_param_vec, models)
+  fitted_values <- sum_peak_models(x, models, final_params)
+  residuals <- y - fitted_values
+
+  list(
+    parameters = final_params,
+    fitted_values = fitted_values,
+    residuals = residuals,
+    convergence = convergence,
+    n_iterations = n_iterations,
+    final_value = sum(residuals^2),
+    optimizer = optimizer,
+    elapsed_time = elapsed_time
+  )
 }
 
 .compute_bounds <- function(
