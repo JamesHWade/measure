@@ -1,5 +1,10 @@
 # measure 0.0.1.9003
 
+* `optimize_deconvolution()` now preserves the initial component order with
+  every optimizer when `constrain_positions = TRUE`, including model-specific
+  bounds and fixed parameters. Final centers may coincide; component identities
+  and model assignments remain attached to their original slots (#117).
+
 * EMG deconvolution no longer caps precursor amplitude using the observed apex. Reported `location` and `height` now describe the fitted component apex within the measured range.
 
 * `emg_peak_model()` now evaluates the correctly signed Gaussian-exponential
