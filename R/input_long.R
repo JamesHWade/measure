@@ -557,31 +557,6 @@ tidy.step_measure_input_long <- function(x, ...) {
 # Internal helpers
 # ------------------------------------------------------------------------------
 
-#' Rename columns to canonical names (location or location_1, location_2, etc.)
-#' @noRd
-rename_long_cols_nd <- function(.data, value_col, loc_cols) {
-  ndim <- length(loc_cols)
-
-  if (ndim == 1) {
-    # 1D: keep original behavior for backward compatibility
-    if (!is.na(loc_cols[1])) {
-      rename_map <- c(value = value_col, location = loc_cols[1])
-    } else {
-      rename_map <- c(value = value_col)
-    }
-  } else {
-    # nD: rename to location_1, location_2, etc.
-    loc_new_names <- paste0("location_", seq_len(ndim))
-    rename_map <- stats::setNames(
-      c(value_col, loc_cols),
-      c("value", loc_new_names)
-    )
-  }
-
-  dplyr::rename(.data, dplyr::all_of(rename_map))
-}
-
-
 #' Wrap nested data as measure_nd_list with metadata
 #' @noRd
 wrap_as_measure_nd_list <- function(nested_data, ndim, dim_names, dim_units) {
@@ -601,15 +576,4 @@ wrap_as_measure_nd_list <- function(nested_data, ndim, dim_names, dim_units) {
   })
 
   new_measure_nd_list(result)
-}
-
-
-# Keep original helper for backward compatibility
-rename_long_cols <- function(.data, val_chr, loc_chr) {
-  if (!is.na(loc_chr)) {
-    res <- c(value = val_chr, location = loc_chr)
-  } else {
-    res <- c(value = unname(val_chr))
-  }
-  dplyr::rename(.data, dplyr::all_of(res))
 }

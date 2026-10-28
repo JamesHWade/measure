@@ -193,45 +193,6 @@ add_param_jitter <- function(
 }
 
 
-#' Estimate Peak Width at Given Index
-#'
-#' @noRd
-.estimate_width_at_peak <- function(x, y, peak_idx) {
-  peak_height <- abs(y[peak_idx])
-  half_height <- peak_height / 2
-
-  # Find left half-height
-  left_idx <- peak_idx
-  while (
-    left_idx > 1 && !is.na(y[left_idx]) && abs(y[left_idx]) > half_height
-  ) {
-    left_idx <- left_idx - 1
-  }
-
-  # Find right half-height
-  right_idx <- peak_idx
-  while (
-    right_idx < length(y) &&
-      !is.na(y[right_idx]) &&
-      abs(y[right_idx]) > half_height
-  ) {
-    right_idx <- right_idx + 1
-  }
-
-  # Calculate FWHM
-  fwhm <- abs(x[right_idx] - x[left_idx])
-
-  # Convert FWHM to standard deviation
-  # For Gaussian: FWHM = 2 * sqrt(2 * ln(2)) * sigma
-
-  width <- fwhm / (2 * sqrt(2 * log(2)))
-
-  # Ensure reasonable minimum
-  min_width <- diff(range(x)) / 100
-  max(width, min_width)
-}
-
-
 #' Detect Peak Asymmetry
 #'
 #' @noRd
@@ -317,35 +278,4 @@ add_param_jitter <- function(
     width_right = width_right,
     is_symmetric = abs(asymmetry_ratio - 1) < 0.1
   )
-}
-
-
-#' Validate Initialized Parameters
-#'
-#' @noRd
-.validate_initialization <- function(params_list, models, x_range, y_range) {
-  for (i in seq_along(params_list)) {
-    bounds <- peak_model_bounds(models[[i]], x_range, y_range)
-
-    for (pname in names(params_list[[i]])) {
-      val <- params_list[[i]][[pname]]
-
-      # Check bounds
-      lower_idx <- which(names(bounds$lower) == pname)
-      upper_idx <- which(names(bounds$upper) == pname)
-
-      if (length(lower_idx) > 0 && length(upper_idx) > 0) {
-        if (val < bounds$lower[lower_idx] || val > bounds$upper[upper_idx]) {
-          return(FALSE)
-        }
-      }
-
-      # Check for NaN or Inf
-      if (is.na(val) || is.infinite(val)) {
-        return(FALSE)
-      }
-    }
-  }
-
-  TRUE
 }

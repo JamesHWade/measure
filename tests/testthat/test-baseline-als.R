@@ -34,6 +34,35 @@ test_that("step_measure_baseline_als modifies values", {
   expect_false(all(orig_vals == corr_vals))
 })
 
+test_that("step_measure_baseline_als retains its numerical output", {
+  data <- tibble::tibble(
+    id = 1L,
+    outcome = 1,
+    value = c(1, 2, 1.1, 4.2, 2.8, 3),
+    location = seq_len(6)
+  )
+
+  result <- recipe(outcome ~ ., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(value, location = vars(location)) |>
+    step_measure_baseline_als(lambda = 10, p = 0.05, max_iter = 3) |>
+    prep() |>
+    bake(new_data = NULL)
+
+  expect_equal(
+    result$.measures[[1]]$value,
+    c(
+      0.744145425,
+      1.205447545,
+      -0.236971062,
+      2.307141639,
+      0.350549935,
+      -0.005517598
+    ),
+    tolerance = 1e-8
+  )
+})
+
 test_that("step_measure_baseline_als validates lambda", {
   expect_error(
     recipe(water + fat + protein ~ ., data = meats_small) |>
