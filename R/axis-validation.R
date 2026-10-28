@@ -119,19 +119,6 @@ validate_measure <- function(
 # Individual validation checks
 # ------------------------------------------------------------------------------
 
-#' Check for monotonic axis
-#'
-#' Validates that location values are monotonically increasing or decreasing.
-#'
-#' @param measures A list of `measure_tbl` objects.
-#'
-#' @return A list with `valid`, `message`, and `details`.
-#'
-#' @examples
-#' spec <- new_measure_tbl(location = 1:10, value = rnorm(10))
-#' measure:::check_monotonic(list(spec))
-#'
-#' @noRd
 check_monotonic <- function(measures) {
   issues <- character()
 

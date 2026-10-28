@@ -149,6 +149,8 @@ reference:
   - step_measure_peaks_filter
   - step_measure_peaks_deconvolve
   - step_measure_peaks_to_table
+  - new_peaks_tbl
+  - new_peaks_list
   - is_peaks_list
   - find_peaks_cols
 - title: Peak Algorithm Registry

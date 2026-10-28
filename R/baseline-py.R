@@ -87,7 +87,7 @@
 #' @family measure-baseline
 #' @export
 #'
-#' @examplesIf measure:::.pybaselines_available()
+#' @examplesIf requireNamespace("reticulate", quietly = TRUE) && reticulate::py_module_available("pybaselines")
 #' library(recipes)
 #'
 #' \donttest{

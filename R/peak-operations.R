@@ -15,22 +15,40 @@
 
 #' Create a new peaks tibble
 #'
+#' Creates a `peaks_tbl` with the standard peak columns. Additional columns can
+#' carry technique-specific metadata and are kept with the returned tibble.
+#'
 #' @param peak_id Integer vector of peak identifiers.
 #' @param location Numeric vector of peak locations (e.g., retention time).
 #' @param height Numeric vector of peak heights.
 #' @param left_base Numeric vector of left baseline locations.
 #' @param right_base Numeric vector of right baseline locations.
 #' @param area Numeric vector of peak areas (can be NA if not yet calculated).
+#' @param ... Additional named columns to include after the standard columns.
 #'
-#' @return A tibble with class `peaks_tbl`.
-#' @noRd
+#' @return A tibble with class `peaks_tbl` and the standard peak columns,
+#'   followed by any additional columns supplied through `...`.
+#'
+#' @examples
+#' new_peaks_tbl(
+#'   peak_id = 1L,
+#'   location = 4.2,
+#'   height = 3.1,
+#'   left_base = 3.9,
+#'   right_base = 4.5,
+#'   area = 0.8,
+#'   algorithm_score = 0.97
+#' )
+#'
+#' @export
 new_peaks_tbl <- function(
   peak_id = integer(),
   location = double(),
   height = double(),
   left_base = double(),
   right_base = double(),
-  area = double()
+  area = double(),
+  ...
 ) {
   x <- tibble::tibble(
     peak_id = peak_id,
@@ -38,7 +56,8 @@ new_peaks_tbl <- function(
     height = height,
     left_base = left_base,
     right_base = right_base,
-    area = area
+    area = area,
+    ...
   )
   class(x) <- c("peaks_tbl", class(x))
   x
@@ -46,9 +65,26 @@ new_peaks_tbl <- function(
 
 #' Create a new peaks list
 #'
-#' @param x A list of peaks tibbles.
-#' @return A list with class `peaks_list`.
-#' @noRd
+#' Wraps a list of peak tables as a `peaks_list` for use in a data frame
+#' column. Additional columns on each peak table are preserved.
+#'
+#' @param x A list of peak tibbles, usually created by [new_peaks_tbl()].
+#'
+#' @return A list-like vector with class `peaks_list`.
+#'
+#' @examples
+#' peaks <- new_peaks_tbl(
+#'   peak_id = 1L,
+#'   location = 4.2,
+#'   height = 3.1,
+#'   left_base = 3.9,
+#'   right_base = 4.5,
+#'   area = 0.8,
+#'   algorithm_score = 0.97
+#' )
+#' new_peaks_list(list(peaks))
+#'
+#' @export
 new_peaks_list <- function(x = list()) {
   if (!is.list(x)) {
     cli::cli_abort("{.arg x} must be a list.")
