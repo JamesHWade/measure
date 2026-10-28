@@ -115,6 +115,7 @@ Each fit is assessed for quality. The \code{.peaks} tibble gains columns:
 \code{max_iter} and \code{quality_threshold} are tunable. The R-squared range is
 bounded by 0 and 1; choose iteration ranges that fit the model and runtime
 budget for your data.
+Before finalization, \code{tidy()} retains unresolved tuning calls in list columns.
 }
 \examples{
 library(recipes)

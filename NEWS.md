@@ -9,7 +9,8 @@
   and objective values from the same constrained fit (#119).
 * `step_measure_peaks_detect()` and `step_measure_peaks_deconvolve()` now expose
   detection thresholds, fit quality, and iteration limits to `tune` through
-  dials parameters (#116).
+  dials parameters (#116). Unresolved tuning calls are retained in list columns
+  when inspecting untrained steps with `tidy()`.
 * `step_measure_savitzky_golay()` now preserves the centered input locations
   after trimming edge points and rejects measurements with inconsistent axes
   (#113).
