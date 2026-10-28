@@ -38,8 +38,9 @@
 #' (2006), *Bioinformatics*, 22(17), 2059-2065,
 #' <https://doi.org/10.1093/bioinformatics/btl355>. The CWT scale values are
 #' widths in samples, from 1 through 10,000. Each width must also be no more
-#' than half the finite run being analyzed. For short runs, the built-in default
-#' widths are trimmed; explicitly requested unsupported widths error. Location
+#' than half the finite run being analyzed. The default sequence is trimmed
+#' for short runs even when supplied explicitly; other unsupported widths error.
+#' Location
 #' axes must be strictly monotone and uniformly spaced; irregular axes are
 #' rejected rather than resampled. NA values divide a signal into independent
 #' runs. Returned location, height, and bases are read from the original
@@ -162,7 +163,7 @@
 
     run_scales <- scales
     max_run_scale <- floor(length(run) / 2)
-    if (identical(scales, .cwt_default_scales)) {
+    if (identical(as.numeric(scales), .cwt_default_scales)) {
       run_scales <- scales[scales <= max_run_scale]
     } else if (any(scales > max_run_scale)) {
       cli::cli_abort(

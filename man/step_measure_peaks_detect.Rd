@@ -23,8 +23,7 @@ step_measure_peaks_detect(
 \item{recipe}{A recipe object.}
 
 \item{algorithm}{Peak detection algorithm. One of \code{"prominence"} (default),
-\code{"derivative"}, \code{"local_maxima"}, or any algorithm registered via
-
+\code{"derivative"}, \code{"local_maxima"}, \code{"cwt"}, or any algorithm registered via
 \code{\link[=register_peak_algorithm]{register_peak_algorithm()}}. Use \code{\link[=peak_algorithms]{peak_algorithms()}} to see available
 algorithms.}
 
@@ -75,6 +74,9 @@ column containing the detected peaks for each sample. The original
 derivative. Faster but more sensitive to noise.
 \item \code{"local_maxima"}: Finds all local maxima above a threshold. Simple and fast
 but may detect many spurious peaks.
+\item \code{"cwt"}: Links Mexican-hat wavelet maxima across widths to identify
+persistent peaks. Requires a uniformly spaced axis. See
+\link{peak_detection_cwt} for widths, local SNR, missing data, and limits.
 }
 
 Additional algorithms can be registered by technique packs using
@@ -124,10 +126,10 @@ rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
 \code{\link[=peak_algorithms]{peak_algorithms()}}, \code{\link[=register_peak_algorithm]{register_peak_algorithm()}}
 
 Other peak-operations:
-\code{\link[=step_measure_peaks_deconvolve]{step_measure_peaks_deconvolve()}},
-\code{\link[=step_measure_peaks_filter]{step_measure_peaks_filter()}},
-\code{\link[=step_measure_peaks_integrate]{step_measure_peaks_integrate()}},
-\code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}},
-\code{\link[=step_measure_peaks_to_table]{step_measure_peaks_to_table()}}
+\code{\link{step_measure_peaks_deconvolve}()},
+\code{\link{step_measure_peaks_filter}()},
+\code{\link{step_measure_peaks_integrate}()},
+\code{\link{step_measure_peaks_properties}()},
+\code{\link{step_measure_peaks_to_table}()}
 }
 \concept{peak-operations}

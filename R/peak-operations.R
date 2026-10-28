@@ -476,8 +476,7 @@ find_peaks_cols <- function(data) {
 #'
 #' @param recipe A recipe object.
 #' @param algorithm Peak detection algorithm. One of `"prominence"` (default),
-#'   `"derivative"`, `"local_maxima"`, or any algorithm registered via
-#'
+#'   `"derivative"`, `"local_maxima"`, `"cwt"`, or any algorithm registered via
 #'   [register_peak_algorithm()]. Use [peak_algorithms()] to see available
 #'   algorithms.
 #' @param min_height Minimum peak height in the measurement's signal units. If
@@ -515,6 +514,10 @@ find_peaks_cols <- function(data) {
 #'
 #' - `"local_maxima"`: Finds all local maxima above a threshold. Simple and fast
 #'   but may detect many spurious peaks.
+#'
+#' - `"cwt"`: Links Mexican-hat wavelet maxima across widths to identify
+#'   persistent peaks. Requires a uniformly spaced axis. See
+#'   [peak_detection_cwt] for widths, local SNR, missing data, and limits.
 #'
 #' Additional algorithms can be registered by technique packs using
 #' [register_peak_algorithm()].

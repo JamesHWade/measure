@@ -144,6 +144,7 @@ reference:
   desc: Peak detection, integration, and analysis for chromatography
   contents:
   - step_measure_peaks_detect
+  - peak_detection_cwt
   - step_measure_peaks_integrate
   - step_measure_peaks_properties
   - step_measure_peaks_filter

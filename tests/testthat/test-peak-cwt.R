@@ -347,3 +347,15 @@ test_that("CWT returns empty schema for short signals", {
     c("peak_id", "location", "height", "left_base", "right_base", "area")
   )
 })
+
+
+test_that("CWT default scale sequence is independent of numeric storage", {
+  axis <- seq_len(10)
+  signal <- exp(-0.5 * ((axis - 5) / 1.5)^2)
+  scales <- c(1, 2, 3, 4, 6, 8, 12)
+
+  expect_identical(
+    .detect_peaks_cwt(axis, signal, scales = as.integer(scales)),
+    .detect_peaks_cwt(axis, signal, scales = scales)
+  )
+})
