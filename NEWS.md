@@ -1,5 +1,10 @@
 # measure 0.0.1.9003
 
+* `step_measure_peaks_detect(algorithm = "cwt")` now detects peaks through
+  Mexican-hat wavelets and persistent scale ridges, with local noise scoring,
+  explicit sample-width controls, missing-data separation, and bounded work.
+  See `?peak_detection_cwt` for parameter units and practical limits.
+
 * Fitted peak areas now integrate the fitted component over explicit finite
   bounds. Detected bases remain available separately, and stored row metadata
   preserves component-aware reintegration after filtering or serialization.
