@@ -364,8 +364,17 @@ summary.deconv_quality <- function(object, ...) {
 
   for (i in seq_len(n_peaks)) {
     y_peak <- peak_model_value(models[[i]], x, parameters[[i]])
+    if (length(y_peak) != length(x) || !all(is.finite(y_peak))) {
+      cli::cli_abort("Peak model returned non-finite predictions for peak {i}.")
+    }
+
+    peak_area <- pracma::trapz(x, y_peak)
+    if (!is.finite(peak_area)) {
+      cli::cli_abort("Peak model returned a non-finite area for peak {i}.")
+    }
+
     peak_data[[i]] <- y_peak
-    peak_areas[i] <- pracma::trapz(x, y_peak)
+    peak_areas[i] <- peak_area
     peak_heights[i] <- max(y_peak)
   }
 
