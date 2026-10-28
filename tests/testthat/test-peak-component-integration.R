@@ -275,3 +275,32 @@ test_that("finite EMG integration is stable across width-to-tail ratios", {
     )
   }
 })
+
+test_that("large-offset narrow EMG fits produce finite component areas", {
+  center <- 1e8 + 0.2
+  params <- list(height = 2, center = center, width = 0.015, tau = 0.025)
+  location <- center + seq(-200, 600, by = 1) * 0.001
+  value <- peak_model_value(emg_peak_model(), location, params)
+  data <- tibble::tibble(id = "offset", location = location, value = value)
+  recipe <- recipes::recipe(~., data = data) |>
+    recipes::update_role(id, new_role = "id") |>
+    step_measure_input_long(value, location = vars(location)) |>
+    step_measure_peaks_detect(min_height = 0.01) |>
+    step_measure_peaks_deconvolve(
+      model = "emg",
+      max_iter = 3000L,
+      tol = 1e-10,
+      quality_threshold = 0,
+      store_components = FALSE
+    ) |>
+    step_measure_peaks_integrate() |>
+    recipes::prep()
+  peaks <- recipes::bake(recipe, new_data = NULL)$.peaks[[1]]
+
+  expect_equal(nrow(peaks), 1L)
+  expect_s3_class(peaks$fit_model[[1]], "emg_peak_model")
+  expect_true(all(is.finite(unlist(peaks$fit_params[[1]], use.names = FALSE))))
+  expect_true(is.finite(peaks$area[[1]]))
+  expect_gt(peaks$area[[1]], 0)
+  expect_equal(peaks$area_basis[[1]], "fitted_component")
+})

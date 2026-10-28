@@ -544,24 +544,52 @@ peak_model_area.emg_peak_model <- function(model, params, x_range = NULL) {
   if (!is.finite(params$width) || params$width <= 0) {
     cli::cli_abort("{.arg width} must be a finite, positive number.")
   }
-
-  center <- params$center
-  # Split at both shape scales so adaptive quadrature resolves the narrow
-  # Gaussian core and broad exponential tail across large scale ratios.
-  breaks <- bounds
-  if (center > bounds[1] && center < bounds[2]) {
-    breaks <- c(breaks, center)
+  if (!is.finite(params$center)) {
+    cli::cli_abort("{.arg center} must be finite.")
   }
-  for (scale in c(params$width, params$tau)) {
-    offsets <- c(-64, -32, -16, -8, -4, -2, -1, 1, 2, 4, 8, 16, 32, 64) *
-      scale
-    candidates <- center + offsets
-    breaks <- c(
-      breaks,
-      candidates[
-        is.finite(candidates) & candidates > bounds[1] & candidates < bounds[2]
-      ]
+
+  # Center the integration variable at zero and scale it geometrically between
+  # width and tau. This keeps translated narrow peaks resolvable and avoids
+  # forming tau / width directly.
+  log_width <- log(params$width)
+  log_tau <- log(params$tau)
+  log_scale <- log_width / 2 + log_tau / 2
+  scale <- exp(log_scale)
+  width_scaled <- exp(log_width - log_scale)
+  tau_scaled <- exp(log_tau - log_scale)
+  scaled_parameters <- params
+  scaled_parameters$center <- 0
+  scaled_parameters$width <- width_scaled
+  scaled_parameters$tau <- tau_scaled
+
+  if (
+    !all(is.finite(c(scale, width_scaled, tau_scaled))) ||
+      any(c(scale, width_scaled, tau_scaled) <= 0)
+  ) {
+    cli::cli_abort(
+      "The EMG width and tau span a range that cannot be scaled for finite-interval integration."
     )
+  }
+
+  scaled_bounds <- .scale_area_endpoint_difference(
+    bounds,
+    params$center,
+    scale
+  )
+  breaks <- scaled_bounds
+  if (scaled_bounds[1] < 0 && scaled_bounds[2] > 0) {
+    breaks <- c(breaks, 0)
+  }
+
+  for (shape_scale in c(width_scaled, tau_scaled)) {
+    offsets <- c(-64, -32, -16, -8, -4, -2, -1, 1, 2, 4, 8, 16, 32, 64) *
+      shape_scale
+    candidates <- offsets[
+      is.finite(offsets) &
+        offsets > scaled_bounds[1] &
+        offsets < scaled_bounds[2]
+    ]
+    breaks <- c(breaks, candidates)
   }
   breaks <- sort(unique(breaks))
 
@@ -569,7 +597,7 @@ peak_model_area.emg_peak_model <- function(model, params, x_range = NULL) {
     seq_len(length(breaks) - 1L),
     function(i) {
       stats::integrate(
-        function(x) peak_model_value(model, x, params),
+        function(x) peak_model_value(model, x, scaled_parameters),
         lower = breaks[i],
         upper = breaks[i + 1L],
         subdivisions = 1000L,
@@ -579,7 +607,19 @@ peak_model_area.emg_peak_model <- function(model, params, x_range = NULL) {
     },
     numeric(1)
   )
-  sum(areas)
+  scale * sum(areas)
+}
+
+.scale_area_endpoint_difference <- function(x, center, scale) {
+  delta <- x - center
+  scaled <- delta / scale
+
+  overflow <- is.infinite(delta) & is.finite(x) & is.finite(center)
+  if (any(overflow)) {
+    scaled[overflow] <- x[overflow] / scale - center / scale
+  }
+
+  scaled
 }
 
 # ==============================================================================
@@ -863,10 +903,31 @@ peak_model_area.lorentzian_peak_model <- function(
   if (params$height == 0 || bounds[1] == bounds[2]) {
     return(0)
   }
+  if (!is.finite(params$center)) {
+    cli::cli_abort("{.arg center} must be finite.")
+  }
 
-  lower <- bounds[1] - params$center
-  upper <- bounds[2] - params$center
-  angle <- atan2(gamma * (bounds[2] - bounds[1]), gamma^2 + lower * upper)
+  coordinate_scale <- max(abs(bounds), abs(params$center), gamma)
+  lower <- bounds[1] / coordinate_scale - params$center / coordinate_scale
+  upper <- bounds[2] / coordinate_scale - params$center / coordinate_scale
+  gamma_scaled <- gamma / coordinate_scale
+
+  numerator <- gamma_scaled * (upper - lower)
+  denominator <- gamma_scaled^2 + lower * upper
+  angle <- atan2(numerator, denominator)
+
+  # Preserve the limiting angle when gamma is too small relative to the
+  # absolute coordinate scale to remain representable after normalization.
+  if (gamma_scaled == 0) {
+    if (bounds[1] < params$center && bounds[2] > params$center) {
+      angle <- pi
+    } else if (bounds[1] == params$center || bounds[2] == params$center) {
+      angle <- pi / 2
+    } else {
+      angle <- 0
+    }
+  }
+
   params$height * gamma * angle
 }
 

@@ -69,6 +69,21 @@ test_that("finite Lorentzian areas are integrated over the requested interval", 
   )
 })
 
+test_that("finite Lorentzian areas scale across extreme coordinate magnitudes", {
+  model <- lorentzian_peak_model()
+  expected <- atan(2) - atan(-1)
+
+  for (scale in c(1e-170, 1, 1e170)) {
+    area <- peak_model_area(
+      model,
+      list(height = 1, center = 0, gamma = scale),
+      x_range = c(-scale, 2 * scale)
+    )
+
+    expect_equal(area / scale, expected, tolerance = 1e-12)
+  }
+})
+
 test_that("finite EMG areas match an independent convolution integral", {
   model <- emg_peak_model()
   params <- list(height = 1.7, center = -0.2, width = 0.7, tau = 1.2)
@@ -201,6 +216,35 @@ test_that("finite EMG areas stay within intervals outside the component center",
       peak_model_area(model, params, x_range = x_range),
       expected,
       tolerance = 1e-9
+    )
+  }
+})
+
+test_that("finite EMG area is stable under large translations of narrow axes", {
+  model <- emg_peak_model()
+
+  translated <- list(
+    list(center = 1e8, width = 0.01, tau = 0.02),
+    list(center = 1e5, width = 1e-5, tau = 2e-5)
+  )
+  for (shape in translated) {
+    params <- c(list(height = 1), shape)
+    x_range <- shape$center + c(-10, 30) * shape$width
+    centered_area <- peak_model_area(
+      model,
+      list(
+        height = 1,
+        center = 0,
+        width = shape$width,
+        tau = shape$tau
+      ),
+      x_range = c(-10, 30) * shape$width
+    )
+
+    expect_equal(
+      peak_model_area(model, params, x_range = x_range),
+      centered_area,
+      tolerance = 1e-7
     )
   }
 })
