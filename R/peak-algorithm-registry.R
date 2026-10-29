@@ -77,6 +77,36 @@
     )
   )
 
+  # Continuous wavelet transform with multi-scale ridge persistence.
+  register_peak_algorithm(
+    name = "cwt",
+    algorithm_fn = .detect_peaks_cwt,
+    pack_name = "measure",
+    description = "Finds peaks with Mexican-hat wavelets and persistent scale ridges",
+    default_params = list(
+      scales = .cwt_default_scales,
+      min_ridge_length = 3L,
+      gap_thresh = 1L,
+      min_snr = 4.5,
+      noise_window = 31L,
+      noise_quantile = 0.95,
+      min_height = 0,
+      min_distance = 0
+    ),
+    param_info = list(
+      scales = "Widths from 1 to 10,000 samples; each run supports widths at most half its length",
+      min_ridge_length = "Minimum number of scales connected in a ridge",
+      gap_thresh = "Maximum consecutive missing scales within a ridge",
+      min_snr = paste0(
+        "Minimum ridge SNR in wavelet space (default 4.5); lower values admit ",
+        "weaker peaks and more noise candidates"
+      ),
+      noise_window = "Window width in samples for local fine-scale noise",
+      noise_quantile = "Quantile used to estimate fine-scale noise",
+      min_height = "Minimum raw-signal peak height",
+      min_distance = "Minimum peak separation in location-axis units"
+    )
+  )
   invisible(NULL)
 }
 

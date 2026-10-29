@@ -476,8 +476,7 @@ find_peaks_cols <- function(data) {
 #'
 #' @param recipe A recipe object.
 #' @param algorithm Peak detection algorithm. One of `"prominence"` (default),
-#'   `"derivative"`, `"local_maxima"`, or any algorithm registered via
-#'
+#'   `"derivative"`, `"local_maxima"`, `"cwt"`, or any algorithm registered via
 #'   [register_peak_algorithm()]. Use [peak_algorithms()] to see available
 #'   algorithms.
 #' @param min_height Minimum peak height in the measurement's signal units. If
@@ -515,6 +514,10 @@ find_peaks_cols <- function(data) {
 #'
 #' - `"local_maxima"`: Finds all local maxima above a threshold. Simple and fast
 #'   but may detect many spurious peaks.
+#'
+#' - `"cwt"`: Links Mexican-hat wavelet maxima across widths to identify
+#'   persistent peaks. Requires a uniformly spaced axis. See
+#'   [peak_detection_cwt] for widths, local SNR, missing data, and limits.
 #'
 #' Additional algorithms can be registered by technique packs using
 #' [register_peak_algorithm()].
@@ -832,6 +835,13 @@ tidy.step_measure_peaks_detect <- function(x, ...) {
 #'
 #' - `"global"`: Subtracts the minimum value in the peak region.
 #'
+#' Peaks with fitted model metadata from
+#' [step_measure_peaks_deconvolve()] are integrated from their individual fitted
+#' component over the finite bounds stored in \code{left_base} and \code{right_base}.
+#' The method and baseline settings apply only to observed-signal integration.
+#' The \code{area_basis} column records whether each area came from the fitted
+#' component or the observed signal.
+#'
 #' @family peak-operations
 #' @export
 #'
@@ -935,13 +945,17 @@ prep.step_measure_peaks_integrate <- function(x, training, info = NULL, ...) {
   baseline_type = "local"
 ) {
   # Find indices within peak range
-  idx <- which(location >= left_base & location <= right_base)
+  bounds <- sort(c(left_base, right_base))
+  idx <- which(location >= bounds[1] & location <= bounds[2])
   if (length(idx) < 2) {
     return(NA_real_)
   }
 
   x <- location[idx]
   y <- value[idx]
+  axis_order <- order(x)
+  x <- x[axis_order]
+  y <- y[axis_order]
 
   # Handle baseline
   if (baseline_type == "local") {
@@ -963,9 +977,16 @@ prep.step_measure_peaks_integrate <- function(x, training, info = NULL, ...) {
     # Trapezoidal rule
     area <- sum(diff(x) * (y[-1] + y[-length(y)]) / 2)
   } else {
-    # Simpson's rule (fallback to trapezoid if even number of intervals)
+    # Simpson's rule assumes equal spacing; use trapezoids on irregular axes.
     n <- length(x)
-    if (n < 3) {
+    spacing <- diff(x)
+    spacing_tolerance <- max(
+      sqrt(.Machine$double.eps) * max(abs(spacing)),
+      .Machine$double.eps * max(abs(x)) * 8,
+      .Machine$double.xmin
+    )
+    equal_spacing <- all(abs(spacing - spacing[1]) <= spacing_tolerance)
+    if (n < 3 || !equal_spacing) {
       area <- sum(diff(x) * (y[-1] + y[-length(y)]) / 2)
     } else if ((n - 1) %% 2 == 0) {
       # Even number of intervals - standard Simpson's
@@ -993,6 +1014,54 @@ prep.step_measure_peaks_integrate <- function(x, training, info = NULL, ...) {
   area
 }
 
+#' @noRd
+.peak_fit_metadata <- function(peaks, i) {
+  has_model <- "fit_model" %in% names(peaks)
+  has_params <- "fit_params" %in% names(peaks)
+  if (!has_model && !has_params) {
+    return(NULL)
+  }
+  if (!has_model || !has_params) {
+    cli::cli_abort(
+      "Fitted component metadata is incomplete for peak {peaks$peak_id[i]}."
+    )
+  }
+
+  model <- peaks$fit_model[[i]]
+  params <- peaks$fit_params[[i]]
+  if (is.null(model) && is.null(params)) {
+    return(NULL)
+  }
+  if (!is_peak_model(model) || !is.list(params)) {
+    cli::cli_abort(
+      "Fitted component metadata is invalid for peak {peaks$peak_id[i]}."
+    )
+  }
+
+  list(model = model, params = params)
+}
+
+.integrate_fitted_peak <- function(peaks, i) {
+  component <- .peak_fit_metadata(peaks, i)
+  if (is.null(component)) {
+    return(NULL)
+  }
+
+  bounds <- sort(c(peaks$left_base[i], peaks$right_base[i]))
+  tryCatch(
+    peak_model_area(component$model, component$params, x_range = bounds),
+    error = function(error) {
+      cli::cli_abort(
+        c(
+          "Unable to integrate fitted component for peak {peaks$peak_id[i]}.",
+          "i" = "Model {.val {component$model$name}}: {conditionMessage(error)}"
+        ),
+        call = NULL
+      )
+    }
+  )
+}
+
 #' @export
 bake.step_measure_peaks_integrate <- function(object, new_data, ...) {
   method <- object$method
@@ -1014,17 +1083,26 @@ bake.step_measure_peaks_integrate <- function(object, new_data, ...) {
         }
 
         areas <- numeric(nrow(peaks))
+        area_basis <- character(nrow(peaks))
         for (j in seq_len(nrow(peaks))) {
-          areas[j] <- .integrate_peak(
-            measures$location,
-            measures$value,
-            peaks$left_base[j],
-            peaks$right_base[j],
-            method,
-            baseline
-          )
+          fitted_area <- .integrate_fitted_peak(peaks, j)
+          if (is.null(fitted_area)) {
+            areas[j] <- .integrate_peak(
+              measures$location,
+              measures$value,
+              peaks$left_base[j],
+              peaks$right_base[j],
+              method,
+              baseline
+            )
+            area_basis[j] <- "observed_signal"
+          } else {
+            areas[j] <- fitted_area
+            area_basis[j] <- "fitted_component"
+          }
         }
         peaks$area <- areas
+        peaks$area_basis <- area_basis
         peaks
       }
     )
@@ -1101,6 +1179,9 @@ tidy.step_measure_peaks_integrate <- function(x, ...) {
 #'
 #' The calculated properties are added as new columns in the `.peaks` tibble and
 #' can be exported later with [step_measure_peaks_to_table()].
+#'
+#' For fitted peaks, prominence uses the original detected minima, while FWHM
+#' is calculated from the stored component model without a baseline correction.
 #'
 #' @family peak-operations
 #' @export
@@ -1204,7 +1285,21 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
 
 #' @noRd
 .peak_signal_at <- function(location, value, xout) {
-  stats::approx(location, value, xout = xout, ties = "ordered", rule = 2)$y
+  valid <- is.finite(location) & is.finite(value)
+  location <- location[valid]
+  value <- value[valid]
+  if (length(location) < 2L) {
+    return(rep(NA_real_, length(xout)))
+  }
+
+  axis_order <- order(location)
+  stats::approx(
+    location[axis_order],
+    value[axis_order],
+    xout = xout,
+    ties = "ordered",
+    rule = 2
+  )$y
 }
 
 #' @noRd
@@ -1339,6 +1434,70 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
 }
 
 #' @noRd
+.calculate_fitted_peak_fwhm <- function(
+  model,
+  params,
+  apex_location,
+  location
+) {
+  domain <- range(location[is.finite(location)])
+  if (
+    length(domain) != 2L ||
+      !all(is.finite(domain)) ||
+      domain[1] == domain[2]
+  ) {
+    return(NA_real_)
+  }
+
+  apex_location <- min(max(apex_location, domain[1]), domain[2])
+  if (apex_location == domain[1] || apex_location == domain[2]) {
+    return(NA_real_)
+  }
+
+  apex_height <- peak_model_value(model, apex_location, params)
+  if (!is.finite(apex_height) || apex_height <= 0) {
+    return(NA_real_)
+  }
+  target <- apex_height / 2
+  component_minus_target <- function(x) {
+    peak_model_value(model, x, params) - target
+  }
+
+  left_value <- component_minus_target(domain[1])
+  right_value <- component_minus_target(domain[2])
+  if (
+    !is.finite(left_value) ||
+      !is.finite(right_value) ||
+      left_value > 0 ||
+      right_value > 0
+  ) {
+    return(NA_real_)
+  }
+
+  left_crossing <- tryCatch(
+    stats::uniroot(
+      component_minus_target,
+      c(domain[1], apex_location),
+      tol = .Machine$double.eps^0.75
+    )$root,
+    error = function(error) NA_real_
+  )
+  right_crossing <- tryCatch(
+    stats::uniroot(
+      component_minus_target,
+      c(apex_location, domain[2]),
+      tol = .Machine$double.eps^0.75
+    )$root,
+    error = function(error) NA_real_
+  )
+
+  if (!all(is.finite(c(left_crossing, right_crossing)))) {
+    return(NA_real_)
+  }
+  right_crossing - left_crossing
+}
+
+#' @noRd
 .add_peak_properties <- function(peaks, measures, properties) {
   if (nrow(peaks) == 0) {
     for (property in properties) {
@@ -1351,6 +1510,17 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
   val <- measures$value
 
   if ("prominence" %in% properties) {
+    left_bases <- if ("detected_left_base" %in% names(peaks)) {
+      peaks$detected_left_base
+    } else {
+      peaks$left_base
+    }
+    right_bases <- if ("detected_right_base" %in% names(peaks)) {
+      peaks$detected_right_base
+    } else {
+      peaks$right_base
+    }
+
     peaks$prominence <- vapply(
       seq_len(nrow(peaks)),
       function(i) {
@@ -1358,8 +1528,8 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
           loc,
           val,
           peaks$location[i],
-          peaks$left_base[i],
-          peaks$right_base[i]
+          left_bases[i],
+          right_bases[i]
         )
       },
       numeric(1)
@@ -1370,13 +1540,23 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
     peaks$fwhm <- vapply(
       seq_len(nrow(peaks)),
       function(i) {
-        .calculate_peak_fwhm(
-          loc,
-          val,
-          peaks$location[i],
-          peaks$left_base[i],
-          peaks$right_base[i]
-        )
+        component <- .peak_fit_metadata(peaks, i)
+        if (is.null(component)) {
+          .calculate_peak_fwhm(
+            loc,
+            val,
+            peaks$location[i],
+            peaks$left_base[i],
+            peaks$right_base[i]
+          )
+        } else {
+          .calculate_fitted_peak_fwhm(
+            component$model,
+            component$params,
+            peaks$location[i],
+            loc
+          )
+        }
       },
       numeric(1)
     )
@@ -1918,8 +2098,9 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' @param quality_threshold Minimum R-squared to accept fit. Fits below this
 #'   threshold trigger a warning. Default is 0.8. Tune this with
 #'   [peak_fit_r_squared()].
-#' @param store_components Logical. If `TRUE`, store individual fitted peak
-#'   curves in the output. Default is `FALSE`.
+#' @param store_components Logical. If \code{TRUE}, also store sampled fitted peak
+#'   curves for diagnostics. Fitted models and parameters are always retained
+#'   for subsequent component integration. Default is \code{FALSE}.
 #' @param smart_init Logical. If `TRUE`, use smart initialization based on
 #'   peak properties. Default is `TRUE`.
 #' @param peaks_col Name of the peaks column. Default is ".peaks".
@@ -1973,6 +2154,15 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #' bounded by 0 and 1; choose iteration ranges that fit the model and runtime
 #' budget for your data.
 #' Before finalization, `tidy()` retains unresolved tuning calls in list columns.
+#'
+#' The columns \code{fit_model} and \code{fit_params} retain each fitted component. The
+#' \code{detected_left_base} and \code{detected_right_base} columns retain original detected
+#' minima. The \code{area_basis} column identifies fitted-component areas.
+#'
+#' \code{left_base} and \code{right_base} define a finite integration interval within the
+#' measured axis. The interval retains detected minima where possible and
+#' expands as needed to contain the reported fitted apex. Fitted areas integrate
+#' each component over this interval without adding a physical baseline.
 #'
 #' @seealso [optimize_deconvolution()], [assess_deconv_quality()],
 #'   [peak_models()], [gaussian_peak_model()]
@@ -2318,31 +2508,42 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
     )
   }
 
-  # Update peaks_tbl with fitted parameters
+  # Preserve detected minima before fitting replaces the integration bounds.
+  if (!"detected_left_base" %in% names(peaks_tbl)) {
+    peaks_tbl$detected_left_base <- peaks_tbl$left_base
+  }
+  if (!"detected_right_base" %in% names(peaks_tbl)) {
+    peaks_tbl$detected_right_base <- peaks_tbl$right_base
+  }
+
+  # Fit areas use finite windows within the measured axis.
+  integration_range <- range(x[is.finite(x)])
+  fit_areas <- numeric(n_peaks)
   for (i in seq_len(n_peaks)) {
     params <- opt_result$parameters[[i]]
+    apex <- .fitted_component_apex(models[[i]], params, x)
+    window <- .fitted_component_window(
+      peaks_tbl$detected_left_base[i],
+      peaks_tbl$detected_right_base[i],
+      apex$location,
+      integration_range
+    )
 
-    # EMG parameters describe the precursor Gaussian, whose center and height
-    # differ from the apex of the fitted component.
-    if (inherits(models[[i]], "emg_peak_model")) {
-      apex <- .fitted_emg_apex(models[[i]], params, x)
-      peaks_tbl$location[i] <- apex$location
-      peaks_tbl$height[i] <- apex$height
-    } else {
-      peaks_tbl$location[i] <- params$center
-      peaks_tbl$height[i] <- params$height
-    }
-
-    # Update width-based bounds
-    width <- params$width %||%
-      ((params$width_left %||% 0) + (params$width_right %||% 0)) /
-      2
-    peaks_tbl$left_base[i] <- params$center - 3 * width
-    peaks_tbl$right_base[i] <- params$center + 3 * width
-
-    # Calculate area from peak model
-    peaks_tbl$area[i] <- peak_model_area(models[[i]], params, range(x))
+    peaks_tbl$location[i] <- apex$location
+    peaks_tbl$height[i] <- apex$height
+    peaks_tbl$left_base[i] <- window[1]
+    peaks_tbl$right_base[i] <- window[2]
+    fit_areas[i] <- peak_model_area(
+      models[[i]],
+      params,
+      x_range = window
+    )
   }
+
+  peaks_tbl$fit_model <- models
+  peaks_tbl$fit_params <- opt_result$parameters
+  peaks_tbl$area <- fit_areas
+  peaks_tbl$area_basis <- rep("fitted_component", n_peaks)
 
   # Add quality columns
   peaks_tbl$fit_r_squared <- rep(r_squared, n_peaks)
@@ -2366,6 +2567,47 @@ bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
 
   class(peaks_tbl) <- c("peaks_tbl", class(tibble::tibble()))
   peaks_tbl
+}
+
+.fitted_component_apex <- function(model, params, x) {
+  if (inherits(model, "emg_peak_model")) {
+    return(.fitted_emg_apex(model, params, x))
+  }
+
+  if (all(c("center", "height") %in% names(params))) {
+    axis_range <- range(x[is.finite(x)])
+    location <- min(max(params$center, axis_range[1]), axis_range[2])
+    if (model$name %in% c("gaussian", "bigaussian", "lorentzian")) {
+      height <- peak_model_value(model, location, params)
+    } else {
+      height <- params$height
+    }
+    return(list(location = location, height = height))
+  }
+
+  cli::cli_abort(
+    "Fitted model {.val {model$name}} must provide center and height parameters."
+  )
+}
+
+.fitted_component_window <- function(
+  detected_left_base,
+  detected_right_base,
+  apex_location,
+  observed_range
+) {
+  observed_range <- sort(observed_range)
+  apex_location <- min(
+    max(apex_location, observed_range[1]),
+    observed_range[2]
+  )
+  detected_bounds <- c(detected_left_base, detected_right_base)
+  detected_bounds <- detected_bounds[is.finite(detected_bounds)]
+  candidates <- c(detected_bounds, apex_location)
+  c(
+    max(observed_range[1], min(candidates)),
+    min(observed_range[2], max(candidates))
+  )
 }
 
 .fitted_emg_apex <- function(model, params, x) {

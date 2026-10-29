@@ -26,12 +26,6 @@
 
   # Register core peak models
   .register_core_peak_models()
-
-  # Set up reticulate to use managed Python environment
-  # Only if reticulate is available (it's in Suggests)
-  if (requireNamespace("reticulate", quietly = TRUE)) {
-    Sys.setenv(RETICULATE_PYTHON = "managed")
-  }
 }
 
 #' Check if pybaselines is available

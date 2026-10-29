@@ -1,5 +1,33 @@
 # measure 0.0.1.9003
 
+* `step_measure_baseline_custom()` now supports declared custom arguments
+  through tuning discovery, custom IDs, parameter extraction, finalization,
+  and prep/bake. Unresolved markers and malformed declarations fail clearly.
+  Formula arguments use a private invocation environment, preserving caller
+  bindings and ordinary function scoping across repeated baking (#124).
+
+* The preprocessing, baseline, internal-class, and multidimensional guides now
+  run their examples. A new technique-pack guide demonstrates public extension
+  APIs. Python examples check the optional backend, and loading measure no
+  longer overwrites `RETICULATE_PYTHON`. The baseline guide uses fixed custom
+  arguments while nested custom-argument tuning is tracked in #124.
+
+* `step_measure_peaks_detect(algorithm = "cwt")` now detects peaks through
+  Mexican-hat wavelets and persistent scale ridges, with local noise scoring,
+  explicit sample-width controls, missing-data separation, and bounded work.
+  See `?peak_detection_cwt` for parameter units and practical limits.
+
+* Fitted peak areas now integrate the fitted component over explicit finite
+  bounds. Detected bases remain available separately, and stored row metadata
+  preserves component-aware reintegration after filtering or serialization.
+  Built-in models respect finite area ranges, including translated narrow EMG
+  and Lorentzian peaks (#121).
+
+* `optimize_deconvolution()` now preserves the initial component order with
+  every optimizer when `constrain_positions = TRUE`, including model-specific
+  bounds and fixed parameters. Final centers may coincide; component identities
+  and model assignments remain attached to their original slots (#117).
+
 * EMG deconvolution no longer caps precursor amplitude using the observed apex. Reported `location` and `height` now describe the fitted component apex within the measured range.
 
 * `emg_peak_model()` now evaluates the correctly signed Gaussian-exponential
