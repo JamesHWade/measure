@@ -24,6 +24,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -90,21 +91,23 @@ includes all techniques (including general-purpose algorithms).</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># List all algorithms</span></span></span>
 <span class="r-in"><span><span class="fu">peak_algorithms</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name         pack_name description                    technique default_params</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;named list&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> prominence   measure   Finds local maxima by promine… <span style="color: #BB0000;">NA</span>        <span style="color: #949494;">&lt;named list&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> derivative   measure   Finds peaks by zero-crossings… <span style="color: #BB0000;">NA</span>        <span style="color: #949494;">&lt;named list&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> local_maxima measure   Finds all local maxima above … <span style="color: #BB0000;">NA</span>        <span style="color: #949494;">&lt;named list&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> cwt          measure   Finds peaks with Mexican-hat … <span style="color: #BB0000;">NA</span>        <span style="color: #949494;">&lt;named list&gt;</span>  </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># List only algorithms from a specific pack</span></span></span>
 <span class="r-in"><span><span class="fu">peak_algorithms</span><span class="op">(</span>packs <span class="op">=</span> <span class="st">"measure"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   name         pack_name description                    technique default_params</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;named list&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> prominence   measure   Finds local maxima by promine… <span style="color: #BB0000;">NA</span>        <span style="color: #949494;">&lt;named list&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> derivative   measure   Finds peaks by zero-crossings… <span style="color: #BB0000;">NA</span>        <span style="color: #949494;">&lt;named list&gt;</span>  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> local_maxima measure   Finds all local maxima above … <span style="color: #BB0000;">NA</span>        <span style="color: #949494;">&lt;named list&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> cwt          measure   Finds peaks with Mexican-hat … <span style="color: #BB0000;">NA</span>        <span style="color: #949494;">&lt;named list&gt;</span>  </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

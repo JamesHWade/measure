@@ -81,6 +81,14 @@ The areas are stored in the `area` column of the `.peaks` tibble.
 
 - `"global"`: Subtracts the minimum value in the peak region.
 
+Peaks with fitted model metadata from
+[`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md)
+are integrated from their individual fitted component over the finite
+bounds stored in `left_base` and `right_base`. The method and baseline
+settings apply only to observed-signal integration. The `area_basis`
+column records whether each area came from the fitted component or the
+observed signal.
+
 ## See also
 
 Other peak-operations:

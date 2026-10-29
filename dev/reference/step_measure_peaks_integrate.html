@@ -26,6 +26,7 @@ that calculates the area under each detected peak."><meta property="og:image" co
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -127,7 +128,13 @@ but requires odd number of points.</p></li>
 peak bases before integration.</p></li>
 <li><p><code>"none"</code>: Integrates directly to y=0.</p></li>
 <li><p><code>"global"</code>: Subtracts the minimum value in the peak region.</p></li>
-</ul></div>
+</ul><p>Peaks with fitted model metadata from
+<code><a href="step_measure_peaks_deconvolve.html">step_measure_peaks_deconvolve()</a></code> are integrated from their individual fitted
+component over the finite bounds stored in <code>left_base</code> and <code>right_base</code>.
+The method and baseline settings apply only to observed-signal integration.
+The <code>area_basis</code> column records whether each area came from the fitted
+component or the observed signal.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other peak-operations:

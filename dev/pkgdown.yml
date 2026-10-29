@@ -5,13 +5,14 @@ articles:
   explanation-internals: explanation-internals.html
   articles/howto-baseline: howto-baseline.html
   articles/howto-data-organization: howto-data-organization.html
+  articles/howto-technique-packs: howto-technique-packs.html
   articles/howto-tidymodels: howto-tidymodels.html
   reference-multidimensional: reference-multidimensional.html
   articles/reference-preprocessing: reference-preprocessing.html
   reference-validation: reference-validation.html
   articles/tutorial-bioreactor: tutorial-bioreactor.html
   articles/tutorial-getting-started: tutorial-getting-started.html
-last_built: 2026-10-28T08:16Z
+last_built: 2026-10-29T11:09Z
 urls:
   reference: https://jameshwade.github.io/measure/reference
   article: https://jameshwade.github.io/measure/articles

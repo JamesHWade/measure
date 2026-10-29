@@ -8,6 +8,23 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(modeldata)
+
+has_pybaselines <- if (requireNamespace("reticulate", quietly = TRUE)) {
+  isTRUE(tryCatch(
+    reticulate::py_module_available("pybaselines"),
+    error = function(e) FALSE
+  ))
+} else {
+  FALSE
+}
+```
+
+``` r
+
+if (!has_pybaselines) {
+  message("Skipping optional pybaselines example (not available in selected Python).")
+}
+#> Skipping optional pybaselines example (not available in selected Python).
 ```
 
 ## Introduction
@@ -182,17 +199,47 @@ processed_detrend <- bake(prep(rec_detrend), new_data = NULL)
 
 ### GPC/SEC baseline correction
 
+The core
 [`step_measure_baseline_gpc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.md)
-is specialized for chromatography data where baseline regions exist at
-the start and end of the chromatogram.
+has been superseded. For SEC/GPC data, use
+`measure.sec::step_sec_baseline()`, which is maintained in the companion
+package. The synthetic example runs when `measure.sec` is installed; it
+is skipped with a message otherwise.
 
 ``` r
 
-# For chromatography data
-rec_gpc <- recipe(outcome ~ ., data = chromatogram_data) |>
+sec_data <- tibble::tibble(
+  sample_id = rep(1:3, each = 20),
+  concentration = rep(c(10, 25, 50), each = 20),
+  time = rep(seq(0, 19), 3),
+  signal = rep(
+    seq(0.1, 0.2, length.out = 20) +
+      c(0, 0, 0, 0, 1, 2, 3, 2, 1, 0.3, rep(0, 10)),
+    3
+  ) + rep(c(0, 0.1, 0.2), each = 20)
+)
 
-  step_measure_input_long(signal, location = vars(time)) |>
-  step_measure_baseline_gpc(left_frac = 0.05, right_frac = 0.05, method = "linear")
+if (requireNamespace("measure.sec", quietly = TRUE)) {
+  sec_fit <- recipe(concentration ~ ., data = sec_data) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      signal,
+      location = vars(time),
+      col_name = "ri"
+    ) |>
+    measure.sec::step_sec_baseline(
+      measures = "ri",
+      left_frac = 0.1,
+      right_frac = 0.1
+    ) |>
+    prep()
+
+  bake(sec_fit, new_data = NULL) |>
+    dplyr::select(sample_id, concentration)
+} else {
+  message("SEC example skipped: install the optional measure.sec package.")
+}
+#> SEC example skipped: install the optional measure.sec package.
 ```
 
 ## Custom baseline functions
@@ -308,14 +355,18 @@ Python [pybaselines](https://pybaselines.readthedocs.io/) library.
 
 ### Setup
 
-First, install pybaselines:
+First, make reticulate available in R and declare pybaselines for the
+Python environment used by reticulate. These commands are for you to run
+when you want to use the backend. The availability check initializes the
+selected Python runtime; reticulate may create a managed environment
+according to its configuration. measure preserves an explicitly selected
+interpreter:
 
 ``` r
 
-# Install reticulate if needed
-install.packages("reticulate")
-
-# Install pybaselines
+if (!requireNamespace("reticulate", quietly = TRUE)) {
+  install.packages("reticulate")
+}
 reticulate::py_require("pybaselines")
 ```
 
@@ -323,29 +374,15 @@ reticulate::py_require("pybaselines")
 
 ``` r
 
-# Asymmetric Least Squares
-rec_py_asls <- recipe(water + fat + protein ~ ., data = meats) |>
+py_small <- meats[1:5, ]
+rec_py <- recipe(water + fat + protein ~ ., data = py_small) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_baseline_py(method = "asls", lam = 1e6, p = 0.01) |>
   step_measure_output_wide(prefix = "nir_")
 
-# SNIP algorithm (good for spectroscopy)
-rec_py_snip <- recipe(water + fat + protein ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_baseline_py(method = "snip", max_half_window = 40) |>
-  step_measure_output_wide(prefix = "nir_")
-
-# Modified polynomial
-rec_py_modpoly <- recipe(water + fat + protein ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_baseline_py(method = "modpoly", poly_order = 3) |>
-  step_measure_output_wide(prefix = "nir_")
-
-# Morphological (rolling ball)
-rec_py_mor <- recipe(water + fat + protein ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_baseline_py(method = "rolling_ball", half_window = 30) |>
-  step_measure_output_wide(prefix = "nir_")
+py_fit <- prep(rec_py)
+py_processed <- bake(py_fit, new_data = NULL)
+py_processed[, 1:6]
 ```
 
 ### Available pybaselines methods
@@ -390,7 +427,7 @@ rec_d2 <- recipe(water + fat + protein ~ ., data = meats) |>
 | [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md) | Gentle curvature | Yes | Simple and fast |
 | [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md) | Complex baselines | Yes | Robust to outliers |
 | [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md) | Simple trends | Yes | Fastest option |
-| [`step_measure_baseline_gpc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_gpc.md) | Chromatography | No | Uses baseline regions |
+| `measure.sec::step_sec_baseline()` | SEC/GPC chromatography | No | Companion package |
 | [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md) | Special cases | Optional | Maximum flexibility |
 | [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md) | Advanced algorithms | Yes | 50+ methods available |
 | [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | NIR/IR spectra | Yes | Also smooths and differentiates |
@@ -402,36 +439,78 @@ framework:
 
 ``` r
 
-library(tune)
-
-# Create tunable recipe
 rec_tunable <- recipe(water ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_baseline_als(
-    lambda = tune(),  # Will be tuned
-    p = tune()        # Will be tuned
+    lambda = tune::tune(),
+    p = tune::tune()
   ) |>
   step_measure_output_wide(prefix = "nir_")
 
-# The tunable parameters are automatically detected
-tunable(rec_tunable)
+tune::tunable(rec_tunable)
+#> # A tibble: 2 × 5
+#>   name   call_info        source component                 component_id         
+#>   <chr>  <list>           <chr>  <chr>                     <chr>                
+#> 1 lambda <named list [2]> recipe step_measure_baseline_als measure_baseline_als…
+#> 2 p      <named list [2]> recipe step_measure_baseline_als measure_baseline_als…
 ```
 
-For
-[`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md),
-you can declare tunable parameters explicitly:
+[`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md)
+can expose callback arguments to the tuning framework. Declare a
+parameter in `tunable`, capture
+[`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html) in
+the matching callback argument, then extract and finalize it through the
+public tuning API:
 
 ``` r
 
-rec_custom_tunable <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
+rec_custom_tuned <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(transmittance, location = vars(channel)) |>
   step_measure_baseline_custom(
-    .fn = ~ stats::loess(.x$value ~ .x$location, span = span)$fitted,
-    span = 0.5,
+    .fn = ~ {
+      fit <- lm(.x$value ~ poly(.x$location, degree))
+      predict(fit)
+    },
+    degree = tune::tune(id = "baseline_degree"),
     tunable = list(
-      span = list(pkg = "dials", fun = "degree", range = c(0.1, 0.9))
+      degree = list(
+        pkg = "dials",
+        fun = "degree_int",
+        range = c(1L, 5L)
+      )
     )
   )
+
+custom_parameters <- tune::extract_parameter_set_dials(rec_custom_tuned)
+custom_parameters
+#> Collection of 1 parameters for tuning
+#> 
+#>       identifier   type    object
+#>  baseline_degree degree nparam[+]
+#> 
+
+rec_custom_final <- tune::finalize_recipe(
+  rec_custom_tuned,
+  list(baseline_degree = 2L)
+)
+
+rec_custom_fixed <- recipe(water + fat + protein ~ ., data = meats_long) |>
+  update_role(id, new_role = "id") |>
+  step_measure_input_long(transmittance, location = vars(channel)) |>
+  step_measure_baseline_custom(
+    .fn = ~ {
+      fit <- lm(.x$value ~ poly(.x$location, degree))
+      predict(fit)
+    },
+    degree = 2L
+  )
+
+all.equal(
+  bake(prep(rec_custom_final), new_data = NULL)$.measures,
+  bake(prep(rec_custom_fixed), new_data = NULL)$.measures
+)
+#> [1] TRUE
 ```
 
 ## Complete preprocessing pipeline

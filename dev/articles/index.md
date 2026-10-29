@@ -15,6 +15,8 @@ Task-oriented guides for solving specific problems
 
 - [How-To: Baseline
   Correction](https://jameshwade.github.io/measure/dev/articles/howto-baseline.md):
+- [How-To: Extend measure with a technique
+  pack](https://jameshwade.github.io/measure/dev/articles/howto-technique-packs.md):
 - [How-To: Integrating with
   tidymodels](https://jameshwade.github.io/measure/dev/articles/howto-tidymodels.md):
 - [How-To: Data Organization and

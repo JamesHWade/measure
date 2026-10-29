@@ -26,6 +26,7 @@ sum of squared residuals between the observed and fitted values."><meta property
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -106,8 +107,12 @@ or <code>"nelder_mead"</code>.</p></dd>
 
 
 <dt id="arg-constrain-positions">constrain_positions<a class="anchor" aria-label="anchor" href="#arg-constrain-positions"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, enforce that peak centers
-maintain their relative ordering.</p></dd>
+<dd><p>Logical. If <code>TRUE</code>, fitted centers are
+nondecreasing in the rank of their starting centers and remain within each
+model's center bounds. Tied final centers are allowed. Duplicate starting
+centers, models without exactly one center parameter, and incompatible
+bounds are rejected. Optimization is local and does not guarantee a global
+minimum.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -154,24 +159,24 @@ maintain their relative ordering.</p></dd>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">parameters</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$height</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.495439</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.495453</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$center</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8.000463</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8.000482</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]$width</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.004556</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.00457</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$height</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7901486</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7901823</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$center</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12.00355</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12.00336</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]$width</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.516792</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.516645</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>

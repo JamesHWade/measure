@@ -52,8 +52,12 @@ optimize_deconvolution(
 
 - constrain_positions:
 
-  Logical. If `TRUE`, enforce that peak centers maintain their relative
-  ordering.
+  Logical. If `TRUE`, fitted centers are nondecreasing in the rank of
+  their starting centers and remain within each model's center bounds.
+  Tied final centers are allowed. Duplicate starting centers, models
+  without exactly one center parameter, and incompatible bounds are
+  rejected. Optimization is local and does not guarantee a global
+  minimum.
 
 - ...:
 
@@ -108,24 +112,24 @@ result <- optimize_deconvolution(x, y, models, init_params)
 print(result$parameters)
 #> [[1]]
 #> [[1]]$height
-#> [1] 1.495439
+#> [1] 1.495453
 #> 
 #> [[1]]$center
-#> [1] 8.000463
+#> [1] 8.000482
 #> 
 #> [[1]]$width
-#> [1] 1.004556
+#> [1] 1.00457
 #> 
 #> 
 #> [[2]]
 #> [[2]]$height
-#> [1] 0.7901486
+#> [1] 0.7901823
 #> 
 #> [[2]]$center
-#> [1] 12.00355
+#> [1] 12.00336
 #> 
 #> [[2]]$width
-#> [1] 1.516792
+#> [1] 1.516645
 #> 
 #> 
 ```

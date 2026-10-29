@@ -69,6 +69,10 @@ The calculated properties are added as new columns in the `.peaks`
 tibble and can be exported later with
 [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md).
 
+For fitted peaks, prominence uses the original detected minima, while
+FWHM is calculated from the stored component model without a baseline
+correction.
+
 ## See also
 
 Other peak-operations:

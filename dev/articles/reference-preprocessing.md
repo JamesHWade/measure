@@ -39,6 +39,66 @@ effects (scatter, baseline drift) that obscure the chemical information
 we’re trying to model. This vignette covers each preprocessing technique
 available in measure and when to use them.
 
+## Fit on training data, then bake new data
+
+A recipe learns preprocessing parameters from its training rows. Keep
+the test or assessment rows separate until
+[`bake()`](https://recipes.tidymodels.org/reference/bake.html), and mark
+a sample identifier as an ID role so it is preserved without being used
+as a predictor.
+
+``` r
+
+set.seed(2026)
+meats_with_id <- meats |>
+  mutate(sample_id = dplyr::row_number())
+training_rows <- sample.int(
+  nrow(meats_with_id),
+  size = floor(0.8 * nrow(meats_with_id))
+)
+meats_training <- meats_with_id[training_rows, ]
+meats_assessment <- meats_with_id[-training_rows, ]
+
+rec_train <- recipe(water ~ ., data = meats_training) |>
+  update_role(sample_id, new_role = "id") |>
+  step_measure_input_wide(
+    starts_with("x_"),
+    location_values = wavelengths
+  ) |>
+  step_measure_snv() |>
+  step_measure_output_wide(prefix = "nir_")
+
+rec_fit <- prep(rec_train)
+training_baked <- bake(rec_fit, new_data = NULL)
+assessment_baked <- bake(rec_fit, new_data = meats_assessment)
+
+assessment_baked |>
+  select(sample_id, starts_with("nir_")) |>
+  head()
+#> # A tibble: 6 × 101
+#>   sample_id nir_0850.0000 nir_0852.0202 nir_0854.0404 nir_0856.0606
+#>       <int>         <dbl>         <dbl>         <dbl>         <dbl>
+#> 1         7         -1.82         -1.80         -1.78         -1.75
+#> 2         9         -1.55         -1.53         -1.51         -1.49
+#> 3        24         -1.58         -1.56         -1.53         -1.51
+#> 4        25         -1.19         -1.19         -1.18         -1.18
+#> 5        26         -1.06         -1.07         -1.09         -1.10
+#> 6        37         -1.37         -1.37         -1.37         -1.36
+#> # ℹ 96 more variables: nir_0858.0808 <dbl>, nir_0860.1010 <dbl>,
+#> #   nir_0862.1212 <dbl>, nir_0864.1414 <dbl>, nir_0866.1616 <dbl>,
+#> #   nir_0868.1818 <dbl>, nir_0870.2020 <dbl>, nir_0872.2222 <dbl>,
+#> #   nir_0874.2424 <dbl>, nir_0876.2626 <dbl>, nir_0878.2828 <dbl>,
+#> #   nir_0880.3030 <dbl>, nir_0882.3232 <dbl>, nir_0884.3434 <dbl>,
+#> #   nir_0886.3636 <dbl>, nir_0888.3838 <dbl>, nir_0890.4040 <dbl>,
+#> #   nir_0892.4242 <dbl>, nir_0894.4444 <dbl>, nir_0896.4646 <dbl>, …
+```
+
+The `wavelengths` vector follows the selected `x_` columns in their data
+order. The same locations are stored during
+[`prep()`](https://recipes.tidymodels.org/reference/prep.html) and used
+when baking assessment rows. Their `sample_id` values remain alongside
+the processed measurements.
+
 ## Why preprocess spectra?
 
 Before diving into specific techniques, let’s understand what we’re
@@ -161,25 +221,26 @@ ggplot(window_data, aes(x = location, y = value, color = window)) +
 
 ### Tuning with dials
 
-The Savitzky-Golay step is tunable! This means you can use
-[`tune()`](https://hardhat.tidymodels.org/reference/tune.html) to find
-optimal parameters:
+The Savitzky-Golay step is tunable! This means you can use `tune()` to
+find optimal parameters:
 
 ``` r
-
-library(tune)
-library(workflows)
 
 rec_tunable <- recipe(water ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_savitzky_golay(
-    window_side = tune(),
-    differentiation_order = tune()
+    window_side = tune::tune(),
+    differentiation_order = tune::tune()
   ) |>
   step_measure_output_wide()
 
-# The tunable parameters are:
-tunable(rec_tunable)
+tune::tunable(rec_tunable)
+#> # A tibble: 3 × 5
+#>   name                  call_info        source component           component_id
+#>   <chr>                 <list>           <chr>  <chr>               <chr>       
+#> 1 window_side           <named list [2]> recipe step_measure_savit… measure_sav…
+#> 2 differentiation_order <named list [2]> recipe step_measure_savit… measure_sav…
+#> 3 degree                <named list [3]> recipe step_measure_savit… measure_sav…
 ```
 
 ## Spectral Math Transformations
@@ -212,9 +273,18 @@ These transformations are inverses - a round-trip preserves values:
 ``` r
 
 rec_roundtrip <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
   step_measure_absorbance() |>
-  step_measure_transmittance()  # Back to original
+  step_measure_transmittance()
+
+raw_measure_data <- bake(prep(rec_raw), new_data = NULL)
+roundtrip_data <- bake(prep(rec_roundtrip), new_data = NULL)
+all.equal(
+  raw_measure_data$.measures[[1]]$value,
+  roundtrip_data$.measures[[1]]$value,
+  tolerance = 1e-10
+)
+#> [1] TRUE
 ```
 
 ### Log Transformation
@@ -249,10 +319,25 @@ f(R) = \frac{(1-R)^2}{2R}
 
 ``` r
 
-# For reflectance data (values between 0 and 1)
+# A small synthetic reflectance dataset with values between 0 and 1
+reflectance_data <- tibble::tibble(
+  concentration = c(1, 2, 3),
+  r_400 = c(0.20, 0.25, 0.30),
+  r_500 = c(0.30, 0.35, 0.40),
+  r_600 = c(0.40, 0.45, 0.50)
+)
+
 rec_km <- recipe(concentration ~ ., data = reflectance_data) |>
   step_measure_input_wide(starts_with("r_")) |>
   step_measure_kubelka_munk()
+
+bake(prep(rec_km), new_data = NULL)
+#> # A tibble: 3 × 2
+#>   concentration .measures
+#>           <dbl>    <meas>
+#> 1             1   [3 × 2]
+#> 2             2   [3 × 2]
+#> 3             3   [3 × 2]
 ```
 
 ### Simple Finite Difference Derivatives
@@ -387,6 +472,22 @@ You can also specify the spacing between points:
 rec_resample_spacing <- recipe(water ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
   step_measure_resample(spacing = 5, method = "linear")
+
+bake(prep(rec_resample_spacing), new_data = NULL)
+#> # A tibble: 215 × 4
+#>      fat protein water .measures
+#>    <dbl>   <dbl> <dbl>    <meas>
+#>  1  22.5    16.7  60.5  [41 × 2]
+#>  2  40.1    13.5  46    [41 × 2]
+#>  3   8.4    20.5  71    [41 × 2]
+#>  4   5.9    20.7  72.8  [41 × 2]
+#>  5  25.5    15.5  58.3  [41 × 2]
+#>  6  42.7    13.7  44    [41 × 2]
+#>  7  42.7    13.7  44    [41 × 2]
+#>  8  10.6    19.3  69.3  [41 × 2]
+#>  9  19.9    17.7  61.4  [41 × 2]
+#> 10  19.9    17.7  61.4  [41 × 2]
+#> # ℹ 205 more rows
 ```
 
 Common use cases: - Align data from different instruments with different
@@ -773,14 +874,30 @@ plot_spectra(bin_data, "Binned to 20 Points", "Reduced dimensionality")
 
 ![](reference-preprocessing_files/figure-html/binning-example-1.png)
 
-The `bin_width` parameter is tunable:
+You can use `n_bins` or a numeric `bin_width`; the step uses one fixed
+value when preparing a recipe:
 
 ``` r
 
-rec_tunable_bin <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_bin(bin_width = tune()) |>
-  step_measure_output_wide()
+rec_bin_width <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_bin(bin_width = 10)
+
+bake(prep(rec_bin_width), new_data = NULL)
+#> # A tibble: 215 × 4
+#>      fat protein water .measures
+#>    <dbl>   <dbl> <dbl>    <meas>
+#>  1  22.5    16.7  60.5  [20 × 2]
+#>  2  40.1    13.5  46    [20 × 2]
+#>  3   8.4    20.5  71    [20 × 2]
+#>  4   5.9    20.7  72.8  [20 × 2]
+#>  5  25.5    15.5  58.3  [20 × 2]
+#>  6  42.7    13.7  44    [20 × 2]
+#>  7  42.7    13.7  44    [20 × 2]
+#>  8  10.6    19.3  69.3  [20 × 2]
+#>  9  19.9    17.7  61.4  [20 × 2]
+#> 10  19.9    17.7  61.4  [20 × 2]
+#> # ℹ 205 more rows
 ```
 
 ## Sample-wise Normalization
@@ -861,13 +978,20 @@ The `location_min` and `location_max` parameters are tunable:
 ``` r
 
 rec_tunable_peak <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
   step_measure_normalize_peak(
-    location_min = tune(),
-    location_max = tune(),
+    location_min = tune::tune(),
+    location_max = tune::tune(),
     method = "mean"
   ) |>
   step_measure_output_wide()
+
+tune::tunable(rec_tunable_peak)
+#> # A tibble: 2 × 5
+#>   name         call_info        source component                   component_id 
+#>   <chr>        <list>           <chr>  <chr>                       <chr>        
+#> 1 location_min <named list [2]> recipe step_measure_normalize_peak measure_norm…
+#> 2 location_max <named list [2]> recipe step_measure_normalize_peak measure_norm…
 ```
 
 ## Variable-wise Scaling
@@ -969,12 +1093,12 @@ head(tidy_params)
 #> # A tibble: 6 × 5
 #>   terms     location  mean    sd id                      
 #>   <chr>        <dbl> <dbl> <dbl> <chr>                   
-#> 1 .measures     850   2.81 0.411 measure_scale_auto_uVs7T
-#> 2 .measures     852.  2.81 0.413 measure_scale_auto_uVs7T
-#> 3 .measures     854.  2.81 0.416 measure_scale_auto_uVs7T
-#> 4 .measures     856.  2.82 0.418 measure_scale_auto_uVs7T
-#> 5 .measures     858.  2.82 0.421 measure_scale_auto_uVs7T
-#> 6 .measures     860.  2.82 0.424 measure_scale_auto_uVs7T
+#> 1 .measures     850   2.81 0.411 measure_scale_auto_nwk4P
+#> 2 .measures     852.  2.81 0.413 measure_scale_auto_nwk4P
+#> 3 .measures     854.  2.81 0.416 measure_scale_auto_nwk4P
+#> 4 .measures     856.  2.82 0.418 measure_scale_auto_nwk4P
+#> 5 .measures     858.  2.82 0.421 measure_scale_auto_nwk4P
+#> 6 .measures     860.  2.82 0.424 measure_scale_auto_nwk4P
 
 # Plot the learned means and SDs
 ggplot(tidy_params, aes(x = location)) +
@@ -1050,16 +1174,27 @@ You can pass extra arguments to your transformation function:
 
 ``` r
 
-# A function with configurable parameters
 robust_scale <- function(x, center_fn = median, scale_fn = mad) {
-x$value <- (x$value - center_fn(x$value)) / scale_fn(x$value)
-x
+  x$value <- (x$value - center_fn(x$value)) / scale_fn(x$value)
+  x
 }
 
-# Use with custom parameters
-rec <- recipe(water ~ ., data = meats) |>
-step_measure_input_wide(starts_with("x_")) |>
-step_measure_map(robust_scale, center_fn = mean, scale_fn = sd)
+rec_robust <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_map(robust_scale, center_fn = mean, scale_fn = stats::sd)
+
+bake(prep(rec_robust), new_data = NULL) |>
+  select(water) |>
+  head()
+#> # A tibble: 6 × 1
+#>   water
+#>   <dbl>
+#> 1  60.5
+#> 2  46  
+#> 3  71  
+#> 4  72.8
+#> 5  58.3
+#> 6  44
 ```
 
 ### Prototyping with measure_map()
@@ -1122,23 +1257,35 @@ when exploring data that might have problematic samples:
 
 ``` r
 
-# A transformation that might fail for some samples
+# Make the first sample invalid to show how its error is captured.
+problem_data <- baked_data
+problem_data$.measures[[1]]$value[1] <- 0
+
 risky_transform <- function(x) {
-if (any(x$value <= 0)) stop("Non-positive values!")
-x$value <- log(x$value)
-x
+  if (any(x$value <= 0)) stop("Non-positive values!")
+  x$value <- log(x$value)
+  x
 }
 
-# Errors are captured, not thrown
-result <- measure_map_safely(baked_data, risky_transform)
+safe_result <- measure_map_safely(problem_data, risky_transform)
+safe_result$errors
+#> # A tibble: 1 × 3
+#>   column    sample error               
+#>   <chr>      <int> <chr>               
+#> 1 .measures      1 Non-positive values!
 
-# Check which samples failed
-if (nrow(result$errors) > 0) {
-print(result$errors)
-}
-
-# result$result contains the data with successful transforms
-# (failed samples keep their original values)
+# The other samples are transformed; the failed sample keeps its original values.
+head(safe_result$result$.measures[[1]])
+#> <measure_tbl [6 x 2]>
+#> # A tibble: 6 × 2
+#>   location value
+#>      <dbl> <dbl>
+#> 1     850   0   
+#> 2     852.  2.62
+#> 3     854.  2.62
+#> 4     856.  2.62
+#> 5     858.  2.62
+#> 6     860.  2.62
 ```
 
 ### Understanding your data with measure_summarize()
@@ -1247,13 +1394,11 @@ A typical order might be:
 
 ## Data Augmentation
 
-Data augmentation steps add controlled variations to training data,
-helping models generalize better. These steps default to `skip = TRUE`,
-meaning they only apply during training (via
-[`prep()`](https://recipes.tidymodels.org/reference/prep.html)) and are
-skipped when applying the recipe to new data (via
-[`bake()`](https://recipes.tidymodels.org/reference/bake.html) with
-`new_data`).
+Data augmentation steps add controlled variations to training
+measurements. They default to `skip = TRUE`, so
+[`bake()`](https://recipes.tidymodels.org/reference/bake.html) applies
+them to the retained training data (`new_data = NULL`) and skips them
+for new assessment or prediction rows.
 
 ### Adding Random Noise
 
@@ -1263,13 +1408,17 @@ adds random noise to simulate measurement uncertainty:
 ``` r
 
 rec_noise <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
   step_measure_augment_noise(
-    sd = 0.01,              # Noise level (relative to signal range)
+    sd = 0.01,
     distribution = "gaussian",
-    relative = TRUE         # TRUE = sd is relative to signal range
+    relative = TRUE
   ) |>
   step_measure_output_wide()
+
+noise_fit <- prep(rec_noise)
+noise_training <- bake(noise_fit, new_data = NULL)
+noise_assessment <- bake(noise_fit, new_data = meats[1:5, ])
 ```
 
 ### Random X-axis Shifts
@@ -1281,9 +1430,13 @@ shift-invariant:
 ``` r
 
 rec_shift <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_augment_shift(max_shift = 2) |>  # Max shift in location units
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_augment_shift(max_shift = 2) |>
   step_measure_output_wide()
+
+shift_fit <- prep(rec_shift)
+shift_training <- bake(shift_fit, new_data = NULL)
+shift_assessment <- bake(shift_fit, new_data = meats[1:5, ])
 ```
 
 ### Random Intensity Scaling
@@ -1294,9 +1447,13 @@ applies random scaling factors to intensities:
 ``` r
 
 rec_scale <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
-  step_measure_augment_scale(range = c(0.9, 1.1)) |>  # Scale between 90-110%
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
+  step_measure_augment_scale(range = c(0.9, 1.1)) |>
   step_measure_output_wide()
+
+scale_fit <- prep(rec_scale)
+scale_training <- bake(scale_fit, new_data = NULL)
+scale_assessment <- bake(scale_fit, new_data = meats[1:5, ])
 ```
 
 ### Combining Augmentations
@@ -1308,17 +1465,16 @@ identical results:
 ``` r
 
 rec_augment <- recipe(water ~ ., data = meats) |>
-  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_input_wide(starts_with("x_"), location_values = wavelengths) |>
   step_measure_augment_noise(sd = 0.005) |>
   step_measure_augment_shift(max_shift = 1) |>
   step_measure_augment_scale(range = c(0.95, 1.05)) |>
   step_measure_snv() |>
   step_measure_output_wide()
 
-# Augmentation only applies during training
-prepped <- prep(rec_augment)
-training_data <- bake(prepped, new_data = NULL)  # Augmented
-new_data <- bake(prepped, new_data = meats[1:5, ])  # Not augmented
+augment_fit <- prep(rec_augment)
+training_data <- bake(augment_fit, new_data = NULL)
+assessment_data <- bake(augment_fit, new_data = meats[1:5, ])
 ```
 
 **When to use augmentation:** - Training deep learning models - Small
@@ -1476,9 +1632,7 @@ shift/scale-invariant models
     strategies
 4.  **Domain knowledge**: Consider the physics of your measurement
     system
-5.  **Tune**: Use
-    [`tune()`](https://hardhat.tidymodels.org/reference/tune.html) to
-    optimize Savitzky-Golay parameters
+5.  **Tune**: Use `tune()` to optimize Savitzky-Golay parameters
 
 ## References
 

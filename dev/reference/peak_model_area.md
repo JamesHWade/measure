@@ -29,8 +29,10 @@ Numeric scalar giving the peak area.
 
 ## Details
 
-For models with analytical integrals (e.g., Gaussian), this can return
-an exact value. Otherwise, numerical integration is used.
+A finite x_range is treated as the integration interval for every model.
+With x_range = NULL, built-in models return their whole-domain area when
+it is defined. Other models use adaptive numerical integration when a
+finite interval is supplied.
 
 ## See also
 
@@ -43,5 +45,5 @@ model <- create_peak_model("gaussian")
 params <- list(height = 1, center = 5, width = 1)
 area <- peak_model_area(model, params, c(0, 10))
 area
-#> [1] 2.506628
+#> [1] 2.506627
 ```

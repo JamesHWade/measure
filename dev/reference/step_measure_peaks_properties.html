@@ -28,6 +28,7 @@ in the .peaks tibble."><meta property="og:image" content="https://jameshwade.git
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -119,6 +120,8 @@ intensities.</p></li>
 after subtracting a local linear baseline between the left and right bases.</p></li>
 </ul><p>The calculated properties are added as new columns in the <code>.peaks</code> tibble and
 can be exported later with <code><a href="step_measure_peaks_to_table.html">step_measure_peaks_to_table()</a></code>.</p>
+<p>For fitted peaks, prominence uses the original detected minima, while FWHM
+is calculated from the stored component model without a baseline correction.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -74,8 +74,9 @@ step_measure_peaks_deconvolve(
 
 - store_components:
 
-  Logical. If `TRUE`, store individual fitted peak curves in the output.
-  Default is `FALSE`.
+  Logical. If `TRUE`, also store sampled fitted peak curves for
+  diagnostics. Fitted models and parameters are always retained for
+  subsequent component integration. Default is `FALSE`.
 
 - smart_init:
 
@@ -168,6 +169,17 @@ runtime budget for your data. Before finalization,
 [`tidy()`](https://generics.r-lib.org/reference/tidy.html) retains
 unresolved tuning calls in list columns.
 
+The columns `fit_model` and `fit_params` retain each fitted component.
+The `detected_left_base` and `detected_right_base` columns retain
+original detected minima. The `area_basis` column identifies
+fitted-component areas.
+
+`left_base` and `right_base` define a finite integration interval within
+the measured axis. The interval retains detected minima where possible
+and expands as needed to contain the reported fitted apex. Fitted areas
+integrate each component over this interval without adding a physical
+baseline.
+
 ## See also
 
 [`optimize_deconvolution()`](https://jameshwade.github.io/measure/dev/reference/optimize_deconvolution.md),
@@ -207,11 +219,13 @@ rec <- recipe(~., data = df) |>
 result <- bake(rec, new_data = NULL)
 # Check fitted peaks
 result$.peaks[[1]]
-#> # A tibble: 2 × 10
-#>   peak_id location height left_base right_base  area fit_r_squared fit_quality
-#>     <int>    <dbl>  <dbl>     <dbl>      <dbl> <dbl>         <dbl> <chr>      
-#> 1       1     8.00  1.50       6.49       9.50  3.77         0.998 A          
-#> 2       2    12.0   0.792      9.74      14.3   2.99         0.998 A          
-#> # ℹ 2 more variables: purity <dbl>, overlap_degree <dbl>
+#> # A tibble: 2 × 15
+#>   peak_id location height left_base right_base  area detected_left_base
+#>     <int>    <dbl>  <dbl>     <dbl>      <dbl> <dbl>              <dbl>
+#> 1       1     8.00  1.50        1.7         20  3.77                1.7
+#> 2       2    12.0   0.792      10.2         20  2.64               10.2
+#> # ℹ 8 more variables: detected_right_base <dbl>, fit_model <list>,
+#> #   fit_params <list>, area_basis <chr>, fit_r_squared <dbl>,
+#> #   fit_quality <chr>, purity <dbl>, overlap_degree <dbl>
 # }
 ```

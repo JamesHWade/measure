@@ -84,7 +84,7 @@ print(quality)
 #> 
 #> Optimization:
 #>   Converged:   Yes
-#>   Iterations:  22
+#>   Iterations:  21
 #>   Optimizer:   lbfgsb
 #>   Final SSE:   0.5220
 ```

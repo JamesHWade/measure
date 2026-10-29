@@ -24,6 +24,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -82,8 +83,10 @@ If <code>NULL</code>, integrates over the full domain (may require analytical so
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>For models with analytical integrals (e.g., Gaussian), this can return
-an exact value. Otherwise, numerical integration is used.</p>
+    <p>A finite x_range is treated as the integration interval for every model.
+With x_range = NULL, built-in models return their whole-domain area when
+it is defined. Other models use adaptive numerical integration when a finite
+interval is supplied.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -96,7 +99,7 @@ an exact value. Otherwise, numerical integration is used.</p>
 <span class="r-in"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>height <span class="op">=</span> <span class="fl">1</span>, center <span class="op">=</span> <span class="fl">5</span>, width <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">area</span> <span class="op">&lt;-</span> <span class="fu">peak_model_area</span><span class="op">(</span><span class="va">model</span>, <span class="va">params</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">area</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.506628</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.506627</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

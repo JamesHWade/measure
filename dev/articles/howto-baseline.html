@@ -48,6 +48,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -93,7 +94,21 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">has_pybaselines</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"reticulate"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
+<span>    <span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_module_available.html" class="external-link">py_module_available</a></span><span class="op">(</span><span class="st">"pybaselines"</span><span class="op">)</span>,</span>
+<span>    error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="cn">FALSE</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">has_pybaselines</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Skipping optional pybaselines example (not available in selected Python)."</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co">#&gt; Skipping optional pybaselines example (not available in selected Python).</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -109,7 +124,7 @@ pybaselines library.</p>
 <h2 id="the-problem-baseline-drift">The problem: Baseline drift<a class="anchor" aria-label="anchor" href="#the-problem-baseline-drift"></a>
 </h2>
 <p>Let’s visualize baseline issues in NIR spectra:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Convert to long format for visualization</span></span>
@@ -148,7 +163,7 @@ related to the chemical composition we want to model.</p>
 Squares algorithm, which is excellent for spectra where peaks are
 predominantly in one direction (e.g., absorption peaks going up or
 emission peaks going down).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_als</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_baseline_als.html">step_measure_baseline_als</a></span><span class="op">(</span>lambda <span class="op">=</span> <span class="fl">1e6</span>, p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span>
@@ -187,7 +202,7 @@ the signal. Try 0.001-0.1.</li>
 <p><code><a href="../reference/step_measure_baseline_poly.html">step_measure_baseline_poly()</a></code> fits a polynomial to the
 spectrum and subtracts it. Simple and fast, works well for gentle
 baseline curvature.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_poly</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_baseline_poly.html">step_measure_baseline_poly</a></span><span class="op">(</span>degree <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
@@ -217,7 +232,7 @@ baseline curvature.</p>
 <p><code><a href="../reference/step_measure_baseline_rf.html">step_measure_baseline_rf()</a></code> uses robust local regression
 (LOESS with iterative reweighting) to estimate the baseline. Good for
 complex baseline shapes.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_baseline_rf.html">step_measure_baseline_rf</a></span><span class="op">(</span>span <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -238,7 +253,7 @@ complex baseline shapes.</p>
 <p><code><a href="../reference/step_measure_detrend.html">step_measure_detrend()</a></code> removes polynomial trends from
 spectra. The simplest baseline correction - just removes the overall
 trend.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_detrend</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_detrend.html">step_measure_detrend</a></span><span class="op">(</span>degree <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -256,15 +271,45 @@ trend.</p>
 <div class="section level3">
 <h3 id="gpcsec-baseline-correction">GPC/SEC baseline correction<a class="anchor" aria-label="anchor" href="#gpcsec-baseline-correction"></a>
 </h3>
-<p><code><a href="../reference/step_measure_baseline_gpc.html">step_measure_baseline_gpc()</a></code> is specialized for
-chromatography data where baseline regions exist at the start and end of
-the chromatogram.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># For chromatography data</span></span>
-<span><span class="va">rec_gpc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">outcome</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">chromatogram_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<p>The core <code><a href="../reference/step_measure_baseline_gpc.html">step_measure_baseline_gpc()</a></code> has been
+superseded. For SEC/GPC data, use
+<code>measure.sec::step_sec_baseline()</code>, which is maintained in
+the companion package. The synthetic example runs when
+<code>measure.sec</code> is installed; it is skipped with a message
+otherwise.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sec_data</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span>
+<span>  concentration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span>
+<span>  time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">19</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  signal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span>, length.out <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0.3</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="fl">3</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">signal</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_baseline_gpc.html">step_measure_baseline_gpc</a></span><span class="op">(</span>left_frac <span class="op">=</span> <span class="fl">0.05</span>, right_frac <span class="op">=</span> <span class="fl">0.05</span>, method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"measure.sec"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">sec_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">concentration</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">sec_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">sample_id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span></span>
+<span>      <span class="va">signal</span>,</span>
+<span>      location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>,</span>
+<span>      col_name <span class="op">=</span> <span class="st">"ri"</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">measure.sec</span><span class="fu">::</span><span class="fu">step_sec_baseline</span><span class="op">(</span></span>
+<span>      measures <span class="op">=</span> <span class="st">"ri"</span>,</span>
+<span>      left_frac <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>      right_frac <span class="op">=</span> <span class="fl">0.1</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">sec_fit</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">sample_id</span>, <span class="va">concentration</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"SEC example skipped: install the optional measure.sec package."</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co">#&gt; SEC example skipped: install the optional measure.sec package.</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -278,7 +323,7 @@ baseline values.</p>
 <div class="section level3">
 <h3 id="using-a-function">Using a function<a class="anchor" aria-label="anchor" href="#using-a-function"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simple moving minimum baseline</span></span>
 <span><span class="va">moving_min_baseline</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">window</span> <span class="op">=</span> <span class="fl">51</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">y</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">$</span><span class="va">value</span></span>
@@ -314,7 +359,7 @@ baseline values.</p>
 </h3>
 <p>For quick one-liners, use the formula interface where <code>.x</code>
 is the <code>measure_tbl</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># LOESS baseline using formula</span></span>
 <span><span class="va">rec_loess</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -340,7 +385,7 @@ is the <code>measure_tbl</code>:</p>
 <code><a href="../reference/step_measure_baseline_py.html">step_measure_baseline_py()</a></code>, set
 <code>subtract = FALSE</code> to get the baseline itself instead of the
 corrected signal:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use custom baseline with subtract = FALSE to extract the baseline</span></span>
 <span><span class="va">rec_extract</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -375,41 +420,31 @@ baseline correction algorithms from the Python <a href="https://pybaselines.read
 <div class="section level3">
 <h3 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h3>
-<p>First, install pybaselines:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install reticulate if needed</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"reticulate"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Install pybaselines</span></span>
+<p>First, make reticulate available in R and declare pybaselines for the
+Python environment used by reticulate. These commands are for you to run
+when you want to use the backend. The availability check initializes the
+selected Python runtime; reticulate may create a managed environment
+according to its configuration. measure preserves an explicitly selected
+interpreter:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"reticulate"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"reticulate"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_require.html" class="external-link">py_require</a></span><span class="op">(</span><span class="st">"pybaselines"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="using-pybaselines-methods">Using pybaselines methods<a class="anchor" aria-label="anchor" href="#using-pybaselines-methods"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Asymmetric Least Squares</span></span>
-<span><span class="va">rec_py_asls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">py_small</span> <span class="op">&lt;-</span> <span class="va">meats</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span>
+<span><span class="va">rec_py</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">py_small</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_baseline_py.html">step_measure_baseline_py</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"asls"</span>, lam <span class="op">=</span> <span class="fl">1e6</span>, p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># SNIP algorithm (good for spectroscopy)</span></span>
-<span><span class="va">rec_py_snip</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_baseline_py.html">step_measure_baseline_py</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"snip"</span>, max_half_window <span class="op">=</span> <span class="fl">40</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Modified polynomial</span></span>
-<span><span class="va">rec_py_modpoly</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_baseline_py.html">step_measure_baseline_py</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"modpoly"</span>, poly_order <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Morphological (rolling ball)</span></span>
-<span><span class="va">rec_py_mor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_baseline_py.html">step_measure_baseline_py</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"rolling_ball"</span>, half_window <span class="op">=</span> <span class="fl">30</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">py_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_py</span><span class="op">)</span></span>
+<span><span class="va">py_processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">py_fit</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="va">py_processed</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="available-pybaselines-methods">Available pybaselines methods<a class="anchor" aria-label="anchor" href="#available-pybaselines-methods"></a>
@@ -473,7 +508,7 @@ documentation</a> for the full list and parameter details.</p>
 </h2>
 <p>Savitzky-Golay derivatives remain a powerful approach for baseline
 correction, especially in NIR spectroscopy:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># First derivative removes constant baseline</span></span>
 <span><span class="va">rec_d1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -528,10 +563,10 @@ correction, especially in NIR spectroscopy:</p>
 <td>Fastest option</td>
 </tr>
 <tr class="odd">
-<td><code><a href="../reference/step_measure_baseline_gpc.html">step_measure_baseline_gpc()</a></code></td>
-<td>Chromatography</td>
+<td><code>measure.sec::step_sec_baseline()</code></td>
+<td>SEC/GPC chromatography</td>
 <td>No</td>
-<td>Uses baseline regions</td>
+<td>Companion package</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/step_measure_baseline_custom.html">step_measure_baseline_custom()</a></code></td>
@@ -559,39 +594,81 @@ correction, especially in NIR spectroscopy:</p>
 </h2>
 <p>Most baseline correction steps are tunable with the tidymodels tuning
 framework:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tune.tidymodels.org/" class="external-link">tune</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create tunable recipe</span></span>
-<span><span class="va">rec_tunable</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec_tunable</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_baseline_als.html">step_measure_baseline_als</a></span><span class="op">(</span></span>
-<span>    lambda <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,  <span class="co"># Will be tuned</span></span>
-<span>    p <span class="op">=</span> <span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>        <span class="co"># Will be tuned</span></span>
+<span>    lambda <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    p <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># The tunable parameters are automatically detected</span></span>
-<span><span class="fu"><a href="https://generics.r-lib.org/reference/tunable.html" class="external-link">tunable</a></span><span class="op">(</span><span class="va">rec_tunable</span><span class="op">)</span></span></code></pre></div>
-<p>For <code><a href="../reference/step_measure_baseline_custom.html">step_measure_baseline_custom()</a></code>, you can declare
-tunable parameters explicitly:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rec_custom_tunable</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tunable.html" class="external-link">tunable</a></span><span class="op">(</span><span class="va">rec_tunable</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
+<span><span class="co">#&gt;   name   call_info        source component                 component_id         </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> lambda <span style="color: #949494;">&lt;named list [2]&gt;</span> recipe step_measure_baseline_als measure_baseline_als…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p      <span style="color: #949494;">&lt;named list [2]&gt;</span> recipe step_measure_baseline_als measure_baseline_als…</span></span></code></pre></div>
+<p><code><a href="../reference/step_measure_baseline_custom.html">step_measure_baseline_custom()</a></code> can expose callback
+arguments to the tuning framework. Declare a parameter in
+<code>tunable</code>, capture <code><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune::tune()</a></code> in the matching
+callback argument, then extract and finalize it through the public
+tuning API:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rec_custom_tuned</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_baseline_custom.html">step_measure_baseline_custom</a></span><span class="op">(</span></span>
-<span>    .fn <span class="op">=</span> <span class="op">~</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/loess.html" class="external-link">loess</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">~</span> <span class="va">.x</span><span class="op">$</span><span class="va">location</span>, span <span class="op">=</span> <span class="va">span</span><span class="op">)</span><span class="op">$</span><span class="va">fitted</span>,</span>
-<span>    span <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>    .fn <span class="op">=</span> <span class="op">~</span> <span class="op">{</span></span>
+<span>      <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">location</span>, <span class="va">degree</span><span class="op">)</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    degree <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"baseline_degree"</span><span class="op">)</span>,</span>
 <span>    tunable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>pkg <span class="op">=</span> <span class="st">"dials"</span>, fun <span class="op">=</span> <span class="st">"degree"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span>
+<span>      degree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        pkg <span class="op">=</span> <span class="st">"dials"</span>,</span>
+<span>        fun <span class="op">=</span> <span class="st">"degree_int"</span>,</span>
+<span>        range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1L</span>, <span class="fl">5L</span><span class="op">)</span></span>
+<span>      <span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">custom_parameters</span> <span class="op">&lt;-</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_parameter_set_dials</a></span><span class="op">(</span><span class="va">rec_custom_tuned</span><span class="op">)</span></span>
+<span><span class="va">custom_parameters</span></span>
+<span><span class="co">#&gt; Collection of 1 parameters for tuning</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;       identifier   type    object</span></span>
+<span><span class="co">#&gt;  baseline_degree degree nparam[+]</span></span>
+<span><span class="co">#&gt; </span></span>
+<span></span>
+<span><span class="va">rec_custom_final</span> <span class="op">&lt;-</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://tune.tidymodels.org/reference/finalize_model.html" class="external-link">finalize_recipe</a></span><span class="op">(</span></span>
+<span>  <span class="va">rec_custom_tuned</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>baseline_degree <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec_custom_fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_baseline_custom.html">step_measure_baseline_custom</a></span><span class="op">(</span></span>
+<span>    .fn <span class="op">=</span> <span class="op">~</span> <span class="op">{</span></span>
+<span>      <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">location</span>, <span class="va">degree</span><span class="op">)</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    degree <span class="op">=</span> <span class="fl">2L</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_custom_final</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span><span class="op">$</span><span class="va">.measures</span>,</span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_custom_fixed</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span><span class="op">$</span><span class="va">.measures</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="complete-preprocessing-pipeline">Complete preprocessing pipeline<a class="anchor" aria-label="anchor" href="#complete-preprocessing-pipeline"></a>
 </h2>
 <p>Baseline correction often works best as part of a complete
 preprocessing pipeline:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_complete</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_wide.html">step_measure_input_wide</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># Baseline correction</span></span>

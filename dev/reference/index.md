@@ -132,6 +132,8 @@ Peak detection, integration, and analysis for chromatography
 
 - [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md)
   : Detect Peaks in Measurements
+- [`peak_detection_cwt`](https://jameshwade.github.io/measure/dev/reference/peak_detection_cwt.md)
+  : Wavelet Peak Detection
 - [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md)
   : Integrate Peak Areas
 - [`step_measure_peaks_properties()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_properties.md)

@@ -48,6 +48,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -184,7 +185,7 @@ follows <code><a href="../reference/step_measure_output_wide.html">step_measure_
 <h3 id="fit-and-evaluate-with-resampling">Fit and evaluate with resampling<a class="anchor" aria-label="anchor" href="#fit-and-evaluate-with-resampling"></a>
 </h3>
 <p>Assess the workflow on the training partition first.
-<code><a href="https://tune.tidymodels.org/reference/fit_resamples.html" class="external-link">fit_resamples()</a></code> fits the recipe using each fold’s analysis
+<code>fit_resamples()</code> fits the recipe using each fold’s analysis
 rows and applies it to that fold’s assessment rows.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu">yardstick</span><span class="fu">::</span><span class="fu"><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">metric_set</a></span><span class="op">(</span><span class="fu">yardstick</span><span class="fu">::</span><span class="va"><a href="https://yardstick.tidymodels.org/reference/rmse.html" class="external-link">rmse</a></span>, <span class="fu">yardstick</span><span class="fu">::</span><span class="va"><a href="https://yardstick.tidymodels.org/reference/rsq.html" class="external-link">rsq</a></span><span class="op">)</span></span>
@@ -443,7 +444,7 @@ these strategies.</p>
 </h2>
 <p>Use the training resamples to choose the tuning values, then evaluate
 the finalized workflow on the reserved test partition once with
-<code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">last_fit()</a></code>.</p>
+<code>last_fit()</code>.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">best_params</span> <span class="op">&lt;-</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">select_best</a></span><span class="op">(</span><span class="va">tune_results</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="va">best_params</span></span>
@@ -466,7 +467,7 @@ the finalized workflow on the reserved test partition once with
 <div class="section level2">
 <h2 id="working-with-workflows-and-new-data">Working with workflows and new data<a class="anchor" aria-label="anchor" href="#working-with-workflows-and-new-data"></a>
 </h2>
-<p><code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">last_fit()</a></code> retains a workflow fitted on the training
+<p><code>last_fit()</code> retains a workflow fitted on the training
 partition. After the final evaluation, it can be extracted and used to
 predict new spectra. The example below uses only the held-out predictors
 to demonstrate prediction; it does not feed predictions back into model
@@ -575,11 +576,11 @@ steps need numeric predictor columns</li>
 <p>measure integrates with tidymodels workflows:</p>
 <ul>
 <li>Use workflows to bundle measure preprocessing and a model</li>
-<li>Use <code><a href="https://tune.tidymodels.org/reference/fit_resamples.html" class="external-link">fit_resamples()</a></code> or <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune_grid()</a></code> on the
+<li>Use <code>fit_resamples()</code> or <code>tune_grid()</code> on the
 training partition</li>
 <li>Tune measure step parameters through the recipe interface</li>
 <li>Compare preprocessing strategies on the same resamples</li>
-<li>Use <code><a href="https://tune.tidymodels.org/reference/last_fit.html" class="external-link">last_fit()</a></code> for one final evaluation on a reserved
+<li>Use <code>last_fit()</code> for one final evaluation on a reserved
 test partition</li>
 </ul>
 <p>Workflow resampling prepares each recipe from the analysis portion of

@@ -4,6 +4,9 @@
 
 library(measure)
 library(recipes)
+library(modeldata)
+
+data(meats)
 ```
 
 ## Overview
@@ -169,19 +172,29 @@ If you’re writing functions that work with measure data:
 
 ``` r
 
-my_function <- function(data) {
-  # Validate input has measure columns
+inspect_measure_data <- function(data) {
   has_measure_col(data)
-
-  # Find measure columns
-  meas_cols <- find_measure_cols(data)
-
-  # Work with the measure_list
-  for (col in meas_cols) {
-    measurements <- data[[col]]
-    # Each element is a measure_tbl with $location and $value
-  }
+  measure_cols <- find_measure_cols(data)
+  lapply(data[measure_cols], function(measurements) measurements[[1]])
 }
+
+inspect_measure_data(result)
+#> $.measures
+#> <measure_tbl [100 x 2]>
+#> # A tibble: 100 × 2
+#>    location value
+#>       <int> <dbl>
+#>  1        1  2.62
+#>  2        2  2.62
+#>  3        3  2.62
+#>  4        4  2.62
+#>  5        5  2.62
+#>  6        6  2.62
+#>  7        7  2.62
+#>  8        8  2.62
+#>  9        9  2.63
+#> 10       10  2.63
+#> # ℹ 90 more rows
 ```
 
 The helper functions `measure_to_matrix()` and `matrix_to_measure()` in
@@ -221,10 +234,29 @@ for reproducible pipelines:
 
 ``` r
 
-# For production use
-rec <- recipe(...) |>
-  step_measure_input_long(...) |>
-  step_measure_map(~ { .x$value <- .x$value - mean(.x$value); .x })
+rec_centered <- recipe(water ~ ., data = meats) |>
+  step_measure_input_wide(starts_with("x_")) |>
+  step_measure_map(~ {
+    .x$value <- .x$value - mean(.x$value)
+    .x
+  }) |>
+  prep()
+
+bake(rec_centered, new_data = NULL)
+#> # A tibble: 215 × 4
+#>      fat protein water .measures
+#>    <dbl>   <dbl> <dbl>    <meas>
+#>  1  22.5    16.7  60.5 [100 × 2]
+#>  2  40.1    13.5  46   [100 × 2]
+#>  3   8.4    20.5  71   [100 × 2]
+#>  4   5.9    20.7  72.8 [100 × 2]
+#>  5  25.5    15.5  58.3 [100 × 2]
+#>  6  42.7    13.7  44   [100 × 2]
+#>  7  42.7    13.7  44   [100 × 2]
+#>  8  10.6    19.3  69.3 [100 × 2]
+#>  9  19.9    17.7  61.4 [100 × 2]
+#> 10  19.9    17.7  61.4 [100 × 2]
+#> # ℹ 205 more rows
 ```
 
 ### measure_map_safely(): Fault-tolerant exploration
@@ -234,13 +266,32 @@ variant:
 
 ``` r
 
-result <- measure_map_safely(data, risky_function)
+problem_data <- result
+problem_data$.measures[[1]]$value[1] <- 0
 
-# Check which samples failed
-result$errors
+risky_transform <- function(x) {
+  if (any(x$value <= 0)) stop("Non-positive values!")
+  x$value <- log(x$value)
+  x
+}
 
-# result$result contains data with successful transforms
-# (failed samples keep original values)
+safe_result <- measure_map_safely(problem_data, risky_transform)
+safe_result$errors
+#> # A tibble: 1 × 3
+#>   column    sample error               
+#>   <chr>      <int> <chr>               
+#> 1 .measures      1 Non-positive values!
+head(safe_result$result$.measures[[1]])
+#> <measure_tbl [6 x 2]>
+#> # A tibble: 6 × 2
+#>   location value
+#>      <dbl> <dbl>
+#> 1        1  0   
+#> 2        2  2.62
+#> 3        3  2.62
+#> 4        4  2.62
+#> 5        5  2.62
+#> 6        6  2.62
 ```
 
 ### measure_summarize(): Understanding your data
@@ -282,15 +333,37 @@ Use the `col_name` parameter in input steps:
 
 ``` r
 
+my_data <- tibble::tibble(
+  sample_id = 101:103,
+  outcome = c(1.2, 2.1, 3.0),
+  uv_400 = c(2.0, 2.2, 2.4),
+  uv_500 = c(2.5, 2.7, 2.9),
+  uv_600 = c(3.0, 3.2, 3.4),
+  ms_1 = c(10, 12, 14),
+  ms_2 = c(15, 17, 19),
+  ms_3 = c(20, 22, 24)
+)
+
 rec <- recipe(outcome ~ ., data = my_data) |>
+  update_role(sample_id, new_role = "id") |>
   step_measure_input_wide(
     starts_with("uv_"),
-    col_name = ".uv_spectrum"
+    col_name = ".uv_spectrum",
+    location_values = c(400, 500, 600)
   ) |>
   step_measure_input_wide(
     starts_with("ms_"),
-    col_name = ".ms_spectrum"
+    col_name = ".ms_spectrum",
+    location_values = 1:3
   )
+
+bake(prep(rec), new_data = NULL)
+#> # A tibble: 3 × 4
+#>   sample_id outcome .uv_spectrum .ms_spectrum
+#>       <int>   <dbl>       <meas>       <meas>
+#> 1       101     1.2      [3 × 2]      [3 × 2]
+#> 2       102     2.1      [3 × 2]      [3 × 2]
+#> 3       103     3        [3 × 2]      [3 × 2]
 ```
 
 ### Processing steps
@@ -299,16 +372,24 @@ By default, processing steps operate on **all** measure columns:
 
 ``` r
 
-rec <- rec |>
-  step_measure_snv()  # Applies to both .uv_spectrum and .ms_spectrum
+rec_all <- rec |>
+  step_measure_snv()
+
+all_processed <- bake(prep(rec_all), new_data = NULL)
+find_measure_cols(all_processed)
+#> [1] ".uv_spectrum" ".ms_spectrum"
 ```
 
 To process specific columns, use the `measures` parameter:
 
 ``` r
 
-rec <- rec |>
-  step_measure_snv(measures = ".uv_spectrum")  # Only UV
+rec_uv <- rec |>
+  step_measure_snv(measures = ".uv_spectrum")
+
+uv_processed <- bake(prep(rec_uv), new_data = NULL)
+find_measure_cols(uv_processed)
+#> [1] ".uv_spectrum" ".ms_spectrum"
 ```
 
 ### Output steps
@@ -318,9 +399,20 @@ which column to output:
 
 ``` r
 
-rec <- rec |>
+rec_output <- rec |>
+  step_measure_snv() |>
   step_measure_output_wide(measures = ".uv_spectrum", prefix = "uv_") |>
-  step_measure_output_wide(measures = ".ms_spectrum", prefix = "ms_")
+  step_measure_output_wide(measures = ".ms_spectrum", prefix = "ms_") |>
+  prep()
+
+bake(rec_output, new_data = NULL) |>
+  dplyr::select(sample_id, outcome, dplyr::starts_with("uv_"), dplyr::starts_with("ms_"))
+#> # A tibble: 3 × 8
+#>   sample_id outcome uv_400 uv_500 uv_600  ms_1  ms_2  ms_3
+#>       <int>   <dbl>  <dbl>  <dbl>  <dbl> <dbl> <dbl> <dbl>
+#> 1       101     1.2     -1      0      1    -1     0     1
+#> 2       102     2.1     -1      0      1    -1     0     1
+#> 3       103     3       -1      0      1    -1     0     1
 ```
 
 If you don’t specify and multiple columns exist, you’ll get a helpful

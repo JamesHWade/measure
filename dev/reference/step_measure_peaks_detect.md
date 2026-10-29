@@ -32,8 +32,8 @@ step_measure_peaks_detect(
 - algorithm:
 
   Peak detection algorithm. One of `"prominence"` (default),
-  `"derivative"`, `"local_maxima"`, or any algorithm registered via
-
+  `"derivative"`, `"local_maxima"`, `"cwt"`, or any algorithm registered
+  via
   [`register_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/register_peak_algorithm.md).
   Use
   [`peak_algorithms()`](https://jameshwade.github.io/measure/dev/reference/peak_algorithms.md)
@@ -108,6 +108,11 @@ column containing the detected peaks for each sample. The original
 
 - `"local_maxima"`: Finds all local maxima above a threshold. Simple and
   fast but may detect many spurious peaks.
+
+- `"cwt"`: Links Mexican-hat wavelet maxima across widths to identify
+  persistent peaks. Requires a uniformly spaced axis. See
+  [peak_detection_cwt](https://jameshwade.github.io/measure/dev/reference/peak_detection_cwt.md)
+  for widths, local SNR, missing data, and limits.
 
 Additional algorithms can be registered by technique packs using
 [`register_peak_algorithm()`](https://jameshwade.github.io/measure/dev/reference/register_peak_algorithm.md).

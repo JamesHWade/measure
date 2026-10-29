@@ -106,8 +106,7 @@ wf
 
 ### Fit and evaluate with resampling
 
-Assess the workflow on the training partition first.
-[`fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
+Assess the workflow on the training partition first. `fit_resamples()`
 fits the recipe using each fold’s analysis rows and applies it to that
 fold’s assessment rows.
 
@@ -381,7 +380,7 @@ workflowsets::autoplot(comparison, metric = "rmse") +
 
 Use the training resamples to choose the tuning values, then evaluate
 the finalized workflow on the reserved test partition once with
-[`last_fit()`](https://tune.tidymodels.org/reference/last_fit.html).
+`last_fit()`.
 
 ``` r
 
@@ -406,11 +405,11 @@ final_metrics
 
 ## Working with workflows and new data
 
-[`last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
-retains a workflow fitted on the training partition. After the final
-evaluation, it can be extracted and used to predict new spectra. The
-example below uses only the held-out predictors to demonstrate
-prediction; it does not feed predictions back into model selection.
+`last_fit()` retains a workflow fitted on the training partition. After
+the final evaluation, it can be extracted and used to predict new
+spectra. The example below uses only the held-out predictors to
+demonstrate prediction; it does not feed predictions back into model
+selection.
 
 ``` r
 
@@ -518,16 +517,10 @@ reproducible_folds
 measure integrates with tidymodels workflows:
 
 - Use workflows to bundle measure preprocessing and a model
-- Use
-  [`fit_resamples()`](https://tune.tidymodels.org/reference/fit_resamples.html)
-  or
-  [`tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html)
-  on the training partition
+- Use `fit_resamples()` or `tune_grid()` on the training partition
 - Tune measure step parameters through the recipe interface
 - Compare preprocessing strategies on the same resamples
-- Use
-  [`last_fit()`](https://tune.tidymodels.org/reference/last_fit.html)
-  for one final evaluation on a reserved test partition
+- Use `last_fit()` for one final evaluation on a reserved test partition
 
 Workflow resampling prepares each recipe from the analysis portion of a
 fold, then applies it to that fold’s assessment portion. This keeps

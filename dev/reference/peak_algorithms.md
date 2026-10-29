@@ -44,19 +44,21 @@ A tibble with columns:
 ``` r
 # List all algorithms
 peak_algorithms()
-#> # A tibble: 3 × 5
+#> # A tibble: 4 × 5
 #>   name         pack_name description                    technique default_params
 #>   <chr>        <chr>     <chr>                          <chr>     <named list>  
 #> 1 prominence   measure   Finds local maxima by promine… NA        <named list>  
 #> 2 derivative   measure   Finds peaks by zero-crossings… NA        <named list>  
 #> 3 local_maxima measure   Finds all local maxima above … NA        <named list>  
+#> 4 cwt          measure   Finds peaks with Mexican-hat … NA        <named list>  
 
 # List only algorithms from a specific pack
 peak_algorithms(packs = "measure")
-#> # A tibble: 3 × 5
+#> # A tibble: 4 × 5
 #>   name         pack_name description                    technique default_params
 #>   <chr>        <chr>     <chr>                          <chr>     <named list>  
 #> 1 prominence   measure   Finds local maxima by promine… NA        <named list>  
 #> 2 derivative   measure   Finds peaks by zero-crossings… NA        <named list>  
 #> 3 local_maxima measure   Finds all local maxima above … NA        <named list>  
+#> 4 cwt          measure   Finds peaks with Mexican-hat … NA        <named list>  
 ```

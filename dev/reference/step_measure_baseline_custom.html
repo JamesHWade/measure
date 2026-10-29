@@ -28,6 +28,7 @@ for flexible, custom baseline estimation algorithms."><meta property="og:image" 
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -95,7 +96,9 @@ where <code>.x</code> represents the <code>measure_tbl</code>.</p></dd>
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code>.fn</code>. These are captured as
-quosures and evaluated at bake time.</p></dd>
+quosures and evaluated at bake time. For formulas, named arguments are
+available as names in the formula body. For functions, they are passed as
+ordinary function arguments.</p></dd>
 
 
 <dt id="arg-subtract">subtract<a class="anchor" aria-label="anchor" href="#arg-subtract"></a></dt>
@@ -113,7 +116,9 @@ process. If <code>NULL</code> (the default), all measure columns (columns with c
 <dt id="arg-tunable">tunable<a class="anchor" aria-label="anchor" href="#arg-tunable"></a></dt>
 <dd><p>An optional named list specifying which arguments in <code>...</code>
 are tunable. Each element should be a list with <code>pkg</code>, <code>fun</code>, and
-optionally <code>range</code>. See Details.</p></dd>
+optionally <code>range</code>. Each name must match exactly one named argument in
+<code>...</code>, and <code>pkg</code> and <code>fun</code> must be non-empty character strings. Fixed
+unnamed arguments are allowed but cannot be declared tunable.</p></dd>
 
 
 <dt id="arg-role">role<a class="anchor" aria-label="anchor" href="#arg-role"></a></dt>
@@ -169,12 +174,21 @@ function where <code>.x</code> represents the <code>measure_tbl</code>:</p>
 
 <p>To make parameters tunable with <code>dials</code>, provide a <code>tunable</code> argument:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="fu"><a href="../reference/step_measure_baseline_custom.html">step_measure_baseline_custom</a></span><span class="op">(</span></span>
-<span>  .fn <span class="op">=</span> <span class="op">~</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/loess.html" class="external-link">loess</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">~</span> <span class="va">.x</span><span class="op">$</span><span class="va">location</span>, span <span class="op">=</span> <span class="va">span</span><span class="op">)</span><span class="op">$</span><span class="va">fitted</span>,</span>
-<span>  span <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  .fn <span class="op">=</span> <span class="op">~</span> <span class="op">{</span></span>
+<span>    <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">value</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">.x</span><span class="op">$</span><span class="va">location</span>, <span class="va">degree</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>,</span>
+<span>  degree <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  tunable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>pkg <span class="op">=</span> <span class="st">"dials"</span>, fun <span class="op">=</span> <span class="st">"degree"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span>
+<span>    degree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      pkg <span class="op">=</span> <span class="st">"dials"</span>,</span>
+<span>      fun <span class="op">=</span> <span class="st">"degree_int"</span>,</span>
+<span>      range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1L</span>, <span class="fl">5L</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre><p></p></div>
+<p>In a recipe, <code><a href="https://tune.tidymodels.org/reference/reexports.html" class="external-link">tune::extract_parameter_set_dials()</a></code> discovers this argument.
+Finalize it with <code><a href="https://tune.tidymodels.org/reference/finalize_model.html" class="external-link">tune::finalize_recipe()</a></code> before calling <code><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">recipes::prep()</a></code>.</p>
 <p><strong>No selectors should be supplied to this step function</strong>. The data should be
 in the internal format produced by <code><a href="step_measure_input_wide.html">step_measure_input_wide()</a></code> or
 <code><a href="step_measure_input_long.html">step_measure_input_long()</a></code>.</p>

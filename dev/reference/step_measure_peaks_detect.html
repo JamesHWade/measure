@@ -26,6 +26,7 @@ detects peaks in measurement data and stores them in a new .peaks column."><meta
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -85,8 +86,8 @@ detects peaks in measurement data and stores them in a new <code>.peaks</code> c
 
 <dt id="arg-algorithm">algorithm<a class="anchor" aria-label="anchor" href="#arg-algorithm"></a></dt>
 <dd><p>Peak detection algorithm. One of <code>"prominence"</code> (default),
-<code>"derivative"</code>, <code>"local_maxima"</code>, or any algorithm registered via</p>
-<p><code><a href="register_peak_algorithm.html">register_peak_algorithm()</a></code>. Use <code><a href="peak_algorithms.html">peak_algorithms()</a></code> to see available
+<code>"derivative"</code>, <code>"local_maxima"</code>, <code>"cwt"</code>, or any algorithm registered via
+<code><a href="register_peak_algorithm.html">register_peak_algorithm()</a></code>. Use <code><a href="peak_algorithms.html">peak_algorithms()</a></code> to see available
 algorithms.</p></dd>
 
 
@@ -152,6 +153,9 @@ column containing the detected peaks for each sample. The original
 derivative. Faster but more sensitive to noise.</p></li>
 <li><p><code>"local_maxima"</code>: Finds all local maxima above a threshold. Simple and fast
 but may detect many spurious peaks.</p></li>
+<li><p><code>"cwt"</code>: Links Mexican-hat wavelet maxima across widths to identify
+persistent peaks. Requires a uniformly spaced axis. See
+<a href="peak_detection_cwt.html">peak_detection_cwt</a> for widths, local SNR, missing data, and limits.</p></li>
 </ul><p>Additional algorithms can be registered by technique packs using
 <code><a href="register_peak_algorithm.html">register_peak_algorithm()</a></code>.</p>
 <p>The detection thresholds are tunable with <code><a href="peak_min_height.html">peak_min_height()</a></code>,

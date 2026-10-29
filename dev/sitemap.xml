@@ -9,6 +9,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/articles/explanation-internals.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-baseline.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-data-organization.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/articles/howto-technique-packs.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-tidymodels.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/index.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/reference-multidimensional.html</loc></url>
@@ -141,6 +142,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/optimize_deconvolution.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/outlier_threshold.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/peak_algorithms.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/peak_detection_cwt.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/peak_location_min.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/peak_min_height.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/peak_model_area.html</loc></url>

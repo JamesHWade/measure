@@ -77,6 +77,41 @@ head(lc_dad_data, 12)
 #> 12         1              2        350      123.             10
 ```
 
+The channel examples use a second small wide dataset. The UV and RI
+channels have slightly different location grids, and each row is one
+sample with a stable identifier.
+
+``` r
+
+channel_wide <- tibble::tibble(
+  sample_id = 101:103,
+  concentration = c(10, 25, 50),
+  uv_1 = c(1.0, 1.5, 2.0),
+  uv_2 = c(2.0, 2.5, 3.0),
+  uv_3 = c(1.2, 1.7, 2.2),
+  ri_1 = c(0.8, 1.0, 1.2),
+  ri_2 = c(1.8, 2.0, 2.2),
+  ri_3 = c(1.0, 1.2, 1.4)
+)
+uv_locations <- c(0, 1, 2)
+ri_locations <- c(0, 1.25, 2)
+
+channel_input_recipe <- function() {
+  recipe(concentration ~ ., data = channel_wide) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_wide(
+      starts_with("uv_"),
+      col_name = "uv",
+      location_values = uv_locations
+    ) |>
+    step_measure_input_wide(
+      starts_with("ri_"),
+      col_name = "ri",
+      location_values = ri_locations
+    )
+}
+```
+
 This is the typical “long format” for 2D analytical data, where each row
 represents a single measurement at a specific (time, wavelength)
 coordinate.
@@ -418,12 +453,18 @@ aligns multiple measure columns to a common grid:
 
 ``` r
 
-# Align UV and RI detector signals to the same time grid
-rec <- recipe(outcome ~ ., data = sec_data) |>
- step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
- step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
- step_measure_channel_align(uv, ri, method = "intersection") |>
- prep()
+channel_fit <- channel_input_recipe() |>
+  step_measure_channel_align(method = "union") |>
+  prep()
+
+aligned_channels <- bake(channel_fit, new_data = NULL)
+identical(
+  aligned_channels$uv[[1]]$location,
+  aligned_channels$ri[[1]]$location
+)
+#> [1] TRUE
+aligned_channels$sample_id
+#> [1] 101 102 103
 ```
 
 Methods include: - `"intersection"`: Keep only locations present in all
@@ -437,13 +478,16 @@ merges multiple channels:
 
 ``` r
 
-# Stack channels into a single 2D measure (location x channel)
-rec <- recipe(outcome ~ ., data = multi_detector_data) |>
- step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
- step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
- step_measure_channel_align(uv, ri) |>
- step_measure_channel_combine(uv, ri, strategy = "stack") |>
- prep()
+combined_fit <- channel_input_recipe() |>
+  step_measure_channel_align(method = "union") |>
+  step_measure_channel_combine(strategy = "stack") |>
+  prep()
+
+combined_channels <- bake(combined_fit, new_data = NULL)
+measure_ndim(combined_channels$.measures)
+#> [1] 2
+combined_channels$sample_id
+#> [1] 101 102 103
 ```
 
 Strategies include: - `"stack"`: Create a 2D measure with channel as a
@@ -457,13 +501,16 @@ computes ratios between channels:
 
 ``` r
 
-# Compute UV/RI ratio for each sample
-rec <- recipe(outcome ~ ., data = sec_data) |>
- step_measure_input_wide(starts_with("uv_"), col_name = "uv") |>
- step_measure_input_wide(starts_with("ri_"), col_name = "ri") |>
- step_measure_channel_align(uv, ri) |>
- step_measure_channel_ratio(numerator = uv, denominator = ri) |>
- prep()
+ratio_fit <- channel_input_recipe() |>
+  step_measure_channel_align(method = "union") |>
+  step_measure_channel_ratio(numerator = "uv", denominator = "ri") |>
+  prep()
+
+channel_ratios <- bake(ratio_fit, new_data = NULL)
+find_measure_cols(channel_ratios)
+#> [1] "uv"          "ri"          "ratio_uv_ri"
+channel_ratios$sample_id
+#> [1] 101 102 103
 ```
 
 ## Multi-Way Analysis
@@ -478,17 +525,35 @@ performs Parallel Factor Analysis, extracting trilinear components:
 
 ``` r
 
-# Extract 3 PARAFAC components from EEM fluorescence data
-rec <- recipe(concentration ~ ., data = eem_data) |>
- step_measure_input_long(
-   fluorescence,
-   location = vars(excitation, emission)
- ) |>
- step_measure_parafac(n_components = 3) |>
- prep()
+if (requireNamespace("multiway", quietly = TRUE)) {
+  eem_data <- lc_dad_data |>
+    rename(
+      excitation = retention_time,
+      emission = wavelength,
+      fluorescence = absorbance
+    )
 
-# Result contains parafac_1, parafac_2, parafac_3 score columns
-baked <- bake(rec, new_data = NULL)
+  rec_parafac <- recipe(concentration ~ ., data = eem_data) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      fluorescence,
+      location = vars(excitation, emission)
+    ) |>
+    step_measure_parafac(n_components = 2, max_iter = 50) |>
+    prep()
+
+  bake(rec_parafac, new_data = NULL) |>
+    select(sample_id, starts_with("parafac_"))
+} else {
+  message("PARAFAC example skipped: install the optional multiway package.")
+}
+#>   |                                                                              |                                                                      |   0%  |                                                                              |=======                                                               |  10%  |                                                                              |==============                                                        |  20%  |                                                                              |=====================                                                 |  30%  |                                                                              |============================                                          |  40%  |                                                                              |===================================                                   |  50%  |                                                                              |==========================================                            |  60%  |                                                                              |=================================================                     |  70%  |                                                                              |========================================================              |  80%  |                                                                              |===============================================================       |  90%  |                                                                              |======================================================================| 100%
+#> # A tibble: 3 × 3
+#>   sample_id parafac_.measures_1 parafac_.measures_2
+#>       <int>               <dbl>               <dbl>
+#> 1         1             -0.631             -0.542  
+#> 2         2              0.606              0.00105
+#> 3         3              0.0254             0.541
 ```
 
 PARAFAC is particularly useful for: - EEM fluorescence (excitation x
@@ -502,14 +567,29 @@ provides more flexibility with independent ranks per mode:
 
 ``` r
 
-# Tucker decomposition with different ranks for each dimension
-rec <- recipe(concentration ~ ., data = lc_dad_data) |>
- step_measure_input_long(
-   absorbance,
-   location = vars(time, wavelength)
- ) |>
- step_measure_tucker(ranks = c(5, 3)) |>  # 5 time, 3 wavelength components
- prep()
+if (requireNamespace("multiway", quietly = TRUE)) {
+  rec_tucker <- recipe(concentration ~ ., data = lc_dad_data) |>
+    update_role(sample_id, new_role = "id") |>
+    step_measure_input_long(
+      absorbance,
+      location = vars(retention_time, wavelength)
+    ) |>
+    step_measure_tucker(ranks = c(2, 2), max_iter = 50) |>
+    prep()
+
+  bake(rec_tucker, new_data = NULL) |>
+    select(sample_id, starts_with("tucker_"))
+} else {
+  message("Tucker example skipped: install the optional multiway package.")
+}
+#>   |                                                                              |                                                                      |   0%  |                                                                              |=======                                                               |  10%  |                                                                              |==============                                                        |  20%  |                                                                              |=====================                                                 |  30%  |                                                                              |============================                                          |  40%  |                                                                              |===================================                                   |  50%  |                                                                              |==========================================                            |  60%  |                                                                              |=================================================                     |  70%  |                                                                              |========================================================              |  80%  |                                                                              |===============================================================       |  90%  |                                                                              |======================================================================| 100%
+#> # A tibble: 3 × 5
+#>   sample_id tucker_.measures_1 tucker_.measures_2 tucker_.measures_3
+#>       <int>              <dbl>              <dbl>              <dbl>
+#> 1         1              -36.2               5.33              -6.28
+#> 2         2               23.5              -2.54              -7.30
+#> 3         3               12.7              -2.79              13.6 
+#> # ℹ 1 more variable: tucker_.measures_4 <dbl>
 ```
 
 ### MCR-ALS (Experimental)
@@ -519,17 +599,30 @@ implements Multivariate Curve Resolution with Alternating Least Squares:
 
 ``` r
 
-# MCR-ALS with non-negativity constraints
-rec <- recipe(concentration ~ ., data = chrom_data) |>
- step_measure_input_long(
-   absorbance,
-   location = vars(time, wavelength)
- ) |>
- step_measure_mcr_als(
-   n_components = 3,
-   non_negativity = TRUE
- ) |>
- prep()
+rec_mcr <- recipe(concentration ~ ., data = lc_dad_data) |>
+  update_role(sample_id, new_role = "id") |>
+  step_measure_input_long(
+    absorbance,
+    location = vars(retention_time, wavelength)
+  ) |>
+  step_measure_mcr_als(
+    n_components = 2,
+    max_iter = 50,
+    non_negativity = TRUE
+  ) |>
+  prep()
+#> Warning: `step_measure_mcr_als()` is experimental.
+#> ℹ The API may change in future versions.
+#> This warning is displayed once per session.
+
+bake(rec_mcr, new_data = NULL) |>
+  select(sample_id, starts_with("mcr_"))
+#> # A tibble: 3 × 3
+#>   sample_id mcr_.measures_1 mcr_.measures_2
+#>       <int>           <dbl>           <dbl>
+#> 1         1               0           1188.
+#> 2         2               0           1203.
+#> 3         3               0           1199.
 ```
 
 > **Note:** MCR-ALS is marked as experimental. The implementation uses a

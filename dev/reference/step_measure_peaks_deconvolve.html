@@ -28,6 +28,7 @@ peaks to have been detected first using step_measure_peaks_detect()."><meta prop
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>How-To Guides</h6></li>
     <li><a class="dropdown-item" href="../articles/howto-baseline.html">Baseline Correction</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -129,8 +130,9 @@ threshold trigger a warning. Default is 0.8. Tune this with
 
 
 <dt id="arg-store-components">store_components<a class="anchor" aria-label="anchor" href="#arg-store-components"></a></dt>
-<dd><p>Logical. If <code>TRUE</code>, store individual fitted peak
-curves in the output. Default is <code>FALSE</code>.</p></dd>
+<dd><p>Logical. If <code>TRUE</code>, also store sampled fitted peak
+curves for diagnostics. Fitted models and parameters are always retained
+for subsequent component integration. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-smart-init">smart_init<a class="anchor" aria-label="anchor" href="#arg-smart-init"></a></dt>
@@ -196,6 +198,13 @@ parameters returned by <code><a href="optimize_deconvolution.html">optimize_deco
 bounded by 0 and 1; choose iteration ranges that fit the model and runtime
 budget for your data.
 Before finalization, <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> retains unresolved tuning calls in list columns.</p>
+<p>The columns <code>fit_model</code> and <code>fit_params</code> retain each fitted component. The
+<code>detected_left_base</code> and <code>detected_right_base</code> columns retain original detected
+minima. The <code>area_basis</code> column identifies fitted-component areas.</p>
+<p><code>left_base</code> and <code>right_base</code> define a finite integration interval within the
+measured axis. The interval retains detected minima where possible and
+expands as needed to contain the reported fitted apex. Fitted areas integrate
+each component over this interval without adding a physical baseline.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -233,12 +242,14 @@ Before finalization, <code><a href="https://generics.r-lib.org/reference/tidy.ht
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Check fitted peaks</span></span></span>
 <span class="r-in"><span><span class="va">result</span><span class="op">$</span><span class="va">.peaks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 10</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   peak_id location height left_base right_base  area fit_r_squared fit_quality</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       1     8.00  1.50       6.49       9.50  3.77         0.998 A          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>       2    12.0   0.792      9.74      14.3   2.99         0.998 A          </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: purity &lt;dbl&gt;, overlap_degree &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 15</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   peak_id location height left_base right_base  area detected_left_base</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       1     8.00  1.50        1.7         20  3.77                1.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>       2    12.0   0.792      10.2         20  2.64               10.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: detected_right_base &lt;dbl&gt;, fit_model &lt;list&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   fit_params &lt;list&gt;, area_basis &lt;chr&gt;, fit_r_squared &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   fit_quality &lt;chr&gt;, purity &lt;dbl&gt;, overlap_degree &lt;dbl&gt;</span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

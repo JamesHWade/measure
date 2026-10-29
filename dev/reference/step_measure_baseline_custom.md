@@ -40,7 +40,9 @@ step_measure_baseline_custom(
 - ...:
 
   Additional arguments passed to `.fn`. These are captured as quosures
-  and evaluated at bake time.
+  and evaluated at bake time. For formulas, named arguments are
+  available as names in the formula body. For functions, they are passed
+  as ordinary function arguments.
 
 - subtract:
 
@@ -58,7 +60,9 @@ step_measure_baseline_custom(
 
   An optional named list specifying which arguments in `...` are
   tunable. Each element should be a list with `pkg`, `fun`, and
-  optionally `range`. See Details.
+  optionally `range`. Each name must match exactly one named argument in
+  `...`, and `pkg` and `fun` must be non-empty character strings. Fixed
+  unnamed arguments are allowed but cannot be declared tunable.
 
 - role:
 
@@ -113,12 +117,26 @@ a function where `.x` represents the `measure_tbl`:
 To make parameters tunable with `dials`, provide a `tunable` argument:
 
     step_measure_baseline_custom(
-      .fn = ~ stats::loess(.x$value ~ .x$location, span = span)$fitted,
-      span = 0.5,
+      .fn = ~ {
+        fit <- stats::lm(.x$value ~ poly(.x$location, degree))
+        stats::predict(fit)
+      },
+      degree = tune::tune(),
       tunable = list(
-        span = list(pkg = "dials", fun = "degree", range = c(0.1, 0.9))
+        degree = list(
+          pkg = "dials",
+          fun = "degree_int",
+          range = c(1L, 5L)
+        )
       )
     )
+
+In a recipe,
+[`tune::extract_parameter_set_dials()`](https://tune.tidymodels.org/reference/reexports.html)
+discovers this argument. Finalize it with
+[`tune::finalize_recipe()`](https://tune.tidymodels.org/reference/finalize_model.html)
+before calling
+[`recipes::prep()`](https://recipes.tidymodels.org/reference/prep.html).
 
 **No selectors should be supplied to this step function**. The data
 should be in the internal format produced by
