@@ -335,31 +335,87 @@ prep.step_measure_baseline_airpls <- function(x, training, info = NULL, ...) {
 .whittaker_smooth <- function(y, w, lambda) {
   n <- length(y)
 
-  # Build difference matrix D (2nd derivative)
-  # D is (n-2) x n with pattern [1, -2, 1]
-  D <- matrix(0, nrow = n - 2, ncol = n)
-  for (i in seq_len(n - 2)) {
-    D[i, i] <- 1
-    D[i, i + 1] <- -2
-    D[i, i + 2] <- 1
+  if (length(w) != n) {
+    stop("`w` must have the same length as `y`.", call. = FALSE)
+  }
+  if (length(lambda) != 1L || !is.finite(lambda) || lambda <= 0) {
+    stop("`lambda` must be a finite positive number.", call. = FALSE)
+  }
+  if (!all(is.finite(w)) || any(w < 0)) {
+    stop("`w` must contain finite nonnegative weights.", call. = FALSE)
   }
 
-  # Solve (W + lambda * D'D) z = W y
-  W <- diag(w)
-  DtD <- t(D) %*% D
-  A <- W + lambda * DtD
-  b <- w * y
+  # With fewer than three points, the second-difference penalty is empty.
+  # The minimum-norm solution leaves unobserved points at zero.
+  if (n < 3L) {
+    z <- numeric(n)
+    observed <- w > 0
+    z[observed] <- y[observed]
+    return(z)
+  }
 
-  # Use Cholesky decomposition for efficiency
-  z <- tryCatch(
-    solve(A, b),
-    error = function(e) {
-      # Fallback if matrix is singular
-      MASS::ginv(A) %*% b
-    }
+  observed <- which(w > 0)
+  if (length(observed) == 0L) {
+    return(numeric(n))
+  }
+
+  # One observation fixes a point on the affine penalty null space. Choose
+  # the minimum-norm affine interpolant, matching the dense pseudoinverse.
+  if (length(observed) == 1L) {
+    t <- seq_len(n) - (n + 1) / 2
+    k <- observed[[1]]
+    sum_t_squared <- sum(t^2)
+    denominator <- 1 / n + t[k]^2 / sum_t_squared
+    return(as.numeric(y[k] * (1 / n + t * t[k] / sum_t_squared) / denominator))
+  }
+
+  # D is sparse with three nonzero entries [1, -2, 1] per row.
+  d_rows <- seq_len(n - 2L)
+  D <- Matrix::sparseMatrix(
+    i = rep(d_rows, each = 3L),
+    j = as.vector(rbind(d_rows, d_rows + 1L, d_rows + 2L)),
+    x = rep(c(1, -2, 1), times = length(d_rows)),
+    dims = c(n - 2L, n)
   )
 
-  as.vector(z)
+  # Scale the mixed constraints so neither lambda nor its reciprocal appears
+  # directly in both blocks. This is algebraically equivalent to
+  # (W + lambda * D'D) z = W y without forming dense normal equations.
+  if (lambda >= 1) {
+    C <- D
+    a <- 1 / lambda
+  } else {
+    C <- sqrt(lambda) * D
+    a <- 1
+  }
+
+  W <- Matrix::Diagonal(n, x = w)
+  constraint <- Matrix::Diagonal(n - 2L, x = rep(-a, n - 2L))
+  system <- rbind(
+    cbind(W, Matrix::t(C)),
+    cbind(C, constraint)
+  )
+  rhs <- c(w * y, numeric(n - 2L))
+
+  solution <- tryCatch(
+    Matrix::solve(system, rhs),
+    error = function(e) {
+      stop(
+        "Sparse Whittaker system solve failed: ",
+        conditionMessage(e),
+        call. = FALSE
+      )
+    }
+  )
+  z <- as.numeric(solution[seq_len(n)])
+  if (length(z) != n || !all(is.finite(z))) {
+    stop(
+      "Sparse Whittaker system solve returned non-finite values.",
+      call. = FALSE
+    )
+  }
+
+  z
 }
 
 #' airPLS baseline algorithm

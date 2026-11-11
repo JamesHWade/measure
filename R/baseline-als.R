@@ -264,22 +264,13 @@ required_pkgs.step_measure_baseline_als <- function(x, ...) {
     return(x)
   }
 
-  # Build the second-difference matrix D (sparse-like using band structure)
-  # D is (n-2) x n, D[i,] has [1, -2, 1] at positions [i, i+1, i+2]
-  # We compute D'D directly as a banded matrix for efficiency
-
-  # Initialize weights (all equal initially)
+  # Reweight the same second-difference penalty at each iteration.
   w <- rep(1, n)
-
-  # Precompute D'D as a sparse tridiagonal-like structure
-  # D'D is pentadiagonal with bandwidth 2
-  # For efficiency, we solve the system iteratively
 
   baseline <- y # Initial baseline estimate
 
   for (iter in seq_len(max_iter)) {
-    # Solve: (W + lambda * D'D) * z = W * y
-    # Using the sparse Whittaker smoother approach
+    # Solve the weighted second-difference system with the shared sparse helper.
     baseline_new <- .whittaker_smooth(y, w, lambda)
 
     # Check convergence
