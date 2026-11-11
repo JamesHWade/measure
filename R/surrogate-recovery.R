@@ -340,11 +340,7 @@ print.step_measure_surrogate_recovery <- function(
 #' @export
 tidy.step_measure_surrogate_recovery <- function(x, ...) {
   if (x$trained) {
-    expected_source <- if (!is.null(x$expected_col)) {
-      x$expected_col
-    } else {
-      as.character(x$expected_value)
-    }
+    expected_source <- x$expected_col %||% as.character(x$expected_value)
 
     tibble::tibble(
       surrogate = x$col_names,

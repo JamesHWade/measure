@@ -384,7 +384,7 @@ calculate_limits_single <- function(
   }
 
   # Center and spread
-  center <- if (is.null(target)) mean(values) else target
+  center <- target %||% mean(values)
   sigma <- sd(values)
 
   if (type == "shewhart") {

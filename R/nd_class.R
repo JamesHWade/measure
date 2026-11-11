@@ -169,7 +169,7 @@ as_measure_nd_tbl <- function(x, dim_names = NULL, dim_units = NULL) {
   }
 
   # Find location columns
-  loc_cols <- grep("^location_[0-9]+$", names(x), value = TRUE)
+  loc_cols <- grepv("^location_[0-9]+$", names(x))
   if (length(loc_cols) < 2) {
     cli::cli_abort(
       "{.arg x} must have at least 2 location columns ({.code location_1}, {.code location_2}, ...).

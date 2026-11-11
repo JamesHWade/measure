@@ -16,7 +16,7 @@ URL: https://jameshwade.github.io/measure/,
     https://github.com/JamesHWade/measure
 BugReports: https://github.com/JamesHWade/measure/issues
 Depends:
-    R (>= 4.1.0),
+    R (>= 4.5.0),
     recipes
 Imports:
     cli,

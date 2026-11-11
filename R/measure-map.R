@@ -731,7 +731,7 @@ measure_summarize <- function(
         list(result = out, error = NULL)
       },
       error = function(e) {
-        fallback <- if (is.null(.otherwise)) x[[i]] else .otherwise
+        fallback <- .otherwise %||% x[[i]]
         list(result = fallback, error = conditionMessage(e))
       }
     )
