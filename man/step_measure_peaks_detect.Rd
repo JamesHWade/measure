@@ -111,6 +111,8 @@ calculations. This rule considers retained peaks only, so a filtered-out
 neighboring peak does not create a boundary. A low sample can also be far
 from its peak on a noisy or sloped baseline, so these bounds do not by
 themselves remove baseline or noise bias.
+Deconvolution uses current \code{left_base} and \code{right_base} as finite limits, so
+fitted areas omit model tails outside them.
 
 Use \code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}} to calculate additional peak metrics
 such as prominence and full width at half maximum (FWHM).

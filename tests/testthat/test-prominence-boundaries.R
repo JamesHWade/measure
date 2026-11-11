@@ -362,3 +362,67 @@ test_that("deconvolution keeps refined integration windows and prominence contou
   expect_equal(properties$prominence, expected_prominence)
   expect_gt(abs(properties$prominence - refined_prominence), 1e-6)
 })
+
+test_that("prominence deconvolution areas use finite fitted-component windows", {
+  location <- seq(0, 12, by = 0.01)
+  model <- gaussian_peak_model()
+  components <- list(
+    list(height = 1, center = 5, width = 0.5),
+    list(height = 1, center = 6.25, width = 0.5)
+  )
+  value <- peak_model_value(model, location, components[[1]]) +
+    peak_model_value(model, location, components[[2]])
+  data <- tibble::tibble(
+    id = 1L,
+    location = location,
+    value = value
+  )
+  recipe <- recipes::recipe(~., data = data) |>
+    recipes::update_role(id, new_role = "id") |>
+    step_measure_input_long(value, location = dplyr::vars(location)) |>
+    step_measure_peaks_detect(
+      algorithm = "prominence",
+      min_prominence = 0.1
+    ) |>
+    step_measure_peaks_deconvolve(
+      model = "gaussian",
+      optimizer = "lbfgsb",
+      max_iter = 2000L,
+      tol = 1e-10,
+      n_starts = 1L,
+      quality_threshold = 0
+    ) |>
+    step_measure_peaks_integrate()
+  peaks <- recipes::bake(recipes::prep(recipe), new_data = NULL)$.peaks[[1]]
+  fitted_window_areas <- vapply(
+    seq_len(nrow(peaks)),
+    function(i) {
+      peak_model_area(
+        peaks$fit_model[[i]],
+        peaks$fit_params[[i]],
+        x_range = sort(c(peaks$left_base[i], peaks$right_base[i]))
+      )
+    },
+    numeric(1)
+  )
+  full_component_areas <- vapply(
+    seq_len(nrow(peaks)),
+    function(i) {
+      peak_model_area(peaks$fit_model[[i]], peaks$fit_params[[i]])
+    },
+    numeric(1)
+  )
+
+  expect_equal(nrow(peaks), 2L)
+  expect_equal(peaks$location, c(5, 6.25), tolerance = 0.005)
+  expect_equal(peaks$right_base[1], peaks$left_base[2])
+  expect_equal(peaks$area_basis, rep("fitted_component", 2))
+  expect_equal(peaks$area, fitted_window_areas, tolerance = 1e-10)
+  expect_equal(
+    full_component_areas,
+    rep(0.5 * sqrt(2 * pi), 2),
+    tolerance = 1e-5
+  )
+  expect_equal(peaks$area, c(1.1186, 1.1232), tolerance = 0.005)
+  expect_lt(max(peaks$area - full_component_areas), -0.1)
+})

@@ -69,6 +69,8 @@ first sample in acquisition order. Only retained peaks define these bounds:
 an adjacent peak removed by a detection threshold does not split the
 interval. Consequently a bound can remain wide or include baseline/noise,
 and \code{baseline = "none"} retains any background signal within the interval.
+Deconvolution uses current \code{left_base} and \code{right_base} as finite limits, so
+fitted areas omit model tails outside them.
 
 Peaks with fitted model metadata from
 \code{\link[=step_measure_peaks_deconvolve]{step_measure_peaks_deconvolve()}} are integrated from their individual fitted

@@ -593,6 +593,8 @@ find_peaks_cols <- function(data) {
 #' neighboring peak does not create a boundary. A low sample can also be far
 #' from its peak on a noisy or sloped baseline, so these bounds do not by
 #' themselves remove baseline or noise bias.
+#' Deconvolution uses current `left_base` and `right_base` as finite limits, so
+#' fitted areas omit model tails outside them.
 #'
 #' Use [step_measure_peaks_properties()] to calculate additional peak metrics
 #' such as prominence and full width at half maximum (FWHM).
@@ -896,6 +898,8 @@ tidy.step_measure_peaks_detect <- function(x, ...) {
 #' an adjacent peak removed by a detection threshold does not split the
 #' interval. Consequently a bound can remain wide or include baseline/noise,
 #' and `baseline = "none"` retains any background signal within the interval.
+#' Deconvolution uses current `left_base` and `right_base` as finite limits, so
+#' fitted areas omit model tails outside them.
 #'
 #' Peaks with fitted model metadata from
 #' [step_measure_peaks_deconvolve()] are integrated from their individual fitted
