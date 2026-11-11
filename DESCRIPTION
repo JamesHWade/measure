@@ -27,6 +27,7 @@ Imports:
     glue,
     IDPmisc,
     lifecycle,
+    Matrix,
     MASS,
     pracma,
     purrr,

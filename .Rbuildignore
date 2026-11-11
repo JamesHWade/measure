@@ -30,3 +30,4 @@ docs
 ^AGENTS\.md$
 ^\.beads$
 ^[.]git$
+^tools$
