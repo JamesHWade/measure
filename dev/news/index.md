@@ -2,6 +2,9 @@
 
 ## measure 0.0.1.9003
 
+- `measure` now requires R 4.5.0 or later
+  ([\#132](https://github.com/JamesHWade/measure/issues/132)).
+
 - [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md)
   now supports declared custom arguments through tuning discovery,
   custom IDs, parameter extraction, finalization, and prep/bake.
