@@ -300,7 +300,7 @@ register_measure_pack <- function(
     name = pack_name,
     technique = technique,
     version = version,
-    description = if (is.null(description)) "" else description,
+    description = description %||% "",
     registered_at = Sys.time()
   )
   invisible(TRUE)
@@ -345,12 +345,11 @@ register_measure_step <- function(
   technique = NULL
 ) {
   # Get technique from pack if not specified
-  tech <- if (is.null(technique)) {
-    pack_info <- .measure_registry$packs[[pack_name]]
-    if (is.null(pack_info)) "unknown" else pack_info$technique
-  } else {
-    technique
-  }
+  tech <- technique %||%
+    {
+      pack_info <- .measure_registry$packs[[pack_name]]
+      if (is.null(pack_info)) "unknown" else pack_info$technique
+    }
 
   new_step <- data.frame(
     step_name = step_name,

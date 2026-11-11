@@ -391,7 +391,7 @@ test_that("reference steps work with wide input format", {
     )
 
   # Get number of measurement columns
-  meas_cols <- grep("^x_", names(test_data_wide), value = TRUE)
+  meas_cols <- grepv("^x_", names(test_data_wide))
   n_locs <- length(meas_cols)
 
   blank <- rep(0.1, n_locs)

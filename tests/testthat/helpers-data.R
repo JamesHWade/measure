@@ -6,7 +6,7 @@ data_meat_long <- function() {
   data(meats, package = "modeldata", envir = environment())
 
   inds <- tibble::tibble(
-    temp = grep("^x_", names(meats), value = TRUE),
+    temp = grepv("^x_", names(meats)),
     ind = seq(1, 17, length.out = 100)
   )
 
