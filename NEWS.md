@@ -1,5 +1,7 @@
 # measure 0.0.1.9003
 
+* `measure` now requires R 4.5.0 or later (#132).
+
 * `step_measure_baseline_custom()` now supports declared custom arguments
   through tuning discovery, custom IDs, parameter extraction, finalization,
   and prep/bake. Unresolved markers and malformed declarations fail clearly.
