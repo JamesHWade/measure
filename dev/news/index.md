@@ -2,6 +2,12 @@
 
 ## measure 0.0.1.9003
 
+- ALS and airPLS use a sparse mixed-system solver to bound memory for
+  long traces and preserve affine signals at large penalties. Their
+  defaults and iteration rules are unchanged. Numerically unresolved
+  systems fail with a clear error
+  ([\#136](https://github.com/JamesHWade/measure/issues/136)).
+
 - Prominence-based peak detection clips integration bounds between
   adjacent retained peaks. Original prominence contours are stored
   separately, preserving prominence calculations and refined SEC
