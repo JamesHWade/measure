@@ -359,14 +359,57 @@ find_peaks_cols <- function(data) {
     return(new_peaks_tbl())
   }
 
+  clipped_bases <- .clip_peak_bases_to_valleys(
+    value,
+    peaks_idx,
+    left_bases,
+    right_bases
+  )
+
+  # Evaluate contour coordinates before tibble construction so `location`
+  # cannot resolve to the new peak-location column inside `tibble()`.
+  prominence_left_base <- location[left_bases]
+  prominence_right_base <- location[right_bases]
+
   new_peaks_tbl(
     peak_id = seq_along(peaks_idx),
     location = location[peaks_idx],
     height = value[peaks_idx],
-    left_base = location[left_bases],
-    right_base = location[right_bases],
-    area = rep(NA_real_, length(peaks_idx))
+    left_base = location[clipped_bases$left],
+    right_base = location[clipped_bases$right],
+    area = rep(NA_real_, length(peaks_idx)),
+    prominence_left_base = prominence_left_base,
+    prominence_right_base = prominence_right_base
   )
+}
+
+#' Clip prominence bounds between adjacent retained peaks
+#'
+#' Bounds are sample indices in acquisition order. A tied minimum is resolved
+#' at its first sample in that order.
+#' @noRd
+.clip_peak_bases_to_valleys <- function(
+  value,
+  peaks_idx,
+  left_bases,
+  right_bases
+) {
+  if (length(peaks_idx) < 2L) {
+    return(list(left = left_bases, right = right_bases))
+  }
+
+  by_sample <- order(peaks_idx)
+  for (k in seq_len(length(by_sample) - 1L)) {
+    first <- by_sample[k]
+    second <- by_sample[k + 1L]
+    between <- seq.int(peaks_idx[first], peaks_idx[second])
+    valley <- between[which.min(value[between])]
+
+    right_bases[first] <- min(right_bases[first], valley)
+    left_bases[second] <- max(left_bases[second], valley)
+  }
+
+  list(left = left_bases, right = right_bases)
 }
 
 # ==============================================================================
@@ -536,8 +579,20 @@ find_peaks_cols <- function(data) {
 #' - `peak_id`: Integer identifier
 #' - `location`: X-axis position of peak apex
 #' - `height`: Y-value at peak apex
-#' - `left_base`, `right_base`: X-axis positions of peak boundaries
+#' - `left_base`, `right_base`: X-axis positions of peak integration bounds
+#' - `prominence_left_base`, `prominence_right_base`: Original contour bases
+#'   for prominence-based detection
 #' - `area`: Initially NA; use `step_measure_peaks_integrate()` to calculate
+#'
+#' For `algorithm = "prominence"`, each pair of adjacent retained peaks is
+#' bounded at the lowest sampled value between their apexes. If values tie, the
+#' first sample in acquisition order is used. These bounds do not overlap in
+#' their interiors. The original prominence contour bases are retained in
+#' `prominence_left_base` and `prominence_right_base` for prominence
+#' calculations. This rule considers retained peaks only, so a filtered-out
+#' neighboring peak does not create a boundary. A low sample can also be far
+#' from its peak on a noisy or sloped baseline, so these bounds do not by
+#' themselves remove baseline or noise bias.
 #'
 #' Use [step_measure_peaks_properties()] to calculate additional peak metrics
 #' such as prominence and full width at half maximum (FWHM).
@@ -834,6 +889,13 @@ tidy.step_measure_peaks_detect <- function(x, ...) {
 #' - `"none"`: Integrates directly to y=0.
 #'
 #' - `"global"`: Subtracts the minimum value in the peak region.
+#'
+#' For prominence-based detection, `left_base` and `right_base` are clipped to
+#' the lowest sampled value between adjacent retained peaks. Ties use the
+#' first sample in acquisition order. Only retained peaks define these bounds:
+#' an adjacent peak removed by a detection threshold does not split the
+#' interval. Consequently a bound can remain wide or include baseline/noise,
+#' and `baseline = "none"` retains any background signal within the interval.
 #'
 #' Peaks with fitted model metadata from
 #' [step_measure_peaks_deconvolve()] are integrated from their individual fitted
@@ -1510,12 +1572,16 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
   val <- measures$value
 
   if ("prominence" %in% properties) {
-    left_bases <- if ("detected_left_base" %in% names(peaks)) {
+    left_bases <- if ("prominence_left_base" %in% names(peaks)) {
+      peaks$prominence_left_base
+    } else if ("detected_left_base" %in% names(peaks)) {
       peaks$detected_left_base
     } else {
       peaks$left_base
     }
-    right_bases <- if ("detected_right_base" %in% names(peaks)) {
+    right_bases <- if ("prominence_right_base" %in% names(peaks)) {
+      peaks$prominence_right_base
+    } else if ("detected_right_base" %in% names(peaks)) {
       peaks$detected_right_base
     } else {
       peaks$right_base

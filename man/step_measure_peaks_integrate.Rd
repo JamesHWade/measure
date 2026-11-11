@@ -63,6 +63,13 @@ peak bases before integration.
 \item \code{"global"}: Subtracts the minimum value in the peak region.
 }
 
+For prominence-based detection, \code{left_base} and \code{right_base} are clipped to
+the lowest sampled value between adjacent retained peaks. Ties use the
+first sample in acquisition order. Only retained peaks define these bounds:
+an adjacent peak removed by a detection threshold does not split the
+interval. Consequently a bound can remain wide or include baseline/noise,
+and \code{baseline = "none"} retains any background signal within the interval.
+
 Peaks with fitted model metadata from
 \code{\link[=step_measure_peaks_deconvolve]{step_measure_peaks_deconvolve()}} are integrated from their individual fitted
 component over the finite bounds stored in \code{left_base} and \code{right_base}.
@@ -83,11 +90,11 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 result <- bake(rec, new_data = NULL)
 }
 \seealso{
-Other peak-operations: 
-\code{\link{step_measure_peaks_deconvolve}()},
-\code{\link{step_measure_peaks_detect}()},
-\code{\link{step_measure_peaks_filter}()},
-\code{\link{step_measure_peaks_properties}()},
-\code{\link{step_measure_peaks_to_table}()}
+Other peak-operations:
+\code{\link[=step_measure_peaks_deconvolve]{step_measure_peaks_deconvolve()}},
+\code{\link[=step_measure_peaks_detect]{step_measure_peaks_detect()}},
+\code{\link[=step_measure_peaks_filter]{step_measure_peaks_filter()}},
+\code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}},
+\code{\link[=step_measure_peaks_to_table]{step_measure_peaks_to_table()}}
 }
 \concept{peak-operations}

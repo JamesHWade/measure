@@ -96,9 +96,21 @@ Tuning covers these direct scalar arguments; values inside
 \item \code{peak_id}: Integer identifier
 \item \code{location}: X-axis position of peak apex
 \item \code{height}: Y-value at peak apex
-\item \code{left_base}, \code{right_base}: X-axis positions of peak boundaries
+\item \code{left_base}, \code{right_base}: X-axis positions of peak integration bounds
+\item \code{prominence_left_base}, \code{prominence_right_base}: Original contour bases
+for prominence-based detection
 \item \code{area}: Initially NA; use \code{step_measure_peaks_integrate()} to calculate
 }
+
+For \code{algorithm = "prominence"}, each pair of adjacent retained peaks is
+bounded at the lowest sampled value between their apexes. If values tie, the
+first sample in acquisition order is used. These bounds do not overlap in
+their interiors. The original prominence contour bases are retained in
+\code{prominence_left_base} and \code{prominence_right_base} for prominence
+calculations. This rule considers retained peaks only, so a filtered-out
+neighboring peak does not create a boundary. A low sample can also be far
+from its peak on a noisy or sloped baseline, so these bounds do not by
+themselves remove baseline or noise bias.
 
 Use \code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}} to calculate additional peak metrics
 such as prominence and full width at half maximum (FWHM).
@@ -126,10 +138,10 @@ rec2 <- recipe(water + fat + protein ~ ., data = meats_long) |>
 \code{\link[=peak_algorithms]{peak_algorithms()}}, \code{\link[=register_peak_algorithm]{register_peak_algorithm()}}
 
 Other peak-operations:
-\code{\link{step_measure_peaks_deconvolve}()},
-\code{\link{step_measure_peaks_filter}()},
-\code{\link{step_measure_peaks_integrate}()},
-\code{\link{step_measure_peaks_properties}()},
-\code{\link{step_measure_peaks_to_table}()}
+\code{\link[=step_measure_peaks_deconvolve]{step_measure_peaks_deconvolve()}},
+\code{\link[=step_measure_peaks_filter]{step_measure_peaks_filter()}},
+\code{\link[=step_measure_peaks_integrate]{step_measure_peaks_integrate()}},
+\code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}},
+\code{\link[=step_measure_peaks_to_table]{step_measure_peaks_to_table()}}
 }
 \concept{peak-operations}
