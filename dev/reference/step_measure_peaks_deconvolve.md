@@ -219,13 +219,14 @@ rec <- recipe(~., data = df) |>
 result <- bake(rec, new_data = NULL)
 # Check fitted peaks
 result$.peaks[[1]]
-#> # A tibble: 2 × 15
-#>   peak_id location height left_base right_base  area detected_left_base
-#>     <int>    <dbl>  <dbl>     <dbl>      <dbl> <dbl>              <dbl>
-#> 1       1     8.00  1.50        1.7         20  3.77                1.7
-#> 2       2    12.0   0.792      10.2         20  2.64               10.2
-#> # ℹ 8 more variables: detected_right_base <dbl>, fit_model <list>,
-#> #   fit_params <list>, area_basis <chr>, fit_r_squared <dbl>,
-#> #   fit_quality <chr>, purity <dbl>, overlap_degree <dbl>
+#> # A tibble: 2 × 17
+#>   peak_id location height left_base right_base  area prominence_left_base
+#>     <int>    <dbl>  <dbl>     <dbl>      <dbl> <dbl>                <dbl>
+#> 1       1     8.00  1.50        1.7       10.2  3.72                  1.7
+#> 2       2    12.0   0.792      10.2       20    2.64                 10.2
+#> # ℹ 10 more variables: prominence_right_base <dbl>, detected_left_base <dbl>,
+#> #   detected_right_base <dbl>, fit_model <list>, fit_params <list>,
+#> #   area_basis <chr>, fit_r_squared <dbl>, fit_quality <chr>, purity <dbl>,
+#> #   overlap_degree <dbl>
 # }
 ```

@@ -2,6 +2,13 @@
 
 ## measure 0.0.1.9003
 
+- Prominence-based peak detection clips integration bounds between
+  adjacent retained peaks. Original prominence contours are stored
+  separately, preserving prominence calculations and refined SEC
+  integration windows. Filtered-out neighbors and baseline/noise effects
+  still require care
+  ([\#131](https://github.com/JamesHWade/measure/issues/131)).
+
 - `measure` now requires R 4.5.0 or later
   ([\#132](https://github.com/JamesHWade/measure/issues/132)).
 

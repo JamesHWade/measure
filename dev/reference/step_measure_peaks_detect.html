@@ -169,9 +169,22 @@ Tuning covers these direct scalar arguments; values inside
 <p><strong>Peak properties stored:</strong></p><ul><li><p><code>peak_id</code>: Integer identifier</p></li>
 <li><p><code>location</code>: X-axis position of peak apex</p></li>
 <li><p><code>height</code>: Y-value at peak apex</p></li>
-<li><p><code>left_base</code>, <code>right_base</code>: X-axis positions of peak boundaries</p></li>
+<li><p><code>left_base</code>, <code>right_base</code>: X-axis positions of peak integration bounds</p></li>
+<li><p><code>prominence_left_base</code>, <code>prominence_right_base</code>: Original contour bases
+for prominence-based detection</p></li>
 <li><p><code>area</code>: Initially NA; use <code><a href="step_measure_peaks_integrate.html">step_measure_peaks_integrate()</a></code> to calculate</p></li>
-</ul><p>Use <code><a href="step_measure_peaks_properties.html">step_measure_peaks_properties()</a></code> to calculate additional peak metrics
+</ul><p>For <code>algorithm = "prominence"</code>, each pair of adjacent retained peaks is
+bounded at the lowest sampled value between their apexes. If values tie, the
+first sample in acquisition order is used. These bounds do not overlap in
+their interiors. The original prominence contour bases are retained in
+<code>prominence_left_base</code> and <code>prominence_right_base</code> for prominence
+calculations. This rule considers retained peaks only, so a filtered-out
+neighboring peak does not create a boundary. A low sample can also be far
+from its peak on a noisy or sloped baseline, so these bounds do not by
+themselves remove baseline or noise bias.
+Deconvolution uses current <code>left_base</code> and <code>right_base</code> as finite limits, so
+fitted areas omit model tails outside them.</p>
+<p>Use <code><a href="step_measure_peaks_properties.html">step_measure_peaks_properties()</a></code> to calculate additional peak metrics
 such as prominence and full width at half maximum (FWHM).</p>
     </div>
     <div class="section level2">

@@ -128,7 +128,15 @@ but requires odd number of points.</p></li>
 peak bases before integration.</p></li>
 <li><p><code>"none"</code>: Integrates directly to y=0.</p></li>
 <li><p><code>"global"</code>: Subtracts the minimum value in the peak region.</p></li>
-</ul><p>Peaks with fitted model metadata from
+</ul><p>For prominence-based detection, <code>left_base</code> and <code>right_base</code> are clipped to
+the lowest sampled value between adjacent retained peaks. Ties use the
+first sample in acquisition order. Only retained peaks define these bounds:
+an adjacent peak removed by a detection threshold does not split the
+interval. Consequently a bound can remain wide or include baseline/noise,
+and <code>baseline = "none"</code> retains any background signal within the interval.
+Deconvolution uses current <code>left_base</code> and <code>right_base</code> as finite limits, so
+fitted areas omit model tails outside them.</p>
+<p>Peaks with fitted model metadata from
 <code><a href="step_measure_peaks_deconvolve.html">step_measure_peaks_deconvolve()</a></code> are integrated from their individual fitted
 component over the finite bounds stored in <code>left_base</code> and <code>right_base</code>.
 The method and baseline settings apply only to observed-signal integration.

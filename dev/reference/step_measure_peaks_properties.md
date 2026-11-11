@@ -96,8 +96,9 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 
 result <- bake(rec, new_data = NULL)
 result$.peaks[[1]]
-#> # A tibble: 1 × 8
-#>   peak_id location height left_base right_base  area prominence  fwhm
-#>     <int>    <int>  <dbl>     <int>      <int> <dbl>      <dbl> <dbl>
-#> 1       1       65   3.39         1        100    NA      0.576  35.8
+#> # A tibble: 1 × 10
+#>   peak_id location height left_base right_base  area prominence_left_base
+#>     <int>    <int>  <dbl>     <int>      <int> <dbl>                <int>
+#> 1       1       65   3.39         1        100    NA                    1
+#> # ℹ 3 more variables: prominence_right_base <int>, prominence <dbl>, fwhm <dbl>
 ```

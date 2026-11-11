@@ -138,11 +138,26 @@ algorithm. Tuning covers these direct scalar arguments; values inside
 
 - `height`: Y-value at peak apex
 
-- `left_base`, `right_base`: X-axis positions of peak boundaries
+- `left_base`, `right_base`: X-axis positions of peak integration bounds
+
+- `prominence_left_base`, `prominence_right_base`: Original contour
+  bases for prominence-based detection
 
 - `area`: Initially NA; use
   [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md)
   to calculate
+
+For `algorithm = "prominence"`, each pair of adjacent retained peaks is
+bounded at the lowest sampled value between their apexes. If values tie,
+the first sample in acquisition order is used. These bounds do not
+overlap in their interiors. The original prominence contour bases are
+retained in `prominence_left_base` and `prominence_right_base` for
+prominence calculations. This rule considers retained peaks only, so a
+filtered-out neighboring peak does not create a boundary. A low sample
+can also be far from its peak on a noisy or sloped baseline, so these
+bounds do not by themselves remove baseline or noise bias. Deconvolution
+uses current `left_base` and `right_base` as finite limits, so fitted
+areas omit model tails outside them.
 
 Use
 [`step_measure_peaks_properties()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_properties.md)
