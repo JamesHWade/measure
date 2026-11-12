@@ -1,5 +1,9 @@
 # measure 0.0.1.9003
 
+* A runnable analytical-records guide demonstrates reinjections, detector
+  channels, interleaved curve import, source references, native roundtrips,
+  and direct use of independent curves in recipes.
+
 * `write_measure_record()` and `read_measure_record()` provide a versioned
   CSV/TSV bundle with explicit schemas, payload hashes, total read limits, and
   exact numeric roundtrips. Writes preserve existing destinations and commit

@@ -47,6 +47,8 @@ navbar:
         href: articles/howto-tidymodels.html
       - text: Data Organization & Diagnostics
         href: articles/howto-data-organization.html
+      - text: Analytical Records
+        href: articles/analytical-records.html
       - text: '---'
       - text: Reference
       - text: Preprocessing Techniques
@@ -74,6 +76,7 @@ articles:
   - articles/howto-technique-packs
   - articles/howto-tidymodels
   - articles/howto-data-organization
+  - analytical-records
 - title: Reference
   desc: Information-oriented technical descriptions
   contents:
