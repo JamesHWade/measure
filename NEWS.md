@@ -1,5 +1,11 @@
 # measure 0.0.1.9003
 
+* `write_measure_record()` and `read_measure_record()` provide a versioned
+  CSV/TSV bundle with explicit schemas, payload hashes, total read limits, and
+  exact numeric roundtrips. Writes preserve existing destinations and commit
+  the manifest last; incomplete and structurally invalid bundles fail clearly
+  (#107).
+
 * `measure_record_from_long()` and `read_measure_record_delim()` import
   explicitly mapped scalar curves. CSV/TSV imports preserve text IDs, hash the
   exact source bytes, and retain parsed-record row references. Numeric parsing
