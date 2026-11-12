@@ -1,5 +1,10 @@
 # measure 0.0.1.9003
 
+* `measure_record_from_long()` and `read_measure_record_delim()` import
+  explicitly mapped scalar curves. CSV/TSV imports preserve text IDs, hash the
+  exact source bytes, and retain parsed-record row references. Numeric parsing
+  rejects malformed, nonfinite, overflowing, or underflowing tokens (#107).
+
 * `measure_record()` connects explicit sample, injection, channel, source, and
   curve identities. Independent one-dimensional grids, declared units, missing
   metadata, and source-row references are validated without aligning points

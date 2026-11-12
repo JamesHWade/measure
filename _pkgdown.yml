@@ -402,6 +402,8 @@ reference:
   - measure_record
   - is_measure_record
   - validate_measure_record
+  - measure_record_from_long
+  - read_measure_record_delim
 - title: Utilities
   desc: Helper functions and utilities
   contents:

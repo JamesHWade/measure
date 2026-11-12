@@ -21,11 +21,13 @@ Depends:
 Imports:
     cli,
     dials,
+    digest,
     dplyr,
     generics,
     ggplot2,
     glue,
     IDPmisc,
+    jsonlite,
     lifecycle,
     Matrix,
     MASS,
