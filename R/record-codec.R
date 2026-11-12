@@ -225,7 +225,9 @@
       call. = FALSE
     )
   }
-  if (!utils::file_test("-f", file)) {
+  if (
+    !isTRUE(fs::file_info(file, follow = TRUE, fail = FALSE)$type == "file")
+  ) {
     stop("`file` must name an existing local regular file.", call. = FALSE)
   }
 
