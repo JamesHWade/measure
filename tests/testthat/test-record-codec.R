@@ -151,8 +151,19 @@ test_that("bounded raw reading enforces limits while reading", {
   on.exit(unlink(path), add = TRUE)
   writeBin(as.raw(c(1, 2, 3)), path)
   original <- readBin(path, what = "raw", n = 3)
+  regular_link <- tempfile()
+  device_link <- tempfile()
+  broken_link <- tempfile()
+  on.exit(unlink(c(regular_link, device_link, broken_link)), add = TRUE)
 
   expect_identical(.record_read_raw(path, 3), as.raw(c(1, 2, 3)))
+  regular_link_created <- tryCatch(
+    suppressWarnings(file.symlink(path, regular_link)),
+    error = function(e) FALSE
+  )
+  if (isTRUE(regular_link_created)) {
+    expect_identical(.record_read_raw(regular_link, 3), original)
+  }
   expect_error(.record_read_raw(path, 2), "exceeds `max_bytes`")
   expect_identical(readBin(path, what = "raw", n = 3), original)
   expect_error(.record_read_raw(path, 0), "positive whole number")
@@ -168,6 +179,27 @@ test_that("bounded raw reading enforces limits while reading", {
     "local regular file"
   )
   expect_error(.record_read_raw(dirname(path), 3), "local regular file")
+  expect_error(.record_read_raw(tempfile(), 3), "local regular file")
+
+  if (file.exists("/dev/null")) {
+    expect_error(.record_read_raw("/dev/null", 3), "local regular file")
+    device_link_created <- tryCatch(
+      suppressWarnings(file.symlink("/dev/null", device_link)),
+      error = function(e) FALSE
+    )
+    if (isTRUE(device_link_created)) {
+      expect_error(.record_read_raw(device_link, 3), "local regular file")
+    }
+  }
+
+  missing_target <- tempfile()
+  broken_link_created <- tryCatch(
+    suppressWarnings(file.symlink(missing_target, broken_link)),
+    error = function(e) FALSE
+  )
+  if (isTRUE(broken_link_created)) {
+    expect_error(.record_read_raw(broken_link, 3), "local regular file")
+  }
 })
 
 test_that("delimited parsing preserves UTF-8, blanks, literal NA, and quoted content", {

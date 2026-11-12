@@ -416,3 +416,14 @@ test_that("failed staged copies leave an incomplete bundle without a manifest", 
   expect_false(file.exists(file.path(destination, "manifest.dcf")))
   expect_false(any(grepl("-stage-", list.files(output, all.files = TRUE))))
 })
+
+
+test_that("bundle member validation rejects named pipes without opening them", {
+  skip_if(.Platform$OS.type == "windows")
+  fifo_command <- Sys.which("mkfifo")
+  skip_if(!nzchar(fifo_command), "mkfifo is not available")
+  fifo_path <- file.path(withr::local_tempdir(), "manifest.dcf")
+
+  expect_identical(system2(unname(fifo_command), shQuote(fifo_path)), 0L)
+  expect_error(.record_io_check_member(fifo_path), "existing regular file")
+})

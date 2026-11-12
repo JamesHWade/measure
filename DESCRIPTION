@@ -23,6 +23,7 @@ Imports:
     dials,
     digest,
     dplyr,
+    fs,
     generics,
     ggplot2,
     glue,
