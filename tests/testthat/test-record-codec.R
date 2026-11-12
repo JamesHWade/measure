@@ -201,6 +201,19 @@ test_that("delimited parsing supports TSV and header-only files", {
   expect_identical(header_only$left, character())
 })
 
+test_that("large delimited inputs retain rows when quoted fields span physical lines", {
+  n <- 10000L
+  lines <- sprintf("row-%06d,%d,hello", seq_len(n), seq_len(n))
+  lines[[5000L]] <- "row-005000,5000,\"line one\nline two\""
+  raw <- charToRaw(paste0("id,index,label\n", paste(lines, collapse = "\n")))
+
+  parsed <- .record_parse_delim(raw, ",")
+
+  expect_equal(nrow(parsed), n)
+  expect_identical(parsed$id[c(1L, n)], c("row-000001", "row-010000"))
+  expect_identical(parsed$label[[5000L]], "line one\nline two")
+})
+
 test_that("delimited parsing rejects malformed CSV and unsafe byte sequences", {
   expect_error(.record_parse_delim(raw(), ","), "empty")
   expect_error(

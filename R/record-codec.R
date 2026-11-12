@@ -276,8 +276,9 @@
   cr <- 13L
   specials <- which(bytes %in% c(delimiter, quote, lf, cr))
   input_length <- length(bytes)
+  rows <- vector("list", sum(raw == as.raw(lf)) + 1)
+  row_count <- 0L
   parser <- new.env(parent = emptyenv())
-  parser$rows <- list()
   parser$current <- character()
   parser$field_parts <- list()
   parser$ended_record <- FALSE
@@ -302,10 +303,11 @@
   }
 
   finish_row <- function() {
-    parser$rows[[length(parser$rows) + 1L]] <- parser$current
+    row <- parser$current
     parser$current <- character()
     parser$field_parts <- list()
     parser$ended_record <- TRUE
+    row
   }
 
   append_chunk <- function(first, last) {
@@ -376,7 +378,8 @@
         } else {
           finish_field("")
         }
-        finish_row()
+        row_count <- row_count + 1L
+        rows[[row_count]] <- finish_row()
         field_start <- position + newline_width
       }
     } else if (mode == "after_quote") {
@@ -386,7 +389,8 @@
         field_start <- position + 1L
       } else if (is_newline) {
         finish_quoted_field()
-        finish_row()
+        row_count <- row_count + 1L
+        rows[[row_count]] <- finish_row()
         mode <- "start"
         field_start <- position + newline_width
       } else {
@@ -423,20 +427,23 @@
       )
     }
     finish_quoted_field()
-    finish_row()
+    row_count <- row_count + 1L
+    rows[[row_count]] <- finish_row()
   } else if (field_start <= input_length || !parser$ended_record) {
     if (field_start <= input_length) {
       finish_field(rawToChar(raw[field_start:input_length]))
     } else {
       finish_field("")
     }
-    finish_row()
+    row_count <- row_count + 1L
+    rows[[row_count]] <- finish_row()
   }
 
-  if (length(parser$rows) == 0L) {
+  if (row_count == 0L) {
     stop("Delimited input has no header record.", call. = FALSE)
   }
-  header <- parser$rows[[1L]]
+  rows <- rows[seq_len(row_count)]
+  header <- rows[[1L]]
   if (anyNA(header) || !all(nzchar(header))) {
     stop("Delimited input headers must be non-empty strings.", call. = FALSE)
   }
@@ -444,7 +451,7 @@
     stop("Delimited input has duplicate headers.", call. = FALSE)
   }
 
-  data_rows <- parser$rows[-1L]
+  data_rows <- rows[-1L]
   if (length(data_rows) > 0L) {
     bad_counts <- which(lengths(data_rows) != length(header))
     if (length(bad_counts) > 0L) {
