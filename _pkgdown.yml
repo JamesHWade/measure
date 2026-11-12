@@ -396,6 +396,12 @@ reference:
   - measure_project
   - find_measure_nd_cols
   - get_measure_col_ndim
+- title: Analytical Records
+  desc: Explicit identities and metadata for independent measurement curves
+  contents:
+  - measure_record
+  - is_measure_record
+  - validate_measure_record
 - title: Utilities
   desc: Helper functions and utilities
   contents:

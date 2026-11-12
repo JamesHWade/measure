@@ -1,5 +1,10 @@
 # measure 0.0.1.9003
 
+* `measure_record()` connects explicit sample, injection, channel, source, and
+  curve identities. Independent one-dimensional grids, declared units, missing
+  metadata, and source-row references are validated without aligning points
+  or inferring identities (#81, #107).
+
 * ALS and airPLS use a sparse mixed-system solver to bound memory for long
   traces and preserve affine signals at large penalties. Their defaults and
   iteration rules are unchanged. Numerically unresolved systems fail with a
