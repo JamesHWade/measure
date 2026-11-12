@@ -43,8 +43,8 @@ corruptions fail, and confirms the valid reordered points restore by index.
 The scripts retain failed outputs and never remove or overwrite existing
 qualification data.
 
-Requirements are R with the installed `measure`, `jsonlite`, and `digest`
-packages, plus Python 3.10 or newer with its standard library. No
+Requirements are R with the installed `measure` package and its declared
+dependencies, plus Python 3.10 or newer with its standard library. No
 `devtools::load_all()`, network access, Python package installation, or source
 checkout install is needed.
 

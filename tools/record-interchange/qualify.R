@@ -305,7 +305,7 @@ if (identical(phase, "produce")) {
   }
 
   versions <- vapply(
-    c("measure", "recipes", "jsonlite", "digest"),
+    c("measure", "recipes", "jsonlite", "digest", "fs"),
     function(package) as.character(utils::packageVersion(package)),
     character(1)
   )
