@@ -21,6 +21,8 @@ Task-oriented guides for solving specific problems
   tidymodels](https://jameshwade.github.io/measure/dev/articles/howto-tidymodels.md):
 - [How-To: Data Organization and
   Diagnostics](https://jameshwade.github.io/measure/dev/articles/howto-data-organization.md):
+- [Analytical records: samples, injections, channels, and
+  curves](https://jameshwade.github.io/measure/dev/articles/analytical-records.md):
 
 ### Reference
 

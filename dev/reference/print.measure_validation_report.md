@@ -38,12 +38,12 @@ print(report)
 #> Title: Test Report
 #> Method: HPLC Assay
 #> Analyst: J. Smith
-#> Date: 2026-11-11
+#> Date: 2026-11-12
 #> 
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-11-11 13:12:28.195009
+#> Generated: 2026-11-12 05:53:24.312139
 #> R version: 4.6.2
 #> measure version: 0.0.1.9003
 #> 

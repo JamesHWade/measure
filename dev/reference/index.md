@@ -638,6 +638,25 @@ NMR)
 - [`get_measure_col_ndim()`](https://jameshwade.github.io/measure/dev/reference/get_measure_col_ndim.md)
   : Get the dimensionality of a measure column
 
+## Analytical Records
+
+Explicit identities and metadata for independent measurement curves
+
+- [`measure_record()`](https://jameshwade.github.io/measure/dev/reference/measure_record.md)
+  [`print(`*`<measure_record>`*`)`](https://jameshwade.github.io/measure/dev/reference/measure_record.md)
+  : Create and validate an analytical measurement record
+- [`is_measure_record()`](https://jameshwade.github.io/measure/dev/reference/is_measure_record.md)
+  : Test whether an object is a measurement record
+- [`validate_measure_record()`](https://jameshwade.github.io/measure/dev/reference/validate_measure_record.md)
+  : Validate a measurement record
+- [`measure_record_from_long()`](https://jameshwade.github.io/measure/dev/reference/measure_record_from_long.md)
+  : Import a measurement record from a long table
+- [`read_measure_record_delim()`](https://jameshwade.github.io/measure/dev/reference/read_measure_record_delim.md)
+  : Read one CSV or TSV file into a measurement record
+- [`write_measure_record()`](https://jameshwade.github.io/measure/dev/reference/record-bundle.md)
+  [`read_measure_record()`](https://jameshwade.github.io/measure/dev/reference/record-bundle.md)
+  : Read and write native measurement record bundles
+
 ## Utilities
 
 Helper functions and utilities
