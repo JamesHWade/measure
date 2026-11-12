@@ -1,0 +1,15 @@
+{
+  "source_files": {
+    "roundtrip.csv": {
+      "sha256": "7f94b2f533efebb498d9d78c347ee1b9c3479b108e5ab2b8b451bfde64810e2a",
+      "bytes": 1427
+    },
+    "roundtrip.tsv": {
+      "sha256": "eab7cbe1490326c39e0e5b0b63c8bf92343fdd4b3913ad62e595abd0c5b4070e",
+      "bytes": 1387
+    }
+  },
+  "declaration_sha256": "e3b65918621a584c9f14e9a02dc1367cb9b65a591e272110ffc51c949f1e3241",
+  "logical_data_rows": 15,
+  "producer": "Python standard csv writer, decimal .17g, independent of R codec"
+}

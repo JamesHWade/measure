@@ -1,5 +1,25 @@
 # measure 0.0.1.9003
 
+* A runnable analytical-records guide demonstrates reinjections, detector
+  channels, interleaved curve import, source references, native roundtrips,
+  and direct use of independent curves in recipes.
+
+* `write_measure_record()` and `read_measure_record()` provide a versioned
+  CSV/TSV bundle with explicit schemas, payload hashes, total read limits, and
+  exact numeric roundtrips. Writes preserve existing destinations and commit
+  the manifest last; incomplete and structurally invalid bundles fail clearly
+  (#107).
+
+* `measure_record_from_long()` and `read_measure_record_delim()` import
+  explicitly mapped scalar curves. CSV/TSV imports preserve text IDs, hash the
+  exact source bytes, and retain parsed-record row references. Numeric parsing
+  rejects malformed, nonfinite, overflowing, or underflowing tokens (#107).
+
+* `measure_record()` connects explicit sample, injection, channel, source, and
+  curve identities. Independent one-dimensional grids, declared units, missing
+  metadata, and source-row references are validated without aligning points
+  or inferring identities (#81, #107).
+
 * ALS and airPLS use a sparse mixed-system solver to bound memory for long
   traces and preserve affine signals at large penalties. Their defaults and
   iteration rules are unchanged. Numerically unresolved systems fail with a
