@@ -1,0 +1,6 @@
+qualification-declaration.json -text
+qualification-input-manifest.json -text
+qualification-input/*.csv -text
+qualification-input/*.tsv -text
+qualification-input/roundtrip.csv whitespace=cr-at-eol
+qualification-input/roundtrip.tsv whitespace=-blank-at-eol

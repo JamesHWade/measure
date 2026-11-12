@@ -1,0 +1,19 @@
+sample_id	injection_id	channel_id	curve_id	channel_name	axis_name	axis_unit	value_name	value_unit	location	value
+0007	inj-0001	UV-254	curve-001	UV, 254 nm	elution_time	min	response	mAU	0	0.10000000000000001
+0007	inj-0001	-MS	curve-002	"Extracted trace
+channel"	elution_time	min	response		2	-0.29999999999999999
+NA	inj-0002	UV-254	curve-003	UV, 254 nm	elution_time	min	response	mAU	0	0
+0007	inj-0003	UV-254	curve-004	UV, 254 nm	elution_time	min	response	mAU	0	0
+0007	inj-0001	UV-254	curve-001	UV, 254 nm	elution_time	min	response	mAU	0.25	1.0000000000000002
+0007	inj-0001	-MS	curve-002	"Extracted trace
+channel"	elution_time	min	response		0.5	0
+NA	inj-0002	UV-254	curve-003	UV, 254 nm	elution_time	min	response	mAU	0.5	4
+0007	inj-0003	UV-254	curve-004	UV, 254 nm	elution_time	min	response	mAU	0.10000000000000001	1
+0007	inj-0001	UV-254	curve-001	UV, 254 nm	elution_time	min	response	mAU	1	3.1415926535897931
+0007	inj-0001	-MS	curve-002	"Extracted trace
+channel"	elution_time	min	response		0	2
+NA	inj-0002	UV-254	curve-003	UV, 254 nm	elution_time	min	response	mAU	2	0
+0007	inj-0003	UV-254	curve-004	UV, 254 nm	elution_time	min	response	mAU	0.40000000000000002	3
+0007	inj-0001	UV-254	curve-001	UV, 254 nm	elution_time	min	response	mAU	2	
+0007	inj-0003	UV-254	curve-004	UV, 254 nm	elution_time	min	response	mAU	1	1
+0007	inj-0003	UV-254	curve-004	UV, 254 nm	elution_time	min	response	mAU	2	0

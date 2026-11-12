@@ -1,0 +1,148 @@
+{
+  "profile": "measure-record-interchange-qualification/1",
+  "scope": "Fixed synthetic scalar-record and directional CSV/TSV/native roundtrip checks; no instrument, host, DAD/MS-spectrum, physical or optimization qualification.",
+  "source_id": "fixture-0001",
+  "curves": [
+    {
+      "curve_id": "curve-001",
+      "sample_id": "0007",
+      "injection_id": "inj-0001",
+      "channel_id": "UV-254",
+      "channel_name": "UV, 254 nm",
+      "axis_name": "elution_time",
+      "axis_unit": "min",
+      "value_name": "response",
+      "value_unit": "mAU",
+      "location": [
+        0,
+        0.25,
+        1,
+        2
+      ],
+      "value": [
+        0.1,
+        1.0000000000000002,
+        3.141592653589793,
+        null
+      ],
+      "source_rows": [
+        1,
+        5,
+        9,
+        13
+      ]
+    },
+    {
+      "curve_id": "curve-002",
+      "sample_id": "0007",
+      "injection_id": "inj-0001",
+      "channel_id": "-MS",
+      "channel_name": "Extracted trace\nchannel",
+      "axis_name": "elution_time",
+      "axis_unit": "min",
+      "value_name": "response",
+      "value_unit": null,
+      "location": [
+        2,
+        0.5,
+        0
+      ],
+      "value": [
+        -0.3,
+        0,
+        2
+      ],
+      "source_rows": [
+        2,
+        6,
+        10
+      ]
+    },
+    {
+      "curve_id": "curve-003",
+      "sample_id": "NA",
+      "injection_id": "inj-0002",
+      "channel_id": "UV-254",
+      "channel_name": "UV, 254 nm",
+      "axis_name": "elution_time",
+      "axis_unit": "min",
+      "value_name": "response",
+      "value_unit": "mAU",
+      "location": [
+        0,
+        0.5,
+        2
+      ],
+      "value": [
+        0,
+        4,
+        0
+      ],
+      "source_rows": [
+        3,
+        7,
+        11
+      ]
+    },
+    {
+      "curve_id": "curve-004",
+      "sample_id": "0007",
+      "injection_id": "inj-0003",
+      "channel_id": "UV-254",
+      "channel_name": "UV, 254 nm",
+      "axis_name": "elution_time",
+      "axis_unit": "min",
+      "value_name": "response",
+      "value_unit": "mAU",
+      "location": [
+        0,
+        0.1,
+        0.4,
+        1,
+        2
+      ],
+      "value": [
+        0,
+        1,
+        3,
+        1,
+        0
+      ],
+      "source_rows": [
+        4,
+        8,
+        12,
+        14,
+        15
+      ]
+    }
+  ],
+  "expected_sample_order": [
+    "0007",
+    "NA"
+  ],
+  "expected_injection_order": [
+    "inj-0001",
+    "inj-0002",
+    "inj-0003"
+  ],
+  "expected_channel_order": [
+    "UV-254",
+    "-MS"
+  ],
+  "expected_curve_order": [
+    "curve-001",
+    "curve-002",
+    "curve-003",
+    "curve-004"
+  ],
+  "fidelity": "Exact finite double equality after integer-to-double and signed-zero canonicalization; exact NA positions, UTF8 strings, IDs, table/curve/point order and parsed-record source ordinals. No arbitrary R-attribute or signed-zero bit identity promise.",
+  "native_corruption_cases": [
+    "numeric_payload_byte_changed",
+    "missing_table",
+    "wrong_manifest_version",
+    "duplicate_point_index",
+    "source_row_type_loss"
+  ],
+  "declaration_before_qualification_execution": true
+}
