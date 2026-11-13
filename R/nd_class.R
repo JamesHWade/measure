@@ -356,6 +356,32 @@ new_measure_nd_list <- function(x = list()) {
   x
 }
 
+.measure_nd_list_ptype <- function(x) {
+  ptype <- attr(x, "ptype", exact = TRUE)
+  if (is.null(ptype)) {
+    cli::cli_abort(
+      "An empty {.cls measure_nd_list} must have a valid {.field ptype}."
+    )
+  }
+
+  .nd_validate_tbl(ptype, arg = "x ptype")
+  if (nrow(ptype) != 0L) {
+    cli::cli_abort("The {.field ptype} of {.arg x} must have zero rows.")
+  }
+
+  if (length(x) > 0L) {
+    .nd_validate_list(x)
+    ndims <- vapply(x, function(el) attr(el, "ndim", exact = TRUE), integer(1))
+    if (any(ndims != attr(ptype, "ndim", exact = TRUE))) {
+      cli::cli_abort(
+        "The {.field ptype} of {.arg x} must match its element dimensionality."
+      )
+    }
+  }
+
+  ptype
+}
+
 
 #' Test if object is an n-dimensional measure list
 #'
@@ -383,7 +409,7 @@ is_measure_nd_list <- function(x) {
 #' @export
 print.measure_nd_list <- function(x, ...) {
   n <- length(x)
-  ndim <- if (n > 0) attr(x[[1]], "ndim", exact = TRUE) %||% 2L else 2L
+  ndim <- measure_ndim(x)
 
   cat(
     "A measure_nd_list with",
@@ -455,9 +481,29 @@ obj_print_data.measure_nd_list <- function(x, ...) {
 
 # Subsetting should preserve class
 #' @rdname vctrs-methods
+#' @param i Locations of elements to keep, using [vctrs::vec_slice()] index
+#'   semantics.
+#' @param drop Ignored because `measure_nd_list` is always one-dimensional.
 #' @export
-`[.measure_nd_list` <- function(x, i, ...) {
-  out <- NextMethod()
+`[.measure_nd_list` <- function(x, i, ..., drop = FALSE) {
+  rlang::check_dots_empty()
+  if (...length() > 0L) {
+    cli::cli_abort(
+      "Additional or missing subscripts are not supported for {.cls measure_nd_list}."
+    )
+  }
+
+  elements <- unclass(x)
+  out <- if (missing(i)) elements[] else vctrs::vec_slice(elements, i)
+
+  if (length(out) == 0L) {
+    return(vctrs::new_list_of(
+      out,
+      ptype = .measure_nd_list_ptype(x),
+      class = c("measure_nd_list", "measure_list")
+    ))
+  }
+
   new_measure_nd_list(out)
 }
 
@@ -523,7 +569,7 @@ measure_ndim.measure_nd_tbl <- function(x) {
 #' @export
 measure_ndim.measure_nd_list <- function(x) {
   if (length(x) == 0) {
-    return(2L) # Default for empty list
+    return(attr(.measure_nd_list_ptype(x), "ndim", exact = TRUE))
   }
   attr(x[[1]], "ndim", exact = TRUE) %||% 2L
 }
