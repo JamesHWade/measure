@@ -51,4 +51,3 @@
       Error in `.nd_assemble_list_results()`:
       ! Dropping all axes left multiple observations in a list member.
       i Use `drop = FALSE` or map the slice over members separately.
-
