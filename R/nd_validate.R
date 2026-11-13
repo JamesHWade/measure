@@ -7,10 +7,148 @@
 # - Structure validation for recipe steps
 # ==============================================================================
 
+.nd_is_plain_numeric_vector <- function(x) {
+  typeof(x) %in%
+    c("integer", "double") &&
+    is.null(dim(x)) &&
+    !is.object(x) &&
+    all(names(attributes(x)) %in% "names")
+}
+
+.nd_check_numeric_vector <- function(x, arg) {
+  if (!.nd_is_plain_numeric_vector(x)) {
+    cli::cli_abort(
+      "{.arg {arg}} must be numeric, specifically a plain one-dimensional integer or double vector, not {.obj_type_friendly {x}}."
+    )
+  }
+
+  invisible(x)
+}
+
+.nd_check_dim_metadata <- function(x, arg, ndim, unique = FALSE) {
+  if (is.null(x)) {
+    return(invisible(x))
+  }
+
+  if (!is.character(x) || is.object(x) || !is.null(dim(x))) {
+    cli::cli_abort(
+      "{.arg {arg}} must be NULL or an unclassed one-dimensional character vector."
+    )
+  }
+
+  if (length(x) != ndim) {
+    cli::cli_abort(
+      "{.arg {arg}} must have length {ndim} (one per dimension), not {length(x)}."
+    )
+  }
+
+  known <- x[!is.na(x)]
+  if (!all(nzchar(trimws(known, whitespace = "[\\h\\v]")))) {
+    cli::cli_abort(
+      "Known values in {.arg {arg}} must be nonblank; use {.code NA_character_} for unknown values."
+    )
+  }
+
+  if (unique && anyDuplicated(known) > 0L) {
+    cli::cli_abort(
+      "Known values in {.arg {arg}} must be unique; missing values are allowed."
+    )
+  }
+
+  invisible(x)
+}
+
+# Validate the mutable structure of an nD measurement payload. This deliberately
+# does not impose analytical constraints on coordinate tuples or numeric values.
+.nd_validate_tbl <- function(x, arg = "x") {
+  if (!inherits(x, "measure_nd_tbl") || !is.data.frame(x)) {
+    cli::cli_abort(
+      "{.arg {arg}} must be a data frame inheriting from {.cls measure_nd_tbl}."
+    )
+  }
+
+  ndim <- attr(x, "ndim", exact = TRUE)
+  if (
+    !is.integer(ndim) ||
+      length(ndim) != 1L ||
+      is.na(ndim) ||
+      ndim < 2L ||
+      !is.null(attributes(ndim))
+  ) {
+    cli::cli_abort(
+      "{.arg {arg}} must have an unclassed integer {.code ndim} attribute of at least 2."
+    )
+  }
+
+  if (ndim != ncol(x) - 1L) {
+    cli::cli_abort(
+      "The {.code ndim} attribute in {.arg {arg}} must equal the number of location columns ({ncol(x) - 1L})."
+    )
+  }
+
+  expected_columns <- c(paste0("location_", seq_len(ndim)), "value")
+  if (!identical(names(x), expected_columns)) {
+    cli::cli_abort(
+      "Columns in {.arg {arg}} must be exactly {.val {expected_columns}} in canonical order."
+    )
+  }
+
+  if (!identical(attr(x, "dim_order", exact = TRUE), seq_len(ndim))) {
+    cli::cli_abort(
+      "{.arg {arg}} must have canonical {.code dim_order} equal to {.val {seq_len(ndim)}}."
+    )
+  }
+
+  for (column in expected_columns) {
+    .nd_check_numeric_vector(x[[column]], paste0(arg, "$", column))
+    if (length(x[[column]]) != nrow(x)) {
+      cli::cli_abort(
+        "Column {.arg {column}} in {.arg {arg}} must have length {.val {nrow(x)}}."
+      )
+    }
+  }
+
+  .nd_check_dim_metadata(
+    attr(x, "dim_names", exact = TRUE),
+    "dim_names",
+    ndim,
+    unique = TRUE
+  )
+  .nd_check_dim_metadata(attr(x, "dim_units", exact = TRUE), "dim_units", ndim)
+
+  invisible(x)
+}
+
+.nd_validate_list <- function(x) {
+  if (!is.list(x) || is.data.frame(x) || !is.null(dim(x))) {
+    cli::cli_abort(
+      "{.arg x} must be a one-dimensional list of nD measurements."
+    )
+  }
+  ndims <- vapply(
+    x,
+    function(el) {
+      .nd_validate_tbl(el, arg = "each measure_nd_tbl element")
+      attr(el, "ndim", exact = TRUE)
+    },
+    integer(1)
+  )
+  if (length(unique(ndims)) > 1L) {
+    cli::cli_abort(
+      "All elements of measure_nd_list must have the same dimensionality.
+       Found: {.val {unique(ndims)}}."
+    )
+  }
+  invisible(x)
+}
+
 #' Check if an n-dimensional measurement has a regular grid
 #'
 #' A regular grid means all combinations of unique coordinate values exist
 #' exactly once (i.e., it forms a complete rectangular grid).
+#' A missing coordinate makes regularity `FALSE`: an unknown coordinate
+#' cannot establish a complete grid. This is a structural check, not a
+#' finite-value or physical-validity assessment.
 #'
 #' @param x A `measure_nd_tbl` object.
 #'
@@ -41,7 +179,13 @@ measure_is_regular <- function(x) {
 
 #' @export
 measure_is_regular.measure_nd_tbl <- function(x) {
+  .nd_validate_tbl(x)
   ndim <- measure_ndim(x)
+
+  coord_cols <- paste0("location_", seq_len(ndim))
+  if (any(vapply(x[coord_cols], anyNA, logical(1)))) {
+    return(FALSE)
+  }
 
   # Get unique values for each dimension
   unique_counts <- vapply(
@@ -55,7 +199,6 @@ measure_is_regular.measure_nd_tbl <- function(x) {
   actual_rows <- nrow(x)
 
   # Also check for duplicate coordinate tuples
-  coord_cols <- paste0("location_", seq_len(ndim))
   n_unique <- nrow(unique(x[coord_cols]))
 
   actual_rows == expected_rows && n_unique == actual_rows
@@ -64,6 +207,7 @@ measure_is_regular.measure_nd_tbl <- function(x) {
 
 #' @export
 measure_is_regular.measure_nd_list <- function(x) {
+  .nd_validate_list(x)
   if (length(x) == 0) {
     return(TRUE)
   }
@@ -96,6 +240,13 @@ measure_is_regular.default <- function(x) {
 #'   - `is_regular`: Whether the grid is regular
 #'   - `has_na`: Whether any values are NA
 #'
+#' Missing coordinate states are retained in `unique_values` and counted in
+#' `shape`; they make `is_regular` false. `has_na` describes missing signal
+#' values only. The reported shape does not imply that every grid cell was
+#' observed, and numeric payloads are not checked for physical validity.
+#' For a collection, inspect each entry of `sample_info` for its own metadata;
+#' collection-level names and units describe the first measurement.
+#'
 #' @examples
 #' m2d <- new_measure_nd_tbl(
 #'   location_1 = rep(seq(0, 10, by = 2), each = 4),
@@ -114,12 +265,13 @@ measure_grid_info <- function(x) {
 
 #' @export
 measure_grid_info.measure_nd_tbl <- function(x) {
+  .nd_validate_tbl(x)
   ndim <- measure_ndim(x)
 
   # Get unique values for each dimension
   unique_values <- lapply(
     seq_len(ndim),
-    function(i) sort(unique(x[[paste0("location_", i)]]))
+    function(i) sort(unique(x[[paste0("location_", i)]]), na.last = TRUE)
   )
   names(unique_values) <- paste0("dim_", seq_len(ndim))
 
@@ -142,6 +294,7 @@ measure_grid_info.measure_nd_tbl <- function(x) {
 
 #' @export
 measure_grid_info.measure_nd_list <- function(x) {
+  .nd_validate_list(x)
   if (length(x) == 0) {
     return(list(
       n_samples = 0L,

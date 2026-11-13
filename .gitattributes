@@ -1,3 +1,8 @@
 
 # Use bd merge for beads JSONL files
 .beads/issues.jsonl merge=beads
+
+# Qualification inputs retain their declared bytes on every platform.
+tools/nd-qualification/fixtures.json -text
+tools/nd-qualification/declaration.json -text
+tools/nd-qualification/input-manifest.json -text

@@ -17,6 +17,23 @@ dimensional structure restored.
 Reconstructs an n-dimensional measurement from a 1D vector that was
 created by \code{\link[=measure_unfold]{measure_unfold()}}. Requires the fold metadata attribute.
 }
+\details{
+Each 1D payload must retain its own \code{fold_info} mapping. When any member
+of a collection has this metadata, every member must have its own valid
+mapping. New list unfolds never attach the first member's grid to the
+collection. For legacy objects with no member mappings, a list-level
+descriptor is accepted only as a caller's explicit shared-grid declaration.
+
+The 1D \code{location} column contains point indices, not physical coordinates.
+It must contain each integer from 1 to the saved point count exactly once.
+Reordering rows is supported: values are matched back by point index. Signal
+values may be edited, but deleting points, duplicating indices, or losing
+part of the mapping is an error. Folding restores canonical unfold order,
+rather than the original acquisition row order.
+To edit a collection while retaining its mappings, transform the extracted
+members with \code{lapply()} and rebuild with \code{\link[=new_measure_list]{new_measure_list()}}. List-column
+assignment or other operations that remove attributes can lose a mapping.
+}
 \examples{
 # Create, unfold, then fold back
 m2d <- new_measure_nd_tbl(

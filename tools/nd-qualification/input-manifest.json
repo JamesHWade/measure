@@ -1,0 +1,12 @@
+{
+  "files": {
+    "declaration.json": {
+      "sha256": "036bad1ac89c7c759de2b6ae8fc2430c0e0052bf80a92c77f196c2b2da0257ef",
+      "size_bytes": 7235
+    },
+    "fixtures.json": {
+      "sha256": "c5692fb3cc7cc69ad746046408779b07d5bed01d11a57d895ad33e648ad7115b",
+      "size_bytes": 4406
+    }
+  }
+}

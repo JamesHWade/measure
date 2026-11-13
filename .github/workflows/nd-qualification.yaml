@@ -1,0 +1,51 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+name: Multidimensional qualification
+
+permissions:
+  contents: read
+
+jobs:
+  nd-qualification:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          needs: check
+
+      - name: Install the checked-out candidate
+        run: R CMD INSTALL .
+
+      - name: Check installed nD operations with an independent coordinate oracle
+        run: |
+          python3 --version
+          Rscript tools/nd-qualification/qualify.R "$RUNNER_TEMP/nd-qualification"
+          python3 tools/nd-qualification/verify.py "$RUNNER_TEMP/nd-qualification"
+
+      - name: Qualify tools copied to a path containing spaces
+        run: |
+          mkdir "$RUNNER_TEMP/qualification tools"
+          cp -R tools/nd-qualification "$RUNNER_TEMP/qualification tools/nd-qualification"
+          Rscript "$RUNNER_TEMP/qualification tools/nd-qualification/qualify.R" "$RUNNER_TEMP/nd qualification copied"
+          python3 "$RUNNER_TEMP/qualification tools/nd-qualification/verify.py" "$RUNNER_TEMP/nd qualification copied"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nd-qualification-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/nd-qualification
+            ${{ runner.temp }}/nd qualification copied
+          if-no-files-found: ignore

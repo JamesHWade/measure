@@ -34,6 +34,24 @@
 #'   `location_2`, ..., `location_n`, and `value` columns. Attributes
 #'   include `ndim`, `dim_names`, `dim_units`, and `dim_order`.
 #'
+#' @details
+#' Location arguments must name every dimension exactly once, from
+#' `location_1` through `location_n`. Argument order is canonicalized; point
+#' order and numeric storage are retained. Coordinates and values must be
+#' plain one-dimensional integer or double vectors of equal length.
+#'
+#' Dimension names and units are `NULL` or unclassed character vectors with
+#' one entry per dimension. Use `NA_character_` for unknown metadata. Known
+#' names must be unique and nonblank; known units must be nonblank and may
+#' repeat. Names and units are declarations, with no inference or conversion.
+#' Inspection uses exact attribute names; similarly prefixed backup attributes
+#' do not supply missing dimension metadata.
+#'
+#' Construction checks structure, not analytical or physical validity.
+#' Sparse grids, repeated coordinate tuples, missing values, and nonfinite
+#' numeric payloads remain representable. In particular, construction does
+#' not certify that a grid is regular or suitable for a given calculation.
+#'
 #' @seealso [new_measure_nd_list()] for creating collections of nD measurements,
 #'   [is_measure_nd_tbl()] for checking object class, [measure_ndim()] for
 #'   getting dimensionality.
@@ -60,7 +78,7 @@ new_measure_nd_tbl <- function(
 
   # Extract location vectors from dots
   loc_names <- names(dots)
-  if (is.null(loc_names) || any(loc_names == "")) {
+  if (is.null(loc_names) || anyNA(loc_names) || !all(nzchar(loc_names))) {
     cli::cli_abort(
       "All location arguments must be named (e.g., {.code location_1 = ...})."
     )
@@ -85,51 +103,42 @@ new_measure_nd_tbl <- function(
     )
   }
 
-  # Validate all location vectors are numeric
-  for (nm in loc_names) {
-    if (!is.numeric(dots[[nm]])) {
-      cli::cli_abort(
-        "{.arg {nm}} must be numeric, not {.obj_type_friendly {dots[[nm]]}}."
-      )
-    }
-  }
-
-  # Validate value is numeric
-  if (!is.numeric(value)) {
+  # Names may be supplied in any order, but the suffixes must form exactly
+  # the canonical sequence. Comparing strings avoids integer overflow.
+  expected_loc_names <- paste0("location_", seq_len(ndim))
+  if (
+    anyDuplicated(loc_names) > 0L || !setequal(loc_names, expected_loc_names)
+  ) {
     cli::cli_abort(
-      "{.arg value} must be numeric, not {.obj_type_friendly {value}}."
+      "Location argument suffixes must be unique and exactly 1 through {ndim}."
     )
   }
+  dots <- dots[match(expected_loc_names, loc_names)]
+  loc_names <- expected_loc_names
+
+  # Coordinates and values are numeric payloads, not analytical assessments.
+  for (nm in loc_names) {
+    .nd_check_numeric_vector(dots[[nm]], nm)
+  }
+  .nd_check_numeric_vector(value, "value")
 
   # Validate all vectors have the same length
-  lengths <- c(lengths(dots), length(value))
-  if (length(unique(lengths)) != 1) {
-    len_str <- paste(c(loc_names, "value"), "=", lengths, collapse = ", ")
+  vector_lengths <- c(lengths(dots), length(value))
+  if (length(unique(vector_lengths)) != 1) {
+    len_str <- paste(
+      c(loc_names, "value"),
+      "=",
+      vector_lengths,
+      collapse = ", "
+    )
     cli::cli_abort(
       "All location and value vectors must have the same length.
        Got: {len_str}."
     )
   }
 
-  # Sort location columns by dimension number for consistent ordering
-  dim_nums <- as.integer(sub("location_", "", loc_names, fixed = TRUE))
-  sorted_idx <- order(dim_nums)
-  dots <- dots[sorted_idx]
-  loc_names <- loc_names[sorted_idx]
-
-  # Validate dim_names length
-  if (!is.null(dim_names) && length(dim_names) != ndim) {
-    cli::cli_abort(
-      "{.arg dim_names} must have length {ndim} (one per dimension), not {length(dim_names)}."
-    )
-  }
-
-  # Validate dim_units length
-  if (!is.null(dim_units) && length(dim_units) != ndim) {
-    cli::cli_abort(
-      "{.arg dim_units} must have length {ndim} (one per dimension), not {length(dim_units)}."
-    )
-  }
+  .nd_check_dim_metadata(dim_names, "dim_names", ndim, unique = TRUE)
+  .nd_check_dim_metadata(dim_units, "dim_units", ndim)
 
   # Build the tibble
   data <- c(dots, list(value = value))
@@ -142,6 +151,7 @@ new_measure_nd_tbl <- function(
   attr(x, "dim_units") <- dim_units
   attr(x, "dim_order") <- seq_len(ndim)
 
+  .nd_validate_tbl(x)
   x
 }
 
@@ -189,8 +199,8 @@ as_measure_nd_tbl <- function(x, dim_names = NULL, dim_units = NULL) {
   # Build args for new_measure_nd_tbl
   args <- stats::setNames(lapply(loc_cols, function(col) x[[col]]), loc_cols)
   args$value <- x[["value"]]
-  args$dim_names <- dim_names %||% attr(x, "dim_names")
-  args$dim_units <- dim_units %||% attr(x, "dim_units")
+  args$dim_names <- dim_names %||% attr(x, "dim_names", exact = TRUE)
+  args$dim_units <- dim_units %||% attr(x, "dim_units", exact = TRUE)
 
   do.call(new_measure_nd_tbl, args)
 }
@@ -223,8 +233,8 @@ is_measure_nd_tbl <- function(x) {
 #' @rdname vctrs-methods
 #' @export
 print.measure_nd_tbl <- function(x, ..., n = NULL, width = NULL) {
-  ndim <- attr(x, "ndim") %||% 2L
-  dim_names <- attr(x, "dim_names")
+  ndim <- attr(x, "ndim", exact = TRUE) %||% 2L
+  dim_names <- attr(x, "dim_names", exact = TRUE)
 
   if (!is.null(dim_names)) {
     dim_str <- paste(dim_names, collapse = " x ")
@@ -250,7 +260,7 @@ print.measure_nd_tbl <- function(x, ..., n = NULL, width = NULL) {
 #' @rdname vctrs-methods
 #' @exportS3Method vctrs::vec_ptype_abbr
 vec_ptype_abbr.measure_nd_tbl <- function(x, ...) {
-  ndim <- attr(x, "ndim") %||% 2L
+  ndim <- attr(x, "ndim", exact = TRUE) %||% 2L
   paste0("msr", ndim, "d")
 }
 
@@ -323,33 +333,18 @@ new_measure_nd_list <- function(x = list()) {
     }
   })
 
-  # Validate all elements have the same ndim
-  ndims <- vapply(x, function(el) attr(el, "ndim") %||% 2L, integer(1))
-  if (length(unique(ndims)) > 1) {
-    cli::cli_abort(
-      "All elements of measure_nd_list must have the same dimensionality.
-       Found: {.val {unique(ndims)}}."
-    )
-  }
+  .nd_validate_list(x)
 
-  # Use the first element as prototype for vctrs
-  ptype <- new_measure_nd_tbl(
-    location_1 = double(),
-    location_2 = double(),
-    value = double()
+  # All elements now have validated, consistent dimensionality.
+  ndims <- vapply(x, function(el) attr(el, "ndim", exact = TRUE), integer(1))
+
+  # Use a canonical nD prototype for vctrs list-column behavior
+  prototype_args <- stats::setNames(
+    rep(list(double()), ndims[1]),
+    paste0("location_", seq_len(ndims[1]))
   )
-  # Copy ndim attribute to match elements
-  attr(ptype, "ndim") <- ndims[1]
-
-  # Add location columns for higher dimensions if needed
-  if (ndims[1] > 2) {
-    for (i in 3:ndims[1]) {
-      ptype[[paste0("location_", i)]] <- double()
-    }
-    # Reorder columns: location_1, location_2, ..., location_n, value
-    loc_cols <- paste0("location_", seq_len(ndims[1]))
-    ptype <- ptype[c(loc_cols, "value")]
-  }
+  prototype_args$value <- double()
+  ptype <- do.call(new_measure_nd_tbl, prototype_args)
 
   # Use vctrs for proper list-column behavior
   x <- vctrs::new_list_of(
@@ -388,7 +383,7 @@ is_measure_nd_list <- function(x) {
 #' @export
 print.measure_nd_list <- function(x, ...) {
   n <- length(x)
-  ndim <- if (n > 0) attr(x[[1]], "ndim") %||% 2L else 2L
+  ndim <- if (n > 0) attr(x[[1]], "ndim", exact = TRUE) %||% 2L else 2L
 
   cat(
     "A measure_nd_list with",
@@ -420,7 +415,7 @@ print.measure_nd_list <- function(x, ...) {
 #' @exportS3Method vctrs::vec_ptype_abbr
 vec_ptype_abbr.measure_nd_list <- function(x, ...) {
   if (length(x) > 0) {
-    ndim <- attr(x[[1]], "ndim") %||% 2L
+    ndim <- attr(x[[1]], "ndim", exact = TRUE) %||% 2L
     paste0("meas", ndim, "d")
   } else {
     "measnd"
@@ -442,7 +437,7 @@ format.measure_nd_list <- function(x, ...) {
     return(character())
   }
   sizes <- vapply(x, nrow, integer(1))
-  ndim <- if (length(x) > 0) attr(x[[1]], "ndim") %||% 2L else 2L
+  ndim <- if (length(x) > 0) attr(x[[1]], "ndim", exact = TRUE) %||% 2L else 2L
   paste0("<meas", ndim, "d [", sizes, "]>")
 }
 
@@ -521,7 +516,7 @@ measure_ndim <- function(x) {
 
 #' @export
 measure_ndim.measure_nd_tbl <- function(x) {
-  attr(x, "ndim") %||% 2L
+  attr(x, "ndim", exact = TRUE) %||% 2L
 }
 
 
@@ -530,7 +525,7 @@ measure_ndim.measure_nd_list <- function(x) {
   if (length(x) == 0) {
     return(2L) # Default for empty list
   }
-  attr(x[[1]], "ndim") %||% 2L
+  attr(x[[1]], "ndim", exact = TRUE) %||% 2L
 }
 
 
@@ -584,7 +579,7 @@ measure_dim_names <- function(x) {
 
 #' @export
 measure_dim_names.measure_nd_tbl <- function(x) {
-  attr(x, "dim_names")
+  attr(x, "dim_names", exact = TRUE)
 }
 
 
@@ -593,7 +588,7 @@ measure_dim_names.measure_nd_list <- function(x) {
   if (length(x) == 0) {
     return(NULL)
   }
-  attr(x[[1]], "dim_names")
+  attr(x[[1]], "dim_names", exact = TRUE)
 }
 
 
@@ -628,7 +623,7 @@ measure_dim_units <- function(x) {
 
 #' @export
 measure_dim_units.measure_nd_tbl <- function(x) {
-  attr(x, "dim_units")
+  attr(x, "dim_units", exact = TRUE)
 }
 
 
@@ -637,7 +632,7 @@ measure_dim_units.measure_nd_list <- function(x) {
   if (length(x) == 0) {
     return(NULL)
   }
-  attr(x[[1]], "dim_units")
+  attr(x[[1]], "dim_units", exact = TRUE)
 }
 
 

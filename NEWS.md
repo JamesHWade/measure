@@ -1,5 +1,23 @@
 # measure 0.0.1.9003
 
+* `measure_fold()` retains each measurement's coordinates and metadata after
+  unfolding a collection, including unequal grids and lengths. Valid reordered
+  point indices restore their original coordinate/value association; incomplete
+  mappings and malformed metadata fail clearly (#145).
+
+* `measure_project()` validates dimensions, flags and scalar summaries before
+  combining results. List outputs retain compatible axes; ordinary R all-missing
+  mean/sum behavior is explicit (#145).
+
+* `measure_slice()` rejects ambiguous selectors and incomplete predicate masks
+  instead of recycling them or inserting missing rows. Heterogeneous list
+  reductions fail with guidance for retaining axes or mapping separately (#145).
+
+* `new_measure_nd_tbl()` rejects malformed numbered dimensions and ambiguous
+  dimension metadata. nD list construction and grid inspection validate mutable
+  payloads; unknown coordinates stay visible in grid summaries and cannot
+  establish a regular grid (#145).
+
 * A runnable analytical-records guide demonstrates reinjections, detector
   channels, interleaved curve import, source references, native roundtrips,
   and direct use of independent curves in recipes.
