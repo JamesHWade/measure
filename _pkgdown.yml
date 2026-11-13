@@ -47,6 +47,8 @@ navbar:
         href: articles/howto-tidymodels.html
       - text: Data Organization & Diagnostics
         href: articles/howto-data-organization.html
+      - text: Multidimensional Measurements
+        href: articles/multidimensional-measurements.html
       - text: Analytical Records
         href: articles/analytical-records.html
       - text: '---'
@@ -77,6 +79,7 @@ articles:
   - articles/howto-tidymodels
   - articles/howto-data-organization
   - analytical-records
+  - multidimensional-measurements
 - title: Reference
   desc: Information-oriented technical descriptions
   contents:
