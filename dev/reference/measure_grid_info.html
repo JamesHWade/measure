@@ -29,6 +29,7 @@ unique values per dimension, grid shape, and regularity status."><meta property=
     <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/multidimensional-measurements.html">Multidimensional Measurements</a></li>
     <li><a class="dropdown-item" href="../articles/analytical-records.html">Analytical Records</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
@@ -82,7 +83,13 @@ unique values per dimension, grid shape, and regularity status.</p>
 <li><p><code>n_points</code>: Total number of data points</p></li>
 <li><p><code>is_regular</code>: Whether the grid is regular</p></li>
 <li><p><code>has_na</code>: Whether any values are NA</p></li>
-</ul></div>
+</ul><p>Missing coordinate states are retained in <code>unique_values</code> and counted in
+<code>shape</code>; they make <code>is_regular</code> false. <code>has_na</code> describes missing signal
+values only. The reported shape does not imply that every grid cell was
+observed, and numeric payloads are not checked for physical validity.
+For a collection, inspect each entry of <code>sample_info</code> for its own metadata;
+collection-level names and units describe the first measurement.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

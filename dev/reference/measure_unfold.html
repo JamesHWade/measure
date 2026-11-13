@@ -31,6 +31,7 @@ reconstruct the original nD structure via measure_fold()."><meta property="og:im
     <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/multidimensional-measurements.html">Multidimensional Measurements</a></li>
     <li><a class="dropdown-item" href="../articles/analytical-records.html">Analytical Records</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
@@ -83,8 +84,8 @@ The first dimension varies fastest.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>measure_tbl</code> or <code>measure_list</code> with an attribute <code>"fold_info"</code>
-containing the metadata needed to reconstruct the nD structure.</p>
+    <p>A <code>measure_tbl</code> or <code>measure_list</code> with fold metadata. Each unfolded
+list member carries its own <code>"fold_info"</code> attribute.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -95,7 +96,10 @@ containing the metadata needed to reconstruct the nD structure.</p>
 <li><p><code>dim_names</code>, <code>dim_units</code>: Original dimension metadata</p></li>
 <li><p><code>coordinates</code>: The original coordinate values for each dimension</p></li>
 <li><p><code>order</code>: The unfolding order used</p></li>
-</ul></div>
+</ul><p>Unfolding sorts points into the selected canonical dimension order. Folding
+restores that sorted order; it does not restore the input's acquisition row
+order.</p>
+    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="measure_fold.html">measure_fold()</a></code> to reconstruct the nD structure</p></div>

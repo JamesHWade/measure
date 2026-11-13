@@ -8,12 +8,13 @@ articles:
   articles/howto-data-organization: howto-data-organization.html
   articles/howto-technique-packs: howto-technique-packs.html
   articles/howto-tidymodels: howto-tidymodels.html
+  multidimensional-measurements: multidimensional-measurements.html
   reference-multidimensional: reference-multidimensional.html
   articles/reference-preprocessing: reference-preprocessing.html
   reference-validation: reference-validation.html
   articles/tutorial-bioreactor: tutorial-bioreactor.html
   articles/tutorial-getting-started: tutorial-getting-started.html
-last_built: 2026-11-12T05:52Z
+last_built: 2026-11-13T03:00Z
 urls:
   reference: https://jameshwade.github.io/measure/reference
   article: https://jameshwade.github.io/measure/articles

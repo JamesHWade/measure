@@ -1,7 +1,10 @@
 # Check if an n-dimensional measurement has a regular grid
 
 A regular grid means all combinations of unique coordinate values exist
-exactly once (i.e., it forms a complete rectangular grid).
+exactly once (i.e., it forms a complete rectangular grid). A missing
+coordinate makes regularity `FALSE`: an unknown coordinate cannot
+establish a complete grid. This is a structural check, not a
+finite-value or physical-validity assessment.
 
 ## Usage
 

@@ -17,16 +17,18 @@ measure_project(x, along, fn = mean, na_rm = TRUE, ...)
 
 - along:
 
-  Integer or character specifying which dimension(s) to aggregate
-  across. Can use dimension numbers or names.
+  A nonempty vector of unique whole-number dimension indices or known
+  semantic dimension names to aggregate across.
 
 - fn:
 
-  Aggregation function. Default is `mean`.
+  Function that returns one plain numeric scalar for each group. Default
+  is `mean`.
 
 - na_rm:
 
-  Logical. Remove NA values before aggregation? Default `TRUE`.
+  One non-missing logical value. Remove `NA` values before aggregation?
+  Default `TRUE`.
 
 - ...:
 
@@ -34,8 +36,23 @@ measure_project(x, along, fn = mean, na_rm = TRUE, ...)
 
 ## Value
 
-A `measure_tbl`, `measure_nd_tbl`, `measure_list`, or `measure_nd_list`
-with reduced dimensionality.
+A numeric scalar when all dimensions are projected, a `measure_tbl` when
+one dimension remains, or a `measure_nd_tbl` when two or more dimensions
+remain. For a list input, homogeneous results are returned as a numeric
+vector, `measure_list`, or `measure_nd_list`, respectively.
+
+## Details
+
+Projection groups rows by the retained coordinate columns. `dplyr` sorts
+these groups in ascending coordinate order (with missing coordinates
+last), so the result order describes coordinate groups rather than
+acquisition timing. With `na_rm = TRUE`, `NA` values are removed before
+`fn` is called. An all-missing group therefore calls `fn(numeric(0))`;
+for example, `mean` returns `NaN` and `sum` returns `0`. An empty input
+with retained axes yields an empty measurement; projecting all axes
+applies `fn` to `numeric(0)`. List members must retain the same axis
+positions, names, and units or projection errors and recommends mapping
+over members separately.
 
 ## Examples
 

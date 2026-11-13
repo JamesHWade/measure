@@ -31,6 +31,7 @@ and values."><meta property="og:image" content="https://jameshwade.github.io/mea
     <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/multidimensional-measurements.html">Multidimensional Measurements</a></li>
     <li><a class="dropdown-item" href="../articles/analytical-records.html">Analytical Records</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
@@ -97,6 +98,23 @@ intensity, signal). Must have the same length as location vectors.</p></dd>
     <p>A tibble with class <code>measure_nd_tbl</code> containing <code>location_1</code>,
 <code>location_2</code>, ..., <code>location_n</code>, and <code>value</code> columns. Attributes
 include <code>ndim</code>, <code>dim_names</code>, <code>dim_units</code>, and <code>dim_order</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Location arguments must name every dimension exactly once, from
+<code>location_1</code> through <code>location_n</code>. Argument order is canonicalized; point
+order and numeric storage are retained. Coordinates and values must be
+plain one-dimensional integer or double vectors of equal length.</p>
+<p>Dimension names and units are <code>NULL</code> or unclassed character vectors with
+one entry per dimension. Use <code>NA_character_</code> for unknown metadata. Known
+names must be unique and nonblank; known units must be nonblank and may
+repeat. Names and units are declarations, with no inference or conversion.
+Inspection uses exact attribute names; similarly prefixed backup attributes
+do not supply missing dimension metadata.</p>
+<p>Construction checks structure, not analytical or physical validity.
+Sparse grids, repeated coordinate tuples, missing values, and nonfinite
+numeric payloads remain representable. In particular, construction does
+not certify that a grid is regular or suitable for a given calculation.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

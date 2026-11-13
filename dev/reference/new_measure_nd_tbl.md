@@ -37,6 +37,25 @@ A tibble with class `measure_nd_tbl` containing `location_1`,
 `location_2`, ..., `location_n`, and `value` columns. Attributes include
 `ndim`, `dim_names`, `dim_units`, and `dim_order`.
 
+## Details
+
+Location arguments must name every dimension exactly once, from
+`location_1` through `location_n`. Argument order is canonicalized;
+point order and numeric storage are retained. Coordinates and values
+must be plain one-dimensional integer or double vectors of equal length.
+
+Dimension names and units are `NULL` or unclassed character vectors with
+one entry per dimension. Use `NA_character_` for unknown metadata. Known
+names must be unique and nonblank; known units must be nonblank and may
+repeat. Names and units are declarations, with no inference or
+conversion. Inspection uses exact attribute names; similarly prefixed
+backup attributes do not supply missing dimension metadata.
+
+Construction checks structure, not analytical or physical validity.
+Sparse grids, repeated coordinate tuples, missing values, and nonfinite
+numeric payloads remain representable. In particular, construction does
+not certify that a grid is regular or suitable for a given calculation.
+
 ## See also
 
 [`new_measure_nd_list()`](https://jameshwade.github.io/measure/dev/reference/new_measure_nd_list.md)

@@ -29,13 +29,32 @@ measure_slice(x, ..., drop = TRUE)
 
 - drop:
 
-  Logical. If `TRUE` (default), dimensions with a single value are
-  dropped from the result. If `FALSE`, they are retained.
+  One non-missing logical value. If `TRUE` (default), dimensions with a
+  single observed coordinate are dropped from the result. If `FALSE`,
+  all original dimensions are retained.
 
 ## Value
 
-A `measure_tbl`, `measure_nd_tbl`, `measure_list`, or `measure_nd_list`
-depending on the number of remaining dimensions.
+For one measurement, a numeric vector when all dimensions are dropped, a
+`measure_tbl` when one dimension remains, or a `measure_nd_tbl` when two
+or more dimensions remain. For a list input, homogeneous results are
+returned as a numeric vector, `measure_list`, or `measure_nd_list`,
+respectively.
+
+## Details
+
+Coordinate selections use exact numeric membership. A numeric selection
+can include `NA` to select rows whose stored coordinate is unknown. A
+predicate must return one non-missing logical value for every input row.
+Empty slices warn and remain n-dimensional with the original axes
+because no axis has a single observed coordinate. Slicing retains the
+input point order. If list members would have different result
+dimensionalities or retained axis schemas, an error recommends
+`drop = FALSE` or mapping over members separately. The dropping rule
+counts a stored `NA` coordinate as one distinct state; it does not infer
+a physical coordinate for it. Repeated observations at one coordinate
+remain a numeric vector for a single measurement. A list cannot flatten
+such multi-value results into one scalar per member.
 
 ## Examples
 

@@ -22,6 +22,28 @@ measure_fold(x)
 A `measure_nd_tbl` or `measure_nd_list` with the original dimensional
 structure restored.
 
+## Details
+
+Each 1D payload must retain its own `fold_info` mapping. When any member
+of a collection has this metadata, every member must have its own valid
+mapping. New list unfolds never attach the first member's grid to the
+collection. For legacy objects with no member mappings, a list-level
+descriptor is accepted only as a caller's explicit shared-grid
+declaration.
+
+The 1D `location` column contains point indices, not physical
+coordinates. It must contain each integer from 1 to the saved point
+count exactly once. Reordering rows is supported: values are matched
+back by point index. Signal values may be edited, but deleting points,
+duplicating indices, or losing part of the mapping is an error. Folding
+restores canonical unfold order, rather than the original acquisition
+row order. To edit a collection while retaining its mappings, transform
+the extracted members with
+[`lapply()`](https://rdrr.io/r/base/lapply.html) and rebuild with
+[`new_measure_list()`](https://jameshwade.github.io/measure/dev/reference/new_measure_list.md).
+List-column assignment or other operations that remove attributes can
+lose a mapping.
+
 ## See also
 
 [`measure_unfold()`](https://jameshwade.github.io/measure/dev/reference/measure_unfold.md)

@@ -35,6 +35,14 @@ A list with components:
 
 - `has_na`: Whether any values are NA
 
+Missing coordinate states are retained in `unique_values` and counted in
+`shape`; they make `is_regular` false. `has_na` describes missing signal
+values only. The reported shape does not imply that every grid cell was
+observed, and numeric payloads are not checked for physical validity.
+For a collection, inspect each entry of `sample_info` for its own
+metadata; collection-level names and units describe the first
+measurement.
+
 ## Examples
 
 ``` r

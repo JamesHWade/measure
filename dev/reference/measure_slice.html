@@ -29,6 +29,7 @@ returning a lower-dimensional result."><meta property="og:image" content="https:
     <li><a class="dropdown-item" href="../articles/howto-technique-packs.html">Technique Pack Extensions</a></li>
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
+    <li><a class="dropdown-item" href="../articles/multidimensional-measurements.html">Multidimensional Measurements</a></li>
     <li><a class="dropdown-item" href="../articles/analytical-records.html">Analytical Records</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Reference</h6></li>
@@ -82,14 +83,33 @@ dimension numbers (e.g., <code>dim_1 = 5</code>) or dimension names if set
 
 
 <dt id="arg-drop">drop<a class="anchor" aria-label="anchor" href="#arg-drop"></a></dt>
-<dd><p>Logical. If <code>TRUE</code> (default), dimensions with a single
-value are dropped from the result. If <code>FALSE</code>, they are retained.</p></dd>
+<dd><p>One non-missing logical value. If <code>TRUE</code> (default), dimensions
+with a single observed coordinate are dropped from the result. If <code>FALSE</code>,
+all original dimensions are retained.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>measure_tbl</code>, <code>measure_nd_tbl</code>, <code>measure_list</code>, or
-<code>measure_nd_list</code> depending on the number of remaining dimensions.</p>
+    <p>For one measurement, a numeric vector when all dimensions are
+dropped, a <code>measure_tbl</code> when one dimension remains, or a
+<code>measure_nd_tbl</code> when two or more dimensions remain. For a list input,
+homogeneous results are returned as a numeric vector, <code>measure_list</code>, or
+<code>measure_nd_list</code>, respectively.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Coordinate selections use exact numeric membership. A numeric selection
+can include <code>NA</code> to select rows whose stored coordinate is unknown. A
+predicate must return one non-missing logical value for every input row.
+Empty slices warn and remain n-dimensional with the original axes because
+no axis has a single observed coordinate. Slicing retains the input point
+order. If list members would have different result dimensionalities or
+retained axis schemas, an error recommends <code>drop = FALSE</code> or mapping over
+members separately.
+The dropping rule counts a stored <code>NA</code> coordinate as one distinct state;
+it does not infer a physical coordinate for it. Repeated observations at
+one coordinate remain a numeric vector for a single measurement. A list
+cannot flatten such multi-value results into one scalar per member.</p>
     </div>
 
     <div class="section level2">

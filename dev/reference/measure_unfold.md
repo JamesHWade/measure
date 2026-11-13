@@ -25,8 +25,8 @@ measure_unfold(x, order = NULL)
 
 ## Value
 
-A `measure_tbl` or `measure_list` with an attribute `"fold_info"`
-containing the metadata needed to reconstruct the nD structure.
+A `measure_tbl` or `measure_list` with fold metadata. Each unfolded list
+member carries its own `"fold_info"` attribute.
 
 ## Details
 
@@ -47,6 +47,10 @@ The fold metadata includes:
 - `coordinates`: The original coordinate values for each dimension
 
 - `order`: The unfolding order used
+
+Unfolding sorts points into the selected canonical dimension order.
+Folding restores that sorted order; it does not restore the input's
+acquisition row order.
 
 ## See also
 

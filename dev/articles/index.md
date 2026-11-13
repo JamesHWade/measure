@@ -23,6 +23,8 @@ Task-oriented guides for solving specific problems
   Diagnostics](https://jameshwade.github.io/measure/dev/articles/howto-data-organization.md):
 - [Analytical records: samples, injections, channels, and
   curves](https://jameshwade.github.io/measure/dev/articles/analytical-records.md):
+- [Working with multidimensional
+  measurements](https://jameshwade.github.io/measure/dev/articles/multidimensional-measurements.md):
 
 ### Reference
 
