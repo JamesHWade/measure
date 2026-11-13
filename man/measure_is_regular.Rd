@@ -15,6 +15,9 @@ Logical indicating if the measurement has a regular grid.
 \description{
 A regular grid means all combinations of unique coordinate values exist
 exactly once (i.e., it forms a complete rectangular grid).
+A missing coordinate makes regularity \code{FALSE}: an unknown coordinate
+cannot establish a complete grid. This is a structural check, not a
+finite-value or physical-validity assessment.
 }
 \examples{
 # Regular grid (all combinations present)

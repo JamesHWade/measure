@@ -21,6 +21,13 @@ A list with components:
 \item \code{is_regular}: Whether the grid is regular
 \item \code{has_na}: Whether any values are NA
 }
+
+Missing coordinate states are retained in \code{unique_values} and counted in
+\code{shape}; they make \code{is_regular} false. \code{has_na} describes missing signal
+values only. The reported shape does not imply that every grid cell was
+observed, and numeric payloads are not checked for physical validity.
+For a collection, inspect each entry of \code{sample_info} for its own metadata;
+collection-level names and units describe the first measurement.
 }
 \description{
 Returns detailed information about the coordinate grid, including

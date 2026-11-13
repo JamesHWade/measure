@@ -1,5 +1,10 @@
 # measure 0.0.1.9003
 
+* `new_measure_nd_tbl()` rejects malformed numbered dimensions and ambiguous
+  dimension metadata. nD list construction and grid inspection validate mutable
+  payloads; unknown coordinates stay visible in grid summaries and cannot
+  establish a regular grid (#145).
+
 * A runnable analytical-records guide demonstrates reinjections, detector
   channels, interleaved curve import, source references, native roundtrips,
   and direct use of independent curves in recipes.
