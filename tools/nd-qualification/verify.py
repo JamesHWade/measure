@@ -198,7 +198,29 @@ def main():
     assert isinstance(observed["R"], str) and observed["R"]
     installed = observed["installed_measure"]
     assert isinstance(installed["path"], str) and installed["path"]
+    assert installed["namespace_path"] == installed["path"]
     assert isinstance(installed["version"], str) and installed["version"]
+    runtime, runtime_sha = read_json(output / "runtime.json")
+    status, status_sha = read_json(output / "run-status.json")
+    assert status["complete"] is True and status["stage"] == "complete"
+    assert status["error"] is None
+    assert isinstance(status["updated_utc"], str) and status["updated_utc"]
+    assert isinstance(runtime["created_utc"], str) and runtime["created_utc"]
+    session = runtime["session_info"]
+    assert isinstance(session, list) and session and session[0] == observed["R"]
+    assert all(isinstance(line, str) for line in session)
+    versions = runtime["dependency_versions"]
+    assert isinstance(versions, dict) and versions["measure"] == installed["version"]
+    for dependency in (
+        "measure",
+        "recipes",
+        "dplyr",
+        "tibble",
+        "vctrs",
+        "jsonlite",
+        "digest",
+    ):
+        assert isinstance(versions[dependency], str) and versions[dependency]
     head = observed["tool_checkout_head"]
     assert head is None or re.fullmatch("(?:[0-9a-f]{40}|[0-9a-f]{64})", head)
     fixture_map = {f["id"]: f for f in fixtures["fixtures"]}
@@ -270,6 +292,8 @@ def main():
         "python_version": platform.python_version(),
         "input_files_sha256": hashes,
         "results_sha256": result_sha,
+        "runtime_sha256": runtime_sha,
+        "run_status_sha256": status_sha,
         "counts": COUNTS,
         "fold_cases": len(expected_fold),
         "slice_cases": len(declaration["slices"]),
