@@ -58,7 +58,7 @@
 
 \method{obj_print_data}{measure_nd_list}(x, ...)
 
-\method{[}{measure_nd_list}(x, i, ...)
+\method{[}{measure_nd_list}(x, i, ..., drop = FALSE)
 
 \method{[[}{measure_nd_list}(x, i, ...)
 
@@ -68,6 +68,11 @@
 \item{x}{A measure_list or measure_tbl object.}
 
 \item{...}{Additional arguments (unused).}
+
+\item{i}{Locations of elements to keep, using \code{\link[vctrs:vec_slice]{vctrs::vec_slice()}} index
+semantics.}
+
+\item{drop}{Ignored because \code{measure_nd_list} is always one-dimensional.}
 }
 \description{
 These methods enable nice printing of measure objects in tibbles.
