@@ -315,7 +315,7 @@ run_qualification <- function() {
     stop("Could not determine the qualification script path.", call. = FALSE)
   }
   script_path <- normalizePath(
-    sub("^--file=", "", script_arg[[1L]]),
+    gsub("~+~", " ", sub("^--file=", "", script_arg[[1L]]), fixed = TRUE),
     winslash = "/",
     mustWork = TRUE
   )
