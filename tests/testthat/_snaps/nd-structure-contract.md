@@ -172,3 +172,19 @@
     Condition
       Error in `.nd_validate_list()`:
       ! All elements of measure_nd_list must have the same dimensionality. Found: 2 and 3.
+
+# nD attributes are matched by their exact canonical names
+
+    Code
+      new_measure_nd_list(list(missing_ndim))
+    Condition
+      Error in `.nd_validate_tbl()`:
+      ! `each measure_nd_tbl element` must have an unclassed integer `ndim` attribute of at least 2.
+
+---
+
+    Code
+      measure_grid_info(missing_order)
+    Condition
+      Error in `.nd_validate_tbl()`:
+      ! `x` must have canonical `dim_order` equal to 1 and 2.

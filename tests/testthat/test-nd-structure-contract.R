@@ -299,3 +299,21 @@ test_that("nD grid inspection rejects forged mixed-dimension collections", {
   expect_snapshot(error = TRUE, measure_grid_info(mixed))
   expect_snapshot(error = TRUE, measure_is_regular(mixed))
 })
+
+test_that("nD attributes are matched by their exact canonical names", {
+  x <- new_measure_nd_tbl(location_1 = 1:2, location_2 = 3:4, value = 5:6)
+  missing_ndim <- x
+  attr(missing_ndim, "ndim_backup") <- attr(x, "ndim")
+  attr(missing_ndim, "ndim") <- NULL
+  expect_snapshot(error = TRUE, new_measure_nd_list(list(missing_ndim)))
+
+  missing_order <- x
+  attr(missing_order, "dim_order_backup") <- attr(x, "dim_order")
+  attr(missing_order, "dim_order") <- NULL
+  expect_snapshot(error = TRUE, measure_grid_info(missing_order))
+
+  attr(x, "dim_names_backup") <- c("old_time", "old_wavelength")
+  attr(x, "dim_units_backup") <- c("old_min", "old_nm")
+  expect_null(measure_dim_names(x))
+  expect_null(measure_dim_units(x))
+})
