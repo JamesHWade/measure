@@ -152,6 +152,9 @@ measure_unfold.measure_nd_list <- function(x, order = NULL) {
 #' values may be edited, but deleting points, duplicating indices, or losing
 #' part of the mapping is an error. Folding restores canonical unfold order,
 #' rather than the original acquisition row order.
+#' To edit a collection while retaining its mappings, transform the extracted
+#' members with `lapply()` and rebuild with [new_measure_list()]. List-column
+#' assignment or other operations that remove attributes can lose a mapping.
 #'
 #' @seealso [measure_unfold()] to create foldable 1D data
 #'
@@ -182,7 +185,7 @@ measure_fold.measure_tbl <- function(x) {
       "Fold input must have exactly {.field location} and {.field value} columns."
     )
   }
-  fold_info <- attr(x, "fold_info")
+  fold_info <- attr(x, "fold_info", exact = TRUE)
 
   if (is.null(fold_info)) {
     cli::cli_abort(
@@ -259,7 +262,7 @@ measure_fold.measure_list <- function(x) {
     return(new_measure_nd_list(list()))
   }
 
-  member_info <- lapply(x, attr, which = "fold_info")
+  member_info <- lapply(x, attr, which = "fold_info", exact = TRUE)
   has_member_info <- !vapply(member_info, is.null, logical(1))
 
   if (any(has_member_info) && !all(has_member_info)) {
@@ -277,7 +280,7 @@ measure_fold.measure_list <- function(x) {
   } else {
     # Older list unfolds stored one shared grid on the list. Use it only when
     # none of the members has its own metadata.
-    fold_info <- attr(x, "fold_info")
+    fold_info <- attr(x, "fold_info", exact = TRUE)
     if (is.null(fold_info)) {
       results <- lapply(x, measure_fold)
     } else {

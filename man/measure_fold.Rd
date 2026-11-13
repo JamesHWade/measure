@@ -30,6 +30,9 @@ Reordering rows is supported: values are matched back by point index. Signal
 values may be edited, but deleting points, duplicating indices, or losing
 part of the mapping is an error. Folding restores canonical unfold order,
 rather than the original acquisition row order.
+To edit a collection while retaining its mappings, transform the extracted
+members with \code{lapply()} and rebuild with \code{\link[=new_measure_list]{new_measure_list()}}. List-column
+assignment or other operations that remove attributes can lose a mapping.
 }
 \examples{
 # Create, unfold, then fold back

@@ -62,3 +62,21 @@
     Condition
       Error in `.nd_validate_fold_info()`:
       ! Fold metadata coordinates must contain exactly one vector per dimension.
+
+# fold mappings require the exact fold_info attribute
+
+    Code
+      measure_fold(unfolded)
+    Condition
+      Error in `measure_fold()`:
+      ! Cannot fold: no fold metadata found.
+      i Use `measure_unfold()` to create foldable data.
+
+---
+
+    Code
+      measure_fold(pair)
+    Condition
+      Error in `FUN()`:
+      ! Cannot fold: no fold metadata found.
+      i Use `measure_unfold()` to create foldable data.

@@ -348,3 +348,15 @@ test_that("fold rejects dimensional list containers before reconstruction", {
   )
   expect_snapshot(error = TRUE, measure_fold(bad_coordinates))
 })
+
+test_that("fold mappings require the exact fold_info attribute", {
+  x <- new_measure_nd_tbl(location_1 = 1:2, location_2 = 3:4, value = 5:6)
+  unfolded <- measure_unfold(x)
+  attr(unfolded, "fold_info_backup") <- attr(unfolded, "fold_info")
+  attr(unfolded, "fold_info") <- NULL
+  expect_snapshot(error = TRUE, measure_fold(unfolded))
+
+  pair <- new_measure_list(list(unfolded, unfolded))
+  attr(pair, "fold_info_backup") <- attr(unfolded, "fold_info_backup")
+  expect_snapshot(error = TRUE, measure_fold(pair))
+})
