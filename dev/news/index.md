@@ -9,6 +9,12 @@
   incomplete mappings and malformed metadata fail clearly
   ([\#145](https://github.com/JamesHWade/measure/issues/145)).
 
+- [`measure_ndim()`](https://jameshwade.github.io/measure/dev/reference/measure_ndim.md)
+  and empty nD list subsets retain their validated dimensional prototype
+  through list filtering, vctrs slicing and recipe baking. Empty 3D
+  collections print as 3D; subsetting keeps strict vctrs index rules
+  ([\#151](https://github.com/JamesHWade/measure/issues/151)).
+
 - [`measure_project()`](https://jameshwade.github.io/measure/dev/reference/measure_project.md)
   validates dimensions, flags and scalar summaries before combining
   results. List outputs retain compatible axes; ordinary R all-missing

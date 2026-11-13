@@ -239,7 +239,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 #> Warning: iarpls did not converge after 10 iterations.
 #> ℹ Final change: 0.0135 (tol: 1e-05)
 #> Warning: iarpls did not converge after 10 iterations.
-#> ℹ Final change: 1.23e-05 (tol: 1e-05)
+#> ℹ Final change: 1.22e-05 (tol: 1e-05)
 #> Warning: iarpls did not converge after 10 iterations.
 #> ℹ Final change: 0.024 (tol: 1e-05)
 #> Warning: iarpls did not converge after 10 iterations.

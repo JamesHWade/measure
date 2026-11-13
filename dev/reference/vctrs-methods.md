@@ -57,7 +57,7 @@ format(x, ...)
 obj_print_data(x, ...)
 
 # S3 method for class 'measure_nd_list'
-x[i, ...]
+x[i, ..., drop = FALSE]
 
 # S3 method for class 'measure_nd_list'
 x[[i, ...]]
@@ -75,3 +75,13 @@ c(...)
 - ...:
 
   Additional arguments (unused).
+
+- i:
+
+  Locations of elements to keep, using
+  [`vctrs::vec_slice()`](https://vctrs.r-lib.org/reference/vec_slice.html)
+  index semantics.
+
+- drop:
+
+  Ignored because `measure_nd_list` is always one-dimensional.
