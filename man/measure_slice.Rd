@@ -18,16 +18,34 @@ dimension numbers (e.g., \code{dim_1 = 5}) or dimension names if set
 \item A function: applied to coordinates, should return logical
 }}
 
-\item{drop}{Logical. If \code{TRUE} (default), dimensions with a single
-value are dropped from the result. If \code{FALSE}, they are retained.}
+\item{drop}{One non-missing logical value. If \code{TRUE} (default), dimensions
+with a single observed coordinate are dropped from the result. If \code{FALSE},
+all original dimensions are retained.}
 }
 \value{
-A \code{measure_tbl}, \code{measure_nd_tbl}, \code{measure_list}, or
-\code{measure_nd_list} depending on the number of remaining dimensions.
+For one measurement, a numeric vector when all dimensions are
+dropped, a \code{measure_tbl} when one dimension remains, or a
+\code{measure_nd_tbl} when two or more dimensions remain. For a list input,
+homogeneous results are returned as a numeric vector, \code{measure_list}, or
+\code{measure_nd_list}, respectively.
 }
 \description{
 Fixes one or more dimensions at specific coordinate values or ranges,
 returning a lower-dimensional result.
+}
+\details{
+Coordinate selections use exact numeric membership. A numeric selection
+can include \code{NA} to select rows whose stored coordinate is unknown. A
+predicate must return one non-missing logical value for every input row.
+Empty slices warn and remain n-dimensional with the original axes because
+no axis has a single observed coordinate. Slicing retains the input point
+order. If list members would have different result dimensionalities or
+retained axis schemas, an error recommends \code{drop = FALSE} or mapping over
+members separately.
+The dropping rule counts a stored \code{NA} coordinate as one distinct state;
+it does not infer a physical coordinate for it. Repeated observations at
+one coordinate remain a numeric vector for a single measurement. A list
+cannot flatten such multi-value results into one scalar per member.
 }
 \examples{
 # Create a 3D measurement (2 x 3 x 4)

@@ -9,22 +9,38 @@ measure_project(x, along, fn = mean, na_rm = TRUE, ...)
 \arguments{
 \item{x}{A \code{measure_nd_tbl} or \code{measure_nd_list} object.}
 
-\item{along}{Integer or character specifying which dimension(s) to
-aggregate across. Can use dimension numbers or names.}
+\item{along}{A nonempty vector of unique whole-number dimension indices or
+known semantic dimension names to aggregate across.}
 
-\item{fn}{Aggregation function. Default is \code{mean}.}
+\item{fn}{Function that returns one plain numeric scalar for each group.
+Default is \code{mean}.}
 
-\item{na_rm}{Logical. Remove NA values before aggregation? Default \code{TRUE}.}
+\item{na_rm}{One non-missing logical value. Remove \code{NA} values before
+aggregation? Default \code{TRUE}.}
 
 \item{...}{Additional arguments passed to \code{fn}.}
 }
 \value{
-A \code{measure_tbl}, \code{measure_nd_tbl}, \code{measure_list}, or
-\code{measure_nd_list} with reduced dimensionality.
+A numeric scalar when all dimensions are projected, a
+\code{measure_tbl} when one dimension remains, or a \code{measure_nd_tbl} when two
+or more dimensions remain. For a list input, homogeneous results are
+returned as a numeric vector, \code{measure_list}, or \code{measure_nd_list},
+respectively.
 }
 \description{
 Reduces dimensionality by applying an aggregation function across
 one or more dimensions.
+}
+\details{
+Projection groups rows by the retained coordinate columns. \code{dplyr} sorts
+these groups in ascending coordinate order (with missing coordinates last),
+so the result order describes coordinate groups rather than acquisition
+timing. With \code{na_rm = TRUE}, \code{NA} values are removed before \code{fn} is called.
+An all-missing group therefore calls \code{fn(numeric(0))}; for example, \code{mean}
+returns \code{NaN} and \code{sum} returns \code{0}. An empty input with retained axes
+yields an empty measurement; projecting all axes applies \code{fn} to
+\code{numeric(0)}. List members must retain the same axis positions, names, and
+units or projection errors and recommends mapping over members separately.
 }
 \examples{
 # Create 2D measurement (time x wavelength)

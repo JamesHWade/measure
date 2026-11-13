@@ -5,6 +5,14 @@
   point indices restore their original coordinate/value association; incomplete
   mappings and malformed metadata fail clearly (#145).
 
+* `measure_project()` validates dimensions, flags and scalar summaries before
+  combining results. List outputs retain compatible axes; ordinary R all-missing
+  mean/sum behavior is explicit (#145).
+
+* `measure_slice()` rejects ambiguous selectors and incomplete predicate masks
+  instead of recycling them or inserting missing rows. Heterogeneous list
+  reductions fail with guidance for retaining axes or mapping separately (#145).
+
 * `new_measure_nd_tbl()` rejects malformed numbered dimensions and ambiguous
   dimension metadata. nD list construction and grid inspection validate mutable
   payloads; unknown coordinates stay visible in grid summaries and cannot

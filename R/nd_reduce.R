@@ -464,11 +464,29 @@ measure_fold.measure_list <- function(x) {
 #'   - A single value: exact match
 #'   - A numeric vector: match any of these values
 #'   - A function: applied to coordinates, should return logical
-#' @param drop Logical. If `TRUE` (default), dimensions with a single
-#'   value are dropped from the result. If `FALSE`, they are retained.
+#' @param drop One non-missing logical value. If `TRUE` (default), dimensions
+#'   with a single observed coordinate are dropped from the result. If `FALSE`,
+#'   all original dimensions are retained.
 #'
-#' @return A `measure_tbl`, `measure_nd_tbl`, `measure_list`, or
-#'   `measure_nd_list` depending on the number of remaining dimensions.
+#' @return For one measurement, a numeric vector when all dimensions are
+#'   dropped, a `measure_tbl` when one dimension remains, or a
+#'   `measure_nd_tbl` when two or more dimensions remain. For a list input,
+#'   homogeneous results are returned as a numeric vector, `measure_list`, or
+#'   `measure_nd_list`, respectively.
+#'
+#' @details
+#' Coordinate selections use exact numeric membership. A numeric selection
+#' can include `NA` to select rows whose stored coordinate is unknown. A
+#' predicate must return one non-missing logical value for every input row.
+#' Empty slices warn and remain n-dimensional with the original axes because
+#' no axis has a single observed coordinate. Slicing retains the input point
+#' order. If list members would have different result dimensionalities or
+#' retained axis schemas, an error recommends `drop = FALSE` or mapping over
+#' members separately.
+#' The dropping rule counts a stored `NA` coordinate as one distinct state;
+#' it does not infer a physical coordinate for it. Repeated observations at
+#' one coordinate remain a numeric vector for a single measurement. A list
+#' cannot flatten such multi-value results into one scalar per member.
 #'
 #' @examples
 #' # Create a 3D measurement (2 x 3 x 4)
@@ -498,92 +516,37 @@ measure_slice <- function(x, ..., drop = TRUE) {
 
 #' @export
 measure_slice.measure_nd_tbl <- function(x, ..., drop = TRUE) {
-  ndim <- measure_ndim(x)
-  dim_names <- measure_dim_names(x)
+  .nd_validate_tbl(x)
+  .nd_validate_flag(drop, "drop")
   conditions <- list(...)
-
-  if (length(conditions) == 0) {
-    return(x)
-  }
-
-  # Resolve dimension references (by name or number)
-  resolved <- resolve_dim_conditions(conditions, ndim, dim_names)
-
-  # Apply filters
-  mask <- rep(TRUE, nrow(x))
-  for (dim_num in names(resolved)) {
-    col_name <- paste0("location_", dim_num)
-    condition <- resolved[[dim_num]]
-
-    if (is.function(condition)) {
-      mask <- mask & condition(x[[col_name]])
-    } else {
-      mask <- mask & (x[[col_name]] %in% condition)
-    }
-  }
-
-  filtered <- x[mask, ]
-
-  if (nrow(filtered) == 0) {
-    cli::cli_warn("Slice returned no data points.")
-  }
-
-  # Determine which dimensions to drop
-  if (drop) {
-    dims_to_drop <- integer(0)
-    for (i in seq_len(ndim)) {
-      col_name <- paste0("location_", i)
-      if (length(unique(filtered[[col_name]])) == 1) {
-        dims_to_drop <- c(dims_to_drop, i)
-      }
-    }
-
-    remaining_dims <- setdiff(seq_len(ndim), dims_to_drop)
-    n_remaining <- length(remaining_dims)
-
-    if (n_remaining == 0) {
-      # All dimensions dropped - return single value
-      return(filtered$value)
-    } else if (n_remaining == 1) {
-      # 1D result
-      return(new_measure_tbl(
-        location = filtered[[paste0("location_", remaining_dims)]],
-        value = filtered$value
-      ))
-    } else {
-      # nD result with fewer dimensions
-      return(renumber_dims(
-        filtered,
-        remaining_dims,
-        dim_names,
-        measure_dim_units(x)
-      ))
-    }
-  }
-
-  # No dropping - return as nD with same structure
-  rebuild_nd_tbl(filtered, ndim, dim_names, measure_dim_units(x))
+  .nd_slice_tbl(x, conditions, drop)$result
 }
 
 
 #' @export
 measure_slice.measure_nd_list <- function(x, ..., drop = TRUE) {
-  results <- lapply(x, function(m) measure_slice(m, ..., drop = drop))
+  .nd_validate_list(x)
+  .nd_validate_flag(drop, "drop")
+  conditions <- list(...)
 
-  # Determine result type based on first element
-  if (length(results) == 0) {
+  if (length(x) == 0L) {
+    # Validate selector syntax against the documented 2D empty-list prototype.
+    resolve_dim_conditions(conditions, measure_ndim(x), measure_dim_names(x))
     return(new_measure_nd_list(list()))
   }
 
-  first <- results[[1]]
-  if (is_measure_tbl(first) && !is_measure_nd_tbl(first)) {
-    new_measure_list(results)
-  } else if (is_measure_nd_tbl(first)) {
-    new_measure_nd_list(results)
-  } else {
-    # Scalar results
-    unlist(results)
+  extracted <- lapply(x, .nd_slice_tbl, conditions = conditions, drop = drop)
+  selector_dims <- lapply(extracted, `[[`, "selector_dims")
+  if (!all(vapply(selector_dims, identical, logical(1), selector_dims[[1]]))) {
+    cli::cli_abort(
+      c(
+        "Slice selectors resolve to different dimensions across {.cls measure_nd_list} members.",
+        "i" = "Use numeric dimension selectors or map the slice over members separately."
+      )
+    )
   }
+
+  .nd_assemble_list_results(extracted, operation = "slice", drop = drop)
 }
 
 
@@ -597,14 +560,30 @@ measure_slice.measure_nd_list <- function(x, ..., drop = TRUE) {
 #' one or more dimensions.
 #'
 #' @param x A `measure_nd_tbl` or `measure_nd_list` object.
-#' @param along Integer or character specifying which dimension(s) to
-#'   aggregate across. Can use dimension numbers or names.
-#' @param fn Aggregation function. Default is `mean`.
-#' @param na_rm Logical. Remove NA values before aggregation? Default `TRUE`.
+#' @param along A nonempty vector of unique whole-number dimension indices or
+#'   known semantic dimension names to aggregate across.
+#' @param fn Function that returns one plain numeric scalar for each group.
+#'   Default is `mean`.
+#' @param na_rm One non-missing logical value. Remove `NA` values before
+#'   aggregation? Default `TRUE`.
 #' @param ... Additional arguments passed to `fn`.
 #'
-#' @return A `measure_tbl`, `measure_nd_tbl`, `measure_list`, or
-#'   `measure_nd_list` with reduced dimensionality.
+#' @return A numeric scalar when all dimensions are projected, a
+#'   `measure_tbl` when one dimension remains, or a `measure_nd_tbl` when two
+#'   or more dimensions remain. For a list input, homogeneous results are
+#'   returned as a numeric vector, `measure_list`, or `measure_nd_list`,
+#'   respectively.
+#'
+#' @details
+#' Projection groups rows by the retained coordinate columns. `dplyr` sorts
+#' these groups in ascending coordinate order (with missing coordinates last),
+#' so the result order describes coordinate groups rather than acquisition
+#' timing. With `na_rm = TRUE`, `NA` values are removed before `fn` is called.
+#' An all-missing group therefore calls `fn(numeric(0))`; for example, `mean`
+#' returns `NaN` and `sum` returns `0`. An empty input with retained axes
+#' yields an empty measurement; projecting all axes applies `fn` to
+#' `numeric(0)`. List members must retain the same axis positions, names, and
+#' units or projection errors and recommends mapping over members separately.
 #'
 #' @examples
 #' # Create 2D measurement (time x wavelength)
@@ -638,59 +617,10 @@ measure_project.measure_nd_tbl <- function(
   na_rm = TRUE,
   ...
 ) {
-  ndim <- measure_ndim(x)
-  dim_names_orig <- measure_dim_names(x)
-  dim_units_orig <- measure_dim_units(x)
-
-  # Resolve 'along' to dimension number(s)
-  along <- resolve_dim_ref(along, ndim, dim_names_orig)
-
-  if (any(along < 1) || any(along > ndim)) {
-    cli::cli_abort(
-      "{.arg along} must be between 1 and {ndim}."
-    )
-  }
-
-  # Dimensions to keep
-  keep_dims <- setdiff(seq_len(ndim), along)
-
-  if (length(keep_dims) == 0) {
-    # Projecting across all dimensions - return scalar
-    if (na_rm) {
-      return(fn(x$value[!is.na(x$value)], ...))
-    } else {
-      return(fn(x$value, ...))
-    }
-  }
-
-  # Group by the kept dimensions and aggregate
-  keep_cols <- paste0("location_", keep_dims)
-
-  aggregated <- x |>
-    dplyr::group_by(dplyr::across(dplyr::all_of(keep_cols))) |>
-    dplyr::summarise(
-      value = if (na_rm) fn(value[!is.na(value)], ...) else fn(value, ...),
-      .groups = "drop"
-    )
-
-  # Build result
-  n_remaining <- length(keep_dims)
-
-  if (n_remaining == 1) {
-    # 1D result
-    new_measure_tbl(
-      location = aggregated[[keep_cols]],
-      value = aggregated$value
-    )
-  } else {
-    # nD result
-    renumber_dims(
-      aggregated,
-      keep_dims,
-      dim_names_orig,
-      dim_units_orig
-    )
-  }
+  .nd_validate_tbl(x)
+  .nd_validate_flag(na_rm, "na_rm")
+  .nd_validate_project_fn(fn)
+  .nd_project_tbl(x, along, fn, na_rm, list(...))$result
 }
 
 
@@ -702,24 +632,337 @@ measure_project.measure_nd_list <- function(
   na_rm = TRUE,
   ...
 ) {
-  results <- lapply(x, function(m) {
-    measure_project(m, along = along, fn = fn, na_rm = na_rm, ...)
-  })
+  .nd_validate_list(x)
+  .nd_validate_flag(na_rm, "na_rm")
+  .nd_validate_project_fn(fn)
 
-  # Determine result type
-  if (length(results) == 0) {
+  if (length(x) == 0L) {
+    resolve_dim_ref(along, measure_ndim(x), measure_dim_names(x))
     return(new_measure_list(list()))
   }
 
-  first <- results[[1]]
-  if (is.numeric(first) && length(first) == 1) {
-    # Scalar results
-    unlist(results)
-  } else if (is_measure_tbl(first) && !is_measure_nd_tbl(first)) {
-    new_measure_list(results)
-  } else {
-    new_measure_nd_list(results)
+  extracted <- lapply(
+    x,
+    .nd_project_tbl,
+    along = along,
+    fn = fn,
+    na_rm = na_rm,
+    dots = list(...)
+  )
+  along_dims <- lapply(extracted, `[[`, "along_dims")
+  if (!all(vapply(along_dims, identical, logical(1), along_dims[[1]]))) {
+    cli::cli_abort(
+      c(
+        "Projection dimensions resolve differently across {.cls measure_nd_list} members.",
+        "i" = "Use numeric dimension references or map the projection over members separately."
+      )
+    )
   }
+
+  .nd_assemble_list_results(extracted, operation = "project")
+}
+
+
+# Apply one slice to a validated nD table and retain its axis schema privately.
+# The schema is used by list methods because public 1D measure_tbl values do
+# not carry nD axis-name or unit metadata.
+# @noRd
+.nd_slice_tbl <- function(x, conditions, drop) {
+  ndim <- attr(x, "ndim")
+  dim_names_orig <- measure_dim_names(x)
+  dim_units_orig <- measure_dim_units(x)
+  resolved <- resolve_dim_conditions(conditions, ndim, dim_names_orig)
+
+  if (length(conditions) == 0L) {
+    return(list(
+      result = x,
+      type = "nd",
+      schema = .nd_axis_schema(seq_len(ndim), dim_names_orig, dim_units_orig),
+      selector_dims = integer()
+    ))
+  }
+
+  mask <- rep(TRUE, nrow(x))
+  resolved_dims <- as.integer(names(resolved))
+  for (dim_num in resolved_dims) {
+    col_name <- paste0("location_", dim_num)
+    condition <- resolved[[as.character(dim_num)]]
+
+    if (is.function(condition)) {
+      selected <- condition(x[[col_name]])
+      selector <- names(conditions)[match(dim_num, resolved_dims)]
+      .nd_validate_predicate(selected, nrow(x), selector)
+      mask <- mask & selected
+    } else {
+      mask <- mask & (x[[col_name]] %in% condition)
+    }
+  }
+
+  filtered <- x[mask, , drop = FALSE]
+  if (nrow(filtered) == 0L) {
+    cli::cli_warn("Slice returned no data points.")
+  }
+
+  if (drop) {
+    dims_to_drop <- which(vapply(
+      seq_len(ndim),
+      function(i) length(unique(filtered[[paste0("location_", i)]])) == 1L,
+      logical(1)
+    ))
+    remaining_dims <- setdiff(seq_len(ndim), dims_to_drop)
+  } else {
+    remaining_dims <- seq_len(ndim)
+  }
+
+  n_remaining <- length(remaining_dims)
+  if (n_remaining == 0L) {
+    result <- filtered$value
+    type <- "scalar"
+  } else if (n_remaining == 1L) {
+    result <- new_measure_tbl(
+      location = filtered[[paste0("location_", remaining_dims)]],
+      value = filtered$value
+    )
+    type <- "1d"
+  } else if (identical(remaining_dims, seq_len(ndim))) {
+    result <- rebuild_nd_tbl(filtered, ndim, dim_names_orig, dim_units_orig)
+    type <- "nd"
+  } else {
+    result <- renumber_dims(
+      filtered,
+      remaining_dims,
+      dim_names_orig,
+      dim_units_orig
+    )
+    type <- "nd"
+  }
+
+  list(
+    result = result,
+    type = type,
+    schema = .nd_axis_schema(remaining_dims, dim_names_orig, dim_units_orig),
+    selector_dims = resolved_dims
+  )
+}
+
+
+# Apply one projection to a validated nD table.
+# @noRd
+.nd_project_tbl <- function(x, along, fn, na_rm, dots) {
+  ndim <- attr(x, "ndim")
+  dim_names_orig <- measure_dim_names(x)
+  dim_units_orig <- measure_dim_units(x)
+  along_dims <- resolve_dim_ref(along, ndim, dim_names_orig)
+  keep_dims <- setdiff(seq_len(ndim), along_dims)
+
+  if (length(keep_dims) == 0L) {
+    result <- .nd_project_group(x$value, fn, na_rm, dots)
+    type <- "scalar"
+  } else {
+    keep_cols <- paste0("location_", keep_dims)
+    aggregated <- x |>
+      dplyr::group_by(dplyr::across(dplyr::all_of(keep_cols))) |>
+      dplyr::summarise(
+        value = .nd_project_group(value, fn, na_rm, dots),
+        .groups = "drop"
+      )
+
+    if (length(keep_dims) == 1L) {
+      result <- new_measure_tbl(
+        location = aggregated[[keep_cols]],
+        value = aggregated$value
+      )
+      type <- "1d"
+    } else {
+      result <- renumber_dims(
+        aggregated,
+        keep_dims,
+        dim_names_orig,
+        dim_units_orig
+      )
+      type <- "nd"
+    }
+  }
+
+  list(
+    result = result,
+    type = type,
+    schema = .nd_axis_schema(keep_dims, dim_names_orig, dim_units_orig),
+    along_dims = along_dims
+  )
+}
+
+
+# Validate and call the projection function on one group's signal values.
+# @noRd
+.nd_project_group <- function(values, fn, na_rm, dots) {
+  if (na_rm) {
+    values <- values[!is.na(values)]
+  }
+
+  result <- do.call(fn, c(list(values), dots))
+  if (!.nd_is_plain_numeric_vector(result) || length(result) != 1L) {
+    cli::cli_abort(
+      "{.arg fn} must return one plain numeric scalar for each projection group."
+    )
+  }
+
+  result
+}
+
+
+# Validate scalar function arguments shared by extraction methods.
+# @noRd
+.nd_validate_flag <- function(x, arg) {
+  valid <-
+    typeof(x) == "logical" &&
+    !is.object(x) &&
+    is.null(dim(x)) &&
+    length(x) == 1L &&
+    !is.na(x) &&
+    all(names(attributes(x)) %in% "names")
+
+  if (!valid) {
+    cli::cli_abort("{.arg {arg}} must be one plain, non-missing logical value.")
+  }
+
+  invisible(x)
+}
+
+
+# Validate the exact shape required from a predicate result.
+# @noRd
+.nd_validate_predicate <- function(x, n, selector) {
+  valid <-
+    typeof(x) == "logical" &&
+    !is.object(x) &&
+    is.null(dim(x)) &&
+    length(x) == n &&
+    !anyNA(x) &&
+    all(names(attributes(x)) %in% "names")
+
+  if (!valid) {
+    cli::cli_abort(
+      "Predicate for {.arg {selector}} must return a plain logical vector of length {n} with no missing values."
+    )
+  }
+
+  invisible(x)
+}
+
+
+# Validate a projection function before applying it to any groups.
+# @noRd
+.nd_validate_project_fn <- function(fn) {
+  if (!is.function(fn)) {
+    cli::cli_abort("{.arg fn} must be a function.")
+  }
+  invisible(fn)
+}
+
+
+# Record retained nD axes privately; 1D measure_tbl intentionally has no such
+# public metadata.
+# @noRd
+.nd_axis_schema <- function(axes, dim_names, dim_units) {
+  if (length(axes) == 0L) {
+    return(list(
+      positions = integer(),
+      dim_names = NULL,
+      dim_units = NULL
+    ))
+  }
+
+  list(
+    positions = as.integer(axes),
+    dim_names = if (is.null(dim_names)) NULL else dim_names[axes],
+    dim_units = if (is.null(dim_units)) NULL else dim_units[axes]
+  )
+}
+
+
+# Return an internal class category for every extraction result.
+# @noRd
+.nd_result_type <- function(x) {
+  if (is_measure_nd_tbl(x)) {
+    return("nd")
+  }
+  if (is_measure_tbl(x)) {
+    return("1d")
+  }
+  if (.nd_is_plain_numeric_vector(x)) {
+    return("scalar")
+  }
+  NA_character_
+}
+
+
+# Check every member's class and retained schema before constructing the list
+# result, then preserve the existing scalar/1D/nD return conventions.
+# @noRd
+.nd_assemble_list_results <- function(extracted, operation, drop = TRUE) {
+  if (length(extracted) == 0L) {
+    if (identical(operation, "slice")) {
+      return(new_measure_nd_list(list()))
+    }
+    return(new_measure_list(list()))
+  }
+
+  results <- lapply(extracted, `[[`, "result")
+  observed_types <- vapply(results, .nd_result_type, character(1))
+  if (anyNA(observed_types)) {
+    cli::cli_abort(
+      "Every {.cls measure_nd_list} member must produce a numeric, 1D, or nD extraction result."
+    )
+  }
+
+  if (length(unique(observed_types)) != 1L) {
+    if (identical(operation, "slice") && isTRUE(drop)) {
+      cli::cli_abort(
+        c(
+          "Slicing {.cls measure_nd_list} members produced mixed scalar, 1D, and nD results.",
+          "i" = "Use {.code drop = FALSE} to retain all axes, or map the slice over members separately."
+        )
+      )
+    }
+    cli::cli_abort(
+      "Projection results across {.cls measure_nd_list} members have incompatible dimensionality; map the operation over members separately."
+    )
+  }
+
+  schemas <- lapply(extracted, `[[`, "schema")
+  if (!all(vapply(schemas, identical, logical(1), schemas[[1]]))) {
+    if (identical(operation, "slice") && isTRUE(drop)) {
+      cli::cli_abort(
+        c(
+          "Slicing {.cls measure_nd_list} members retained different axis positions, names, or units.",
+          "i" = "Use {.code drop = FALSE} when the difference comes from dropped axes, or map the slice over members separately."
+        )
+      )
+    }
+    cli::cli_abort(
+      c(
+        "Extraction results across {.cls measure_nd_list} members retained different axis positions, names, or units.",
+        "i" = "Map the operation over members separately."
+      )
+    )
+  }
+
+  if (identical(observed_types[[1]], "scalar")) {
+    if (any(lengths(results) != 1L)) {
+      cli::cli_abort(
+        c(
+          "Dropping all axes left multiple observations in a list member.",
+          "i" = "Use {.code drop = FALSE} or map the slice over members separately."
+        )
+      )
+    }
+    return(unlist(results))
+  }
+  if (identical(observed_types[[1]], "1d")) {
+    return(new_measure_list(results))
+  }
+  new_measure_nd_list(results)
 }
 
 
@@ -730,63 +973,156 @@ measure_project.measure_nd_list <- function(
 #' Resolve dimension conditions to numbered dimensions
 #' @noRd
 resolve_dim_conditions <- function(conditions, ndim, dim_names) {
-  resolved <- list()
-
-  for (name in names(conditions)) {
-    # Try to match as dim_N format
-    if (grepl("^dim_[0-9]+$", name)) {
-      dim_num <- as.integer(sub("dim_", "", name, fixed = TRUE))
-    } else if (!is.null(dim_names) && name %in% dim_names) {
-      # Match by semantic name
-      dim_num <- which(dim_names == name)
-    } else {
-      # Try as plain number
-      dim_num <- suppressWarnings(as.integer(name))
-      if (is.na(dim_num)) {
-        cli::cli_abort(
-          "Unknown dimension reference: {.val {name}}. Use dim_1, dim_2, ... or dimension names."
-        )
-      }
-    }
-
-    if (dim_num < 1 || dim_num > ndim) {
-      cli::cli_abort(
-        "Dimension {dim_num} is out of range (1 to {ndim})."
-      )
-    }
-
-    resolved[[as.character(dim_num)]] <- conditions[[name]]
+  if (length(conditions) == 0L) {
+    return(list())
   }
 
-  resolved
+  condition_names <- names(conditions)
+  if (
+    is.null(condition_names) ||
+      length(condition_names) != length(conditions) ||
+      anyNA(condition_names) ||
+      !all(nzchar(trimws(condition_names)))
+  ) {
+    cli::cli_abort("Every slice condition must have a nonempty dimension name.")
+  }
+  if (anyDuplicated(condition_names)) {
+    cli::cli_abort("Slice condition names must be unique.")
+  }
+
+  resolved_dims <- vapply(
+    condition_names,
+    .nd_resolve_slice_dim,
+    integer(1),
+    ndim = ndim,
+    dim_names = dim_names
+  )
+  if (anyDuplicated(resolved_dims)) {
+    cli::cli_abort(
+      "Slice conditions must not select the same dimension through multiple aliases."
+    )
+  }
+
+  for (i in seq_along(conditions)) {
+    condition <- conditions[[i]]
+    valid_condition <- is.function(condition) ||
+      .nd_is_plain_numeric_vector(condition)
+    if (!valid_condition) {
+      cli::cli_abort(
+        "Slice condition {.arg {condition_names[[i]]}} must be a function or a plain one-dimensional numeric vector."
+      )
+    }
+  }
+
+  names(conditions) <- as.character(resolved_dims)
+  conditions
+}
+
+
+# Resolve a slice selector string, rejecting reserved-name collisions.
+# @noRd
+.nd_resolve_slice_dim <- function(name, ndim, dim_names) {
+  candidates <- numeric()
+  reserved <- character()
+  if (grepl("\\Adim_[0-9]+\\z", name, perl = TRUE)) {
+    reserved <- c(reserved, sub("^dim_", "", name))
+  }
+  if (grepl("\\A[0-9]+\\z", name, perl = TRUE)) {
+    reserved <- c(reserved, name)
+  }
+  if (length(reserved) > 0L) {
+    candidates <- c(candidates, suppressWarnings(as.double(reserved)))
+  }
+
+  if (!is.null(dim_names)) {
+    semantic <- which(!is.na(dim_names) & dim_names == name)
+    candidates <- c(candidates, semantic)
+  }
+  candidates <- unique(candidates)
+
+  if (length(candidates) == 0L) {
+    cli::cli_abort(
+      "Unknown dimension reference: {.val {name}}. Use dim_1, dim_2, an integer dimension string, or a known dimension name."
+    )
+  }
+  if (length(candidates) > 1L) {
+    cli::cli_abort(
+      "Dimension reference {.val {name}} is ambiguous between a reserved dimension and a semantic axis name."
+    )
+  }
+  if (
+    !is.finite(candidates[[1]]) ||
+      candidates[[1]] < 1 ||
+      candidates[[1]] > ndim ||
+      candidates[[1]] != floor(candidates[[1]])
+  ) {
+    cli::cli_abort(
+      "Dimension reference {.val {name}} is out of range (1 to {ndim})."
+    )
+  }
+
+  as.integer(candidates[[1]])
 }
 
 
 #' Resolve a dimension reference to number(s)
 #' @noRd
 resolve_dim_ref <- function(ref, ndim, dim_names) {
-  if (is.numeric(ref)) {
+  if (
+    typeof(ref) %in%
+      c("integer", "double") &&
+      !is.object(ref) &&
+      is.null(dim(ref)) &&
+      all(names(attributes(ref)) %in% "names")
+  ) {
+    valid <-
+      length(ref) > 0L &&
+      !anyNA(ref) &&
+      all(is.finite(ref)) &&
+      all(ref == floor(ref)) &&
+      all(ref >= 1 & ref <= ndim)
+    if (!valid) {
+      cli::cli_abort(
+        "{.arg along} must contain nonempty, unique whole-number dimensions between 1 and {ndim}."
+      )
+    }
+    if (anyDuplicated(ref)) {
+      cli::cli_abort("{.arg along} must not contain duplicate dimensions.")
+    }
     return(as.integer(ref))
   }
 
-  if (is.character(ref)) {
-    if (!is.null(dim_names)) {
-      matches <- match(ref, dim_names)
-      if (anyNA(matches)) {
-        cli::cli_abort(
-          "Unknown dimension name(s): {.val {ref[is.na(matches)]}}."
-        )
-      }
-      return(matches)
-    } else {
+  if (
+    typeof(ref) == "character" &&
+      !is.object(ref) &&
+      is.null(dim(ref)) &&
+      all(names(attributes(ref)) %in% "names")
+  ) {
+    valid_names <- length(ref) > 0L && !anyNA(ref) && all(nzchar(trimws(ref)))
+    if (!valid_names) {
+      cli::cli_abort(
+        "{.arg along} must contain nonempty, non-missing dimension names."
+      )
+    }
+    if (is.null(dim_names)) {
       cli::cli_abort(
         "Cannot use dimension names: no dim_names set on this measurement."
       )
     }
+    matches <- match(ref, dim_names)
+    if (anyNA(matches)) {
+      cli::cli_abort(
+        "Unknown dimension name(s): {.val {ref[is.na(matches)]}}."
+      )
+    }
+    if (anyDuplicated(matches)) {
+      cli::cli_abort("{.arg along} must not contain duplicate dimensions.")
+    }
+    return(as.integer(matches))
   }
 
   cli::cli_abort(
-    "{.arg along} must be numeric or character."
+    "{.arg along} must be a plain numeric or character vector."
   )
 }
 
