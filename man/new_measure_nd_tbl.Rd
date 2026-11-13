@@ -40,6 +40,8 @@ Dimension names and units are \code{NULL} or unclassed character vectors with
 one entry per dimension. Use \code{NA_character_} for unknown metadata. Known
 names must be unique and nonblank; known units must be nonblank and may
 repeat. Names and units are declarations, with no inference or conversion.
+Inspection uses exact attribute names; similarly prefixed backup attributes
+do not supply missing dimension metadata.
 
 Construction checks structure, not analytical or physical validity.
 Sparse grids, repeated coordinate tuples, missing values, and nonfinite

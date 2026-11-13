@@ -67,7 +67,7 @@
     )
   }
 
-  ndim <- attr(x, "ndim")
+  ndim <- attr(x, "ndim", exact = TRUE)
   if (
     !is.integer(ndim) ||
       length(ndim) != 1L ||
@@ -93,7 +93,7 @@
     )
   }
 
-  if (!identical(attr(x, "dim_order"), seq_len(ndim))) {
+  if (!identical(attr(x, "dim_order", exact = TRUE), seq_len(ndim))) {
     cli::cli_abort(
       "{.arg {arg}} must have canonical {.code dim_order} equal to {.val {seq_len(ndim)}}."
     )
@@ -108,8 +108,13 @@
     }
   }
 
-  .nd_check_dim_metadata(attr(x, "dim_names"), "dim_names", ndim, unique = TRUE)
-  .nd_check_dim_metadata(attr(x, "dim_units"), "dim_units", ndim)
+  .nd_check_dim_metadata(
+    attr(x, "dim_names", exact = TRUE),
+    "dim_names",
+    ndim,
+    unique = TRUE
+  )
+  .nd_check_dim_metadata(attr(x, "dim_units", exact = TRUE), "dim_units", ndim)
 
   invisible(x)
 }
@@ -124,7 +129,7 @@
     x,
     function(el) {
       .nd_validate_tbl(el, arg = "each measure_nd_tbl element")
-      attr(el, "ndim")
+      attr(el, "ndim", exact = TRUE)
     },
     integer(1)
   )

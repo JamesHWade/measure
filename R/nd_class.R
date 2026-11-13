@@ -44,6 +44,8 @@
 #' one entry per dimension. Use `NA_character_` for unknown metadata. Known
 #' names must be unique and nonblank; known units must be nonblank and may
 #' repeat. Names and units are declarations, with no inference or conversion.
+#' Inspection uses exact attribute names; similarly prefixed backup attributes
+#' do not supply missing dimension metadata.
 #'
 #' Construction checks structure, not analytical or physical validity.
 #' Sparse grids, repeated coordinate tuples, missing values, and nonfinite
@@ -197,8 +199,8 @@ as_measure_nd_tbl <- function(x, dim_names = NULL, dim_units = NULL) {
   # Build args for new_measure_nd_tbl
   args <- stats::setNames(lapply(loc_cols, function(col) x[[col]]), loc_cols)
   args$value <- x[["value"]]
-  args$dim_names <- dim_names %||% attr(x, "dim_names")
-  args$dim_units <- dim_units %||% attr(x, "dim_units")
+  args$dim_names <- dim_names %||% attr(x, "dim_names", exact = TRUE)
+  args$dim_units <- dim_units %||% attr(x, "dim_units", exact = TRUE)
 
   do.call(new_measure_nd_tbl, args)
 }
@@ -231,8 +233,8 @@ is_measure_nd_tbl <- function(x) {
 #' @rdname vctrs-methods
 #' @export
 print.measure_nd_tbl <- function(x, ..., n = NULL, width = NULL) {
-  ndim <- attr(x, "ndim") %||% 2L
-  dim_names <- attr(x, "dim_names")
+  ndim <- attr(x, "ndim", exact = TRUE) %||% 2L
+  dim_names <- attr(x, "dim_names", exact = TRUE)
 
   if (!is.null(dim_names)) {
     dim_str <- paste(dim_names, collapse = " x ")
@@ -258,7 +260,7 @@ print.measure_nd_tbl <- function(x, ..., n = NULL, width = NULL) {
 #' @rdname vctrs-methods
 #' @exportS3Method vctrs::vec_ptype_abbr
 vec_ptype_abbr.measure_nd_tbl <- function(x, ...) {
-  ndim <- attr(x, "ndim") %||% 2L
+  ndim <- attr(x, "ndim", exact = TRUE) %||% 2L
   paste0("msr", ndim, "d")
 }
 
@@ -334,7 +336,7 @@ new_measure_nd_list <- function(x = list()) {
   .nd_validate_list(x)
 
   # All elements now have validated, consistent dimensionality.
-  ndims <- vapply(x, function(el) attr(el, "ndim"), integer(1))
+  ndims <- vapply(x, function(el) attr(el, "ndim", exact = TRUE), integer(1))
 
   # Use a canonical nD prototype for vctrs list-column behavior
   prototype_args <- stats::setNames(
@@ -381,7 +383,7 @@ is_measure_nd_list <- function(x) {
 #' @export
 print.measure_nd_list <- function(x, ...) {
   n <- length(x)
-  ndim <- if (n > 0) attr(x[[1]], "ndim") %||% 2L else 2L
+  ndim <- if (n > 0) attr(x[[1]], "ndim", exact = TRUE) %||% 2L else 2L
 
   cat(
     "A measure_nd_list with",
@@ -413,7 +415,7 @@ print.measure_nd_list <- function(x, ...) {
 #' @exportS3Method vctrs::vec_ptype_abbr
 vec_ptype_abbr.measure_nd_list <- function(x, ...) {
   if (length(x) > 0) {
-    ndim <- attr(x[[1]], "ndim") %||% 2L
+    ndim <- attr(x[[1]], "ndim", exact = TRUE) %||% 2L
     paste0("meas", ndim, "d")
   } else {
     "measnd"
@@ -435,7 +437,7 @@ format.measure_nd_list <- function(x, ...) {
     return(character())
   }
   sizes <- vapply(x, nrow, integer(1))
-  ndim <- if (length(x) > 0) attr(x[[1]], "ndim") %||% 2L else 2L
+  ndim <- if (length(x) > 0) attr(x[[1]], "ndim", exact = TRUE) %||% 2L else 2L
   paste0("<meas", ndim, "d [", sizes, "]>")
 }
 
@@ -514,7 +516,7 @@ measure_ndim <- function(x) {
 
 #' @export
 measure_ndim.measure_nd_tbl <- function(x) {
-  attr(x, "ndim") %||% 2L
+  attr(x, "ndim", exact = TRUE) %||% 2L
 }
 
 
@@ -523,7 +525,7 @@ measure_ndim.measure_nd_list <- function(x) {
   if (length(x) == 0) {
     return(2L) # Default for empty list
   }
-  attr(x[[1]], "ndim") %||% 2L
+  attr(x[[1]], "ndim", exact = TRUE) %||% 2L
 }
 
 
@@ -577,7 +579,7 @@ measure_dim_names <- function(x) {
 
 #' @export
 measure_dim_names.measure_nd_tbl <- function(x) {
-  attr(x, "dim_names")
+  attr(x, "dim_names", exact = TRUE)
 }
 
 
@@ -586,7 +588,7 @@ measure_dim_names.measure_nd_list <- function(x) {
   if (length(x) == 0) {
     return(NULL)
   }
-  attr(x[[1]], "dim_names")
+  attr(x[[1]], "dim_names", exact = TRUE)
 }
 
 
@@ -621,7 +623,7 @@ measure_dim_units <- function(x) {
 
 #' @export
 measure_dim_units.measure_nd_tbl <- function(x) {
-  attr(x, "dim_units")
+  attr(x, "dim_units", exact = TRUE)
 }
 
 
@@ -630,7 +632,7 @@ measure_dim_units.measure_nd_list <- function(x) {
   if (length(x) == 0) {
     return(NULL)
   }
-  attr(x[[1]], "dim_units")
+  attr(x[[1]], "dim_units", exact = TRUE)
 }
 
 
