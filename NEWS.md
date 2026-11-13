@@ -1,5 +1,10 @@
 # measure 0.0.1.9003
 
+* `measure_fold()` retains each measurement's coordinates and metadata after
+  unfolding a collection, including unequal grids and lengths. Valid reordered
+  point indices restore their original coordinate/value association; incomplete
+  mappings and malformed metadata fail clearly (#145).
+
 * `new_measure_nd_tbl()` rejects malformed numbered dimensions and ambiguous
   dimension metadata. nD list construction and grid inspection validate mutable
   payloads; unknown coordinates stay visible in grid summaries and cannot

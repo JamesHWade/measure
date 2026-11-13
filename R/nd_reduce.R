@@ -23,8 +23,8 @@
 #'   unfolding. Default is `NULL`, which uses the natural order (1, 2, ..., n).
 #'   The first dimension varies fastest.
 #'
-#' @return A `measure_tbl` or `measure_list` with an attribute `"fold_info"`
-#'   containing the metadata needed to reconstruct the nD structure.
+#' @return A `measure_tbl` or `measure_list` with fold metadata. Each unfolded
+#'   list member carries its own `"fold_info"` attribute.
 #'
 #' @details
 #' Unfolding is useful for:
@@ -38,6 +38,10 @@
 #' - `dim_names`, `dim_units`: Original dimension metadata
 #' - `coordinates`: The original coordinate values for each dimension
 #' - `order`: The unfolding order used
+#'
+#' Unfolding sorts points into the selected canonical dimension order. Folding
+#' restores that sorted order; it does not restore the input's acquisition row
+#' order.
 #'
 #' @seealso [measure_fold()] to reconstruct the nD structure
 #'
@@ -65,18 +69,14 @@ measure_unfold <- function(x, order = NULL) {
 
 #' @export
 measure_unfold.measure_nd_tbl <- function(x, order = NULL) {
+  .nd_validate_tbl(x)
   ndim <- measure_ndim(x)
 
   if (is.null(order)) {
     order <- seq_len(ndim)
   }
 
-  # Validate order
-  if (length(order) != ndim || !setequal(order, seq_len(ndim))) {
-    cli::cli_abort(
-      "{.arg order} must be a permutation of 1:{ndim}, got {.val {order}}."
-    )
-  }
+  order <- .nd_validate_fold_order(order, ndim, arg = "order")
 
   # Sort by the specified dimension order
   loc_cols <- paste0("location_", order)
@@ -110,15 +110,18 @@ measure_unfold.measure_nd_tbl <- function(x, order = NULL) {
 
 #' @export
 measure_unfold.measure_nd_list <- function(x, order = NULL) {
-  results <- lapply(x, function(m) measure_unfold(m, order = order))
-  result <- new_measure_list(results)
-
-  # Preserve fold_info from first element for the list
-  if (length(results) > 0) {
-    attr(result, "fold_info") <- attr(results[[1]], "fold_info")
+  .nd_validate_list(x)
+  if (length(x) == 0L) {
+    ndim <- measure_ndim(x)
+    if (is.null(order)) {
+      order <- seq_len(ndim)
+    }
+    .nd_validate_fold_order(order, ndim, arg = "order")
+    return(new_measure_list(list()))
   }
 
-  result
+  results <- lapply(x, function(m) measure_unfold(m, order = order))
+  new_measure_list(results)
 }
 
 
@@ -135,6 +138,20 @@ measure_unfold.measure_nd_list <- function(x, order = NULL) {
 #'
 #' @return A `measure_nd_tbl` or `measure_nd_list` with the original
 #'   dimensional structure restored.
+#'
+#' @details
+#' Each 1D payload must retain its own `fold_info` mapping. When any member
+#' of a collection has this metadata, every member must have its own valid
+#' mapping. New list unfolds never attach the first member's grid to the
+#' collection. For legacy objects with no member mappings, a list-level
+#' descriptor is accepted only as a caller's explicit shared-grid declaration.
+#'
+#' The 1D `location` column contains point indices, not physical coordinates.
+#' It must contain each integer from 1 to the saved point count exactly once.
+#' Reordering rows is supported: values are matched back by point index. Signal
+#' values may be edited, but deleting points, duplicating indices, or losing
+#' part of the mapping is an error. Folding restores canonical unfold order,
+#' rather than the original acquisition row order.
 #'
 #' @seealso [measure_unfold()] to create foldable 1D data
 #'
@@ -160,6 +177,11 @@ measure_fold <- function(x) {
 
 #' @export
 measure_fold.measure_tbl <- function(x) {
+  if (!is.data.frame(x) || !identical(names(x), c("location", "value"))) {
+    cli::cli_abort(
+      "Fold input must have exactly {.field location} and {.field value} columns."
+    )
+  }
   fold_info <- attr(x, "fold_info")
 
   if (is.null(fold_info)) {
@@ -171,8 +193,16 @@ measure_fold.measure_tbl <- function(x) {
     )
   }
 
-  ndim <- fold_info$ndim
+  .nd_validate_fold_info(fold_info)
+
+  ndim <- as.integer(fold_info$ndim)
   n <- nrow(x)
+  .nd_check_numeric_vector(x$value, "x$value")
+  if (length(x$value) != n) {
+    cli::cli_abort(
+      "Fold input {.field value} must have one entry per point index."
+    )
+  }
 
   # Validate length matches
   expected_n <- length(fold_info$coordinates[[1]])
@@ -185,13 +215,34 @@ measure_fold.measure_tbl <- function(x) {
     )
   }
 
-  # Reconstruct nD structure
+  point_index <- x$location
+  valid_point_index <-
+    typeof(point_index) %in%
+    c("integer", "double") &&
+    !is.object(point_index) &&
+    is.null(dim(point_index)) &&
+    length(point_index) == n &&
+    !anyNA(point_index) &&
+    all(is.finite(point_index)) &&
+    all(point_index == floor(point_index)) &&
+    !anyDuplicated(point_index) &&
+    all(point_index >= 1 & point_index <= n)
+
+  if (!valid_point_index) {
+    cli::cli_abort(
+      "The 1D {.field location} must be a complete point index from 1 to {n}."
+    )
+  }
+
+  # Reconstruct nD structure in canonical unfold order, following the point
+  # indices if rows were reordered after unfolding.
+  value_order <- order(point_index)
   loc_cols <- paste0("location_", seq_len(ndim))
   args <- stats::setNames(
     lapply(seq_len(ndim), function(i) fold_info$coordinates[[i]]),
     loc_cols
   )
-  args$value <- x$value
+  args$value <- x$value[value_order]
   args$dim_names <- fold_info$dim_names
   args$dim_units <- fold_info$dim_units
 
@@ -201,20 +252,196 @@ measure_fold.measure_tbl <- function(x) {
 
 #' @export
 measure_fold.measure_list <- function(x) {
-  fold_info <- attr(x, "fold_info")
+  if (!is.list(x) || is.data.frame(x) || !is.null(dim(x))) {
+    cli::cli_abort("Fold input must be a one-dimensional list of measurements.")
+  }
+  if (length(x) == 0L) {
+    return(new_measure_nd_list(list()))
+  }
 
-  # If list has fold_info, apply to all elements
-  if (!is.null(fold_info)) {
-    results <- lapply(x, function(m) {
-      attr(m, "fold_info") <- fold_info
-      measure_fold(m)
-    })
-  } else {
-    # Try to fold each element individually
+  member_info <- lapply(x, attr, which = "fold_info")
+  has_member_info <- !vapply(member_info, is.null, logical(1))
+
+  if (any(has_member_info) && !all(has_member_info)) {
+    cli::cli_abort(
+      c(
+        "Cannot fold a list with partial member metadata.",
+        "i" = "Every member must carry its own {.field fold_info} attribute."
+      )
+    )
+  }
+
+  if (all(has_member_info)) {
+    # Per-member metadata is authoritative. Ignore any stale list-level copy.
     results <- lapply(x, measure_fold)
+  } else {
+    # Older list unfolds stored one shared grid on the list. Use it only when
+    # none of the members has its own metadata.
+    fold_info <- attr(x, "fold_info")
+    if (is.null(fold_info)) {
+      results <- lapply(x, measure_fold)
+    } else {
+      .nd_validate_fold_info(fold_info)
+      results <- lapply(x, function(m) {
+        attr(m, "fold_info") <- fold_info
+        measure_fold(m)
+      })
+    }
   }
 
   new_measure_nd_list(results)
+}
+
+
+# Validate an unfolding permutation without coercing lossy or ambiguous input.
+# @noRd
+.nd_validate_fold_order <- function(order, ndim, arg = "order") {
+  valid <-
+    typeof(order) %in%
+    c("integer", "double") &&
+    !is.object(order) &&
+    is.null(dim(order)) &&
+    length(order) == ndim &&
+    !anyNA(order) &&
+    all(is.finite(order)) &&
+    all(order == floor(order)) &&
+    all(order >= 1 & order <= ndim) &&
+    !anyDuplicated(order)
+
+  if (!valid) {
+    cli::cli_abort(
+      "{.arg {arg}} must be a nonempty integral complete permutation of 1:{ndim}."
+    )
+  }
+
+  # A complete set of unique integers within 1:ndim is the full permutation.
+  as.integer(order)
+}
+
+
+# Validate the private metadata written by measure_unfold(). Older single
+# measurements use the same fields and remain valid when those fields pass.
+# @noRd
+.nd_validate_fold_info <- function(fold_info) {
+  required <- c("ndim", "dim_names", "dim_units", "order", "coordinates")
+  valid_container <-
+    is.list(fold_info) &&
+    !is.object(fold_info) &&
+    is.null(dim(fold_info)) &&
+    !is.null(names(fold_info)) &&
+    !anyDuplicated(names(fold_info)) &&
+    all(required %in% names(fold_info))
+
+  if (!valid_container) {
+    cli::cli_abort(
+      "Fold metadata must be a one-dimensional named list containing {.field ndim}, {.field dim_names}, {.field dim_units}, {.field order}, and {.field coordinates}."
+    )
+  }
+
+  ndim <- fold_info$ndim
+  valid_ndim <-
+    typeof(ndim) %in%
+    c("integer", "double") &&
+    !is.object(ndim) &&
+    is.null(dim(ndim)) &&
+    length(ndim) == 1L &&
+    !is.na(ndim) &&
+    is.finite(ndim) &&
+    ndim == floor(ndim) &&
+    ndim >= 2 &&
+    ndim <= .Machine$integer.max
+
+  if (!valid_ndim) {
+    cli::cli_abort(
+      "Fold metadata {.field ndim} must be one integer of at least 2."
+    )
+  }
+
+  ndim <- as.integer(ndim)
+
+  coordinates <- fold_info$coordinates
+  if (
+    !is.list(coordinates) ||
+      is.object(coordinates) ||
+      !is.null(dim(coordinates)) ||
+      length(coordinates) != ndim
+  ) {
+    cli::cli_abort(
+      "Fold metadata {.field coordinates} must contain exactly one vector per dimension."
+    )
+  }
+
+  .nd_validate_fold_order(fold_info$order, ndim, arg = "fold_info$order")
+
+  for (field in c("dim_names", "dim_units")) {
+    values <- fold_info[[field]]
+    valid_values <-
+      is.null(values) ||
+      (is.character(values) &&
+        !is.object(values) &&
+        is.null(dim(values)) &&
+        length(values) == ndim)
+
+    if (!valid_values) {
+      cli::cli_abort(
+        "Fold metadata {.field {field}} must be NULL or a character vector of length {ndim}."
+      )
+    }
+
+    if (is.null(values)) {
+      next
+    }
+
+    known <- !is.na(values)
+    if (any(known & !nzchar(trimws(values, whitespace = "[\\h\\v]")))) {
+      cli::cli_abort(
+        "Fold metadata {.field {field}} cannot contain blank values."
+      )
+    }
+
+    if (identical(field, "dim_names") && anyDuplicated(values[known])) {
+      cli::cli_abort(
+        "Known fold metadata {.field dim_names} must be unique."
+      )
+    }
+  }
+
+  expected_coordinate_names <- paste0("dim_", seq_len(ndim))
+  if (
+    !is.list(coordinates) ||
+      is.object(coordinates) ||
+      length(coordinates) != ndim ||
+      !identical(names(coordinates), expected_coordinate_names)
+  ) {
+    cli::cli_abort(
+      "Fold metadata {.field coordinates} must be a named list with exactly {.val {expected_coordinate_names}} in dimension order."
+    )
+  }
+
+  valid_coordinates <- vapply(
+    coordinates,
+    function(values) {
+      typeof(values) %in%
+        c("integer", "double") &&
+        !is.object(values) &&
+        is.null(dim(values))
+    },
+    logical(1)
+  )
+
+  if (!all(valid_coordinates)) {
+    cli::cli_abort(
+      "Every fold metadata coordinate must be a plain one-dimensional numeric vector."
+    )
+  }
+
+  if (length(unique(lengths(coordinates))) > 1L) {
+    cli::cli_abort(
+      "Fold metadata coordinate vectors must have equal lengths."
+    )
+  }
+
+  invisible(fold_info)
 }
 
 

@@ -14,8 +14,8 @@ unfolding. Default is \code{NULL}, which uses the natural order (1, 2, ..., n).
 The first dimension varies fastest.}
 }
 \value{
-A \code{measure_tbl} or \code{measure_list} with an attribute \code{"fold_info"}
-containing the metadata needed to reconstruct the nD structure.
+A \code{measure_tbl} or \code{measure_list} with fold metadata. Each unfolded
+list member carries its own \code{"fold_info"} attribute.
 }
 \description{
 Converts an n-dimensional measurement to a 1D vector by flattening
@@ -37,6 +37,10 @@ The fold metadata includes:
 \item \code{coordinates}: The original coordinate values for each dimension
 \item \code{order}: The unfolding order used
 }
+
+Unfolding sorts points into the selected canonical dimension order. Folding
+restores that sorted order; it does not restore the input's acquisition row
+order.
 }
 \examples{
 # Create a 2D measurement (3 x 4 grid)
