@@ -655,11 +655,11 @@ Key functions for multi-dimensional measurement data:
 
 ## See Also
 
-- [Getting
-  Started](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.md) -
+- [Getting Started
+  (online)](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html) -
   Introduction to measure workflows
-- [Preprocessing
-  Reference](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.md) -
+- [Preprocessing Reference
+  (online)](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.html) -
   Guide to preprocessing techniques
 - [Internal Class
   System](https://jameshwade.github.io/measure/dev/articles/explanation-internals.md) -

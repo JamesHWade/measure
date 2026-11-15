@@ -420,12 +420,12 @@ error message telling you which columns are available.
 
 ## See Also
 
-- [Getting
-  Started](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.md) -
+- [Getting Started
+  (online)](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html) -
   Learn the fundamentals of measure
 - [Multi-Dimensional
   Measurements](https://jameshwade.github.io/measure/dev/articles/reference-multidimensional.md) -
   Working with nD data
-- [Preprocessing
-  Reference](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.md) -
+- [Preprocessing Reference
+  (online)](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.html) -
   Guide to preprocessing techniques

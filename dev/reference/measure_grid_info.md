@@ -13,7 +13,7 @@ measure_grid_info(x)
 
 - x:
 
-  A `measure_nd_tbl` object.
+  A `measure_nd_tbl` or `measure_nd_list` object.
 
 ## Value
 
@@ -41,7 +41,9 @@ values only. The reported shape does not imply that every grid cell was
 observed, and numeric payloads are not checked for physical validity.
 For a collection, inspect each entry of `sample_info` for its own
 metadata; collection-level names and units describe the first
-measurement.
+measurement. An empty collection reports dimensionality from its
+validated prototype, without inferring observed points or metadata from
+nonexistent members.
 
 ## Examples
 

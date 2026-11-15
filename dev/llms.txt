@@ -1101,6 +1101,9 @@ NMR)
   : Check if an n-dimensional measurement has a regular grid
 - [`measure_grid_info()`](https://jameshwade.github.io/measure/dev/reference/measure_grid_info.md)
   : Get grid information for an n-dimensional measurement
+- [`write_measure_nd()`](https://jameshwade.github.io/measure/dev/reference/measure-nd-bundle.md)
+  [`read_measure_nd()`](https://jameshwade.github.io/measure/dev/reference/measure-nd-bundle.md)
+  : Read and write native n-dimensional measurement bundles
 - [`measure_apply()`](https://jameshwade.github.io/measure/dev/reference/measure_apply.md)
   : Apply a function to measurement data along dimensions
 - [`measure_unfold()`](https://jameshwade.github.io/measure/dev/reference/measure_unfold.md)

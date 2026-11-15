@@ -2,12 +2,32 @@
 
 ## measure 0.0.1.9003
 
+- Native bundle readers recognize symbolic links on Windows as well as
+  Unix-like systems. Scalar and nD writers preserve existing
+  dangling-link destinations.
+
+- [`write_measure_nd()`](https://jameshwade.github.io/measure/dev/reference/measure-nd-bundle.md)
+  and
+  [`read_measure_nd()`](https://jameshwade.github.io/measure/dev/reference/measure-nd-bundle.md)
+  preserve supported nD tables and collections in a native CSV or TSV
+  bundle, including column storage types, finite numerical values,
+  signed zero, missing/nonfinite states, member and point order,
+  dimension metadata, list labels and empty prototypes
+  ([\#154](https://github.com/JamesHWade/measure/issues/154)).
+
 - [`measure_fold()`](https://jameshwade.github.io/measure/dev/reference/measure_fold.md)
   retains each measurement’s coordinates and metadata after unfolding a
   collection, including unequal grids and lengths. Valid reordered point
   indices restore their original coordinate/value association;
   incomplete mappings and malformed metadata fail clearly
   ([\#145](https://github.com/JamesHWade/measure/issues/145)).
+
+- [`measure_grid_info()`](https://jameshwade.github.io/measure/dev/reference/measure_grid_info.md)
+  reports dimensionality from the validated prototype of an empty nD
+  collection, agreeing with
+  [`measure_ndim()`](https://jameshwade.github.io/measure/dev/reference/measure_ndim.md)
+  after filtering or restoring an empty 3D list
+  ([\#153](https://github.com/JamesHWade/measure/issues/153)).
 
 - [`measure_ndim()`](https://jameshwade.github.io/measure/dev/reference/measure_ndim.md)
   and empty nD list subsets retain their validated dimensional prototype

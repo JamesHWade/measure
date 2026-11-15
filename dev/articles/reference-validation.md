@@ -1032,7 +1032,7 @@ print(report)
 #> Method: Compound X Assay
 #> Analyst: J. Smith
 #> Lab: Analytical Development
-#> Date: 2026-11-13
+#> Date: 2026-11-15
 #> 
 #> ── Validation Sections ──
 #> 
@@ -1053,7 +1053,7 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-11-13 12:20:16.901009
+#> Generated: 2026-11-15 22:01:21.981651
 #> R version: 4.6.2
 #> measure version: 0.0.1.9003
 #> 
@@ -1069,7 +1069,7 @@ summary(report)
 #> 
 #> ── Validation Report Summary ───────────────────────────────────────────────────
 #> Method: Compound X Assay
-#> Date: 2026-11-13
+#> Date: 2026-11-15
 #> 
 #> # A tibble: 9 × 4
 #>   section                 status n_results notes             
@@ -1235,9 +1235,9 @@ For more details on any function, see the package documentation with
 
 ## See Also
 
-- [Getting
-  Started](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.md) -
+- [Getting Started
+  (online)](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html) -
   Introduction to measure workflows
-- [Preprocessing
-  Reference](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.md) -
+- [Preprocessing Reference
+  (online)](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.html) -
   Guide to preprocessing techniques
