@@ -1,5 +1,10 @@
 # measure 0.0.1.9003
 
+* `write_measure_nd()` and `read_measure_nd()` preserve supported nD tables and
+  collections in a native CSV or TSV bundle, including column storage types,
+  finite numerical values, signed zero, missing/nonfinite states, member and
+  point order, dimension metadata, list labels and empty prototypes (#154).
+
 * `measure_fold()` retains each measurement's coordinates and metadata after
   unfolding a collection, including unequal grids and lengths. Valid reordered
   point indices restore their original coordinate/value association; incomplete
