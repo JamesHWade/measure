@@ -633,11 +633,8 @@ test_that("reader enforces cumulative byte limits and fixed member files", {
   axes <- file.path(symlink_bundle, "axes.csv")
   target <- tempfile("axes-target-")
   file.rename(axes, target)
-  if (file.symlink(target, axes)) {
-    expect_error(read_measure_nd(symlink_bundle), "symbolic links")
-  } else {
-    skip("This filesystem does not allow symbolic links.")
-  }
+  native_io_test_link(target, axes)
+  expect_error(read_measure_nd(symlink_bundle), "symbolic links")
 
   directory_member <- file.path(withr::local_tempdir(), "directory-member")
   write_measure_nd(nd_io_test_tbl(), directory_member)
@@ -671,10 +668,9 @@ test_that("writer does not overwrite paths and cleans staging after failures", {
   expect_identical(readLines(existing_file), "leave me")
 
   dangling <- file.path(output, "dangling")
-  if (file.symlink(file.path(output, "missing-target"), dangling)) {
-    expect_error(write_measure_nd(measurement, dangling), "already exists")
-    expect_match(Sys.readlink(dangling), "missing-target")
-  }
+  native_io_test_link(file.path(output, "missing-target"), dangling)
+  expect_error(write_measure_nd(measurement, dangling), "already exists")
+  expect_match(fs::link_path(dangling), "missing-target")
 
   destination <- file.path(output, "copy-failure")
   copy_file <- .record_io_copy_file
