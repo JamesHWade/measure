@@ -24,6 +24,8 @@ jobs:
           needs: check
       - name: Install the checked-out candidate
         run: R CMD INSTALL .
+      - name: Check portable runtime metadata
+        run: python3 -m unittest discover -s tools/nd-interchange -p 'test_*.py'
       - name: Verify public R and independent Python interchange
         run: |
           python3 --version
