@@ -51,6 +51,280 @@ The pair can share an nD list while preserving each member's grid and
 metadata. The list does not assert that the two measurements have identical
 coordinates.
 
+## Save the raw DAD payload before extracting a trace
+
+The next paired example keeps the input point order. Retention-time groups
+appear in descending order, and wavelengths within each time group are also
+listed in descending order. The members have different sparse grids, and one
+coordinate tuple is repeated. Missing signal values remain missing
+observations; they are not replaced with zero. The member names below are
+labels only. They do not supply sample or injection identifiers.
+These are synthetic teaching observations, not an instrument recording.
+
+```{r native-nd-roundtrip}
+raw_dad_a <- new_measure_nd_tbl(
+  location_1 = c(3, 3, 3, 1.5, 1.5, 1.5, 1.5, 0, 0),
+  location_2 = c(300L, 254L, 210L, 300L, 254L, 210L, 210L, 300L, 254L),
+  value = c(-0.0, 0.42, 0.61, 0.15, 0.58, 0.72, NA_real_, 0.18, 0.83),
+  dim_names = c("retention_time", "wavelength"),
+  dim_units = c("min", "nm")
+)
+
+raw_dad_b <- new_measure_nd_tbl(
+  location_1 = c(4, 4, 2, 2, 2, 0, 0),
+  location_2 = c(320L, 270L, 320L, 270L, 235L, 320L, 270L),
+  value = c(1.4, 1.1, 1.8, 1.2, NA_real_, 2.2, 1.5),
+  dim_names = c("retention_time", "wavelength"),
+  dim_units = c("min", "nm")
+)
+
+raw_dad_pair <- new_measure_nd_list(
+  list(member_A = raw_dad_a, member_B = raw_dad_b)
+)
+
+column_types <- function(x) {
+  vapply(
+    x[c("location_1", "location_2", "value")],
+    typeof,
+    character(1)
+  )
+}
+
+finite_binary64_bytes <- function(x) {
+  stopifnot(typeof(x) == "double")
+  connection <- rawConnection(raw(), open = "wb")
+  on.exit(close(connection), add = TRUE)
+  writeBin(
+    x[is.finite(x)],
+    connection,
+    size = 8L,
+    endian = "little"
+  )
+  rawConnectionValue(connection)
+}
+
+expected_column_types <- c(
+  location_1 = "double",
+  location_2 = "integer",
+  value = "double"
+)
+
+stopifnot(
+  identical(nrow(raw_dad_a), 9L),
+  identical(nrow(raw_dad_b), 7L),
+  identical(
+    sort(unique(raw_dad_a$location_1), decreasing = TRUE),
+    c(3, 1.5, 0)
+  ),
+  identical(
+    sort(unique(raw_dad_a$location_2), decreasing = TRUE),
+    c(300L, 254L, 210L)
+  ),
+  identical(sort(unique(raw_dad_b$location_1), decreasing = TRUE), c(4, 2, 0)),
+  identical(
+    sort(unique(raw_dad_b$location_2), decreasing = TRUE),
+    c(320L, 270L, 235L)
+  )
+)
+
+guide_temp_dir <- tempfile("measure-dad-guide-")
+dir.create(guide_temp_dir)
+
+tryCatch(
+  {
+    raw_bundle <- file.path(guide_temp_dir, "raw-dad-native")
+    write_measure_nd(raw_dad_pair, path = raw_bundle, delim = ",")
+    restored_raw_dad <- read_measure_nd(
+      raw_bundle,
+      max_bytes = 10 * 1024^2
+    )
+
+    stopifnot(
+      identical(restored_raw_dad, raw_dad_pair),
+      identical(names(restored_raw_dad), c("member_A", "member_B")),
+      identical(restored_raw_dad[[1]]$location_1, raw_dad_a$location_1),
+      identical(restored_raw_dad[[1]]$location_2, raw_dad_a$location_2),
+      identical(restored_raw_dad[[1]]$value, raw_dad_a$value),
+      identical(
+        measure_dim_names(restored_raw_dad[[1]]),
+        c("retention_time", "wavelength")
+      ),
+      identical(measure_dim_units(restored_raw_dad[[1]]), c("min", "nm")),
+      identical(column_types(raw_dad_a), expected_column_types),
+      identical(column_types(raw_dad_b), expected_column_types),
+      identical(column_types(restored_raw_dad[[1]]), expected_column_types),
+      identical(column_types(restored_raw_dad[[2]]), expected_column_types),
+      identical(
+        finite_binary64_bytes(raw_dad_a$location_1),
+        finite_binary64_bytes(restored_raw_dad[[1]]$location_1)
+      ),
+      identical(
+        finite_binary64_bytes(raw_dad_a$value),
+        finite_binary64_bytes(restored_raw_dad[[1]]$value)
+      ),
+      identical(
+        finite_binary64_bytes(raw_dad_b$location_1),
+        finite_binary64_bytes(restored_raw_dad[[2]]$location_1)
+      ),
+      identical(
+        finite_binary64_bytes(raw_dad_b$value),
+        finite_binary64_bytes(restored_raw_dad[[2]]$value)
+      ),
+      identical(
+        finite_binary64_bytes(raw_dad_a$value[1]),
+        as.raw(c(0L, 0L, 0L, 0L, 0L, 0L, 0L, 128L))
+      ),
+      identical(
+        finite_binary64_bytes(restored_raw_dad[[1]]$value[1]),
+        as.raw(c(0L, 0L, 0L, 0L, 0L, 0L, 0L, 128L))
+      )
+    )
+
+    # The empty list retains its validated 3D prototype through native I/O.
+    empty_3d <- new_measure_nd_tbl(
+      location_1 = integer(),
+      location_2 = double(),
+      location_3 = integer(),
+      value = integer(),
+      dim_names = c("retention_time", "wavelength", "scan"),
+      dim_units = c("min", "nm", NA_character_)
+    )
+    empty_3d_list <- new_measure_nd_list(list(empty_3d))[0]
+    empty_3d_bundle <- file.path(guide_temp_dir, "empty-3d-native")
+    write_measure_nd(empty_3d_list, path = empty_3d_bundle)
+    restored_empty_3d <- read_measure_nd(empty_3d_bundle)
+    empty_3d_grid <- measure_grid_info(restored_empty_3d)
+
+    stopifnot(
+      identical(restored_empty_3d, empty_3d_list),
+      identical(measure_ndim(restored_empty_3d), 3L),
+      identical(empty_3d_grid$ndim, 3L),
+      identical(empty_3d_grid$n_samples, 0L),
+      identical(empty_3d_grid$sample_info, list())
+    )
+
+    # Extract only after the raw bundle has been reloaded and checked.
+    selected_wavelength <- 254L
+    restored_member_a <- restored_raw_dad[[1]]
+    selected_original_point_indices <- which(
+      restored_member_a$location_2 == selected_wavelength
+    )
+    raw_trace_254 <- measure_slice(
+      restored_member_a,
+      wavelength = selected_wavelength,
+      drop = TRUE
+    )
+
+    stopifnot(
+      identical(
+        raw_trace_254$location,
+        restored_member_a$location_1[selected_original_point_indices]
+      ),
+      identical(
+        raw_trace_254$value,
+        restored_member_a$value[selected_original_point_indices]
+      ),
+      identical(raw_trace_254$location, c(3, 1.5, 0)),
+      identical(raw_trace_254$value, c(0.42, 0.58, 0.83))
+    )
+
+    raw_points_file <- file.path(raw_bundle, "points.csv")
+    raw_points <- utils::read.csv(
+      raw_points_file,
+      colClasses = "character",
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    )
+    raw_points$member_index <- as.integer(raw_points$member_index)
+    raw_points$point_index <- as.integer(raw_points$point_index)
+    point_lookup <- tibble::tibble(
+      member_index = raw_points$member_index,
+      point_index = raw_points$point_index,
+      source_record_ordinal = seq_len(nrow(raw_points))
+    )
+    point_mapping <- dplyr::left_join(
+      tibble::tibble(
+        member_index = 1L,
+        point_index = as.integer(selected_original_point_indices)
+      ),
+      point_lookup,
+      by = c("member_index", "point_index")
+    )
+
+    stopifnot(
+      nrow(point_mapping) == length(selected_original_point_indices),
+      !anyNA(point_mapping$source_record_ordinal),
+      !anyDuplicated(point_mapping$source_record_ordinal),
+      identical(
+        point_mapping$point_index,
+        as.integer(selected_original_point_indices)
+      )
+    )
+
+    trace_order <- order(raw_trace_254$location)
+    record_trace <- new_measure_tbl(
+      location = raw_trace_254$location[trace_order],
+      value = raw_trace_254$value[trace_order]
+    )
+    source_rows_for_record <- as.integer(
+      point_mapping$source_record_ordinal[
+        match(trace_order, seq_len(nrow(point_mapping)))
+      ]
+    )
+    stopifnot(identical(
+      source_rows_for_record,
+      as.integer(point_mapping$source_record_ordinal[trace_order])
+    ))
+
+    raw_points_bytes <- readBin(
+      raw_points_file,
+      what = "raw",
+      n = file.info(raw_points_file)$size
+    )
+    raw_points_sha256 <- digest::digest(
+      raw_points_bytes,
+      algo = "sha256",
+      serialize = FALSE
+    )
+    raw_points_file_name <- basename(raw_points_file)
+  },
+  finally = unlink(guide_temp_dir, recursive = TRUE)
+)
+```
+
+The native `measure-nd` v1 bundle preserves this supported numerical payload,
+including point order, the members' different grids, repeated tuples, missing
+values, and dimension names and units. It does not expand the sparse data into
+a rectangular grid or interpret the observations as a physical acquisition.
+The empty-list check also uses the public grid inspection function: its
+reported dimensionality agrees with the constructor's canonical 3D
+prototype. This vignette removes only its temporary directory after the
+example; a real workflow should retain the raw nD bundle when it is needed for
+later analysis or review.
+
+## Map an extracted trace to parsed raw points
+
+The chunk above writes and reloads the raw pair before its first slice. It then
+extracts the 254 nm trace from the restored first member, retaining the
+selected point indices from that member's original row order. Before cleaning
+the temporary bundle, it reads the actual `points.csv` and joins on
+`member_index` plus `point_index`. Its source ordinals count parsed CSV data
+records, not physical text lines. Coordinates are not used as keys, so
+repeated coordinate tuples remain distinguishable.
+
+```{r extracted-trace-lineage}
+point_mapping
+raw_trace_254
+record_trace
+```
+
+The mapping is a local tutorial calculation from the saved bundle. The scalar
+record below retains these source-record ordinals alongside its extracted
+trace and records the exact SHA-256 of the raw `points.csv` bytes. The nD
+bundle and scalar record are separate artifacts; the native scalar
+`measure-record` v1 bundle stores the trace and source reference metadata but
+does not embed the raw nD bundle or raw point file.
+
 ## Unfold and restore each member
 
 Unfolding creates one 1D payload per nD member and retains that member's fold
@@ -71,12 +345,16 @@ canonical_cells <- function(x) {
   )
 }
 
-restored_exactly <- vapply(seq_along(dad_pair), function(i) {
-  identical(
-    canonical_cells(dad_pair[[i]]),
-    canonical_cells(restored_pair[[i]])
-  )
-}, logical(1))
+restored_exactly <- vapply(
+  seq_along(dad_pair),
+  function(i) {
+    identical(
+      canonical_cells(dad_pair[[i]]),
+      canonical_cells(restored_pair[[i]])
+    )
+  },
+  logical(1)
+)
 restored_exactly
 stopifnot(all(restored_exactly))
 ```
@@ -97,9 +375,13 @@ edited_members <- lapply(unfolded_pair, function(member) {
   member
 })
 edited_pair <- measure_fold(new_measure_list(edited_members))
-stopifnot(all(vapply(seq_along(edited_pair), function(i) {
-  identical(edited_pair[[i]]$value, 2 * restored_pair[[i]]$value)
-}, logical(1))))
+stopifnot(all(vapply(
+  seq_along(edited_pair),
+  function(i) {
+    identical(edited_pair[[i]]$value, 2 * restored_pair[[i]]$value)
+  },
+  logical(1)
+)))
 ```
 
 ## Slice and project without changing the measurement question
@@ -163,18 +445,15 @@ measurements whose grids differ.
 
 ## Make a scalar record from an extracted trace
 
-The current measure_record schema stores one-dimensional curves. Here the
-caller selects the 254 nm trace, orders its retention-time points for the
-record's monotonic-axis requirement, and supplies the sample, injection,
-channel, axis, and signal labels explicitly.
+The current `measure_record` schema stores one-dimensional curves. The record
+uses the 254 nm trace extracted from the restored raw nD member and orders its
+retention-time points for the record's monotonic-axis requirement. For this
+tutorial curve, the caller declares `sample-001` and `injection-001`; neither
+identifier is inferred from the nD member label. The retention-time unit
+(`min`), selected wavelength (`254 nm`), and scalar response unit (`AU`) are
+also declared.
 
 ```{r scalar-record}
-trace_order <- order(trace_254$location)
-record_trace <- new_measure_tbl(
-  location = trace_254$location[trace_order],
-  value = trace_254$value[trace_order]
-)
-
 record <- measure_record(
   samples = tibble(sample_id = "sample-001"),
   injections = tibble(
@@ -189,29 +468,57 @@ record <- measure_record(
     curve_id = "curve-001",
     injection_id = "injection-001",
     channel_id = "dad-254",
+    source_id = "raw-dad-points",
     axis_name = "retention time",
     axis_unit = "min",
     value_name = "absorbance",
     value_unit = "AU",
-    .measures = list(record_trace)
+    .measures = list(record_trace),
+    .source_rows = list(source_rows_for_record)
+  ),
+  sources = tibble(
+    source_id = "raw-dad-points",
+    source_name = raw_points_file_name,
+    source_sha256 = raw_points_sha256
   )
 )
 
 validate_measure_record(record)
 record$curves$.measures[[1]]
+record$curves$.source_rows[[1]]
 ```
 
-The record contains this extracted 1D trace; it does not contain dad_a or
-dad_pair. A version 1 native record bundle likewise saves the extracted
-curve payload. Keep the original nD measurement separately when it is needed.
-The bundle does not establish raw-row lineage, an nD interchange format, or
-instrument provenance.
+The record contains this extracted 1D trace; it does not contain `dad_a`,
+`dad_pair`, or the raw nD payload. The caller supplies the source hash and
+parsed-record ordinals shown above. The scalar bundle saves its curve and
+source-reference metadata, but does not embed the raw points file or nD
+bundle. The references describe this explicit mapping; they do not establish
+source authenticity or instrument provenance.
 
 ```{r save-record}
-bundle <- tempfile("measure-dad-record-")
-write_measure_record(record, bundle)
-saved_record <- read_measure_record(bundle)
-stopifnot(identical(record, saved_record))
-nrow(saved_record$curves$.measures[[1]])
-unlink(bundle, recursive = TRUE)
+record_bundle <- tempfile("measure-dad-record-")
+tryCatch(
+  {
+    write_measure_record(record, record_bundle)
+    saved_record <- read_measure_record(record_bundle)
+    stopifnot(identical(record, saved_record))
+    nrow(saved_record$curves$.measures[[1]])
+  },
+  finally = unlink(record_bundle, recursive = TRUE)
+)
 ```
+
+## What this format does and does not claim
+
+| Capability | Boundary |
+|---|---|
+| Native R nD bundle | The `measure-nd` v1 profile preserves supported numerical coordinates, values, dimension labels and units, member order, and special numerical states. |
+| Independent Python reader | The project qualification reader checks this same native profile; it is not a general scientific-file or vendor reader. |
+| Vendor, mzML, NPZ, or MS file readers | These formats and their vendor-specific conventions are outside this bundle profile. A numerical coordinate/value table does not provide a validated parser for them. |
+| Acquisition and instrument metadata | The current nD class and bundle do not define sample or injection identity, detector identity, acquisition settings, method history, or instrument provenance. Supply needed identifiers and units explicitly in a separate schema. |
+
+The bundle's hashes detect changes to its payload bytes; they do not establish
+source authenticity or qualify an instrument, acquisition, or analytical
+method. A wavelength slice is an observed trace at the selected wavelength.
+Likewise, a sum or mean over sampled wavelengths is not physical wavelength
+integration and does not account for spacing or missing bands.
