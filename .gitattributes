@@ -6,3 +6,9 @@
 tools/nd-qualification/fixtures.json -text
 tools/nd-qualification/declaration.json -text
 tools/nd-qualification/input-manifest.json -text
+
+# Native nD numerical truth and its manifest retain their exact bytes.
+tools/nd-interchange/fixtures.json -text
+tools/nd-interchange/declaration.json -text
+tools/nd-interchange/input-manifest.json -text
+tools/nd-interchange/finite-stress.bin -text

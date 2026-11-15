@@ -1,0 +1,258 @@
+{
+  "profile": "measure-nd-interchange/1",
+  "formats": [
+    "csv",
+    "tsv"
+  ],
+  "object_ids": [
+    "dad-table",
+    "dad-unequal",
+    "numeric-states",
+    "sparse-3d",
+    "metadata-null",
+    "metadata-unknown",
+    "member-labels",
+    "unnamed-list",
+    "empty-table-3d",
+    "empty-list-2d",
+    "empty-list-3d",
+    "typed-empty-list-3d",
+    "mixed-empty-list-3d",
+    "five-dimensional",
+    "finite-stress"
+  ],
+  "forward_bundles": [
+    {
+      "id": "dad-table-csv",
+      "object_id": "dad-table",
+      "delimiter": "csv"
+    },
+    {
+      "id": "dad-table-tsv",
+      "object_id": "dad-table",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "dad-unequal-csv",
+      "object_id": "dad-unequal",
+      "delimiter": "csv"
+    },
+    {
+      "id": "dad-unequal-tsv",
+      "object_id": "dad-unequal",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "numeric-states-csv",
+      "object_id": "numeric-states",
+      "delimiter": "csv"
+    },
+    {
+      "id": "numeric-states-tsv",
+      "object_id": "numeric-states",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "sparse-3d-csv",
+      "object_id": "sparse-3d",
+      "delimiter": "csv"
+    },
+    {
+      "id": "sparse-3d-tsv",
+      "object_id": "sparse-3d",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "metadata-null-csv",
+      "object_id": "metadata-null",
+      "delimiter": "csv"
+    },
+    {
+      "id": "metadata-null-tsv",
+      "object_id": "metadata-null",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "metadata-unknown-csv",
+      "object_id": "metadata-unknown",
+      "delimiter": "csv"
+    },
+    {
+      "id": "metadata-unknown-tsv",
+      "object_id": "metadata-unknown",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "member-labels-csv",
+      "object_id": "member-labels",
+      "delimiter": "csv"
+    },
+    {
+      "id": "member-labels-tsv",
+      "object_id": "member-labels",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "unnamed-list-csv",
+      "object_id": "unnamed-list",
+      "delimiter": "csv"
+    },
+    {
+      "id": "unnamed-list-tsv",
+      "object_id": "unnamed-list",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "empty-table-3d-csv",
+      "object_id": "empty-table-3d",
+      "delimiter": "csv"
+    },
+    {
+      "id": "empty-table-3d-tsv",
+      "object_id": "empty-table-3d",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "empty-list-2d-csv",
+      "object_id": "empty-list-2d",
+      "delimiter": "csv"
+    },
+    {
+      "id": "empty-list-2d-tsv",
+      "object_id": "empty-list-2d",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "empty-list-3d-csv",
+      "object_id": "empty-list-3d",
+      "delimiter": "csv"
+    },
+    {
+      "id": "empty-list-3d-tsv",
+      "object_id": "empty-list-3d",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "typed-empty-list-3d-csv",
+      "object_id": "typed-empty-list-3d",
+      "delimiter": "csv"
+    },
+    {
+      "id": "typed-empty-list-3d-tsv",
+      "object_id": "typed-empty-list-3d",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "mixed-empty-list-3d-csv",
+      "object_id": "mixed-empty-list-3d",
+      "delimiter": "csv"
+    },
+    {
+      "id": "mixed-empty-list-3d-tsv",
+      "object_id": "mixed-empty-list-3d",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "five-dimensional-csv",
+      "object_id": "five-dimensional",
+      "delimiter": "csv"
+    },
+    {
+      "id": "five-dimensional-tsv",
+      "object_id": "five-dimensional",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "finite-stress-csv",
+      "object_id": "finite-stress",
+      "delimiter": "csv"
+    },
+    {
+      "id": "finite-stress-tsv",
+      "object_id": "finite-stress",
+      "delimiter": "tsv"
+    }
+  ],
+  "reverse_bundles": [
+    {
+      "id": "python-states-csv",
+      "object_id": "numeric-states",
+      "delimiter": "csv"
+    },
+    {
+      "id": "python-typed-empty-tsv",
+      "object_id": "typed-empty-list-3d",
+      "delimiter": "tsv"
+    }
+  ],
+  "reordered_bundles": [
+    {
+      "id": "reordered-dad-csv",
+      "base_bundle": "dad-unequal-csv",
+      "object_id": "dad-unequal"
+    },
+    {
+      "id": "reordered-sparse-tsv",
+      "base_bundle": "sparse-3d-tsv",
+      "object_id": "sparse-3d"
+    }
+  ],
+  "invalid_bundles": [
+    "wrong-format",
+    "wrong-version",
+    "missing-manifest",
+    "missing-members",
+    "hash-mismatch",
+    "truncated-points",
+    "malformed-quoting",
+    "invalid-utf8",
+    "embedded-nul",
+    "duplicate-manifest-field",
+    "unknown-manifest-field",
+    "missing-manifest-field",
+    "dimensions-too-small",
+    "dimensions-too-large",
+    "huge-point-count",
+    "wrong-members-header",
+    "wrong-axes-header",
+    "wrong-points-header",
+    "wrong-row-count",
+    "wrong-column-count",
+    "invalid-hash-syntax",
+    "duplicate-member",
+    "member-gap",
+    "orphan-axis",
+    "duplicate-axis",
+    "missing-axis",
+    "orphan-point",
+    "duplicate-point",
+    "point-gap",
+    "prototype-point",
+    "fractional-integer",
+    "reserved-integer",
+    "integer-overflow",
+    "double-overflow",
+    "double-underflow",
+    "padded-double",
+    "invalid-special-token",
+    "absent-metadata-with-text",
+    "duplicate-dimension-name",
+    "blank-dimension-unit",
+    "invalid-flag",
+    "missing-name-with-text",
+    "table-with-prototype",
+    "missing-prototype",
+    "nonempty-prototype",
+    "unnamed-list-with-names",
+    "point-count-mismatch",
+    "invalid-storage-type",
+    "invalid-value-type"
+  ],
+  "cross_format_rejections": [
+    "scalar-reader-on-nd",
+    "nd-reader-on-scalar"
+  ],
+  "source_values": "Integer states or big-endian binary64 hexadecimal/committed bytes, decoded independently in R with readBin and in Python with struct. No shared decimal expected-value parser.",
+  "fidelity": "Exact storage types and finite IEEE754 bits including signed zero; NA/NaN/infinity states separately; NaN payload bits and R encoding markers excluded.",
+  "scope": "Synthetic native nD numerical interchange only; no established external scientific reader, acquisition-record metadata, vendor/MS/mzML/NPZ, instrument, hosted-user or fresh optimization qualification."
+}

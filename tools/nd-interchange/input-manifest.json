@@ -1,0 +1,17 @@
+{
+  "profile": "measure-nd-interchange/1",
+  "files": {
+    "declaration.json": {
+      "sha256": "2963f9966b77721682a48c9dd60b009b43195577e56f461ebaa51255f452bc9c",
+      "size_bytes": 6138
+    },
+    "finite-stress.bin": {
+      "sha256": "d11301fb08fce7aab29a12ab49e82b32c8438c7bdd0b9489a5ff49587e3cf63c",
+      "size_bytes": 65664
+    },
+    "fixtures.json": {
+      "sha256": "8ec764cc0f77e8540a5764f37ad5a9784132f31910101005b508f14dd993f57b",
+      "size_bytes": 53739
+    }
+  }
+}
