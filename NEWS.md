@@ -3,6 +3,11 @@
 * Native bundle readers recognize symbolic links on Windows as well as Unix-like
   systems. Scalar and nD writers preserve existing dangling-link destinations.
 
+* `measure_acquisition()` links raw ragged MS scans and two-dimensional arrays
+  to declared samples, injections, channels and sources. Scan order, raw numeric
+  storage, missing versus acquired-empty scans and per-point saturation and
+  source references remain explicit (#162).
+
 * `write_measure_nd()` and `read_measure_nd()` preserve supported nD tables and
   collections in a native CSV or TSV bundle, including column storage types,
   finite numerical values, signed zero, missing/nonfinite states, member and

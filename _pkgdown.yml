@@ -414,6 +414,13 @@ reference:
   - read_measure_record_delim
   - write_measure_record
   - read_measure_record
+
+- title: Acquisition Records
+  desc: Identity-linked raw MS scans and two-dimensional arrays
+  contents:
+  - measure_acquisition
+  - is_measure_acquisition
+  - validate_measure_acquisition
 - title: Utilities
   desc: Helper functions and utilities
   contents:
