@@ -395,6 +395,8 @@ reference:
   - measure_dim_units
   - measure_is_regular
   - measure_grid_info
+  - write_measure_nd
+  - read_measure_nd
   - measure_apply
   - measure_unfold
   - measure_fold

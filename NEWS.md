@@ -1,9 +1,21 @@
 # measure 0.0.1.9003
 
+* Native bundle readers recognize symbolic links on Windows as well as Unix-like
+  systems. Scalar and nD writers preserve existing dangling-link destinations.
+
+* `write_measure_nd()` and `read_measure_nd()` preserve supported nD tables and
+  collections in a native CSV or TSV bundle, including column storage types,
+  finite numerical values, signed zero, missing/nonfinite states, member and
+  point order, dimension metadata, list labels and empty prototypes (#154).
+
 * `measure_fold()` retains each measurement's coordinates and metadata after
   unfolding a collection, including unequal grids and lengths. Valid reordered
   point indices restore their original coordinate/value association; incomplete
   mappings and malformed metadata fail clearly (#145).
+
+* `measure_grid_info()` reports dimensionality from the validated prototype of
+  an empty nD collection, agreeing with `measure_ndim()` after filtering or
+  restoring an empty 3D list (#153).
 
 * `measure_ndim()` and empty nD list subsets retain their validated dimensional
   prototype through list filtering, vctrs slicing and recipe baking. Empty 3D

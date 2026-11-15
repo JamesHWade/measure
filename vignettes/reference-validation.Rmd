@@ -792,5 +792,5 @@ For more details on any function, see the package documentation with `?function_
 
 ## See Also
 
-- [Getting Started](../articles/tutorial-getting-started.html) - Introduction to measure workflows
-- [Preprocessing Reference](../articles/reference-preprocessing.html) - Guide to preprocessing techniques
+- [Getting Started (online)](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html) - Introduction to measure workflows
+- [Preprocessing Reference (online)](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.html) - Guide to preprocessing techniques

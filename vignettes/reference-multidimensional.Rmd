@@ -446,6 +446,6 @@ Key functions for multi-dimensional measurement data:
 
 ## See Also
 
-- [Getting Started](../articles/tutorial-getting-started.html) - Introduction to measure workflows
-- [Preprocessing Reference](../articles/reference-preprocessing.html) - Guide to preprocessing techniques
+- [Getting Started (online)](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html) - Introduction to measure workflows
+- [Preprocessing Reference (online)](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.html) - Guide to preprocessing techniques
 - [Internal Class System](explanation-internals.html) - How measure data structures work

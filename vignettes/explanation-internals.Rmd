@@ -283,6 +283,6 @@ If you don't specify and multiple columns exist, you'll get a helpful error mess
 
 ## See Also
 
-- [Getting Started](../articles/tutorial-getting-started.html) - Learn the fundamentals of measure
+- [Getting Started (online)](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html) - Learn the fundamentals of measure
 - [Multi-Dimensional Measurements](reference-multidimensional.html) - Working with nD data
-- [Preprocessing Reference](../articles/reference-preprocessing.html) - Guide to preprocessing techniques
+- [Preprocessing Reference (online)](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.html) - Guide to preprocessing techniques

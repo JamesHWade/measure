@@ -1,0 +1,2122 @@
+{
+  "profile": "measure-nd-interchange/1",
+  "objects": [
+    {
+      "id": "dad-table",
+      "kind": "tbl",
+      "ndim": 2,
+      "list_names": null,
+      "ptype": null,
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fe0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fe0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fe0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff8000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff8000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff8000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4000000000000000"
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "3f9afeae9f329efb"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fa67ee6d9ff847c"
+                },
+                {
+                  "state": "number",
+                  "hex": "3f9afeae9f329efb"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fdbc679a8b74e84"
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fdbc679a8b74e84"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fdc6a50b2f4bf28"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fe740b3e3a2fedf"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fdc6a50b2f4bf28"
+                },
+                {
+                  "state": "number",
+                  "hex": "3facdb80455bdeda"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fb2ed87e7e109ec"
+                },
+                {
+                  "state": "number",
+                  "hex": "3facdb80455bdeda"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fa4883cf253339b"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fa49124b96bf306"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fa4883cf253339b"
+                }
+              ]
+            }
+          ],
+          "dim_names": [
+            "retention_time",
+            "wavelength"
+          ],
+          "dim_units": [
+            "min",
+            "nm"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dad-unequal",
+      "kind": "list",
+      "ndim": 2,
+      "list_names": [
+        "injection-A",
+        "injection-B"
+      ],
+      "ptype": {
+        "columns": [
+          {
+            "name": "location_1",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_2",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "value",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          }
+        ],
+        "dim_names": null,
+        "dim_units": null
+      },
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fe0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fe0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fe0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff8000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff8000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff8000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4000000000000000"
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 254
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "3f9afeae9f329efb"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fa67ee6d9ff847c"
+                },
+                {
+                  "state": "number",
+                  "hex": "3f9afeae9f329efb"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fdbc679a8b74e84"
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fdbc679a8b74e84"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fdc6a50b2f4bf28"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fe740b3e3a2fedf"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fdc6a50b2f4bf28"
+                },
+                {
+                  "state": "number",
+                  "hex": "3facdb80455bdeda"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fb2ed87e7e109ec"
+                },
+                {
+                  "state": "number",
+                  "hex": "3facdb80455bdeda"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fa4883cf253339b"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fa49124b96bf306"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fa4883cf253339b"
+                }
+              ]
+            }
+          ],
+          "dim_names": [
+            "retention_time",
+            "wavelength"
+          ],
+          "dim_units": [
+            "min",
+            "nm"
+          ]
+        },
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4008000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4008000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ffc000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ffc000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fd0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fd0000000000000"
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                },
+                {
+                  "state": "number",
+                  "number": 320
+                },
+                {
+                  "state": "number",
+                  "number": 280
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "3fb5810624ddbf60"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fb5810624de1f8f"
+                },
+                {
+                  "state": "number",
+                  "hex": "3faac02aebf6538a"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fabdbed6c992db5"
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fd6ca3aae6d66ab"
+                }
+              ]
+            }
+          ],
+          "dim_names": [
+            "retention_time",
+            "wavelength"
+          ],
+          "dim_units": [
+            "min",
+            "nm"
+          ]
+        }
+      ],
+      "construction": "list-of"
+    },
+    {
+      "id": "numeric-states",
+      "kind": "tbl",
+      "ndim": 2,
+      "list_names": null,
+      "ptype": null,
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": -2147483647
+                },
+                {
+                  "state": "number",
+                  "number": -1
+                },
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2147483647
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "number": -2147483647
+                },
+                {
+                  "state": "number",
+                  "number": -1
+                },
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2147483647
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "number": -2147483647
+                },
+                {
+                  "state": "number",
+                  "number": -1
+                },
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2147483647
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "number": -2147483647
+                },
+                {
+                  "state": "number",
+                  "number": -1
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "8000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "0000000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "8000000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "7fefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "ffefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "0010000000000000"
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "nan"
+                },
+                {
+                  "state": "+inf"
+                },
+                {
+                  "state": "-inf"
+                },
+                {
+                  "state": "number",
+                  "hex": "8010000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "400921fb54442d18"
+                },
+                {
+                  "state": "number",
+                  "hex": "7e37e43c8800759c"
+                },
+                {
+                  "state": "number",
+                  "hex": "fe37e43c8800759c"
+                },
+                {
+                  "state": "number",
+                  "hex": "01a56e1fc2f8f359"
+                },
+                {
+                  "state": "number",
+                  "hex": "81a56e1fc2f8f359"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "81a56e1fc2f8f359"
+                },
+                {
+                  "state": "number",
+                  "hex": "01a56e1fc2f8f359"
+                },
+                {
+                  "state": "number",
+                  "hex": "fe37e43c8800759c"
+                },
+                {
+                  "state": "number",
+                  "hex": "7e37e43c8800759c"
+                },
+                {
+                  "state": "number",
+                  "hex": "400921fb54442d18"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "8010000000000000"
+                },
+                {
+                  "state": "-inf"
+                },
+                {
+                  "state": "+inf"
+                },
+                {
+                  "state": "nan"
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "hex": "0010000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "ffefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "7fefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "8000000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "0000000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "8000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                }
+              ]
+            }
+          ],
+          "dim_names": [
+            "time, \"declared\"\nα",
+            null
+          ],
+          "dim_units": [
+            "NA",
+            " unité "
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sparse-3d",
+      "kind": "tbl",
+      "ndim": 3,
+      "list_names": null,
+      "ptype": null,
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 250
+                },
+                {
+                  "state": "number",
+                  "number": 250
+                },
+                {
+                  "state": "number",
+                  "number": 260
+                },
+                {
+                  "state": "number",
+                  "number": 270
+                },
+                {
+                  "state": "number",
+                  "number": 270
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4072c00000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4075e00000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4072c00000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4075e00000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4075e00000000000"
+                }
+              ]
+            },
+            {
+              "name": "location_3",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 5
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "number": 7
+                },
+                {
+                  "state": "number",
+                  "number": 8
+                },
+                {
+                  "state": "number",
+                  "number": 9
+                }
+              ]
+            }
+          ],
+          "dim_names": [
+            "excitation",
+            "emission",
+            "acquisition"
+          ],
+          "dim_units": [
+            "nm",
+            "nm",
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "id": "metadata-null",
+      "kind": "tbl",
+      "ndim": 2,
+      "list_names": null,
+      "ptype": null,
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4014000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 10
+                },
+                {
+                  "state": "na"
+                }
+              ]
+            }
+          ],
+          "dim_names": null,
+          "dim_units": null
+        }
+      ]
+    },
+    {
+      "id": "metadata-unknown",
+      "kind": "tbl",
+      "ndim": 2,
+      "list_names": null,
+      "ptype": null,
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4014000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 10
+                },
+                {
+                  "state": "na"
+                }
+              ]
+            }
+          ],
+          "dim_names": [
+            null,
+            null
+          ],
+          "dim_units": [
+            null,
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "id": "member-labels",
+      "kind": "list",
+      "ndim": 2,
+      "list_names": [
+        "",
+        "NA",
+        null,
+        "duplicate",
+        "duplicate"
+      ],
+      "ptype": {
+        "columns": [
+          {
+            "name": "location_1",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_2",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "value",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          }
+        ],
+        "dim_names": null,
+        "dim_units": null
+      },
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 1
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4008000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 1
+                }
+              ]
+            }
+          ],
+          "dim_names": null,
+          "dim_units": null
+        },
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 5
+                },
+                {
+                  "state": "number",
+                  "number": 6
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4008000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                }
+              ]
+            }
+          ],
+          "dim_names": null,
+          "dim_units": null
+        },
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 10
+                },
+                {
+                  "state": "number",
+                  "number": 11
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4008000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 2
+                },
+                {
+                  "state": "number",
+                  "number": 3
+                }
+              ]
+            }
+          ],
+          "dim_names": null,
+          "dim_units": null
+        },
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 15
+                },
+                {
+                  "state": "number",
+                  "number": 16
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4008000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 3
+                },
+                {
+                  "state": "number",
+                  "number": 4
+                }
+              ]
+            }
+          ],
+          "dim_names": null,
+          "dim_units": null
+        },
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 20
+                },
+                {
+                  "state": "number",
+                  "number": 21
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4008000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 4
+                },
+                {
+                  "state": "number",
+                  "number": 5
+                }
+              ]
+            }
+          ],
+          "dim_names": null,
+          "dim_units": null
+        }
+      ],
+      "construction": "list-of"
+    },
+    {
+      "id": "unnamed-list",
+      "kind": "list",
+      "ndim": 2,
+      "list_names": null,
+      "ptype": {
+        "columns": [
+          {
+            "name": "location_1",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_2",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "value",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          }
+        ],
+        "dim_names": null,
+        "dim_units": null
+      },
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4014000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 10
+                },
+                {
+                  "state": "na"
+                }
+              ]
+            }
+          ],
+          "dim_names": null,
+          "dim_units": null
+        },
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4014000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 10
+                },
+                {
+                  "state": "na"
+                }
+              ]
+            }
+          ],
+          "dim_names": [
+            null,
+            null
+          ],
+          "dim_units": [
+            null,
+            null
+          ]
+        }
+      ],
+      "construction": "list-of"
+    },
+    {
+      "id": "empty-table-3d",
+      "kind": "tbl",
+      "ndim": 3,
+      "list_names": null,
+      "ptype": null,
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": []
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": []
+            },
+            {
+              "name": "location_3",
+              "storage": "integer",
+              "encoding": "values",
+              "data": []
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": []
+            }
+          ],
+          "dim_names": [
+            "axis_A",
+            null,
+            "axis_C"
+          ],
+          "dim_units": [
+            "nm",
+            "nm",
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "id": "empty-list-2d",
+      "kind": "list",
+      "ndim": 2,
+      "list_names": null,
+      "ptype": {
+        "columns": [
+          {
+            "name": "location_1",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_2",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "value",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          }
+        ],
+        "dim_names": null,
+        "dim_units": null
+      },
+      "members": [],
+      "construction": "default-empty"
+    },
+    {
+      "id": "empty-list-3d",
+      "kind": "list",
+      "ndim": 3,
+      "list_names": null,
+      "ptype": {
+        "columns": [
+          {
+            "name": "location_1",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_2",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_3",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "value",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          }
+        ],
+        "dim_names": null,
+        "dim_units": null
+      },
+      "members": [],
+      "construction": "public-empty-subset"
+    },
+    {
+      "id": "typed-empty-list-3d",
+      "kind": "list",
+      "ndim": 3,
+      "list_names": [],
+      "ptype": {
+        "columns": [
+          {
+            "name": "location_1",
+            "storage": "integer",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_2",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_3",
+            "storage": "integer",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "value",
+            "storage": "integer",
+            "encoding": "values",
+            "data": []
+          }
+        ],
+        "dim_names": [
+          "excitation",
+          "emission",
+          "time"
+        ],
+        "dim_units": [
+          "nm",
+          "nm",
+          "min"
+        ]
+      },
+      "members": [],
+      "construction": "list-of"
+    },
+    {
+      "id": "mixed-empty-list-3d",
+      "kind": "list",
+      "ndim": 3,
+      "list_names": [
+        "empty",
+        "sparse"
+      ],
+      "ptype": {
+        "columns": [
+          {
+            "name": "location_1",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_2",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "location_3",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          },
+          {
+            "name": "value",
+            "storage": "double",
+            "encoding": "values",
+            "data": []
+          }
+        ],
+        "dim_names": null,
+        "dim_units": null
+      },
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": []
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": []
+            },
+            {
+              "name": "location_3",
+              "storage": "integer",
+              "encoding": "values",
+              "data": []
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": []
+            }
+          ],
+          "dim_names": [
+            "axis_A",
+            null,
+            "axis_C"
+          ],
+          "dim_units": [
+            "nm",
+            "nm",
+            null
+          ]
+        },
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 250
+                },
+                {
+                  "state": "number",
+                  "number": 250
+                },
+                {
+                  "state": "number",
+                  "number": 260
+                },
+                {
+                  "state": "number",
+                  "number": 270
+                },
+                {
+                  "state": "number",
+                  "number": 270
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4072c00000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4075e00000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4072c00000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4075e00000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4075e00000000000"
+                }
+              ]
+            },
+            {
+              "name": "location_3",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 0
+                },
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                },
+                {
+                  "state": "number",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 5
+                },
+                {
+                  "state": "na"
+                },
+                {
+                  "state": "number",
+                  "number": 7
+                },
+                {
+                  "state": "number",
+                  "number": 8
+                },
+                {
+                  "state": "number",
+                  "number": 9
+                }
+              ]
+            }
+          ],
+          "dim_names": [
+            "excitation",
+            "emission",
+            "acquisition"
+          ],
+          "dim_units": [
+            "nm",
+            "nm",
+            null
+          ]
+        }
+      ],
+      "construction": "list-of"
+    },
+    {
+      "id": "five-dimensional",
+      "kind": "tbl",
+      "ndim": 5,
+      "list_names": null,
+      "ptype": null,
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 1
+                },
+                {
+                  "state": "number",
+                  "number": 1
+                }
+              ]
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4000000000000000"
+                }
+              ]
+            },
+            {
+              "name": "location_3",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 3
+                },
+                {
+                  "state": "number",
+                  "number": 3
+                }
+              ]
+            },
+            {
+              "name": "location_4",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "4010000000000000"
+                }
+              ]
+            },
+            {
+              "name": "location_5",
+              "storage": "integer",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "number": 5
+                },
+                {
+                  "state": "number",
+                  "number": 5
+                }
+              ]
+            },
+            {
+              "name": "value",
+              "storage": "double",
+              "encoding": "values",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "4018000000000000"
+                },
+                {
+                  "state": "na"
+                }
+              ]
+            }
+          ],
+          "dim_names": null,
+          "dim_units": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finite-stress",
+      "kind": "tbl",
+      "ndim": 2,
+      "list_names": null,
+      "ptype": null,
+      "members": [
+        {
+          "columns": [
+            {
+              "name": "location_1",
+              "storage": "integer",
+              "encoding": "sequence",
+              "start": 1,
+              "length": 8208
+            },
+            {
+              "name": "location_2",
+              "storage": "double",
+              "encoding": "cycle",
+              "data": [
+                {
+                  "state": "number",
+                  "hex": "0000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "8000000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "0000000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "8000000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "7fefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "ffefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "0010000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "8010000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000000"
+                },
+                {
+                  "state": "number",
+                  "hex": "3ff0000000000001"
+                },
+                {
+                  "state": "number",
+                  "hex": "3fefffffffffffff"
+                },
+                {
+                  "state": "number",
+                  "hex": "400921fb54442d18"
+                },
+                {
+                  "state": "number",
+                  "hex": "7e37e43c8800759c"
+                },
+                {
+                  "state": "number",
+                  "hex": "fe37e43c8800759c"
+                },
+                {
+                  "state": "number",
+                  "hex": "01a56e1fc2f8f359"
+                },
+                {
+                  "state": "number",
+                  "hex": "81a56e1fc2f8f359"
+                }
+              ],
+              "length": 8208
+            },
+            {
+              "name": "value",
+              "storage": "double",
+              "encoding": "binary64",
+              "file": "finite-stress.bin",
+              "endian": "big",
+              "length": 8208
+            }
+          ],
+          "dim_names": null,
+          "dim_units": null
+        }
+      ]
+    }
+  ],
+  "finite_corpus": {
+    "file": "finite-stress.bin",
+    "count": 8208,
+    "fixed_controls": 16,
+    "random_finite_values": 8192,
+    "generator": "Python random.Random MT19937 getrandbits(64), reject all-ones exponent",
+    "seed": 20261115,
+    "generator_python": "3.14.2",
+    "scope": "Committed bytes are authoritative; same-seed identity on another Python version is not required."
+  }
+}
