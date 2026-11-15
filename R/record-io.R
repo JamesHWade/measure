@@ -684,8 +684,7 @@ read_measure_record <- function(path, max_bytes = 100 * 1024^2) {
 }
 
 .record_io_is_symlink <- function(path) {
-  target <- suppressWarnings(Sys.readlink(path))
-  length(target) == 1L && !is.na(target) && nzchar(target)
+  isTRUE(fs::file_info(path, follow = FALSE, fail = FALSE)$type == "symlink")
 }
 
 .record_io_path_exists <- function(path) {
@@ -697,7 +696,7 @@ read_measure_record <- function(path, max_bytes = 100 * 1024^2) {
     stop("Bundle members must not be symbolic links.", call. = FALSE)
   }
   if (
-    !isTRUE(fs::file_info(path, follow = TRUE, fail = FALSE)$type == "file")
+    !isTRUE(fs::file_info(path, follow = FALSE, fail = FALSE)$type == "file")
   ) {
     stop("Bundle member must be an existing regular file.", call. = FALSE)
   }
@@ -734,7 +733,7 @@ read_measure_record <- function(path, max_bytes = 100 * 1024^2) {
   }
   if (
     .record_io_is_symlink(to) ||
-      !isTRUE(fs::file_info(to, follow = TRUE, fail = FALSE)$type == "file")
+      !isTRUE(fs::file_info(to, follow = FALSE, fail = FALSE)$type == "file")
   ) {
     stop(
       "Copied bundle member is not a regular file at its fixed path.",

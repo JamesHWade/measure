@@ -311,15 +311,12 @@ test_that("manifest and point structure are checked after valid rehashing", {
 })
 
 test_that("bundle members cannot be symbolic links", {
-  skip_if(Sys.info()[["sysname"]] == "Windows")
   bundle <- file.path(withr::local_tempdir(), "bundle")
   write_measure_record(record_io_fixture(), bundle)
   samples <- file.path(bundle, "samples.csv")
   target <- file.path(bundle, "channels.csv")
   expect_true(file.remove(samples))
-  if (!file.symlink(target, samples)) {
-    skip("This filesystem does not allow symbolic links.")
-  }
+  native_io_test_link(target, samples)
   expect_error(read_measure_record(bundle), "symbolic links")
 })
 
@@ -346,18 +343,85 @@ test_that("writer preserves existing destination files and directories", {
 })
 
 test_that("writer preserves dangling symbolic link destinations", {
-  skip_if(Sys.info()[["sysname"]] == "Windows")
   output <- withr::local_tempdir()
   record <- record_io_fixture()
   dangling <- file.path(output, "dangling")
-  if (!file.symlink(file.path(output, "missing-target"), dangling)) {
-    skip("This filesystem does not allow symbolic links.")
-  }
+  native_io_test_link(file.path(output, "missing-target"), dangling)
   expect_error(
     write_measure_record(record, dangling),
     "already exists"
   )
-  expect_match(Sys.readlink(dangling), "missing-target")
+  expect_match(fs::link_path(dangling), "missing-target")
+})
+
+test_that("native link detection works without the POSIX readlink primitive", {
+  output <- withr::local_tempdir()
+  target <- file.path(output, "target")
+  writeLines("keep", target)
+  link <- file.path(output, "link")
+  dangling <- file.path(output, "dangling")
+  native_io_test_link(target, link)
+  native_io_test_link(file.path(output, "missing-target"), dangling)
+
+  local_mocked_bindings(
+    Sys.readlink = function(paths) rep("", length(paths)),
+    .package = "base"
+  )
+  expect_identical(Sys.readlink(link), "")
+  expect_true(.record_io_is_symlink(link))
+  expect_true(.record_io_is_symlink(dangling))
+  expect_true(.record_io_path_exists(dangling))
+  expect_false(.record_io_is_symlink(target))
+  expect_false(.record_io_is_symlink(file.path(output, "absent")))
+  expect_error(.record_io_check_member(link), "symbolic links")
+  expect_identical(readLines(target), "keep")
+})
+
+test_that("native readers accept hard links to regular payload files", {
+  output <- withr::local_tempdir()
+  cases <- list(
+    scalar = list(
+      object = record_io_fixture(),
+      payload = "samples.csv",
+      write = write_measure_record,
+      read = read_measure_record
+    ),
+    nd = list(
+      object = new_measure_nd_tbl(
+        location_1 = c(0, 1),
+        location_2 = c(254L, 280L),
+        value = c(-0, NA_real_)
+      ),
+      payload = "points.csv",
+      write = write_measure_nd,
+      read = read_measure_nd
+    )
+  )
+  for (kind in names(cases)) {
+    case <- cases[[kind]]
+    bundle <- file.path(output, kind)
+    case$write(case$object, bundle)
+    payload <- file.path(bundle, case$payload)
+    target <- file.path(output, paste0(kind, "-target"))
+    expect_true(file.rename(payload, target))
+    linked <- tryCatch(
+      {
+        fs::link_create(target, payload, symbolic = FALSE)
+        TRUE
+      },
+      error = function(error) FALSE
+    )
+    if (!linked) {
+      skip("This filesystem does not allow hard links.")
+    }
+    expect_identical(
+      as.character(fs::file_info(payload, follow = FALSE)$type),
+      "file"
+    )
+    expect_false(.record_io_is_symlink(payload))
+    expect_silent(.record_io_check_member(payload))
+    expect_identical(case$read(bundle), case$object)
+  }
 })
 
 test_that("writer leaves raced destinations untouched and commits manifest last", {

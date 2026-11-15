@@ -1,5 +1,8 @@
 # measure 0.0.1.9003
 
+* Native bundle readers recognize symbolic links on Windows as well as Unix-like
+  systems. Scalar and nD writers preserve existing dangling-link destinations.
+
 * `write_measure_nd()` and `read_measure_nd()` preserve supported nD tables and
   collections in a native CSV or TSV bundle, including column storage types,
   finite numerical values, signed zero, missing/nonfinite states, member and
