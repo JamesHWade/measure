@@ -7,7 +7,7 @@
 measure_grid_info(x)
 }
 \arguments{
-\item{x}{A \code{measure_nd_tbl} object.}
+\item{x}{A \code{measure_nd_tbl} or \code{measure_nd_list} object.}
 }
 \value{
 A list with components:
@@ -28,6 +28,8 @@ values only. The reported shape does not imply that every grid cell was
 observed, and numeric payloads are not checked for physical validity.
 For a collection, inspect each entry of \code{sample_info} for its own metadata;
 collection-level names and units describe the first measurement.
+An empty collection reports dimensionality from its validated prototype,
+without inferring observed points or metadata from nonexistent members.
 }
 \description{
 Returns detailed information about the coordinate grid, including

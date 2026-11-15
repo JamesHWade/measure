@@ -5,6 +5,10 @@
   point indices restore their original coordinate/value association; incomplete
   mappings and malformed metadata fail clearly (#145).
 
+* `measure_grid_info()` reports dimensionality from the validated prototype of
+  an empty nD collection, agreeing with `measure_ndim()` after filtering or
+  restoring an empty 3D list (#153).
+
 * `measure_ndim()` and empty nD list subsets retain their validated dimensional
   prototype through list filtering, vctrs slicing and recipe baking. Empty 3D
   collections print as 3D; subsetting keeps strict vctrs index rules (#151).

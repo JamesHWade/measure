@@ -228,7 +228,7 @@ measure_is_regular.default <- function(x) {
 #' Returns detailed information about the coordinate grid, including
 #' unique values per dimension, grid shape, and regularity status.
 #'
-#' @param x A `measure_nd_tbl` object.
+#' @param x A `measure_nd_tbl` or `measure_nd_list` object.
 #'
 #' @return A list with components:
 #'   - `ndim`: Number of dimensions
@@ -246,6 +246,8 @@ measure_is_regular.default <- function(x) {
 #' observed, and numeric payloads are not checked for physical validity.
 #' For a collection, inspect each entry of `sample_info` for its own metadata;
 #' collection-level names and units describe the first measurement.
+#' An empty collection reports dimensionality from its validated prototype,
+#' without inferring observed points or metadata from nonexistent members.
 #'
 #' @examples
 #' m2d <- new_measure_nd_tbl(
@@ -298,7 +300,7 @@ measure_grid_info.measure_nd_list <- function(x) {
   if (length(x) == 0) {
     return(list(
       n_samples = 0L,
-      ndim = 2L,
+      ndim = measure_ndim(x),
       sample_info = list()
     ))
   }
