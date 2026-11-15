@@ -2,7 +2,7 @@
 
 import argparse
 import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from nd_profile import (
     exact_equal,
@@ -73,8 +73,10 @@ def runtime_check(value):
         ("path", "namespace_path", "version", "built", "remote_sha"),
         "installed package",
     )
+    path = package["path"]
     require(
-        type(package["path"]) is str and package["path"].startswith("/"),
+        type(path) is str
+        and (PurePosixPath(path).is_absolute() or PureWindowsPath(path).is_absolute()),
         "Invalid installed path",
     )
     same(package["namespace_path"], package["path"], "Namespace path")
