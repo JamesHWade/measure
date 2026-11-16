@@ -660,6 +660,24 @@ Explicit identities and metadata for independent measurement curves
   [`read_measure_record()`](https://jameshwade.github.io/measure/dev/reference/record-bundle.md)
   : Read and write native measurement record bundles
 
+## Acquisition Records
+
+Identity-linked raw MS scans and two-dimensional arrays
+
+- [`measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/measure_acquisition.md)
+  [`print(`*`<measure_acquisition>`*`)`](https://jameshwade.github.io/measure/dev/reference/measure_acquisition.md)
+  [`summary(`*`<measure_acquisition>`*`)`](https://jameshwade.github.io/measure/dev/reference/measure_acquisition.md)
+  : Create a bounded mass-spectrometry and array acquisition
+- [`is_measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/is_measure_acquisition.md)
+  : Test whether an object is a measurement acquisition
+- [`validate_measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/validate_measure_acquisition.md)
+  : Validate a measurement acquisition
+- [`measure_ms_trace()`](https://jameshwade.github.io/measure/dev/reference/measure_ms_trace.md)
+  : Extract a centroid total-ion or selected-ion trace
+- [`write_measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/measure-acquisition-bundle.md)
+  [`read_measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/measure-acquisition-bundle.md)
+  : Read and write native measurement acquisition bundles
+
 ## Utilities
 
 Helper functions and utilities

@@ -2,6 +2,7 @@ pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
+  acquisition-ms: acquisition-ms.html
   analytical-records: analytical-records.html
   explanation-internals: explanation-internals.html
   articles/howto-baseline: howto-baseline.html
@@ -14,7 +15,7 @@ articles:
   reference-validation: reference-validation.html
   articles/tutorial-bioreactor: tutorial-bioreactor.html
   articles/tutorial-getting-started: tutorial-getting-started.html
-last_built: 2026-11-15T21:58Z
+last_built: 2026-11-16T01:05Z
 urls:
   reference: https://jameshwade.github.io/measure/reference
   article: https://jameshwade.github.io/measure/articles

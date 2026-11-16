@@ -1032,7 +1032,7 @@ print(report)
 #> Method: Compound X Assay
 #> Analyst: J. Smith
 #> Lab: Analytical Development
-#> Date: 2026-11-15
+#> Date: 2026-11-16
 #> 
 #> ── Validation Sections ──
 #> 
@@ -1053,7 +1053,7 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-11-15 22:01:21.981651
+#> Generated: 2026-11-16 01:09:52.998777
 #> R version: 4.6.2
 #> measure version: 0.0.1.9003
 #> 
@@ -1069,7 +1069,7 @@ summary(report)
 #> 
 #> ── Validation Report Summary ───────────────────────────────────────────────────
 #> Method: Compound X Assay
-#> Date: 2026-11-15
+#> Date: 2026-11-16
 #> 
 #> # A tibble: 9 × 4
 #>   section                 status n_results notes             

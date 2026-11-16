@@ -6,6 +6,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/LICENSE-text.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/LICENSE.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/SUPPORT.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/articles/acquisition-ms.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/analytical-records.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/explanation-internals.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-baseline.html</loc></url>
@@ -71,6 +72,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/index.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/infer_axis_type.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/initialize_peak_params.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_acquisition.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_list.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_nd_list.html</loc></url>
@@ -81,9 +83,11 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_peaks_list.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/lorentzian_peak_model.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/maldi_spectra.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure-acquisition-bundle.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure-nd-bundle.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure-package.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_accuracy.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_acquisition.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_apply.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_assess.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_axis_info.html</loc></url>
@@ -115,6 +119,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_map.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_map_safely.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_ms_trace.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_ndim.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_packs.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.html</loc></url>
@@ -291,6 +296,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/unregister_peak_algorithm.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/unregister_peak_model.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/validate_measure.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/validate_measure_acquisition.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/validate_measure_record.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/validate_peak_model_params.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/vctrs-methods.html</loc></url>

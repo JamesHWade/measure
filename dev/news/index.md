@@ -6,6 +6,42 @@
   Unix-like systems. Scalar and nD writers preserve existing
   dangling-link destinations.
 
+- [`measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/measure_acquisition.md)
+  links raw ragged MS scans and two-dimensional arrays to declared
+  samples, injections, channels and sources. Scan order, raw numeric
+  storage, missing versus acquired-empty scans and per-point saturation
+  and source references remain explicit
+  ([\#162](https://github.com/JamesHWade/measure/issues/162)).
+
+- The acquisition/MS guide maps raw source records to ragged MS scans
+  and an independently sampled array, saves and reloads the acquisition,
+  then traces each selected centroid result to its contributing points
+  and source ordinals. Missingness, saturation, declared m/z conventions
+  and interpretation limits remain visible
+  ([\#162](https://github.com/JamesHWade/measure/issues/162)).
+
+- Acquisition interchange has a public installed-R/Python qualification
+  profile with fixed binary64 truth, typed raw acquisitions, independent
+  trace checks, reverse/reorder controls and corruption rejection. CI
+  also runs the tools outside the checkout from paths containing spaces
+  ([\#162](https://github.com/JamesHWade/measure/issues/162)).
+
+- [`write_measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/measure-acquisition-bundle.md)
+  and
+  [`read_measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/measure-acquisition-bundle.md)
+  preserve linked raw acquisitions in a fixed native CSV/TSV profile.
+  Typed values, numerical states, masks, point/source links and metadata
+  survive readback; publication is exclusive and selected-file reads use
+  one cumulative byte limit
+  ([\#162](https://github.com/JamesHWade/measure/issues/162)).
+
+- [`measure_ms_trace()`](https://jameshwade.github.io/measure/dev/reference/measure_ms_trace.md)
+  calculates explicitly selected centroid TIC/XIC traces with scan and
+  point contributor links. Missing scans, empty spectra/windows, missing
+  intensities and known or unknown saturation remain distinguishable;
+  profile integration and detector synchronization are not inferred
+  ([\#162](https://github.com/JamesHWade/measure/issues/162)).
+
 - [`write_measure_nd()`](https://jameshwade.github.io/measure/dev/reference/measure-nd-bundle.md)
   and
   [`read_measure_nd()`](https://jameshwade.github.io/measure/dev/reference/measure-nd-bundle.md)
