@@ -8,6 +8,11 @@
   storage, missing versus acquired-empty scans and per-point saturation and
   source references remain explicit (#162).
 
+* Acquisition interchange has a public installed-R/Python qualification profile
+  with fixed binary64 truth, typed raw acquisitions, independent trace checks,
+  reverse/reorder controls and corruption rejection. CI also runs the tools
+  outside the checkout from paths containing spaces (#162).
+
 * `write_measure_acquisition()` and `read_measure_acquisition()` preserve linked
   raw acquisitions in a fixed native CSV/TSV profile. Typed values, numerical
   states, masks, point/source links and metadata survive readback; publication

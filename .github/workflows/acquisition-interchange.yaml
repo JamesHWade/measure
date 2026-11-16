@@ -1,0 +1,63 @@
+name: Native acquisition interchange
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  acquisition-interchange:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: "yes"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          needs: check
+      - name: Install the checked-out candidate
+        run: R CMD INSTALL .
+      - name: Run the acquisition oracle unit tests
+        run: python3 -m unittest discover -s tools/acquisition-interchange -p 'test_*.py'
+      - name: Run the installed R and independent Python qualification
+        run: |
+          set -euo pipefail
+          {
+            python3 --version
+            Rscript tools/acquisition-interchange/qualify.R produce "$RUNNER_TEMP/acquisition-interchange"
+            python3 tools/acquisition-interchange/verify.py "$RUNNER_TEMP/acquisition-interchange"
+            python3 tools/acquisition-interchange/mutate.py "$RUNNER_TEMP/acquisition-interchange"
+            Rscript tools/acquisition-interchange/qualify.R reject "$RUNNER_TEMP/acquisition-interchange"
+            python3 tools/acquisition-interchange/verify.py "$RUNNER_TEMP/acquisition-interchange" --rejections
+          } 2>&1 | tee "$RUNNER_TEMP/acquisition-interchange.log"
+      - name: Run the copied tools from a path containing spaces
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qualification tools"
+          cp -R tools/acquisition-interchange "$RUNNER_TEMP/qualification tools/acquisition-interchange"
+          cd "$RUNNER_TEMP"
+          {
+            Rscript "$RUNNER_TEMP/qualification tools/acquisition-interchange/qualify.R" produce "$RUNNER_TEMP/acquisition interchange copied"
+            python3 "$RUNNER_TEMP/qualification tools/acquisition-interchange/verify.py" "$RUNNER_TEMP/acquisition interchange copied"
+            python3 "$RUNNER_TEMP/qualification tools/acquisition-interchange/mutate.py" "$RUNNER_TEMP/acquisition interchange copied"
+            Rscript "$RUNNER_TEMP/qualification tools/acquisition-interchange/qualify.R" reject "$RUNNER_TEMP/acquisition interchange copied"
+            python3 "$RUNNER_TEMP/qualification tools/acquisition-interchange/verify.py" "$RUNNER_TEMP/acquisition interchange copied" --rejections
+          } 2>&1 | tee "$RUNNER_TEMP/acquisition-interchange-copied.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: acquisition-interchange-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/acquisition-interchange
+            ${{ runner.temp }}/acquisition interchange copied
+            ${{ runner.temp }}/acquisition-interchange.log
+            ${{ runner.temp }}/acquisition-interchange-copied.log
+          if-no-files-found: ignore

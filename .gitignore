@@ -8,3 +8,6 @@ docs
 tests/testthat/_problems/
 /doc/
 /Meta/
+
+# Local bytecode is not part of the qualification profile.
+tools/acquisition-interchange/__pycache__/

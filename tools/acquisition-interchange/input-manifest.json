@@ -1,0 +1,21 @@
+{
+  "profile": "measure-acquisition/1",
+  "files": {
+    "declaration.json": {
+      "sha256": "800770c2bd0be385f7bb068ecfe0016496ec26068338d05dded836ca2e34bfd3",
+      "size_bytes": 16977
+    },
+    "fixtures.json": {
+      "sha256": "8207d06957fd5dadc6349d08163470e7c656137fb578ad4fb49e1b6379665f09",
+      "size_bytes": 702102
+    },
+    "wire-schema.json": {
+      "sha256": "a4f53803ff81dbf05bf61860a2103b86ad9510968bd60ae1af8eeadda06923c3",
+      "size_bytes": 2018
+    },
+    "finite-stress.bin": {
+      "sha256": "d11301fb08fce7aab29a12ab49e82b32c8438c7bdd0b9489a5ff49587e3cf63c",
+      "size_bytes": 65664
+    }
+  }
+}

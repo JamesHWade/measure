@@ -1,0 +1,111 @@
+{
+  "format": "measure-acquisition",
+  "version": 1,
+  "tables": {
+    "Samples": [
+      "row_index",
+      "sample_id"
+    ],
+    "Injections": [
+      "row_index",
+      "injection_id",
+      "sample_id"
+    ],
+    "Channels": [
+      "row_index",
+      "channel_id",
+      "channel_name"
+    ],
+    "Sources": [
+      "row_index",
+      "source_id",
+      "source_name",
+      "source_sha256"
+    ],
+    "Curves": [
+      "row_index",
+      "curve_id",
+      "injection_id",
+      "channel_id",
+      "source_id",
+      "axis_name",
+      "axis_unit",
+      "value_name",
+      "value_unit"
+    ],
+    "Points": [
+      "curve_id",
+      "point_index",
+      "location",
+      "value",
+      "source_row"
+    ],
+    "Streams": [
+      "row_index",
+      "stream_id",
+      "injection_id",
+      "channel_id",
+      "kind",
+      "source_id",
+      "time_unit",
+      "mz_unit",
+      "value_name",
+      "value_unit"
+    ],
+    "Scans": [
+      "row_index",
+      "scan_id",
+      "stream_id",
+      "scan_index",
+      "scan_status",
+      "retention_time",
+      "polarity",
+      "ms_level",
+      "spectrum_type",
+      "source_scan_id",
+      "location_type",
+      "value_type",
+      "point_count"
+    ],
+    "ScanPoints": [
+      "scan_id",
+      "point_index",
+      "location",
+      "value",
+      "source_row",
+      "saturated"
+    ],
+    "Arrays": [
+      "row_index",
+      "array_id",
+      "stream_id",
+      "dim_names_present",
+      "dim_units_present",
+      "value_type",
+      "point_count"
+    ],
+    "ArrayAxes": [
+      "array_id",
+      "axis_index",
+      "storage_type",
+      "axis_name",
+      "axis_unit"
+    ],
+    "ArrayPoints": [
+      "array_id",
+      "point_index",
+      "location_1",
+      "location_2",
+      "value",
+      "source_row",
+      "saturated"
+    ]
+  },
+  "metadata_order_field": "row_index",
+  "mask_tokens": {
+    "true": "1",
+    "false": "0",
+    "unknown": ""
+  },
+  "contract_sha256": "5453fee9de2ca695633fe1f76a91e2c169085399f491d8083b29d912f1f9b2ec"
+}
