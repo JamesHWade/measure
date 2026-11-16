@@ -1,5 +1,10 @@
 # measure 0.0.1.9003
 
+* Guides and the homepage now pair preprocessing, records, acquisitions and
+  validation examples with labeled plots, captions and descriptive alt text.
+  Revised prose distinguishes source absorbance, arbitrary coordinates and
+  simulated results from physical qualification (#169).
+
 * Native bundle readers recognize symbolic links on Windows as well as Unix-like
   systems. Scalar and nD writers preserve existing dangling-link destinations.
 

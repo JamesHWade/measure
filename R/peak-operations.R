@@ -550,13 +550,14 @@ find_peaks_cols <- function(data) {
 #' **Detection algorithms:**
 #'
 #' - `"prominence"` (default): Finds local maxima and calculates their prominence
-#'   (how much a peak stands out from surrounding signal). More robust to noise.
+#'   (the height above the surrounding contour). Use `min_prominence` to
+#'   exclude maxima below the chosen prominence threshold.
 #'
 #' - `"derivative"`: Finds peaks by detecting zero-crossings in the first
-#'   derivative. Faster but more sensitive to noise.
+#'   derivative. Noise can introduce additional zero-crossings.
 #'
-#' - `"local_maxima"`: Finds all local maxima above a threshold. Simple and fast
-#'   but may detect many spurious peaks.
+#' - `"local_maxima"`: Finds local maxima above the chosen height threshold,
+#'   including maxima caused by noise.
 #'
 #' - `"cwt"`: Links Mexican-hat wavelet maxima across widths to identify
 #'   persistent peaks. Requires a uniformly spaced axis. See
@@ -2186,8 +2187,8 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #'
 #' @details
 #' Peak deconvolution fits mathematical models to overlapping peaks to
-#' determine their individual contributions. This is essential for
-#' quantitative analysis when peaks are not baseline-resolved.
+#' estimate their individual contributions. The result depends on the selected
+#' peak model, starting values and fit constraints.
 #'
 #' **Peak Models:**
 #'
@@ -2203,7 +2204,7 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
 #'
 #' - `"auto"`: Selects based on problem complexity and SNR
 #' - `"lbfgsb"`: L-BFGS-B (fast, local optimization)
-#' - `"multistart"`: Multiple L-BFGS-B runs from perturbed starts (robust)
+#' - `"multistart"`: Multiple L-BFGS-B runs from perturbed starting values
 #' - `"nelder_mead"`: Derivative-free Nelder-Mead simplex
 #'
 #' **Reported Peak Properties:**

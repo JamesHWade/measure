@@ -19,12 +19,24 @@ library(measure)
 library(tibble)
 ```
 
+```{r guide-plot-theme, include = FALSE}
+guide_plot_theme <- ggplot2::theme_minimal(base_size = 11) +
+  ggplot2::theme(
+    plot.background = ggplot2::element_rect(fill = "white", colour = NA),
+    panel.background = ggplot2::element_rect(fill = "white", colour = NA),
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.background = ggplot2::element_rect(fill = "#EAF0F2", colour = NA),
+    strip.text = ggplot2::element_text(face = "bold", colour = "#263238"),
+    legend.position = "bottom"
+  )
+```
+
 ## Paired DAD data on different grids
 
-An LC-DAD result can be represented with retention time and wavelength as two
-location dimensions. These small measurements deliberately use different time
-and wavelength grids and have different point counts. Their shared dimension
-names describe the axes; the coordinates remain specific to each measurement.
+An nD payload can store signal observations against retention time and
+wavelength. These synthetic teaching measurements use different coordinate
+grids and point counts. Their dimension names and units are shared declarations;
+the coordinates remain specific to each member.
 
 ```{r paired-dad}
 dad_a <- new_measure_nd_tbl(
@@ -47,11 +59,69 @@ dad_pair <- new_measure_nd_list(list(dad_a, dad_b))
 c(nrow(dad_pair[[1]]), nrow(dad_pair[[2]]))
 ```
 
+The points below are the recorded coordinate pairs. Member A contains all
+eight pairings of its four sampled retention times and two wavelengths; one
+signal is missing. Member B contains six of the eight pairings from its own
+four retention times and two wavelengths. The chart adds no coordinate pairs.
+
+```{r paired-dad-grid-plot, fig.width = 7, fig.height = 4.5, fig.cap = "Recorded coordinate pairs from two synthetic teaching members. Member A has all eight combinations of four retention times and two wavelengths; member B has six of eight combinations. Circle and cross shapes distinguish numeric and missing signals.", fig.alt = "Two-panel coordinate scatter chart with retention time in minutes on the x-axis and wavelength in nanometres on the y-axis. Member A contains all eight pairings of its four sampled times and two wavelengths, with a missing signal at 1.75 min and 210 nm. Member B contains six of eight pairings from its own four sampled times and two wavelengths; all six signals are numeric. Points are not connected or interpolated."}
+dad_plot_data <- dplyr::bind_rows(lapply(seq_along(dad_pair), function(i) {
+  member <- dad_pair[[i]]
+  data.frame(
+    member = c("Member A", "Member B")[[i]],
+    retention_time = member$location_1,
+    wavelength = member$location_2,
+    signal = member$value,
+    observation = ifelse(
+      is.na(member$value),
+      "Signal missing",
+      "Numeric signal"
+    )
+  )
+}))
+
+ggplot2::ggplot(
+  dad_plot_data,
+  ggplot2::aes(
+    x = retention_time,
+    y = wavelength,
+    colour = observation,
+    shape = observation
+  )
+) +
+  ggplot2::geom_point(size = 3.2, stroke = 1.1) +
+  ggplot2::facet_wrap(~member, ncol = 2) +
+  ggplot2::scale_colour_manual(
+    name = "Observation",
+    values = c(
+      "Numeric signal" = "#176B87",
+      "Signal missing" = "#B4493A"
+    )
+  ) +
+  ggplot2::scale_shape_manual(
+    name = "Observation",
+    values = c("Numeric signal" = 16, "Signal missing" = 4)
+  ) +
+  ggplot2::scale_x_continuous(
+    breaks = c(0, 1, 2, 3, 4),
+    minor_breaks = NULL
+  ) +
+  ggplot2::scale_y_continuous(
+    breaks = sort(unique(dad_plot_data$wavelength)),
+    minor_breaks = NULL
+  ) +
+  ggplot2::labs(
+    x = "Retention time (min)",
+    y = "Wavelength (nm)"
+  ) +
+  guide_plot_theme
+```
+
 The pair can share an nD list while preserving each member's grid and
 metadata. The list does not assert that the two measurements have identical
 coordinates.
 
-## Save the raw DAD payload before extracting a trace
+## Preserve sparse coordinates and point order
 
 The next paired example keeps the input point order. Retention-time groups
 appear in descending order, and wavelengths within each time group are also
@@ -296,21 +366,67 @@ The native `measure-nd` v1 bundle preserves this supported numerical payload,
 including point order, the members' different grids, repeated tuples, missing
 values, and dimension names and units. It does not expand the sparse data into
 a rectangular grid or interpret the observations as a physical acquisition.
-The empty-list check also uses the public grid inspection function: its
-reported dimensionality agrees with the constructor's canonical 3D
-prototype. This vignette removes only its temporary directory after the
-example; a real workflow should retain the raw nD bundle when it is needed for
-later analysis or review.
+The guide deletes its temporary files after rendering; retain the native
+bundle when later analysis requires the raw points.
+
+The plot keeps all 16 raw coordinate pairs. The cross and circle at the same
+member A coordinate mark two distinct observations: one numeric signal and one
+missing signal.
+
+```{r raw-dad-grid-plot, fig.width = 7, fig.height = 4.5, fig.cap = "Raw coordinate pairs after reloading the native nD bundle. The overlapping circle and cross in member A mark two records at the same coordinate: one numeric signal and one missing signal.", fig.alt = "Two-panel coordinate scatter chart with retention time in minutes on the x-axis and wavelength in nanometres on the y-axis. Member A has nine raw point records, including a numeric signal and a missing signal at the repeated coordinate 1.5 min and 210 nm. Member B has seven records on a different sparse grid, including one missing signal. Circles mark numeric signals and crosses mark missing signals; no points are interpolated or joined."}
+raw_dad_plot_data <- dplyr::bind_rows(lapply(
+  seq_along(restored_raw_dad),
+  function(i) {
+    member <- restored_raw_dad[[i]]
+    data.frame(
+      member = names(restored_raw_dad)[[i]],
+      retention_time = member$location_1,
+      wavelength = member$location_2,
+      signal = member$value,
+      observation = ifelse(
+        is.na(member$value),
+        "Signal missing",
+        "Numeric signal"
+      )
+    )
+  }
+))
+
+ggplot2::ggplot(
+  raw_dad_plot_data,
+  ggplot2::aes(
+    x = retention_time,
+    y = wavelength,
+    colour = observation,
+    shape = observation
+  )
+) +
+  ggplot2::geom_point(size = 3.2, stroke = 1.1) +
+  ggplot2::facet_wrap(~member, ncol = 2) +
+  ggplot2::scale_colour_manual(
+    name = "Observation",
+    values = c(
+      "Numeric signal" = "#176B87",
+      "Signal missing" = "#B4493A"
+    )
+  ) +
+  ggplot2::scale_shape_manual(
+    name = "Observation",
+    values = c("Numeric signal" = 16, "Signal missing" = 4)
+  ) +
+  ggplot2::labs(
+    x = "Retention time (min)",
+    y = "Wavelength (nm)"
+  ) +
+  guide_plot_theme
+```
 
 ## Map an extracted trace to parsed raw points
 
-The chunk above writes and reloads the raw pair before its first slice. It then
-extracts the 254 nm trace from the restored first member, retaining the
-selected point indices from that member's original row order. Before cleaning
-the temporary bundle, it reads the actual `points.csv` and joins on
-`member_index` plus `point_index`. Its source ordinals count parsed CSV data
-records, not physical text lines. Coordinates are not used as keys, so
-repeated coordinate tuples remain distinguishable.
+The 254 nm slice preserves member A's input order. `point_mapping` joins on
+`member_index` and `point_index` in `points.csv`, not on coordinates, so
+repeated tuples remain distinct. Its source ordinals count parsed CSV records,
+not physical text lines.
 
 ```{r extracted-trace-lineage}
 point_mapping
@@ -318,12 +434,9 @@ raw_trace_254
 record_trace
 ```
 
-The mapping is a local tutorial calculation from the saved bundle. The scalar
-record below retains these source-record ordinals alongside its extracted
-trace and records the exact SHA-256 of the raw `points.csv` bytes. The nD
-bundle and scalar record are separate artifacts; the native scalar
-`measure-record` v1 bundle stores the trace and source reference metadata but
-does not embed the raw nD bundle or raw point file.
+The scalar record below stores these source ordinals and the SHA-256 of the
+raw `points.csv` bytes alongside the trace. Its native bundle does not embed
+the nD bundle or raw point file.
 
 ## Unfold and restore each member
 
@@ -359,15 +472,11 @@ restored_exactly
 stopifnot(all(restored_exactly))
 ```
 
-For heterogeneous grids, keep each element's own unfold metadata attached.
-Do not copy one member's fold metadata across the list. A missing member
-mapping or invalid point index is an error, because the coordinates could no
-longer be tied to the edited 1D values safely.
-
-To edit an unfolded collection, edit its extracted members and rebuild the
-list with `new_measure_list()`. Assignment through a list-column prototype
-can remove non-prototype attributes, including the fold mapping. The next
-block makes a deliberate signal edit and verifies the saved point association.
+For heterogeneous grids, keep each member's fold metadata attached.
+`new_measure_list()` rebuilds edited members while retaining that metadata;
+direct replacement through a list-column prototype can drop it. A missing
+member mapping or invalid point index is an error because the edited values
+could no longer be tied safely to coordinates.
 
 ```{r edit-unfolded}
 edited_members <- lapply(unfolded_pair, function(member) {
@@ -384,7 +493,7 @@ stopifnot(all(vapply(
 )))
 ```
 
-## Slice and project without changing the measurement question
+## Slice points and summarize observed values
 
 Use one named dimension selector at a time, or unique dimension numbers, to
 make the chosen axis clear. A slice preserves the selected point order. A
@@ -488,12 +597,39 @@ record$curves$.measures[[1]]
 record$curves$.source_rows[[1]]
 ```
 
-The record contains this extracted 1D trace; it does not contain `dad_a`,
-`dad_pair`, or the raw nD payload. The caller supplies the source hash and
-parsed-record ordinals shown above. The scalar bundle saves its curve and
-source-reference metadata, but does not embed the raw points file or nD
-bundle. The references describe this explicit mapping; they do not establish
-source authenticity or instrument provenance.
+The scalar curve is ordered by retention time, while its labels retain the
+parsed `points.csv` record ordinals. These references show which raw point
+supplied each selected 254 nm value.
+
+```{r extracted-trace-plot, fig.width = 7, fig.height = 4.5, fig.cap = "The scalar record's extracted 254 nm trace, with each point labeled by its parsed raw points.csv record ordinal.", fig.alt = "Point chart of the extracted 254 nm trace. Retention time in minutes is on the x-axis and absorbance in AU, as declared in the scalar record, is on the y-axis. Values are 0.83 at 0 min from source record 9, 0.58 at 1.5 min from record 5, and 0.42 at 3 min from record 2. The points are not connected; labels show that record order differs from source order."}
+record_trace_plot_data <- data.frame(
+  retention_time = record$curves$.measures[[1L]]$location,
+  absorbance = record$curves$.measures[[1L]]$value,
+  source_record = record$curves$.source_rows[[1L]]
+)
+
+ggplot2::ggplot(
+  record_trace_plot_data,
+  ggplot2::aes(x = retention_time, y = absorbance)
+) +
+  ggplot2::geom_point(colour = "#176B87", size = 3) +
+  ggplot2::geom_text(
+    ggplot2::aes(label = paste0("record ", source_record)),
+    vjust = -0.8,
+    size = 3
+  ) +
+  ggplot2::scale_x_continuous(breaks = record_trace_plot_data$retention_time) +
+  ggplot2::labs(
+    x = "Retention time (min)",
+    y = "Absorbance (AU; declared in scalar record)"
+  ) +
+  guide_plot_theme
+```
+
+The record contains this extracted 1D trace, not `dad_a`, `dad_pair`, or the
+raw nD payload. The caller supplies the source hash and parsed-record ordinals;
+the scalar bundle stores these references without embedding the raw points
+file or nD bundle.
 
 ```{r save-record}
 record_bundle <- tempfile("measure-dad-record-")
@@ -508,7 +644,7 @@ tryCatch(
 )
 ```
 
-## What this format does and does not claim
+## Storage and provenance limits
 
 | Capability | Boundary |
 |---|---|

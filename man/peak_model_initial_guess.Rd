@@ -23,9 +23,8 @@ Estimates initial parameter values from the data, providing a starting
 point for optimization.
 }
 \details{
-A good initial guess is crucial for successful optimization. The method
-should estimate parameters from local features of the data (peak height,
-width at half maximum, asymmetry, etc.).
+Starting values affect whether the nonlinear fit converges. Estimate them
+from the local peak height, width at half maximum and asymmetry.
 }
 \examples{
 model <- create_peak_model("gaussian")

@@ -30,6 +30,11 @@
 #'   mutate(channel = str_extract(channel, "[:digit:]+") |> as.integer())
 #' ```
 #'
+#' The column named `transmittance` contains these original absorbance values;
+#' the reshaping above changes their layout and column name, not their scale.
+#' No wavelength mapping is stored, so `channel` is an index rather than a
+#' wavelength in nanometres.
+#'
 #' @name meats_long
 #' @aliases meats_long
 #' @docType data

@@ -38,6 +38,11 @@ Included here are the meats data transformed to a long format with
                values_to = "transmittance") |>
   mutate(channel = str_extract(channel, "[:digit:]+") |> as.integer())
 }\if{html}{\out{</div>}}
+
+The column named \code{transmittance} contains these original absorbance values;
+the reshaping above changes their layout and column name, not their scale.
+No wavelength mapping is stored, so \code{channel} is an index rather than a
+wavelength in nanometres.
 }
 \examples{
 

@@ -201,9 +201,8 @@ peak_model_bounds.default <- function(model, x_range, y_range) {
 #' @return Named list of initial parameter values.
 #'
 #' @details
-#' A good initial guess is crucial for successful optimization. The method
-#' should estimate parameters from local features of the data (peak height,
-#' width at half maximum, asymmetry, etc.).
+#' Starting values affect whether the nonlinear fit converges. Estimate them
+#' from the local peak height, width at half maximum and asymmetry.
 #'
 #' @examples
 #' model <- create_peak_model("gaussian")
