@@ -151,11 +151,12 @@ These are passed to the algorithm function along with the standard parameters.</
 column containing the detected peaks for each sample. The original
 <code>.measures</code> column is preserved.</p>
 <p><strong>Detection algorithms:</strong></p><ul><li><p><code>"prominence"</code> (default): Finds local maxima and calculates their prominence
-(how much a peak stands out from surrounding signal). More robust to noise.</p></li>
+(the height above the surrounding contour). Use <code>min_prominence</code> to
+exclude maxima below the chosen prominence threshold.</p></li>
 <li><p><code>"derivative"</code>: Finds peaks by detecting zero-crossings in the first
-derivative. Faster but more sensitive to noise.</p></li>
-<li><p><code>"local_maxima"</code>: Finds all local maxima above a threshold. Simple and fast
-but may detect many spurious peaks.</p></li>
+derivative. Noise can introduce additional zero-crossings.</p></li>
+<li><p><code>"local_maxima"</code>: Finds local maxima above the chosen height threshold,
+including maxima caused by noise.</p></li>
 <li><p><code>"cwt"</code>: Links Mexican-hat wavelet maxima across widths to identify
 persistent peaks. Requires a uniformly spaced axis. See
 <a href="peak_detection_cwt.html">peak_detection_cwt</a> for widths, local SNR, missing data, and limits.</p></li>

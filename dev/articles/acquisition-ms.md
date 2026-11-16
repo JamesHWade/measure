@@ -5,15 +5,15 @@
 library(measure)
 ```
 
-## Keep the acquisition beside the analytical record
+## Link raw acquisitions to analytical records
 
 [`measure_record()`](https://jameshwade.github.io/measure/dev/reference/measure_record.md)
-remains the relational record for samples, injections, channels,
-sources, and independent one-dimensional curves. A
+stores the relationships among samples, injections, channels, sources,
+and one-dimensional curves.
 [`measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/measure_acquisition.md)
-adds stream declarations, per-scan spectra, and two-dimensional arrays
-without changing that record. It preserves raw point order and each
-scan’s own m/z vector; a shared grid is not required.
+adds stream declarations, per-scan spectra, and two-dimensional arrays.
+Each scan keeps its own m/z coordinates and point order; scans need not
+share a grid.
 
 This example starts with a small synthetic CSV written for the vignette.
 It is not an instrument recording or a vendor export. The input contains
@@ -268,11 +268,11 @@ streams <- tibble::tibble(
 )
 ```
 
-The acquisition contains one MS stream with positive and negative scans
-and two MS levels, plus a separate profile stream and a 2D stream. IDs,
-units, scan state, representation, saturation declarations, and array
-axis labels are caller-supplied. The constructor validates relationships
-and supported structure; it does not infer these values.
+The acquisition contains positive and negative scans at two MS levels, a
+separate profile stream, and a 2D stream. The caller supplies IDs,
+units, scan states, representations, saturation declarations, and array
+axis labels; the constructor validates their relationships without
+inferring them.
 
 ``` r
 
@@ -294,10 +294,9 @@ summary(acquisition)
 #>   arrays: 1
 ```
 
-The synthetic record has no scalar curves. An extracted trace has
-many-to-one links into raw scan points, so it remains beside its
-acquisition ancestry rather than being represented as though one trace
-value came from one scan point.
+The synthetic record has no scalar curves. Each trace value may
+summarize multiple scan points, so the extracted trace remains linked to
+its raw acquisition.
 
 ## Write and reload the raw acquisition first
 
@@ -322,10 +321,10 @@ summary(raw_acquisition)
 #>   arrays: 1
 ```
 
-The raw scan vectors are ragged: their lengths and m/z coordinates
-belong to each scan. The native bundle retains acquired-empty and
-missing scans, ordinary missing intensities, and the three-valued
-saturation mask (`TRUE`/`FALSE`/unknown) as separate states.
+Each scan retains its own point count and m/z coordinates. The bundle
+also retains acquired-empty and missing scans, missing intensities, and
+the three-valued saturation mask (`TRUE`, `FALSE`, or unknown) as
+separate states.
 
 ## Derive an explicit centroid TIC and XIC
 
@@ -392,8 +391,171 @@ knitr::kable(xic_table, digits = 3)
 | scan-saturated | 9 | 1.90 | NA | saturated | 1 | FALSE |
 | scan-missing | 12 | 2.20 | NA | missing_scan |  | FALSE |
 
-The corresponding TIC is a total-ion sum over all points in the same
-selected scans. These are derived traces, not source-reported
+This plot shows numeric results for the selected centroid XIC. The
+acquired-empty scan and the empty m/z window both yield zero, with
+distinct statuses. Missing-intensity, saturated, and missing-scan
+results have no numeric value and are omitted here.
+
+``` r
+
+xic_value_plot_data <- xic_table |>
+  dplyr::filter(is.finite(value)) |>
+  dplyr::mutate(
+    status = factor(
+      status,
+      levels = c("calculated", "empty_scan", "empty_window")
+    ),
+    scan_label = paste0("scan ", scan_index)
+  )
+
+ggplot2::ggplot(
+  xic_value_plot_data,
+  ggplot2::aes(
+    x = retention_time_s,
+    y = value,
+    colour = status,
+    shape = status
+  )
+) +
+  ggplot2::geom_point(size = 3) +
+  ggplot2::geom_text(
+    ggplot2::aes(label = scan_label),
+    nudge_y = 0.55,
+    size = 3,
+    show.legend = FALSE
+  ) +
+  ggplot2::scale_colour_manual(
+    name = "Trace status",
+    values = c(
+      calculated = "#176B87",
+      empty_scan = "#69757A",
+      empty_window = "#3A7864"
+    ),
+    labels = c(
+      calculated = "Calculated",
+      empty_scan = "Acquired empty",
+      empty_window = "Empty m/z window"
+    )
+  ) +
+  ggplot2::scale_shape_manual(
+    name = "Trace status",
+    values = c(calculated = 16, empty_scan = 15, empty_window = 17),
+    labels = c(
+      calculated = "Calculated",
+      empty_scan = "Acquired empty",
+      empty_window = "Empty m/z window"
+    )
+  ) +
+  ggplot2::scale_x_continuous(
+    breaks = xic_value_plot_data$retention_time_s,
+    expand = ggplot2::expansion(mult = c(0.05, 0.2))
+  ) +
+  ggplot2::scale_y_continuous(
+    expand = ggplot2::expansion(mult = c(0.05, 0.15))
+  ) +
+  ggplot2::labs(
+    x = "Retention time (s)",
+    y = "XIC ion abundance (counts)"
+  ) +
+  guide_plot_theme
+```
+
+![Point chart of XIC intensity in counts against retention time in
+seconds. Scan 1 has a 15-count sum at 0.25 s from two m/z 100
+contributors. Scan 5 is acquired-empty and has value zero at 0.8 s. Scan
+6 has a 2.25-count result at 1.0 s with an unknown saturation mask. Scan
+8 has value zero at 1.6 s because no point falls in the selected m/z
+interval. The acquired-empty and empty-window zeros have different
+shapes. Missing-intensity, saturated, and missing-scan results have no
+numeric value and are not
+plotted.](acquisition-ms_files/figure-html/xic-value-plot-1.png)
+
+Numeric XIC results for the declared positive-ion, MS1 centroid
+selection. The acquired-empty scan and the scan with no point in the m/z
+window both return zero, with distinct statuses.
+
+The status column distinguishes an acquired-empty scan from a missing
+scan, a missing intensity, a saturated point, and a scan with no point
+in the XIC window. Both an acquired-empty scan and an empty m/z window
+produce a numeric zero here, with different statuses; missing-intensity,
+saturated, and missing-scan results have no numeric trace value.
+
+``` r
+
+xic_status_levels <- c(
+  "calculated",
+  "empty_scan",
+  "missing_intensity",
+  "empty_window",
+  "saturated",
+  "missing_scan"
+)
+xic_status_plot_data <- xic_table |>
+  dplyr::mutate(
+    status = factor(status, levels = xic_status_levels),
+    scan_label = paste0("scan ", scan_index)
+  )
+
+ggplot2::ggplot(
+  xic_status_plot_data,
+  ggplot2::aes(x = retention_time_s, y = status, colour = status)
+) +
+  ggplot2::geom_point(size = 3) +
+  ggplot2::geom_text(
+    ggplot2::aes(label = scan_label),
+    nudge_x = 0.06,
+    hjust = 0,
+    size = 3,
+    show.legend = FALSE
+  ) +
+  ggplot2::scale_colour_manual(
+    values = c(
+      calculated = "#176B87",
+      empty_scan = "#69757A",
+      missing_intensity = "#C05A2B",
+      empty_window = "#3A7864",
+      saturated = "#A52A2A",
+      missing_scan = "#7356A2"
+    ),
+    guide = "none"
+  ) +
+  ggplot2::scale_y_discrete(
+    labels = c(
+      calculated = "Calculated",
+      empty_scan = "Acquired empty",
+      missing_intensity = "Missing intensity",
+      empty_window = "Empty m/z window",
+      saturated = "Saturated",
+      missing_scan = "Missing scan"
+    )
+  ) +
+  ggplot2::scale_x_continuous(
+    expand = ggplot2::expansion(mult = c(0.03, 0.3))
+  ) +
+  ggplot2::labs(
+    x = "Retention time (s)",
+    y = "XIC result status"
+  ) +
+  guide_plot_theme
+```
+
+![Categorical scatter chart of XIC result status. Retention time in
+seconds is on the x-axis and trace status is on the y-axis. Scan 1 is
+calculated at 0.25 s, scan 5 is acquired-empty with value zero at 0.8 s,
+scan 6 is calculated at 1.0 s, scan 7 has missing intensity at 1.3 s,
+scan 8 has an empty m/z window with value zero at 1.6 s, scan 9 is
+saturated at 1.9 s, and scan 12 is a missing scan at 2.2 s. The two
+zero-valued states retain different categories; missing-intensity,
+saturated, and missing-scan results have no numeric
+value.](acquisition-ms_files/figure-html/xic-status-plot-1.png)
+
+XIC status by retention time for the declared positive-ion, MS1 centroid
+selection. Acquired-empty scans and empty m/z windows both return zero,
+while missing-intensity, saturated, and missing-scan states remain
+separate.
+
+The corresponding TIC sums all points in the same selected scans. Both
+traces are derived from the raw spectra, not source-reported
 chromatograms.
 
 ``` r
@@ -540,10 +702,10 @@ trace_point_links <- do.call(
 rownames(trace_point_links) <- NULL
 ```
 
-The table shows every selected contributor position and its parallel
-parsed source-row reference. It includes the two repeated m/z points in
-the first scan, plus the point with a missing intensity and the point
-declared saturated.
+The table shows each selected contributor’s position in its scan and
+parsed CSV record ordinal. It includes the two distinct m/z 100 points
+in scan 1, a point with missing intensity, and a point declared
+saturated.
 
 ``` r
 
@@ -557,6 +719,104 @@ knitr::kable(trace_point_links, digits = 3)
 | scan-unknown-mask | 6 | 1 | 6 | 100.50 | 2.25 | NA |
 | scan-missing-intensity | 7 | 1 | 7 | 100.75 | NA | NA |
 | scan-saturated | 9 | 1 | 9 | 100.20 | 80.00 | TRUE |
+
+This plot maps each XIC contributor from its parsed CSV record to its
+scan. Point labels give the within-scan point index; shape marks whether
+an intensity is present, and color shows the point’s saturation mask.
+The two m/z 100 contributors in scan 1 remain separate points.
+
+``` r
+
+trace_point_plot_data <- trace_point_links |>
+  dplyr::mutate(
+    intensity_state = ifelse(
+      is.na(intensity),
+      "Missing intensity",
+      "Numeric intensity"
+    ),
+    saturation_state = dplyr::case_when(
+      is.na(saturated) ~ "Saturation unknown",
+      saturated ~ "Declared saturated",
+      TRUE ~ "Declared not saturated"
+    ),
+    point_label = paste0("p", point_index)
+  )
+
+ggplot2::ggplot(
+  trace_point_plot_data,
+  ggplot2::aes(
+    x = parsed_csv_record,
+    y = scan_index,
+    colour = saturation_state,
+    shape = intensity_state
+  )
+) +
+  ggplot2::geom_point(size = 3) +
+  ggplot2::geom_text(
+    ggplot2::aes(label = point_label),
+    nudge_y = 0.28,
+    size = 3,
+    show.legend = FALSE
+  ) +
+  ggplot2::scale_colour_manual(
+    name = "Saturation mask",
+    values = c(
+      "Declared not saturated" = "#176B87",
+      "Saturation unknown" = "#C05A2B",
+      "Declared saturated" = "#A52A2A"
+    ),
+    labels = c(
+      "Declared not saturated" = "Not saturated",
+      "Saturation unknown" = "Unknown",
+      "Declared saturated" = "Saturated"
+    )
+  ) +
+  ggplot2::scale_shape_manual(
+    name = "Intensity",
+    values = c(
+      "Numeric intensity" = 16,
+      "Missing intensity" = 15
+    ),
+    labels = c(
+      "Numeric intensity" = "Numeric",
+      "Missing intensity" = "Missing"
+    )
+  ) +
+  ggplot2::scale_x_continuous(
+    breaks = sort(unique(trace_point_plot_data$parsed_csv_record)),
+    minor_breaks = NULL
+  ) +
+  ggplot2::scale_y_continuous(
+    breaks = sort(unique(trace_point_plot_data$scan_index)),
+    minor_breaks = NULL
+  ) +
+  ggplot2::labs(
+    x = "Parsed CSV data-record ordinal",
+    y = "Scan index (within stream)"
+  ) +
+  ggplot2::guides(
+    colour = ggplot2::guide_legend(nrow = 1),
+    shape = ggplot2::guide_legend(nrow = 1)
+  ) +
+  ggplot2::theme(
+    legend.box = "vertical",
+    legend.justification = "left"
+  ) +
+  guide_plot_theme
+```
+
+![Lineage scatter chart with parsed CSV data-record ordinal on the
+x-axis and scan index on the y-axis. Rows 1 and 2 map to scan 1 as
+separate numeric points at the same m/z coordinate; row 6 maps to scan 6
+with numeric intensity and an unknown saturation mask. Row 7 maps to
+scan 7 with missing intensity and an unknown mask. Row 9 maps to scan 9
+with numeric intensity marked saturated. Point labels give within-scan
+indices.](acquisition-ms_files/figure-html/trace-lineage-plot-1.png)
+
+Parsed CSV records contributing to the selected XIC, mapped to scan
+indices. Labels give within-scan point indices; shape indicates whether
+an intensity is present, and color indicates the declared saturation
+mask.
 
 The source digest and these local links are provenance aids; they do not
 authenticate the source or assert that it is complete.
@@ -622,7 +882,7 @@ knitr::kable(array_table, digits = 3)
 |                15 |             1.50 |           235 |     NA | FALSE     |
 |                16 |             3.00 |           320 |   0.69 | TRUE      |
 
-## Capability boundary
+## Capabilities and limits
 
 | Capability | This slice |
 |:---|:---|

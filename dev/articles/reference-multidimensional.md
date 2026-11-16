@@ -20,6 +20,17 @@ library(measure)
 #>     step
 library(recipes)
 library(dplyr)
+library(ggplot2)
+
+theme_measure <- function() {
+  theme_minimal(base_size = 11) +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "white", colour = NA),
+      plot.background = element_rect(fill = "white", colour = NA),
+      legend.background = element_rect(fill = "white", colour = NA)
+    )
+}
 ```
 
 ## Introduction
@@ -186,6 +197,38 @@ m1
 #> # ℹ 30 more rows
 ```
 
+The point chart plots the 40 coordinates stored for sample 1. Colour
+represents the simulated `absorbance` values; the chart does not fill in
+values between the measured wavelengths.
+
+``` r
+
+m1_plot_data <- data.frame(
+  retention_time = m1$location_1,
+  wavelength = m1$location_2,
+  value = m1$value
+)
+
+ggplot(m1_plot_data, aes(x = retention_time, y = wavelength, colour = value)) +
+  geom_point(size = 3) +
+  scale_colour_viridis_c(name = "Simulated\nabsorbance") +
+  labs(
+    x = "Retention time (min)",
+    y = "Wavelength (nm)"
+  ) +
+  theme_measure()
+```
+
+![Point chart of sample 1 with retention time in minutes on the x-axis
+and wavelength in nanometres on the y-axis. Colour encodes simulated
+absorbance. The chart has 40 points, one at every combination of 10
+times and 4
+wavelengths.](reference-multidimensional_files/figure-html/multidimensional-points-1.png)
+
+The first sample contains one simulated absorbance value at each of 10
+retention times and 4 wavelengths. Points mark the observed
+time-wavelength pairs; no interpolation is drawn between them.
+
 Dimension metadata is preserved:
 
 ``` r
@@ -297,8 +340,9 @@ For 2D data, location columns are named with dimension suffixes
 
 ## Irregular Grids
 
-Not all 2D data forms a regular rectangular grid. The package handles
-irregular grids gracefully:
+Not all 2D data forms a regular rectangular grid. This example has seven
+observed coordinate pairs, with some time-wavelength combinations
+absent.
 
 ``` r
 
@@ -322,6 +366,38 @@ irr_result <- bake(irr_rec, new_data = NULL)
 measure_is_regular(irr_result$.measures[[1]])
 #> [1] FALSE
 ```
+
+The plot shows the stored coordinate-value rows only. Absent pairs are
+left unmarked rather than being represented as zeros.
+
+``` r
+
+irr_measure <- irr_result$.measures[[1]]
+irr_plot_data <- data.frame(
+  time = irr_measure$location_1,
+  wavelength = irr_measure$location_2,
+  value = irr_measure$value
+)
+
+ggplot(irr_plot_data, aes(x = time, y = wavelength, colour = value)) +
+  geom_point(size = 3) +
+  scale_colour_viridis_c(name = "Value") +
+  labs(
+    x = "Time coordinate",
+    y = "Wavelength coordinate"
+  ) +
+  theme_measure()
+```
+
+![Point chart of seven observed time-wavelength pairs. Time coordinate
+is on the x-axis, wavelength coordinate is on the y-axis, and colour
+encodes the simulated value. The coordinates are unevenly represented;
+no points mark unobserved
+combinations.](reference-multidimensional_files/figure-html/irregular-grid-plot-1.png)
+
+Observed values from the seven-row irregular input. The points show
+sampled coordinates without adding the missing time-wavelength
+combinations.
 
 ## Dimension Reduction Operations
 
@@ -439,6 +515,52 @@ wl_total
 #> 3      320  987.
 #> 4      350 1033.
 ```
+
+The 254 nm slice can be compared with the mean projection across all
+four wavelengths. Both traces retain retention time as their location
+axis.
+
+``` r
+
+trace_data <- dplyr::bind_rows(
+  data.frame(
+    location = slice_254$location,
+    value = slice_254$value,
+    trace = "254 nm slice"
+  ),
+  data.frame(
+    location = time_trace$location,
+    value = time_trace$value,
+    trace = "Mean across wavelengths"
+  )
+)
+
+ggplot(trace_data, aes(x = location, y = value, colour = trace)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2) +
+  scale_colour_manual(
+    values = c(
+      "254 nm slice" = "#2166AC",
+      "Mean across wavelengths" = "#B2182B"
+    ),
+    name = "Trace"
+  ) +
+  labs(
+    x = "Retention time (min)",
+    y = "Simulated absorbance"
+  ) +
+  theme_measure()
+```
+
+![Line chart with retention time from 0 to 9 minutes on the x-axis and
+simulated absorbance on the y-axis. One line is the 254 nm wavelength
+slice; the other is the mean projection across wavelengths. Both show
+the same sample at each time, with the projected line averaging four
+values per
+time.](reference-multidimensional_files/figure-html/slice-projection-plot-1.png)
+
+For sample 1, the 254 nm slice is compared with the mean signal across
+all four wavelengths. Both traces use the same simulated signal scale.
 
 ## Multi-Channel Operations
 

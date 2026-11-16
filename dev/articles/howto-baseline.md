@@ -1,4 +1,4 @@
-# How-To: Baseline Correction
+# How-to: baseline correction
 
 ``` r
 
@@ -7,6 +7,16 @@ library(recipes)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+
+article_plot_theme <- theme_minimal(base_size = 12) +
+  theme(
+    text = element_text(colour = "#222222"),
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "white", colour = NA),
+    legend.background = element_rect(fill = "white", colour = NA),
+    legend.key = element_rect(fill = "white", colour = NA),
+    strip.background = element_rect(fill = "white", colour = NA)
+  )
 library(modeldata)
 
 has_pybaselines <- if (requireNamespace("reticulate", quietly = TRUE)) {
@@ -29,18 +39,20 @@ if (!has_pybaselines) {
 
 ## Introduction
 
-Baseline correction is a fundamental preprocessing step for
-spectroscopic and chromatographic data. Baselines can drift due to
-instrument effects, sample scattering, fluorescence, or detector
-response, obscuring the chemical information in your measurements.
+A baseline is the slowly changing background in a measured signal.
+Baseline correction estimates that background and subtracts it. The
+estimate can overlap real signal features, so inspect the corrected data
+before using it in later analysis.
 
-The measure package provides several baseline correction methods as
-recipe steps, plus the ability to use custom R functions or Python’s
-pybaselines library.
+measure includes baseline recipe steps, a custom R callback, and
+optional access to the Python `pybaselines` library.
 
-## The problem: Baseline drift
+## Inspecting baseline variation
 
-Let’s visualize baseline issues in NIR spectra:
+The first five spectra from
+[`modeldata::meats`](https://modeldata.tidymodels.org/reference/meats.html)
+show differences in level and shape. This plot alone does not separate
+baseline variation from sample composition.
 
 ``` r
 
@@ -56,33 +68,40 @@ meats_viz <- meats |>
   ) |>
   mutate(channel = as.integer(gsub("x_", "", channel)))
 
-# Plot raw spectra
+# Plot five raw spectra
 meats_viz |>
-  filter(id <= 20) |>
+  filter(id <= 5) |>
   ggplot(aes(x = channel, y = transmittance, group = id, color = factor(id))) +
-  geom_line(alpha = 0.7) +
+  geom_line(alpha = 0.8) +
+  scale_color_viridis_d(name = "Sample ID") +
   labs(
-    x = "Channel",
-    y = "Transmittance",
-    title = "Raw NIR Spectra with Baseline Variation"
+    x = "Spectral channel (index)",
+    y = "Absorbance (unitless)",
+    title = "Meat spectra before baseline correction"
   ) +
-  theme_minimal() +
-  theme(legend.position = "none")
+  article_plot_theme
 ```
 
-![](howto-baseline_files/figure-html/baseline-problem-1.png)
+![Line chart of absorbance by spectral channel index for five meat
+samples. Colored lines identify samples and show variation in shape and
+level across the 100
+channels.](howto-baseline_files/figure-html/baseline-problem-1.png)
 
-Notice the vertical offset between spectra? This baseline shift isn’t
-related to the chemical composition we want to model.
+Five NIR spectra from modeldata::meats. Color identifies each sample;
+the x-axis is a channel index and absorbance is unitless.
+
+Differences between spectra may reflect baseline variation, sample
+composition, or both. The plot does not identify their source.
 
 ## Built-in baseline correction methods
 
-### Asymmetric Least Squares (ALS)
+### Asymmetric least squares (ALS)
 
 [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md)
-uses the Asymmetric Least Squares algorithm, which is excellent for
-spectra where peaks are predominantly in one direction (e.g., absorption
-peaks going up or emission peaks going down).
+estimates an asymmetric least-squares baseline for each spectrum and
+subtracts it from the signal. The example uses `lambda = 1e6` and
+`p = 0.01`; inspect the corrected trace before selecting parameters for
+other data.
 
 ``` r
 
@@ -92,24 +111,47 @@ rec_als <- recipe(water + fat + protein ~ ., data = meats) |>
 
 processed_als <- bake(prep(rec_als), new_data = NULL)
 
-# Visualize using unnest
-plot_als <- processed_als |>
-  slice(1:20) |>
-  mutate(id = row_number()) |>
-  unnest(.measures)
+raw_als <- meats |>
+  slice(1) |>
+  pivot_longer(
+    cols = starts_with("x_"),
+    names_to = "feature",
+    values_to = "value"
+  ) |>
+  transmute(
+    location = as.integer(sub("^x_", "", feature)),
+    value,
+    processing = "Raw"
+  )
 
-ggplot(plot_als, aes(x = location, y = value, group = id, color = factor(id))) +
-  geom_line(alpha = 0.7) +
-  labs(
-    x = "Channel",
-    y = "Corrected Transmittance",
-    title = "ALS Baseline Correction"
+corrected_als <- processed_als |>
+  slice(1) |>
+  unnest(.measures) |>
+  transmute(location, value, processing = "ALS corrected")
+
+bind_rows(raw_als, corrected_als) |>
+  mutate(processing = factor(processing, levels = c("Raw", "ALS corrected"))) |>
+  ggplot(aes(x = location, y = value, colour = processing)) +
+  geom_line(linewidth = 0.7) +
+  scale_colour_manual(
+    name = "Processing",
+    values = c("Raw" = "#6B7280", "ALS corrected" = "#0072B2")
   ) +
-  theme_minimal() +
-  theme(legend.position = "none")
+  labs(
+    x = "Spectral channel (index)",
+    y = "Absorbance (unitless)",
+    title = "ALS correction of one meat spectrum"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-baseline_files/figure-html/als-baseline-1.png)
+![Overlay line chart of one meat sample's absorbance across 100 channel
+indices before and after ALS correction. The raw trace sits well above
+the corrected trace; both retain a broad peak around channel
+60.](howto-baseline_files/figure-html/als-baseline-1.png)
+
+One meat spectrum before and after ALS correction with lambda = 1e6 and
+p = 0.01. Both traces use the same 100 spectral channels.
 
 **Key parameters:**
 
@@ -121,8 +163,9 @@ ggplot(plot_als, aes(x = location, y = value, group = id, color = factor(id))) +
 ### Polynomial baseline
 
 [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md)
-fits a polynomial to the spectrum and subtracts it. Simple and fast,
-works well for gentle baseline curvature.
+fits a polynomial across the spectrum and subtracts the fitted curve.
+The example uses degree 2; inspect the corrected signal to check whether
+the fit has altered features relevant to your analysis.
 
 ``` r
 
@@ -132,30 +175,55 @@ rec_poly <- recipe(water + fat + protein ~ ., data = meats) |>
 
 processed_poly <- bake(prep(rec_poly), new_data = NULL)
 
-# Visualize using unnest
-plot_poly <- processed_poly |>
-  slice(1:20) |>
-  mutate(id = row_number()) |>
-  unnest(.measures)
+raw_poly <- meats |>
+  slice(1) |>
+  pivot_longer(
+    cols = starts_with("x_"),
+    names_to = "feature",
+    values_to = "value"
+  ) |>
+  transmute(
+    location = as.integer(sub("^x_", "", feature)),
+    value,
+    processing = "Raw"
+  )
 
-ggplot(plot_poly, aes(x = location, y = value, group = id, color = factor(id))) +
-  geom_line(alpha = 0.7) +
-  labs(
-    x = "Channel",
-    y = "Corrected Transmittance",
-    title = "Polynomial Baseline Correction (degree = 2)"
+corrected_poly <- processed_poly |>
+  slice(1) |>
+  unnest(.measures) |>
+  transmute(location, value, processing = "Polynomial corrected")
+
+bind_rows(raw_poly, corrected_poly) |>
+  mutate(processing = factor(processing, levels = c("Raw", "Polynomial corrected"))) |>
+  ggplot(aes(x = location, y = value, colour = processing)) +
+  geom_line(linewidth = 0.7) +
+  scale_colour_manual(
+    name = "Processing",
+    values = c("Raw" = "#6B7280", "Polynomial corrected" = "#0072B2")
   ) +
-  theme_minimal() +
-  theme(legend.position = "none")
+  labs(
+    x = "Spectral channel (index)",
+    y = "Absorbance (unitless)",
+    title = "Polynomial correction of one meat spectrum"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-baseline_files/figure-html/poly-baseline-1.png)
+![Overlay line chart of one meat sample's absorbance across 100 channel
+indices before and after degree-2 polynomial correction. The raw trace
+sits well above the corrected trace, which fluctuates around zero and
+retains a broad peak around channel
+60.](howto-baseline_files/figure-html/poly-baseline-1.png)
+
+One meat spectrum before and after degree-2 polynomial baseline
+correction. Both traces use the same 100 spectral channels.
 
 ### Robust fitting baseline
 
 [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md)
-uses robust local regression (LOESS with iterative reweighting) to
-estimate the baseline. Good for complex baseline shapes.
+estimates a baseline with locally weighted regression and iterative
+reweighting. Check its fit on spectra with the signal shapes and noise
+levels in your data.
 
 ``` r
 
@@ -350,8 +418,8 @@ baselines |>
 ## Python pybaselines integration
 
 [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md)
-provides access to over 50 baseline correction algorithms from the
-Python [pybaselines](https://pybaselines.readthedocs.io/) library.
+calls baseline methods from the Python
+[pybaselines](https://pybaselines.readthedocs.io/) library.
 
 ### Setup
 
@@ -401,18 +469,19 @@ for the full list and parameter details.
 
 ## Using derivatives for baseline correction
 
-Savitzky-Golay derivatives remain a powerful approach for baseline
-correction, especially in NIR spectroscopy:
+Savitzky-Golay derivatives can reduce constant or linear baseline
+components. Derivatives also change the signal scale and can change peak
+shapes, so inspect them before interpretation.
 
 ``` r
 
-# First derivative removes constant baseline
+# A first derivative suppresses a constant offset
 rec_d1 <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_savitzky_golay(window_side = 7, differentiation_order = 1) |>
   step_measure_output_wide(prefix = "nir_")
 
-# Second derivative removes linear baseline
+# A second derivative suppresses a linear trend
 rec_d2 <- recipe(water + fat + protein ~ ., data = meats) |>
   step_measure_input_wide(starts_with("x_")) |>
   step_measure_savitzky_golay(window_side = 7, differentiation_order = 2) |>
@@ -421,16 +490,16 @@ rec_d2 <- recipe(water + fat + protein ~ ., data = meats) |>
 
 ## Choosing a method
 
-| Method | Best for | Tunable | Notes |
+| Method | Operation | Tunable | Notes |
 |----|----|----|----|
-| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md) | Most spectroscopy | Yes | Good general-purpose choice |
-| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md) | Gentle curvature | Yes | Simple and fast |
-| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md) | Complex baselines | Yes | Robust to outliers |
-| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md) | Simple trends | Yes | Fastest option |
-| `measure.sec::step_sec_baseline()` | SEC/GPC chromatography | No | Companion package |
-| [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md) | Special cases | Optional | Maximum flexibility |
-| [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md) | Advanced algorithms | Yes | 50+ methods available |
-| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | NIR/IR spectra | Yes | Also smooths and differentiates |
+| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md) | Estimates and subtracts an asymmetric least-squares baseline | Yes | Tune `lambda` and `p` for the signal |
+| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md) | Fits and subtracts a polynomial | Yes | `degree` sets polynomial order |
+| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md) | Fits a locally weighted baseline | Yes | `span` controls the local fit |
+| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md) | Removes a polynomial trend | Yes | `degree` sets trend order |
+| `measure.sec::step_sec_baseline()` | Processes SEC/GPC traces | No | Provided by the companion package |
+| [`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md) | Calls a supplied R function | Optional | The function returns baseline values |
+| [`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md) | Calls a pybaselines method | Yes | Requires the Python backend |
+| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Smooths or differentiates signals | Yes | Derivatives change signal scale |
 
 ## Hyperparameter tuning
 
@@ -515,8 +584,10 @@ all.equal(
 
 ## Complete preprocessing pipeline
 
-Baseline correction often works best as part of a complete preprocessing
-pipeline:
+This recipe combines baseline estimation, sample-wise normalization, and
+a first derivative. Each step changes the signal, so inspect
+intermediate output when deciding whether the sequence suits the
+analysis:
 
 ``` r
 
@@ -550,27 +621,7 @@ final_data[1:5, 1:8]
 #> 5  58.3  25.5    15.5 <dbl [2]> <dbl [2]> <dbl [2]> <dbl [2]> <dbl [2]>
 ```
 
-## Summary
-
-- **ALS**
-  ([`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md))
-  is a good default for most spectroscopy applications
-- **Polynomial**
-  ([`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md))
-  works well for simple baseline shapes
-- **Derivatives** via
-  [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md)
-  are effective for NIR/IR when peak shapes aren’t critical
-- **Custom functions**
-  ([`step_measure_baseline_custom()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_custom.md))
-  provide maximum flexibility
-- **pybaselines**
-  ([`step_measure_baseline_py()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_py.md))
-  offers 50+ advanced algorithms when R options aren’t sufficient
-- Combine baseline correction with normalization (SNV/MSC) for best
-  results
-
-## See Also
+## See also
 
 - [Getting
   Started](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.md) -

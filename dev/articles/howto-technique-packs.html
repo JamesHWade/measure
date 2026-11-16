@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>How-To: Extend measure with a technique pack • measure</title>
+<title>How-to: extend measure with a technique pack • measure</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <link href="../deps/Montserrat-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="How-To: Extend measure with a technique pack">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="How-to: extend measure with a technique pack">
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -81,7 +81,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>How-To: Extend measure with a technique pack</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>How-to: extend measure with a technique pack</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/JamesHWade/measure/blob/main/vignettes/articles/howto-technique-packs.Rmd" class="external-link"><code>vignettes/articles/howto-technique-packs.Rmd</code></a></small>
@@ -103,9 +103,49 @@ measurement technique while reusing measure’s data classes and workflow.
 The core package provides input and output steps, registry functions,
 and reusable processing steps. A pack owns the technique-specific
 analysis and declares which steps it provides.</p>
-<p>This guide shows the small registration contract, builds a runnable
-example step from the public <code><a href="../reference/step_measure_map.html">step_measure_map()</a></code>
-constructor, and composes it with the public peak-processing steps.</p>
+<p>This guide shows the registration contract, wraps
+<code><a href="../reference/step_measure_map.html">step_measure_map()</a></code> in a small example step, and uses the
+public peak-processing steps.</p>
+<table class="table">
+<colgroup>
+<col width="19%">
+<col width="44%">
+<col width="36%">
+</colgroup>
+<thead><tr class="header">
+<th>Stage</th>
+<th>Extension task</th>
+<th>measure API</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Package load</td>
+<td>Register the package and its step metadata</td>
+<td>
+<code><a href="../reference/register_measure_pack.html">register_measure_pack()</a></code>,
+<code><a href="../reference/register_measure_step.html">register_measure_step()</a></code>
+</td>
+</tr>
+<tr class="even">
+<td>Recipe execution</td>
+<td>Implement or compose a step</td>
+<td>
+<code><a href="../reference/step_measure_map.html">step_measure_map()</a></code>, recipe <code><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep()</a></code> and
+<code><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake()</a></code>
+</td>
+</tr>
+<tr class="odd">
+<td>Discovery</td>
+<td>Inspect registered packages and steps</td>
+<td>
+<code><a href="../reference/measure_packs.html">measure_packs()</a></code>, <code><a href="../reference/measure_steps.html">measure_steps()</a></code>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The registry contains package and step metadata, not measurement
+values. A numeric plot would not help explain registration or discovery,
+so the examples use a table and runnable recipe instead.</p>
 </div>
 <div class="section level2">
 <h2 id="register-a-pack-when-it-loads">Register a pack when it loads<a class="anchor" aria-label="anchor" href="#register-a-pack-when-it-loads"></a>
@@ -155,9 +195,10 @@ bake measurement columns.</p>
 <span>    measures <span class="op">=</span> <span class="va">measures</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>Use a stable sample identifier and make the measurement axis explicit
-when working with long data. The <code>time</code> column below becomes
-the measurement location; <code>sample_id</code> stays outside the
+<p>The next example uses simulated peak shapes with an arbitrary
+location coordinate from 0 to 20. The signal has no physical units or
+calibration. In long data, the <code>time</code> column becomes the
+measurement location, while <code>sample_id</code> stays outside the
 measurement and is retained as an ID.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">peak_axis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">20</span>, length.out <span class="op">=</span> <span class="fl">201</span><span class="op">)</span></span>
@@ -245,7 +286,7 @@ it does not register a demonstration pack or change registry state.</p>
 <h2 id="a-real-pack-measure-sec">A real pack: <code>measure.sec</code><a class="anchor" aria-label="anchor" href="#a-real-pack-measure-sec"></a>
 </h2>
 <p><code>measure.sec</code> is a companion package that uses this
-registry for Size Exclusion Chromatography steps, including the current
+registry for Size Exclusion Chromatography steps, including
 <code>measure.sec::step_sec_baseline()</code>. Loading the package
 registers its pack and step metadata. The check below runs only when
 that optional package is installed; no dependency is added to

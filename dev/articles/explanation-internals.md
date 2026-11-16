@@ -5,9 +5,27 @@
 library(measure)
 library(recipes)
 library(modeldata)
+library(ggplot2)
+
+theme_measure <- function() {
+  theme_minimal(base_size = 11) +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "white", colour = NA),
+      plot.background = element_rect(fill = "white", colour = NA),
+      legend.background = element_rect(fill = "white", colour = NA)
+    )
+}
 
 data(meats)
 ```
+
+In
+[`modeldata::meats`](https://modeldata.tidymodels.org/reference/meats.html),
+the `meats_long$transmittance` column retains a legacy name: its values
+are absorbance from the source dataset. The input step below stores
+those values as supplied; it does not convert transmittance to
+absorbance.
 
 ## Overview
 
@@ -29,7 +47,7 @@ spectral data. This worked but had limitations:
 - Detection relied on column names, not types
 
 Following [Issue \#16](https://github.com/JamesHWade/measure/issues/16),
-measure now uses custom S3 classes. This enables robust detection via
+measure uses custom S3 classes for class-based detection with
 [`inherits()`](https://rdrr.io/r/base/class.html) and supports multiple
 measure columns per dataset (see [Multiple Measure
 Columns](#multiple-measure-columns) below).
@@ -320,6 +338,36 @@ This is useful for:
 - Computing reference spectra (e.g., for MSC-style corrections)
 - Identifying high-variability regions
 - Quality control and outlier detection
+
+The summary plot shows the mean and standard deviation of the source
+absorbance values at each stored location in `result`. The band
+describes variation in this dataset; it is not a control limit or an
+outlier rule.
+
+``` r
+
+ggplot(stats, aes(x = location, y = mean)) +
+  geom_ribbon(
+    aes(ymin = mean - sd, ymax = mean + sd),
+    fill = "#D9EAF2"
+  ) +
+  geom_line(colour = "#2166AC", linewidth = 0.8) +
+  labs(
+    x = "Measurement location",
+    y = "Mean absorbance (source data scale)"
+  ) +
+  theme_measure()
+```
+
+![Line chart of mean absorbance by measurement location with a shaded
+band spanning plus or minus one standard deviation across samples. The
+band widens where sample values vary more; it does not show a fitted
+model or a QC
+threshold.](explanation-internals_files/figure-html/summary-plot-1.png)
+
+Mean absorbance across the baked meat spectra, with a band from one
+standard deviation below to one standard deviation above the mean at
+each location.
 
 ## Multiple Measure Columns
 

@@ -100,14 +100,15 @@ column containing the detected peaks for each sample. The original
 **Detection algorithms:**
 
 - `"prominence"` (default): Finds local maxima and calculates their
-  prominence (how much a peak stands out from surrounding signal). More
-  robust to noise.
+  prominence (the height above the surrounding contour). Use
+  `min_prominence` to exclude maxima below the chosen prominence
+  threshold.
 
 - `"derivative"`: Finds peaks by detecting zero-crossings in the first
-  derivative. Faster but more sensitive to noise.
+  derivative. Noise can introduce additional zero-crossings.
 
-- `"local_maxima"`: Finds all local maxima above a threshold. Simple and
-  fast but may detect many spurious peaks.
+- `"local_maxima"`: Finds local maxima above the chosen height
+  threshold, including maxima caused by noise.
 
 - `"cwt"`: Links Mexican-hat wavelet maxima across widths to identify
   persistent peaks. Requires a uniformly spaced axis. See

@@ -108,7 +108,18 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     step</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">theme_measure</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">11</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>      panel.grid.minor <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>      panel.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>      plot.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>      legend.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
@@ -263,8 +274,33 @@ sample:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>          2        254 120. </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>          2        280  99.4</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 30 more rows</span></span></span></code></pre></div>
-<p>Dimension metadata is preserved:</p>
+<p>The point chart plots the 40 coordinates stored for sample 1. Colour
+represents the simulated <code>absorbance</code> values; the chart does
+not fill in values between the measured wavelengths.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">m1_plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  retention_time <span class="op">=</span> <span class="va">m1</span><span class="op">$</span><span class="va">location_1</span>,</span>
+<span>  wavelength <span class="op">=</span> <span class="va">m1</span><span class="op">$</span><span class="va">location_2</span>,</span>
+<span>  value <span class="op">=</span> <span class="va">m1</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">m1_plot_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">retention_time</span>, y <span class="op">=</span> <span class="va">wavelength</span>, colour <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_colour_viridis_c</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Simulated\nabsorbance"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Retention time (min)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Wavelength (nm)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_measure</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-multidimensional_files/figure-html/multidimensional-points-1.png" class="r-plt" alt="Point chart of sample 1 with retention time in minutes on the x-axis and wavelength in nanometres on the y-axis. Colour encodes simulated absorbance. The chart has 40 points, one at every combination of 10 times and 4 wavelengths." width="672"><p class="caption">
+The first sample contains one simulated absorbance value at each of 10
+retention times and 4 wavelengths. Points mark the observed
+time-wavelength pairs; no interpolation is drawn between them.
+</p>
+</div>
+<p>Dimension metadata is preserved:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/measure_dim_names.html">measure_dim_names</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "time"       "wavelength"</span></span>
 <span><span class="fu"><a href="../reference/measure_dim_units.html">measure_dim_units</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span>
@@ -275,7 +311,7 @@ sample:</p>
 </h2>
 <p>The <code><a href="../reference/measure_grid_info.html">measure_grid_info()</a></code> function provides detailed
 information about the measurement grid:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_grid_info.html">measure_grid_info</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span>
 <span><span class="va">info</span><span class="op">$</span><span class="va">ndim</span></span>
 <span><span class="co">#&gt; [1] 2</span></span>
@@ -295,7 +331,7 @@ present (complete rectangular grid).</p>
 <p>The <code><a href="../reference/measure_apply.html">measure_apply()</a></code> function enables existing 1D
 preprocessing operations to work on n-dimensional data by applying them
 along specified dimensions.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define a simple 1D smoothing function</span></span>
 <span><span class="va">smooth_1d</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">window</span> <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;</span> <span class="va">window</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
@@ -307,7 +343,7 @@ along specified dimensions.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>Apply smoothing along the time dimension (dimension 1):</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Apply to a single 2D measurement</span></span>
 <span><span class="va">smoothed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_apply.html">measure_apply</a></span><span class="op">(</span><span class="va">m1</span>, <span class="va">smooth_1d</span>, along <span class="op">=</span> <span class="fl">1</span>, window <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
@@ -326,7 +362,7 @@ treating time as the 1D axis.</p>
 </h2>
 <p>Use <code><a href="../reference/step_measure_output_long.html">step_measure_output_long()</a></code> to convert the nested
 measure back to long format:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">concentration</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">lc_dad_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">sample_id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span></span>
@@ -356,9 +392,10 @@ measure back to long format:</p>
 <div class="section level2">
 <h2 id="irregular-grids">Irregular Grids<a class="anchor" aria-label="anchor" href="#irregular-grids"></a>
 </h2>
-<p>Not all 2D data forms a regular rectangular grid. The package handles
-irregular grids gracefully:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<p>Not all 2D data forms a regular rectangular grid. This example has
+seven observed coordinate pairs, with some time-wavelength combinations
+absent.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create irregular data (different wavelengths sampled at different times)</span></span>
 <span><span class="va">irregular_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">7</span><span class="op">)</span>,</span>
@@ -378,6 +415,31 @@ irregular grids gracefully:</p>
 <span><span class="co"># Check regularity</span></span>
 <span><span class="fu"><a href="../reference/measure_is_regular.html">measure_is_regular</a></span><span class="op">(</span><span class="va">irr_result</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<p>The plot shows the stored coordinate-value rows only. Absent pairs
+are left unmarked rather than being represented as zeros.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">irr_measure</span> <span class="op">&lt;-</span> <span class="va">irr_result</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">irr_plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  time <span class="op">=</span> <span class="va">irr_measure</span><span class="op">$</span><span class="va">location_1</span>,</span>
+<span>  wavelength <span class="op">=</span> <span class="va">irr_measure</span><span class="op">$</span><span class="va">location_2</span>,</span>
+<span>  value <span class="op">=</span> <span class="va">irr_measure</span><span class="op">$</span><span class="va">value</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">irr_plot_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">wavelength</span>, colour <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_colour_viridis_c</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Value"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Time coordinate"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Wavelength coordinate"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_measure</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-multidimensional_files/figure-html/irregular-grid-plot-1.png" class="r-plt" alt="Point chart of seven observed time-wavelength pairs. Time coordinate is on the x-axis, wavelength coordinate is on the y-axis, and colour encodes the simulated value. The coordinates are unevenly represented; no points mark unobserved combinations." width="672"><p class="caption">
+Observed values from the seven-row irregular input. The points show
+sampled coordinates without adding the missing time-wavelength
+combinations.
+</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="dimension-reduction-operations">Dimension Reduction Operations<a class="anchor" aria-label="anchor" href="#dimension-reduction-operations"></a>
@@ -389,7 +451,7 @@ of nD data.</p>
 </h3>
 <p><code><a href="../reference/measure_unfold.html">measure_unfold()</a></code> converts nD data to 1D for use with
 modeling techniques that expect vectors:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Unfold 2D to 1D</span></span>
 <span><span class="va">m1d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_unfold.html">measure_unfold</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span>
 <span><span class="va">m1d</span></span>
@@ -414,7 +476,7 @@ modeling techniques that expect vectors:</p>
 <span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
 <p><code><a href="../reference/measure_fold.html">measure_fold()</a></code> reconstructs the original nD
 structure:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Reconstruct 2D from 1D</span></span>
 <span><span class="va">m2d_restored</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_fold.html">measure_fold</a></span><span class="op">(</span><span class="va">m1d</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/measure_ndim.html">measure_ndim</a></span><span class="op">(</span><span class="va">m2d_restored</span><span class="op">)</span></span>
@@ -425,7 +487,7 @@ structure:</p>
 </h3>
 <p><code><a href="../reference/measure_slice.html">measure_slice()</a></code> extracts subsets at specific
 coordinates:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract data at wavelength = 254</span></span>
 <span><span class="va">slice_254</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_slice.html">measure_slice</a></span><span class="op">(</span><span class="va">m1</span>, wavelength <span class="op">=</span> <span class="fl">254</span><span class="op">)</span></span>
 <span><span class="va">slice_254</span></span>
@@ -453,7 +515,7 @@ coordinates:</p>
 <h3 id="projection">Projection<a class="anchor" aria-label="anchor" href="#projection"></a>
 </h3>
 <p><code><a href="../reference/measure_project.html">measure_project()</a></code> aggregates across dimensions:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Average across wavelengths to get time trace</span></span>
 <span><span class="va">time_trace</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_project.html">measure_project</a></span><span class="op">(</span><span class="va">m1</span>, along <span class="op">=</span> <span class="st">"wavelength"</span><span class="op">)</span></span>
 <span><span class="va">time_trace</span></span>
@@ -483,6 +545,44 @@ coordinates:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      280  920.</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      320  987.</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      350 <span style="text-decoration: underline;">1</span>033.</span></span></code></pre></div>
+<p>The 254 nm slice can be compared with the mean projection across all
+four wavelengths. Both traces retain retention time as their location
+axis.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">trace_data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    location <span class="op">=</span> <span class="va">slice_254</span><span class="op">$</span><span class="va">location</span>,</span>
+<span>    value <span class="op">=</span> <span class="va">slice_254</span><span class="op">$</span><span class="va">value</span>,</span>
+<span>    trace <span class="op">=</span> <span class="st">"254 nm slice"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    location <span class="op">=</span> <span class="va">time_trace</span><span class="op">$</span><span class="va">location</span>,</span>
+<span>    value <span class="op">=</span> <span class="va">time_trace</span><span class="op">$</span><span class="va">value</span>,</span>
+<span>    trace <span class="op">=</span> <span class="st">"Mean across wavelengths"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">trace_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">location</span>, y <span class="op">=</span> <span class="va">value</span>, colour <span class="op">=</span> <span class="va">trace</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span></span>
+<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"254 nm slice"</span> <span class="op">=</span> <span class="st">"#2166AC"</span>,</span>
+<span>      <span class="st">"Mean across wavelengths"</span> <span class="op">=</span> <span class="st">"#B2182B"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    name <span class="op">=</span> <span class="st">"Trace"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Retention time (min)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Simulated absorbance"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_measure</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-multidimensional_files/figure-html/slice-projection-plot-1.png" class="r-plt" alt="Line chart with retention time from 0 to 9 minutes on the x-axis and simulated absorbance on the y-axis. One line is the 254 nm wavelength slice; the other is the mean projection across wavelengths. Both show the same sample at each time, with the projected line averaging four values per time." width="672"><p class="caption">
+For sample 1, the 254 nm slice is compared with the mean signal across
+all four wavelengths. Both traces use the same simulated signal scale.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
@@ -496,7 +596,7 @@ aligning, combining, and computing ratios between channels.</p>
 </h3>
 <p><code><a href="../reference/step_measure_channel_align.html">step_measure_channel_align()</a></code> aligns multiple measure
 columns to a common grid:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">channel_fit</span> <span class="op">&lt;-</span> <span class="fu">channel_input_recipe</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_channel_align.html">step_measure_channel_align</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"union"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -519,7 +619,7 @@ channels to a reference channel’s grid</p>
 </h3>
 <p><code><a href="../reference/step_measure_channel_combine.html">step_measure_channel_combine()</a></code> merges multiple
 channels:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">combined_fit</span> <span class="op">&lt;-</span> <span class="fu">channel_input_recipe</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_channel_align.html">step_measure_channel_align</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"union"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_channel_combine.html">step_measure_channel_combine</a></span><span class="op">(</span>strategy <span class="op">=</span> <span class="st">"stack"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -540,7 +640,7 @@ Combine into a single channel</p>
 </h3>
 <p><code><a href="../reference/step_measure_channel_ratio.html">step_measure_channel_ratio()</a></code> computes ratios between
 channels:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ratio_fit</span> <span class="op">&lt;-</span> <span class="fu">channel_input_recipe</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_channel_align.html">step_measure_channel_align</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"union"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_channel_ratio.html">step_measure_channel_ratio</a></span><span class="op">(</span>numerator <span class="op">=</span> <span class="st">"uv"</span>, denominator <span class="op">=</span> <span class="st">"ri"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -563,7 +663,7 @@ data, the package provides multi-way decomposition methods.</p>
 </h3>
 <p><code><a href="../reference/step_measure_parafac.html">step_measure_parafac()</a></code> performs Parallel Factor
 Analysis, extracting trilinear components:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"multiway"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">eem_data</span> <span class="op">&lt;-</span> <span class="va">lc_dad_data</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span></span>
@@ -602,7 +702,7 @@ Identifying underlying chemical species in mixtures</p>
 </h3>
 <p><code><a href="../reference/step_measure_tucker.html">step_measure_tucker()</a></code> provides more flexibility with
 independent ranks per mode:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"multiway"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">rec_tucker</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">concentration</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">lc_dad_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">sample_id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -632,7 +732,7 @@ independent ranks per mode:</p>
 </h3>
 <p><code><a href="../reference/step_measure_mcr_als.html">step_measure_mcr_als()</a></code> implements Multivariate Curve
 Resolution with Alternating Least Squares:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_mcr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">concentration</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">lc_dad_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">sample_id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span></span>

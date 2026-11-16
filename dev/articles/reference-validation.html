@@ -97,16 +97,19 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The <code>measure</code> package provides a comprehensive suite of
-functions for analytical method validation. These functions are designed
-to be compatible with regulatory frameworks including: - <strong>ICH
-Q2(R2)</strong>: Validation of Analytical Procedures - <strong>ISO/IEC
-17025</strong>: General requirements for testing and calibration
-laboratories - <strong>USP &lt;1225&gt;</strong>: Validation of
-Compendial Procedures - <strong>ICH M10</strong>: Bioanalytical Method
-Validation (for applicable workflows)</p>
-<p>This vignette demonstrates key validation workflows including
-calibration, precision, accuracy, uncertainty, and quality control.</p>
+<p>The <code>measure</code> package includes calculations and plots used
+in analytical method validation work. The examples reference procedures
+described in: - <strong>ICH Q2(R2)</strong>: Validation of Analytical
+Procedures - <strong>ISO/IEC 17025</strong>: General requirements for
+testing and calibration laboratories - <strong>USP
+&lt;1225&gt;</strong>: Validation of Compendial Procedures - <strong>ICH
+M10</strong>: Bioanalytical Method Validation (for applicable
+workflows)</p>
+<p>The examples use simulated measurements to demonstrate calibration,
+precision, accuracy, uncertainty, and quality-control workflows. They do
+not establish method suitability or regulatory acceptance; those
+conclusions depend on the study design, data, and criteria for the
+intended use.</p>
 </div>
 <div class="section level2">
 <h2 id="calibration-curves">Calibration Curves<a class="anchor" aria-label="anchor" href="#calibration-curves"></a>
@@ -114,8 +117,8 @@ calibration, precision, accuracy, uncertainty, and quality control.</p>
 <div class="section level3">
 <h3 id="fitting-calibration-curves">Fitting Calibration Curves<a class="anchor" aria-label="anchor" href="#fitting-calibration-curves"></a>
 </h3>
-<p>The <code><a href="../reference/measure_calibration_fit.html">measure_calibration_fit()</a></code> function fits weighted or
-unweighted calibration curves with comprehensive diagnostics.</p>
+<p><code><a href="../reference/measure_calibration_fit.html">measure_calibration_fit()</a></code> fits weighted or unweighted
+calibration curves and returns model diagnostics.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create calibration data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
@@ -144,15 +147,32 @@ unweighted calibration curves with comprehensive diagnostics.</p>
 <h3 id="visualizing-the-calibration">Visualizing the Calibration<a class="anchor" aria-label="anchor" href="#visualizing-the-calibration"></a>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">cal</span>, type <span class="op">=</span> <span class="st">"curve"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference-validation_files/figure-html/calibration-plot-1.png" class="r-plt" alt="" width="672"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">cal</span>, type <span class="op">=</span> <span class="st">"curve"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Nominal concentration (simulated scale)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Response (simulated scale)"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-validation_files/figure-html/calibration-plot-1.png" class="r-plt" alt="Scatter chart of nominal concentration versus response for eight simulated standards, with a fitted weighted regression line. The points follow an increasing trend across the concentration range; the line summarizes the fitted model." width="672"><p class="caption">
+Eight simulated standards and the fitted calibration line from a model
+weighted by 1/x². The points show the supplied observations; the line is
+the fitted response over the calibration range.
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="checking-residuals">Checking Residuals<a class="anchor" aria-label="anchor" href="#checking-residuals"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">cal</span>, type <span class="op">=</span> <span class="st">"residuals"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference-validation_files/figure-html/calibration-residuals-1.png" class="r-plt" alt="" width="672"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">cal</span>, type <span class="op">=</span> <span class="st">"residuals"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Nominal concentration (simulated scale)"</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-validation_files/figure-html/calibration-residuals-1.png" class="r-plt" alt="Residual scatter chart for the eight simulated calibration standards. Nominal concentration is on the x-axis and residual is on the y-axis; the dashed horizontal line marks zero. One point near 250 has a much larger positive residual than the others." width="672"><p class="caption">
+Residuals from the weighted calibration model plotted against nominal
+concentration, with a horizontal zero reference line. The standard near
+concentration 250 has a larger positive residual than the other points.
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="predicting-unknown-concentrations">Predicting Unknown Concentrations<a class="anchor" aria-label="anchor" href="#predicting-unknown-concentrations"></a>
@@ -178,7 +198,7 @@ unweighted calibration curves with comprehensive diagnostics.</p>
 <div class="section level3">
 <h3 id="calibration-verification">Calibration Verification<a class="anchor" aria-label="anchor" href="#calibration-verification"></a>
 </h3>
-<p>Verify that the calibration remains valid using QC samples:</p>
+<p>Check the fitted calibration against QC samples:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">qc_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"QC_Low"</span>, <span class="st">"QC_Mid"</span>, <span class="st">"QC_High"</span><span class="op">)</span>,</span>
@@ -296,11 +316,47 @@ LOD/LOQ:</p>
 <span><span class="co">#&gt;   SD = 18.58 </span></span>
 <span><span class="co">#&gt;   CV = 3.7 %</span></span>
 <span><span class="co">#&gt;   95% CI: [481.6, 520.6]</span></span></code></pre></div>
+<p>The plot keeps the six replicate results visible at each level.
+Diamonds mark the group means; horizontal jitter separates observations
+with similar values.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>  <span class="va">repeat_data</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sample_id</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Low"</span>, <span class="st">"Mid"</span>, <span class="st">"High"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    y <span class="op">=</span> <span class="va">concentration</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span></span>
+<span>    position <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_jitter.html" class="external-link">position_jitter</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.08</span>, height <span class="op">=</span> <span class="fl">0</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span>,</span>
+<span>    colour <span class="op">=</span> <span class="st">"#2166AC"</span>,</span>
+<span>    size <span class="op">=</span> <span class="fl">2</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/stat_summary.html" class="external-link">stat_summary</a></span><span class="op">(</span></span>
+<span>    fun <span class="op">=</span> <span class="va">mean</span>,</span>
+<span>    geom <span class="op">=</span> <span class="st">"point"</span>,</span>
+<span>    shape <span class="op">=</span> <span class="fl">23</span>,</span>
+<span>    size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    fill <span class="op">=</span> <span class="st">"white"</span>,</span>
+<span>    colour <span class="op">=</span> <span class="st">"#B2182B"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Sample level"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Concentration (simulated scale)"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-validation_files/figure-html/repeatability-plot-1.png" class="r-plt" alt="Jittered dot plot of six concentration replicates for each of three levels, ordered low, mid, high from left to right. Concentration is on the y-axis; white diamonds mark the group means. The vertical spread shows within-level variation in these simulated results." width="672"><p class="caption">
+Six simulated repeatability measurements at each of the low, mid, and
+high sample levels, ordered from left to right. Diamonds mark the mean
+within each level; point positions are jittered horizontally only to
+separate observations.
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="intermediate-precision">Intermediate Precision<a class="anchor" aria-label="anchor" href="#intermediate-precision"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Data from multiple days</span></span>
 <span><span class="va">ip_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, each <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,</span>
@@ -334,7 +390,7 @@ LOD/LOQ:</p>
 <h3 id="gage-rr-analysis">Gage R&amp;R Analysis<a class="anchor" aria-label="anchor" href="#gage-rr-analysis"></a>
 </h3>
 <p>For measurement system analysis:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Gage R&amp;R data</span></span>
 <span><span class="va">grr_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  part <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, each <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,</span>
@@ -394,7 +450,7 @@ LOD/LOQ:</p>
 <div class="section level3">
 <h3 id="bias-and-recovery">Bias and Recovery<a class="anchor" aria-label="anchor" href="#bias-and-recovery"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">accuracy_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Low"</span>, <span class="st">"Mid"</span>, <span class="st">"High"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  measured <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -442,7 +498,7 @@ LOD/LOQ:</p>
 <div class="section level3">
 <h3 id="linearity-assessment">Linearity Assessment<a class="anchor" aria-label="anchor" href="#linearity-assessment"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">linearity_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  concentration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">75</span>, <span class="fl">100</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">75</span>, <span class="fl">100</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.02</span> <span class="op">+</span></span>
@@ -480,8 +536,18 @@ LOD/LOQ:</p>
 <span><span class="co">#&gt;   Result: Not significant (linearity acceptable)</span></span>
 <span></span>
 <span><span class="co"># Plot with fit line</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">linearity</span>, type <span class="op">=</span> <span class="st">"fit"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference-validation_files/figure-html/linearity-1.png" class="r-plt" alt="" width="672"></p>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">linearity</span>, type <span class="op">=</span> <span class="st">"fit"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Concentration (simulated scale)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Response (simulated scale)"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-validation_files/figure-html/linearity-1.png" class="r-plt" alt="Scatter chart of response against concentration for 15 simulated observations. Points form five concentration groups with three observations each; a fitted straight line is overlaid. Both axes use the simulated data scale." width="672"><p class="caption">
+Fifteen simulated observations across five concentration levels, with
+the fitted linear model. The plot describes this generated example and
+does not establish linearity for a method.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
@@ -492,7 +558,7 @@ LOD/LOQ:</p>
 </h3>
 <p>Create uncertainty budgets following the GUM (Guide to the Expression
 of Uncertainty in Measurement):</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define uncertainty components</span></span>
 <span><span class="va">components</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/uncertainty_component.html">uncertainty_component</a></span><span class="op">(</span></span>
@@ -533,9 +599,17 @@ of Uncertainty in Measurement):</p>
 <div class="section level3">
 <h3 id="visualizing-uncertainty-contributions">Visualizing Uncertainty Contributions<a class="anchor" aria-label="anchor" href="#visualizing-uncertainty-contributions"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">budget</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference-validation_files/figure-html/uncertainty-plot-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">budget</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Component type"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-validation_files/figure-html/uncertainty-plot-1.png" class="r-plt" alt="Pareto chart of percentage contribution to variance for Repeatability, Calibration, Reference Standard, and Temperature, ordered from largest to smallest. Bars use fill to distinguish Type A from Type B; a line with points shows the cumulative percentage on the secondary axis." width="672"><p class="caption">
+The simulated uncertainty budget ranks four components by their
+percentage contribution to combined variance. Bar fill distinguishes
+Type A and Type B components; the line tracks the cumulative
+contribution.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
@@ -544,7 +618,7 @@ of Uncertainty in Measurement):</p>
 <div class="section level3">
 <h3 id="setting-up-control-limits">Setting Up Control Limits<a class="anchor" aria-label="anchor" href="#setting-up-control-limits"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Historical QC data</span></span>
 <span><span class="va">qc_history</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  run_order <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span>,</span>
@@ -567,7 +641,7 @@ of Uncertainty in Measurement):</p>
 <div class="section level3">
 <h3 id="monitoring-with-westgard-rules">Monitoring with Westgard Rules<a class="anchor" aria-label="anchor" href="#monitoring-with-westgard-rules"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># New run data including potential out-of-control point</span></span>
 <span><span class="va">new_run</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  run_order <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span>
@@ -599,9 +673,20 @@ of Uncertainty in Measurement):</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         5     97.3 R:4s     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>        19    100.  R:4s     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>        20    108   1:3s R:4s</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">chart</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference-validation_files/figure-html/control-chart-plot-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">chart</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Run order"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"QC response (simulated scale)"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-validation_files/figure-html/control-chart-plot-1.png" class="r-plt" alt="Control chart of QC response by run order. A green solid center line, orange dotted warning limits, and red dashed action limits run horizontally. Four points are flagged; run 20 is the highest and lies above the upper action limit." width="672"><p class="caption">
+The simulated QC run is plotted against the green solid center line,
+orange dotted warning limits, and red dashed action limits estimated
+from historical QC results. Point colour indicates whether a rule
+violation was flagged.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
@@ -610,7 +695,7 @@ of Uncertainty in Measurement):</p>
 <div class="section level3">
 <h3 id="defining-criteria">Defining Criteria<a class="anchor" aria-label="anchor" href="#defining-criteria"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create custom criteria</span></span>
 <span><span class="va">my_criteria</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_criteria.html">measure_criteria</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/criterion.html">criterion</a></span><span class="op">(</span><span class="st">"cv"</span>, <span class="st">"&lt;="</span>, <span class="fl">15</span>, description <span class="op">=</span> <span class="st">"Precision CV"</span><span class="op">)</span>,</span>
@@ -626,7 +711,7 @@ of Uncertainty in Measurement):</p>
 <div class="section level3">
 <h3 id="using-preset-criteria">Using Preset Criteria<a class="anchor" aria-label="anchor" href="#using-preset-criteria"></a>
 </h3>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># ICH Q2 presets</span></span>
 <span><span class="va">ich_criteria</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/criteria_presets.html">criteria_ich_q2</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ich_criteria</span><span class="op">)</span></span>
@@ -649,7 +734,7 @@ of Uncertainty in Measurement):</p>
 <div class="section level3">
 <h3 id="assessing-results">Assessing Results<a class="anchor" aria-label="anchor" href="#assessing-results"></a>
 </h3>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Sample results to assess (single summary values per criterion)</span></span>
 <span><span class="co"># For example, from a method validation summary</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -683,7 +768,7 @@ several approaches for method comparison studies.</p>
 </h3>
 <p>Bland-Altman plots show the agreement between two methods by plotting
 differences against means:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Paired measurements from two methods</span></span>
 <span><span class="va">comparison_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sample_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span>,</span>
@@ -716,17 +801,28 @@ differences against means:</p>
 <span><span class="co">#&gt;   Slope = 0.2046 </span></span>
 <span><span class="co">#&gt;   p-value = 0.57 </span></span>
 <span><span class="co">#&gt;   Result: No significant proportional bias</span></span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ba</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">ba</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Mean of methods (simulated scale)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Difference, method B minus method A (simulated scale)"</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre></div>
-<p><img src="reference-validation_files/figure-html/bland-altman-plot-1.png" class="r-plt" alt="" width="672"></p>
+<div class="figure">
+<img src="reference-validation_files/figure-html/bland-altman-plot-1.png" class="r-plt" alt="Bland–Altman scatter chart for 30 simulated pairs. Mean of the two methods is on the x-axis and method B minus method A is on the y-axis. A solid line marks mean bias, dashed lines mark the estimated limits of agreement, and a dotted line shows the fitted linear trend." width="672"><p class="caption">
+Differences between simulated method B and method A results are plotted
+against their pairwise means. Horizontal lines mark the estimated mean
+bias and limits of agreement; a dotted line shows the tested linear
+trend. These data are illustrative only.
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="regression-methods">Regression Methods<a class="anchor" aria-label="anchor" href="#regression-methods"></a>
 </h3>
 <p>For method comparison regression, use Deming or Passing-Bablok
 regression which account for error in both methods:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Method comparison with known measurement error</span></span>
 <span><span class="va">deming_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">25</span>, <span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">400</span><span class="op">)</span>,</span>
@@ -769,7 +865,7 @@ regression which account for error in both methods:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  -<span style="color: #BB0000;">0.004</span><span style="color: #BB0000; text-decoration: underline;">14</span>  1.02 TRUE                    FALSE                   1.000 0.409</span></span></code></pre></div>
 <p>For Passing-Bablok regression (non-parametric), install the
 <code>mcr</code> package:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Requires: install.packages("mcr")</span></span>
 <span><span class="va">pb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_passing_bablok.html">measure_passing_bablok</a></span><span class="op">(</span></span>
 <span>  <span class="va">deming_data</span>,</span>
@@ -782,7 +878,7 @@ regression which account for error in both methods:</p>
 <h3 id="proficiency-testing">Proficiency Testing<a class="anchor" aria-label="anchor" href="#proficiency-testing"></a>
 </h3>
 <p>Evaluate laboratory performance in proficiency testing programs:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># PT results from multiple labs</span></span>
 <span><span class="va">pt_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  lab_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Lab_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>,</span>
@@ -815,9 +911,22 @@ regression which account for error in both methods:</p>
 <span><span class="co">#&gt;   Mean score: -0.24 </span></span>
 <span><span class="co">#&gt;   SD score: 0.925 </span></span>
 <span><span class="co">#&gt;   Max |score|: 2.4</span></span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">z_scores</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference-validation_files/figure-html/proficiency-plot-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">z_scores</span>, type <span class="op">=</span> <span class="st">"point"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pt_data</span><span class="op">)</span><span class="op">)</span>, labels <span class="op">=</span> <span class="va">pt_data</span><span class="op">$</span><span class="va">lab_id</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Laboratory"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"z score"</span>,</span>
+<span>    colour <span class="op">=</span> <span class="st">"Score classification"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-validation_files/figure-html/proficiency-plot-1.png" class="r-plt" alt="Point chart of z-scores for Lab_1 through Lab_10. The y-axis is z-score; horizontal lines mark zero and plus or minus 2 and 3. Lab_10 falls below −2 and is marked questionable; the other nine points are marked satisfactory." width="672"><p class="caption">
+Proficiency z-scores for the ten simulated laboratories, using an
+assigned value of 100 and the specified sigma of 2.5. Horizontal
+reference lines mark zero and the ±2 and ±3 score boundaries; Lab_10 is
+classified as questionable and the other nine results as satisfactory.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
@@ -828,7 +937,7 @@ LC-MS/MS and similar methods.</p>
 <div class="section level3">
 <h3 id="evaluating-matrix-effects">Evaluating Matrix Effects<a class="anchor" aria-label="anchor" href="#evaluating-matrix-effects"></a>
 </h3>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Post-extraction spike experiment</span></span>
 <span><span class="va">me_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sample_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"matrix"</span>, <span class="st">"neat"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,</span>
@@ -865,16 +974,30 @@ LC-MS/MS and similar methods.</p>
 <span><span class="co">#&gt;   Ion suppression (ME &lt; 100%): 2 </span></span>
 <span><span class="co">#&gt;   Ion enhancement (ME &gt; 100%): 0 </span></span>
 <span><span class="co">#&gt;   Acceptable (80-120%): 2 / 2</span></span></code></pre></div>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">me</span>, type <span class="op">=</span> <span class="st">"bar"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference-validation_files/figure-html/matrix-effect-plot-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">me</span>, type <span class="op">=</span> <span class="st">"bar"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span> <span class="op">=</span> <span class="st">"Low"</span>, <span class="st">"2"</span> <span class="op">=</span> <span class="st">"High"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Interpretation"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Concentration group"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Matrix effect (%)"</span>,</span>
+<span>    fill <span class="op">=</span> <span class="st">"Interpretation"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="reference-validation_files/figure-html/matrix-effect-plot-1.png" class="r-plt" alt="Bar chart of matrix effect percentage for low and high concentration groups. The y-axis is matrix effect percent, the solid horizontal line marks 100%, dashed lines mark 80% and 120%, and bar fill indicates the returned interpretation category." width="672"><p class="caption">
+Estimated matrix effect percentages for the low and high simulated
+concentration groups. The solid line marks 100% and dashed lines mark
+80% and 120%; classification colours follow the result returned by
+<code><a href="../reference/measure_matrix_effect.html">measure_matrix_effect()</a></code>.
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="standard-addition-correction">Standard Addition Correction<a class="anchor" aria-label="anchor" href="#standard-addition-correction"></a>
 </h3>
 <p>When matrix effects vary between samples, standard addition provides
 sample-specific correction:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Standard addition data</span></span>
@@ -907,7 +1030,7 @@ sample-specific correction:</p>
 <h3 id="dilution-factor-correction">Dilution Factor Correction<a class="anchor" aria-label="anchor" href="#dilution-factor-correction"></a>
 </h3>
 <p>Back-calculate concentrations for diluted samples:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">dilution_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -940,7 +1063,7 @@ sample-specific correction:</p>
 <h3 id="surrogate-recovery">Surrogate Recovery<a class="anchor" aria-label="anchor" href="#surrogate-recovery"></a>
 </h3>
 <p>Monitor extraction efficiency with surrogate standards:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">qc_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"QC"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>,</span>
 <span>  surrogate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">95</span>, <span class="fl">105</span>, <span class="fl">88</span>, <span class="fl">112</span>, <span class="fl">75</span>, <span class="fl">132</span><span class="op">)</span>  <span class="co"># Expected = 100</span></span>
@@ -976,7 +1099,7 @@ sample-specific correction:</p>
 <div class="section level3">
 <h3 id="detecting-drift">Detecting Drift<a class="anchor" aria-label="anchor" href="#detecting-drift"></a>
 </h3>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Data with drift</span></span>
 <span><span class="va">drift_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  sample_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"qc"</span>, <span class="fl">20</span><span class="op">)</span>,</span>
@@ -1001,7 +1124,7 @@ sample-specific correction:</p>
 <div class="section level3">
 <h3 id="correcting-drift">Correcting Drift<a class="anchor" aria-label="anchor" href="#correcting-drift"></a>
 </h3>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Using QC-LOESS correction in a recipe</span></span>
@@ -1018,22 +1141,21 @@ sample-specific correction:</p>
 <div class="section level2">
 <h2 id="validation-reports">Validation Reports<a class="anchor" aria-label="anchor" href="#validation-reports"></a>
 </h2>
-<p>Once you’ve completed your validation studies, you can compile all
-results into a reproducible validation report using
-<code><a href="../reference/measure_validation_report.html">measure_validation_report()</a></code>. The package provides templates
-following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
-### Creating a Validation Report</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<p><code><a href="../reference/measure_validation_report.html">measure_validation_report()</a></code> collects analysis objects,
+metadata, and text sections in a report object. The package includes
+templates organized around ICH Q2(R2) and USP &lt;1225&gt; sections. ###
+Creating a Validation Report</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Gather validation results (using objects from above)</span></span>
 <span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_validation_report.html">measure_validation_report</a></span><span class="op">(</span></span>
 <span>  <span class="co"># Metadata</span></span>
-<span>  title <span class="op">=</span> <span class="st">"HPLC-UV Method Validation Report"</span>,</span>
-<span>  method_name <span class="op">=</span> <span class="st">"Compound X Assay"</span>,</span>
-<span>  method_description <span class="op">=</span> <span class="st">"Reversed-phase HPLC with UV detection at 254 nm"</span>,</span>
-<span>  analyst <span class="op">=</span> <span class="st">"J. Smith"</span>,</span>
-<span>  reviewer <span class="op">=</span> <span class="st">"A. Jones"</span>,</span>
-<span>  lab <span class="op">=</span> <span class="st">"Analytical Development"</span>,</span>
-<span>  instrument <span class="op">=</span> <span class="st">"Agilent 1260 Infinity II"</span>,</span>
+<span>  title <span class="op">=</span> <span class="st">"Illustrative Method Validation Report"</span>,</span>
+<span>  method_name <span class="op">=</span> <span class="st">"Simulated Assay"</span>,</span>
+<span>  method_description <span class="op">=</span> <span class="st">"Example metadata; study measurements in this vignette are simulated"</span>,</span>
+<span>  analyst <span class="op">=</span> <span class="st">"Example analyst"</span>,</span>
+<span>  reviewer <span class="op">=</span> <span class="st">"Example reviewer"</span>,</span>
+<span>  lab <span class="op">=</span> <span class="st">"Example laboratory"</span>,</span>
+<span>  instrument <span class="op">=</span> <span class="st">"Example instrument"</span>,</span>
 <span></span>
 <span></span>
 <span>  <span class="co"># Validation sections (results from earlier in this vignette)</span></span>
@@ -1042,22 +1164,22 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <span>  accuracy <span class="op">=</span> <span class="va">accuracy</span>,</span>
 <span>  precision <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>repeatability <span class="op">=</span> <span class="va">repeatability</span>, intermediate <span class="op">=</span> <span class="va">ip_result</span><span class="op">)</span>,</span>
 <span>  linearity <span class="op">=</span> <span class="va">linearity</span>,</span>
-<span>  range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">1</span>, upper <span class="op">=</span> <span class="fl">500</span>, units <span class="op">=</span> <span class="st">"ng/mL"</span><span class="op">)</span>,</span>
+<span>  range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">1</span>, upper <span class="op">=</span> <span class="fl">500</span>, units <span class="op">=</span> <span class="st">"simulated scale"</span><span class="op">)</span>,</span>
 <span>  uncertainty <span class="op">=</span> <span class="va">budget</span>,</span>
 <span></span>
 <span>  <span class="co"># Text sections</span></span>
-<span>  specificity <span class="op">=</span> <span class="st">"No interfering peaks observed at the analyte retention time when analyzing blank matrix samples."</span>,</span>
+<span>  specificity <span class="op">=</span> <span class="st">"Example placeholder; blank-matrix results are not included in this vignette."</span>,</span>
 <span>  robustness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    factors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Flow rate (±0.1 mL/min)"</span>, <span class="st">"Column temperature (±5°C)"</span>, <span class="st">"Mobile phase pH (±0.2)"</span><span class="op">)</span>,</span>
-<span>    conclusion <span class="op">=</span> <span class="st">"Method showed acceptable robustness within tested parameter ranges."</span></span>
+<span>    conclusion <span class="op">=</span> <span class="st">"Example placeholder; robustness-study data are not included in this vignette."</span></span>
 <span>  <span class="op">)</span>,</span>
 <span></span>
 <span>  <span class="co"># Conclusions</span></span>
 <span>  conclusions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>    summary <span class="op">=</span> <span class="st">"The analytical method meets all acceptance criteria for precision, accuracy, and linearity."</span>,</span>
+<span>    summary <span class="op">=</span> <span class="st">"No method suitability conclusion is supported by the simulated data in this vignette."</span>,</span>
 <span>    recommendations <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"Method is suitable for intended use"</span>,</span>
-<span>      <span class="st">"Revalidate if significant changes are made to instrumentation or reagents"</span></span>
+<span>      <span class="st">"Repeat the analyses with representative study data for the intended use"</span>,</span>
+<span>      <span class="st">"Document the acceptance criteria and any changes to instruments or reagents"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span></span>
@@ -1071,10 +1193,10 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Validation Report</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Title</span>: HPLC-UV Method Validation Report</span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Method</span>: Compound X Assay</span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Analyst</span>: J. Smith</span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Lab</span>: Analytical Development</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Title</span>: Illustrative Method Validation Report</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Method</span>: Simulated Assay</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Analyst</span>: Example analyst</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Lab</span>: Example laboratory</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Date</span>: 2026-11-16</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Validation Sections</span> ──</span></span>
@@ -1091,12 +1213,12 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Conclusions</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; The analytical method meets all acceptance criteria for precision, accuracy,</span></span>
-<span><span class="co">#&gt; and linearity.</span></span>
+<span><span class="co">#&gt; No method suitability conclusion is supported by the simulated data in this</span></span>
+<span><span class="co">#&gt; vignette.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Provenance</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Generated: 2026-11-16 01:09:52.998777</span></span>
+<span><span class="co">#&gt; Generated: 2026-11-16 15:21:32.000916</span></span>
 <span><span class="co">#&gt; R version: 4.6.2</span></span>
 <span><span class="co">#&gt; measure version: 0.0.1.9003</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1104,12 +1226,12 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <div class="section level3">
 <h3 id="inspecting-report-sections">Inspecting Report Sections<a class="anchor" aria-label="anchor" href="#inspecting-report-sections"></a>
 </h3>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check which sections are included</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Validation Report Summary</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Method</span>: Compound X Assay</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Method</span>: Simulated Assay</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Date</span>: 2026-11-16</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 4</span></span></span>
@@ -1142,13 +1264,13 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <span><span class="co">#&gt; [1] 500</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $units</span></span>
-<span><span class="co">#&gt; [1] "ng/mL"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "simulated scale"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="adding-custom-sections">Adding Custom Sections<a class="anchor" aria-label="anchor" href="#adding-custom-sections"></a>
 </h3>
 <p>You can add additional sections after report creation:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add a stability section later</span></span>
 <span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_validation_section.html">add_validation_section</a></span><span class="op">(</span></span>
 <span>  <span class="va">report</span>,</span>
@@ -1170,7 +1292,7 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <h3 id="tidy-output">Tidy Output<a class="anchor" aria-label="anchor" href="#tidy-output"></a>
 </h3>
 <p>Extract all results as a tidy tibble for further analysis:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 41</span></span></span>
 <span><span class="co">#&gt;    section              term  estimate std_error statistic   p_value group     n</span></span>
@@ -1206,7 +1328,7 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <strong>USP &lt;1225&gt;</strong>: Organized by procedure category
 (I, II, III, IV)</li>
 </ul>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Render to HTML using ICH Q2 template (default)</span></span>
 <span><span class="fu"><a href="../reference/render_validation_report.html">render_validation_report</a></span><span class="op">(</span></span>
 <span>  <span class="va">report</span>,</span>
@@ -1220,13 +1342,6 @@ following regulatory frameworks like ICH Q2(R2) and USP &lt;1225&gt;.
 <span>  output_file <span class="op">=</span> <span class="st">"validation_report.pdf"</span>,</span>
 <span>  output_format <span class="op">=</span> <span class="st">"pdf"</span>,</span>
 <span>  template <span class="op">=</span> <span class="st">"usp_1225"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Use a custom Quarto template</span></span>
-<span><span class="fu"><a href="../reference/render_validation_report.html">render_validation_report</a></span><span class="op">(</span></span>
-<span>  <span class="va">report</span>,</span>
-<span>  output_file <span class="op">=</span> <span class="st">"custom_report.html"</span>,</span>
-<span>  template_path <span class="op">=</span> <span class="st">"path/to/custom_template.qmd"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The rendered report includes:</p>
 <ul>
@@ -1248,8 +1363,7 @@ for reproducibility</li>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<p>The <code>measure</code> package provides a complete toolkit for
-analytical method validation:</p>
+<p>Functions shown in this vignette include:</p>
 <table class="table">
 <colgroup>
 <col width="40%">
@@ -1351,16 +1465,10 @@ analytical method validation:</p>
 </tr>
 </tbody>
 </table>
-<p>All functions follow a consistent design philosophy: - <strong>Tidy
-outputs</strong>: Results are tibbles with <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>,
-<code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code>, and <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> methods -
-<strong>Transparent diagnostics</strong>: No hidden decisions; all
-parameters and flags are visible - <strong>Regulatory
-compatibility</strong>: Designed with ICH, ISO, and FDA guidelines in
-mind - <strong>Provenance tracking</strong>: Audit trails for outlier
-handling and data modifications</p>
-<p>For more details on any function, see the package documentation with
-<code>?function_name</code>.</p>
+<p>The examples use simulated measurements and illustrative report text.
+They demonstrate API results, not evidence that a method meets criteria
+or is suitable for a particular intended use. Check each function’s help
+page for its inputs and assumptions.</p>
 </div>
 <div class="section level2">
 <h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>How-To: Data Organization and Diagnostics • measure</title>
+<title>How-to: data organization and diagnostics • measure</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <link href="../deps/Montserrat-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="How-To: Data Organization and Diagnostics">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="How-to: data organization and diagnostics">
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -81,7 +81,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>How-To: Data Organization and Diagnostics</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>How-to: data organization and diagnostics</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/JamesHWade/measure/blob/main/vignettes/articles/howto-data-organization.Rmd" class="external-link"><code>vignettes/articles/howto-data-organization.Rmd</code></a></small>
@@ -94,29 +94,28 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jameshwade.github.io/measure/">measure</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">article_plot_theme</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>    text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#222222"</span><span class="op">)</span>,</span>
+<span>    plot.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    panel.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    legend.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    legend.key <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    strip.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>When working with analytical data, proper organization and
-visualization are essential for building effective preprocessing
-pipelines. The measure package provides tools to:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Detect column types</strong> automatically based on naming
-conventions</li>
-<li>
-<strong>Assign roles</strong> to columns for use in recipes</li>
-<li>
-<strong>Validate recipes</strong> before running them</li>
-<li>
-<strong>Visualize spectra</strong> and preprocessing effects</li>
-</ol>
-<p>This vignette covers these data organization and diagnostic
-capabilities.</p>
+<p>This guide covers column detection, recipe roles, recipe checks, and
+plots for inspecting spectra after preprocessing. The role examples use
+generated data; the spectral plots use the packaged meat spectra.</p>
 </div>
 <div class="section level2">
-<h2 id="detecting-column-types">Detecting Column Types<a class="anchor" aria-label="anchor" href="#detecting-column-types"></a>
+<h2 id="detecting-column-types">Detecting column types<a class="anchor" aria-label="anchor" href="#detecting-column-types"></a>
 </h2>
 <p>Analytical data often follows naming conventions that indicate what
 each column represents. The <code><a href="../reference/measure_identify_columns.html">measure_identify_columns()</a></code>
@@ -166,12 +165,12 @@ function automatically detects these patterns:</p>
 </tbody>
 </table>
 <div class="section level3">
-<h3 id="example-identifying-columns-in-wide-format-data">Example: Identifying columns in wide-format data<a class="anchor" aria-label="anchor" href="#example-identifying-columns-in-wide-format-data"></a>
+<h3 id="example-identifying-columns-in-wide-format-data">Example: identifying columns in wide-format data<a class="anchor" aria-label="anchor" href="#example-identifying-columns-in-wide-format-data"></a>
 </h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create example wide-format spectral data</span></span>
+<code class="sourceCode R"><span><span class="co"># Create synthetic wide-format example data</span></span>
 <span><span class="va">spec_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span> sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
+<span>  sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
 <span>  concentration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10.2</span>, <span class="fl">25.1</span>, <span class="fl">50.3</span>, <span class="fl">75.0</span>, <span class="fl">100.5</span><span class="op">)</span>,</span>
 <span>  batch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"B"</span><span class="op">)</span>,</span>
 <span>  wn_1000 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>,</span>
@@ -215,7 +214,7 @@ matched) - <strong>suggested_role</strong>: Recommended recipe role -
 </div>
 </div>
 <div class="section level2">
-<h2 id="assigning-roles-in-recipes">Assigning Roles in Recipes<a class="anchor" aria-label="anchor" href="#assigning-roles-in-recipes"></a>
+<h2 id="assigning-roles-in-recipes">Assigning roles in recipes<a class="anchor" aria-label="anchor" href="#assigning-roles-in-recipes"></a>
 </h2>
 <p>Recipes use roles to determine how columns should be treated. Common
 roles include:</p>
@@ -256,7 +255,7 @@ roles include:</p>
 </tbody>
 </table>
 <div class="section level3">
-<h3 id="using-set_measure_roles">Using set_measure_roles()<a class="anchor" aria-label="anchor" href="#using-set_measure_roles"></a>
+<h3 id="using-set_measure_roles">Using <code>set_measure_roles()</code><a class="anchor" aria-label="anchor" href="#using-set_measure_roles"></a>
 </h3>
 <p>The <code><a href="../reference/set_measure_roles.html">set_measure_roles()</a></code> function provides a convenient
 way to assign multiple roles at once:</p>
@@ -320,7 +319,7 @@ special sample types and metadata columns:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="validating-recipe-structure">Validating Recipe Structure<a class="anchor" aria-label="anchor" href="#validating-recipe-structure"></a>
+<h2 id="validating-recipe-structure">Validating recipe structure<a class="anchor" aria-label="anchor" href="#validating-recipe-structure"></a>
 </h2>
 <p>Before running a preprocessing pipeline,
 <code><a href="../reference/check_measure_recipe.html">check_measure_recipe()</a></code> validates the recipe structure and
@@ -377,22 +376,36 @@ directly to the console:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="visualizing-spectra">Visualizing Spectra<a class="anchor" aria-label="anchor" href="#visualizing-spectra"></a>
+<h2 id="visualizing-spectra">Visualizing spectra<a class="anchor" aria-label="anchor" href="#visualizing-spectra"></a>
 </h2>
-<p>The measure package provides <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> methods for
-quick visualization of spectral data.</p>
+<p><code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> methods display <code>measure_tbl</code> and
+<code>measure_list</code> objects. The first example uses generated
+data; the remaining examples use <code>meats_long</code>. Its
+<code>transmittance</code> column stores the absorbance values from
+<code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code>.</p>
 <div class="section level3">
 <h3 id="plotting-a-single-spectrum">Plotting a single spectrum<a class="anchor" aria-label="anchor" href="#plotting-a-single-spectrum"></a>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create a single spectrum</span></span>
+<code class="sourceCode R"><span><span class="co"># Create a synthetic single spectrum</span></span>
 <span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_measure_tbl.html">new_measure_tbl</a></span><span class="op">(</span></span>
 <span>  location <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">1100</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">1100</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">/</span> <span class="fl">20</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">101</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/autoplot-single-1.png" class="r-plt" alt="" width="672"></p>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Location (synthetic coordinate)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Signal (synthetic, unitless)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Synthetic example spectrum"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/autoplot-single-1.png" class="r-plt" alt="Line chart of a generated signal across locations 1000 to 1100. The sinusoidal trace includes small random variation; both location and signal use synthetic, unitless scales." width="672"><p class="caption">
+A synthetic spectrum created with <code><a href="../reference/new_measure_tbl.html">new_measure_tbl()</a></code> to
+illustrate the single-spectrum plotting method.
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="plotting-multiple-spectra">Plotting multiple spectra<a class="anchor" aria-label="anchor" href="#plotting-multiple-spectra"></a>
@@ -407,27 +420,48 @@ quick visualization of spectral data.</p>
 <span><span class="va">baked</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot the spectra</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">baked</span><span class="op">$</span><span class="va">.measures</span>, max_spectra <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/autoplot-multiple-1.png" class="r-plt" alt="" width="672"></p>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">baked</span><span class="op">$</span><span class="va">.measures</span>, max_spectra <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Absorbance (unitless)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/autoplot-multiple-1.png" class="r-plt" alt="Overlay line chart of 20 meat spectra drawn in gray. The x-axis is spectral channel index and the y-axis is unitless absorbance. Each line is a sample; the spectra have broad peaks near channel 60." width="672"><p class="caption">
+Twenty meat spectra from <code>meats_long</code>; each gray line is one
+sample.
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="adding-summary-statistics">Adding summary statistics<a class="anchor" aria-label="anchor" href="#adding-summary-statistics"></a>
 </h3>
-<p>Use <code>summary = TRUE</code> to overlay mean ± standard
-deviation:</p>
+<p>Use <code>summary = TRUE</code> to add a mean curve and
+standard-deviation band to the sample traces.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">baked</span><span class="op">$</span><span class="va">.measures</span>, summary <span class="op">=</span> <span class="cn">TRUE</span>, max_spectra <span class="op">=</span> <span class="fl">30</span>, alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/autoplot-summary-1.png" class="r-plt" alt="" width="672"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">baked</span><span class="op">$</span><span class="va">.measures</span>, summary <span class="op">=</span> <span class="cn">TRUE</span>, max_spectra <span class="op">=</span> <span class="fl">30</span>, alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Absorbance (unitless)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/autoplot-summary-1.png" class="r-plt" alt="Line chart of meat spectra across spectral channel indices, with a central mean curve and a shaded standard-deviation band. The y-axis is unitless absorbance." width="672"><p class="caption">
+Meat spectra with the mean and standard-deviation band added to the
+displayed sample traces.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="visualizing-preprocessing-effects">Visualizing Preprocessing Effects<a class="anchor" aria-label="anchor" href="#visualizing-preprocessing-effects"></a>
+<h2 id="visualizing-preprocessing-effects">Visualizing preprocessing effects<a class="anchor" aria-label="anchor" href="#visualizing-preprocessing-effects"></a>
 </h2>
 <div class="section level3">
-<h3 id="beforeafter-comparison">Before/after comparison<a class="anchor" aria-label="anchor" href="#beforeafter-comparison"></a>
+<h3 id="plotting-the-recipe-output">Plotting the recipe output<a class="anchor" aria-label="anchor" href="#plotting-the-recipe-output"></a>
 </h3>
-<p>The <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> method for recipes shows preprocessing
-effects:</p>
+<p>This recipe applies a first derivative and SNV to each spectrum. The
+plot shows the processed signals; it does not include the original
+spectra.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a preprocessing recipe</span></span>
 <span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -437,24 +471,43 @@ effects:</p>
 <span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span>retain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">rec</span>, n_samples <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">rec</span>, n_samples <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Processed signal (unitless)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span>
 <span><span class="co">#&gt; Warning: Could not extract 'before' data for comparison.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Showing processed data only.</span></span>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Required column not found in data: <span style="color: #00BB00;">transmittance</span> <span style="color: #00BBBB;">ℹ</span> These columns were</span></span>
 <span><span class="co">#&gt;   expected from recipe preparation. <span style="color: #BB0000;">✖</span> Ensure new_data has the same structure as</span></span>
 <span><span class="co">#&gt;   training data.</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/autoplot-recipe-1.png" class="r-plt" alt="" width="672"></p>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/autoplot-recipe-1.png" class="r-plt" alt="Overlay line chart of 10 processed meat spectra across the recorded channel range. Each line is a sample; the y-axis is the unitless processed signal." width="672"><p class="caption">
+Processed spectra for 10 meat samples after a Savitzky-Golay first
+derivative and SNV.
+</p>
+</div>
 </div>
 <div class="section level3">
-<h3 id="summary-statistics-view">Summary statistics view<a class="anchor" aria-label="anchor" href="#summary-statistics-view"></a>
+<h3 id="summary-view">Summary view<a class="anchor" aria-label="anchor" href="#summary-view"></a>
 </h3>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">rec</span>, which <span class="op">=</span> <span class="st">"summary"</span>, n_samples <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/autoplot-recipe-summary-1.png" class="r-plt" alt="" width="672"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">rec</span>, which <span class="op">=</span> <span class="st">"summary"</span>, n_samples <span class="op">=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Processed signal (unitless)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/autoplot-recipe-summary-1.png" class="r-plt" alt="Summary line chart of 50 processed meat spectra. The mean is shown with a standard-deviation band and a minimum-to-maximum band across the recorded channel range." width="672"><p class="caption">
+Mean, standard deviation, and range for 50 processed meat spectra.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="comparing-preprocessing-strategies">Comparing Preprocessing Strategies<a class="anchor" aria-label="anchor" href="#comparing-preprocessing-strategies"></a>
+<h2 id="comparing-preprocessing-strategies">Comparing preprocessing strategies<a class="anchor" aria-label="anchor" href="#comparing-preprocessing-strategies"></a>
 </h2>
 <p>Use <code><a href="../reference/plot_measure_comparison.html">plot_measure_comparison()</a></code> to compare different
 preprocessing approaches side-by-side:</p>
@@ -464,7 +517,7 @@ preprocessing approaches side-by-side:</p>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Strategy 1: Just SNV</span></span>
+<span><span class="co"># Strategy 1: SNV</span></span>
 <span><span class="va">snv_rec</span> <span class="op">&lt;-</span> <span class="va">base_rec</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span>retain <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -486,12 +539,23 @@ preprocessing approaches side-by-side:</p>
 <span>  <span class="st">"SG + SNV"</span> <span class="op">=</span> <span class="va">sg_snv_rec</span>,</span>
 <span>  <span class="st">"MSC"</span> <span class="op">=</span> <span class="va">msc_rec</span>,</span>
 <span>  n_samples <span class="op">=</span> <span class="fl">15</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/compare-recipes-1.png" class="r-plt" alt="" width="672"></p>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Processed signal (unitless)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/compare-recipes-1.png" class="r-plt" alt="Three-panel line chart comparing processed meat spectra by recipe: SNV, Savitzky-Golay plus SNV, and MSC. Each panel contains 15 sample traces across the input channel range. The derivative panel has sharper changes near the central peak; values are unitless and y-axis scales vary by panel." width="672"><p class="caption">
+Processed spectra from the SNV, Savitzky-Golay plus SNV, and MSC
+recipes; each panel shows 15 samples on a method-specific y scale.
+</p>
+</div>
 <div class="section level3">
 <h3 id="summary-comparison">Summary comparison<a class="anchor" aria-label="anchor" href="#summary-comparison"></a>
 </h3>
-<p>For a cleaner comparison, use <code>summary_only = TRUE</code>:</p>
+<p>Use <code>summary_only = TRUE</code> to compare the means and spreads
+without displaying every sample trace.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_measure_comparison.html">plot_measure_comparison</a></span><span class="op">(</span></span>
 <span>  <span class="st">"SNV"</span> <span class="op">=</span> <span class="va">snv_rec</span>,</span>
@@ -499,44 +563,65 @@ preprocessing approaches side-by-side:</p>
 <span>  <span class="st">"MSC"</span> <span class="op">=</span> <span class="va">msc_rec</span>,</span>
 <span>  n_samples <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  summary_only <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/compare-summary-1.png" class="r-plt" alt="" width="672"></p>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Processed signal (unitless)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/compare-summary-1.png" class="r-plt" alt="Three-panel summary line chart comparing the mean and standard-deviation band for SNV, Savitzky-Golay plus SNV, and MSC across the input channel range. Each panel has its own y-axis range; values are unitless processed signals." width="672"><p class="caption">
+Mean and standard-deviation bands for 50 spectra processed by each of
+three recipes; panels use method-specific y scales.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="summary-plot-for-processed-data">Summary Plot for Processed Data<a class="anchor" aria-label="anchor" href="#summary-plot-for-processed-data"></a>
+<h2 id="summary-plots-for-processed-data">Summary plots for processed data<a class="anchor" aria-label="anchor" href="#summary-plots-for-processed-data"></a>
 </h2>
-<p>The <code><a href="../reference/measure_plot_summary.html">measure_plot_summary()</a></code> function creates
-publication-ready summary plots:</p>
+<p>The functions below summarize the processed meat spectra. The first
+shows the mean and standard deviation; <code>show_range = TRUE</code>
+also displays the observed minimum and maximum.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">baked</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">sg_snv_rec</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/measure_plot_summary.html">measure_plot_summary</a></span><span class="op">(</span><span class="va">baked</span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/measure-plot-summary-1.png" class="r-plt" alt="" width="672"></p>
-<p>Show the full range with <code>show_range = TRUE</code>:</p>
+<span><span class="fu"><a href="../reference/measure_plot_summary.html">measure_plot_summary</a></span><span class="op">(</span><span class="va">baked</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Processed signal (unitless)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/measure-plot-summary-1.png" class="r-plt" alt="Summary line chart of 215 processed meat spectra across the recorded channel range. A mean curve is surrounded by a standard-deviation band; the y-axis is unitless processed signal." width="672"><p class="caption">
+Mean and standard deviation across all 215 spectra after Savitzky-Golay
+derivative and SNV processing.
+</p>
+</div>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/measure_plot_summary.html">measure_plot_summary</a></span><span class="op">(</span><span class="va">baked</span>, show_range <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-data-organization_files/figure-html/measure-plot-summary-range-1.png" class="r-plt" alt="" width="672"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/measure_plot_summary.html">measure_plot_summary</a></span><span class="op">(</span><span class="va">baked</span>, show_range <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Processed signal (unitless)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-data-organization_files/figure-html/measure-plot-summary-range-1.png" class="r-plt" alt="Summary line chart of 215 processed meat spectra across the recorded channel range. It shows the mean, a standard-deviation band, and a minimum-to-maximum band; the y-axis is unitless processed signal." width="672"><p class="caption">
+Mean, standard deviation, and observed range across all 215 processed
+spectra.
+</p>
+</div>
 </div>
 <div class="section level2">
-<h2 id="best-practices">Best Practices<a class="anchor" aria-label="anchor" href="#best-practices"></a>
+<h2 id="checks-to-make">Checks to make<a class="anchor" aria-label="anchor" href="#checks-to-make"></a>
 </h2>
-<ol style="list-style-type: decimal">
-<li><p><strong>Always check your recipe</strong> with
-<code><a href="../reference/check_measure_recipe.html">check_measure_recipe()</a></code> before running long preprocessing
-pipelines</p></li>
-<li><p><strong>Use <code><a href="../reference/measure_identify_columns.html">measure_identify_columns()</a></code></strong> to
-understand your data structure before building recipes</p></li>
-<li><p><strong>Assign roles explicitly</strong> for ID columns,
-metadata, and special sample types</p></li>
-<li><p><strong>Visualize at each stage</strong> - use
-<code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> to verify preprocessing effects</p></li>
-<li><p><strong>Compare strategies</strong> with
-<code><a href="../reference/plot_measure_comparison.html">plot_measure_comparison()</a></code> before committing to a
-preprocessing approach</p></li>
-</ol>
+<p>Use <code><a href="../reference/check_measure_recipe.html">check_measure_recipe()</a></code> to catch recipe issues,
+<code><a href="../reference/measure_identify_columns.html">measure_identify_columns()</a></code> to inspect input structure, and
+<code><a href="../reference/plot_measure_comparison.html">plot_measure_comparison()</a></code> to review how recipe choices
+change the processed signals. Assign ID and metadata roles before
+modeling.</p>
 </div>
 <div class="section level2">
-<h2 id="next-steps">Next Steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
+<h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
 </h2>
 <ul>
 <li>See the <a href="reference-preprocessing.html">Preprocessing

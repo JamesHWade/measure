@@ -95,7 +95,7 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="record-grain">Record grain<a class="anchor" aria-label="anchor" href="#record-grain"></a>
+<h2 id="record-relationships">Record relationships<a class="anchor" aria-label="anchor" href="#record-relationships"></a>
 </h2>
 <p>A <code>measure_record</code> connects four practical levels:</p>
 <table class="table">
@@ -146,7 +146,7 @@ injection has at most one curve per channel.</p>
 <div class="section level2">
 <h2 id="map-an-interleaved-long-table">Map an interleaved long table<a class="anchor" aria-label="anchor" href="#map-an-interleaved-long-table"></a>
 </h2>
-<p>The small table below has two samples, two detector channels, and
+<p>This synthetic table has two samples, two detector channels, and
 three injections. <code>inj-02</code> is a reinjection of sample
 <code>0007</code>. Rows from four curves are interleaved; the curves
 have unequal grids, including a descending axis. The literal ID
@@ -317,6 +317,100 @@ interleaved, their references are not a single contiguous range.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu">source_rows_for</span><span class="op">(</span><span class="va">record</span>, <span class="st">"uv-02"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3L</span>, <span class="fl">7L</span>, <span class="fl">11L</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu">source_rows_for</span><span class="op">(</span><span class="va">record</span>, <span class="st">"ri-02"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4L</span>, <span class="fl">8L</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>Each panel below uses one curve’s declared axes and units. Points
+retain the recorded coordinates, with parsed input row ordinals beside
+numeric signals. The red baseline mark identifies a coordinate whose
+signal is missing; it has no y value. No values are interpolated between
+points.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">curve_plot_parts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">record</span><span class="op">$</span><span class="va">curves</span><span class="op">)</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">curve_row</span> <span class="op">&lt;-</span> <span class="va">record</span><span class="op">$</span><span class="va">curves</span><span class="op">[</span><span class="va">i</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span>  <span class="va">curve</span> <span class="op">&lt;-</span> <span class="va">curve_row</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="va">channel</span> <span class="op">&lt;-</span> <span class="va">record</span><span class="op">$</span><span class="va">channels</span><span class="op">$</span><span class="va">channel_name</span><span class="op">[</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">curve_row</span><span class="op">$</span><span class="va">channel_id</span>, <span class="va">record</span><span class="op">$</span><span class="va">channels</span><span class="op">$</span><span class="va">channel_id</span><span class="op">)</span></span>
+<span>  <span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    panel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span></span>
+<span>      <span class="va">channel</span>,</span>
+<span>      <span class="va">curve_row</span><span class="op">$</span><span class="va">injection_id</span>,</span>
+<span>      <span class="va">curve_row</span><span class="op">$</span><span class="va">curve_id</span>,</span>
+<span>      sep <span class="op">=</span> <span class="st">" | "</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    axis_name <span class="op">=</span> <span class="va">curve_row</span><span class="op">$</span><span class="va">axis_name</span>,</span>
+<span>    axis_unit <span class="op">=</span> <span class="va">curve_row</span><span class="op">$</span><span class="va">axis_unit</span>,</span>
+<span>    value_name <span class="op">=</span> <span class="va">curve_row</span><span class="op">$</span><span class="va">value_name</span>,</span>
+<span>    value_unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">curve_row</span><span class="op">$</span><span class="va">value_unit</span><span class="op">)</span> <span class="op">|</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">curve_row</span><span class="op">$</span><span class="va">value_unit</span><span class="op">)</span>,</span>
+<span>      <span class="st">"unit unknown"</span>,</span>
+<span>      <span class="va">curve_row</span><span class="op">$</span><span class="va">value_unit</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    coordinate <span class="op">=</span> <span class="va">curve</span><span class="op">$</span><span class="va">location</span>,</span>
+<span>    signal <span class="op">=</span> <span class="va">curve</span><span class="op">$</span><span class="va">value</span>,</span>
+<span>    source_record <span class="op">=</span> <span class="va">curve_row</span><span class="op">$</span><span class="va">.source_rows</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>    stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="va">curve_plot_data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">curve_plot_parts</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    panel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
+<span>      <span class="va">panel</span>,</span>
+<span>      <span class="st">"\n"</span>,</span>
+<span>      <span class="va">axis_name</span>,</span>
+<span>      <span class="st">" ("</span>,</span>
+<span>      <span class="va">axis_unit</span>,</span>
+<span>      <span class="st">") / "</span>,</span>
+<span>      <span class="va">value_name</span>,</span>
+<span>      <span class="st">" ("</span>,</span>
+<span>      <span class="va">value_unit</span>,</span>
+<span>      <span class="st">")"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="va">curve_observed</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">curve_plot_data</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">signal</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">curve_missing</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">curve_plot_data</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">signal</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">curve_observed</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">coordinate</span>, y <span class="op">=</span> <span class="va">signal</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"Recorded signal"</span><span class="op">)</span>,</span>
+<span>    size <span class="op">=</span> <span class="fl">2.7</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"r"</span>, <span class="va">source_record</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    vjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span>,</span>
+<span>    size <span class="op">=</span> <span class="fl">2.8</span>,</span>
+<span>    show.legend <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_rug.html" class="external-link">geom_rug</a></span><span class="op">(</span></span>
+<span>    data <span class="op">=</span> <span class="va">curve_missing</span>,</span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">coordinate</span>, colour <span class="op">=</span> <span class="st">"Signal missing"</span><span class="op">)</span>,</span>
+<span>    sides <span class="op">=</span> <span class="st">"b"</span>,</span>
+<span>    length <span class="op">=</span> <span class="fu">grid</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.06</span>, <span class="st">"npc"</span><span class="op">)</span>,</span>
+<span>    inherit.aes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    linewidth <span class="op">=</span> <span class="fl">0.9</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">panel</span>, scales <span class="op">=</span> <span class="st">"free"</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"Observation"</span>,</span>
+<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Recorded signal"</span> <span class="op">=</span> <span class="st">"#176B87"</span>,</span>
+<span>      <span class="st">"Signal missing"</span> <span class="op">=</span> <span class="st">"#B4493A"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Coordinate (panel-specific axis and declared unit)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Signal (panel-specific declared unit)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span></span>
+<span>    expand <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.06</span>, <span class="fl">0.28</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">guide_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="analytical-records_files/figure-html/curve-grid-plot-1.png" class="r-plt" alt="Faceted point chart with four panels. The two UV panels use wavelength in nanometres on the x-axis and absorbance in AU on the y-axis; the two RI panels use retention time in minutes and response, with RIU declared for one curve and unknown for the other. The UV curve for inj-01 has numeric points at 250 and 253 nm and a missing signal at 251 nm, shown as a red rug on the x-axis. The inj-02 UV curve has points at 250.2, 251.6, and 252.7 nm. The two RI curves have separate retention-time grids. Point labels give source record ordinals, and no line joins or interpolates observations." width="672"><p class="caption">
+Recorded points for the four curves, separated by injection and channel.
+Each panel has its own coordinate and signal scales; point labels
+identify parsed CSV records. The rug marks the missing UV signal at 251
+nm without assigning it a signal value.
+</p>
+</div>
 <p><code>axis_unit</code> and <code>value_unit</code> are declarations
 only. For example, <code>nm</code>, <code>min</code>, and
 <code>RIU</code> are retained as supplied; a missing unit stays missing.
@@ -332,7 +426,7 @@ fixed version 1 bundle format. It is distinct from reading or writing
 one delimited long table. The bundle contains a manifest and fixed CSV
 or TSV tables for sources, samples, injections, channels, curves, and
 points. The source file itself is not embedded.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bundle_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">guide_dir</span>, <span class="st">"record-bundle"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/record-bundle.html">write_measure_record</a></span><span class="op">(</span><span class="va">record</span>, path <span class="op">=</span> <span class="va">bundle_dir</span>, delim <span class="op">=</span> <span class="st">","</span><span class="op">)</span></span>
 <span><span class="va">restored</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/record-bundle.html">read_measure_record</a></span><span class="op">(</span><span class="va">bundle_dir</span>, max_bytes <span class="op">=</span> <span class="fl">10</span> <span class="op">*</span> <span class="fl">1024</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
@@ -356,7 +450,7 @@ its one input file. Both readers enforce the limit while reading.</p>
 recipe can use a channel-consistent selection directly. This example
 retains the two UV injections as separate rows and applies an existing
 sample-wise normalization step without a long-to-wide conversion.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">uv_curves</span> <span class="op">&lt;-</span> <span class="va">record</span><span class="op">$</span><span class="va">curves</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">channel_id</span> <span class="op">==</span> <span class="st">"uv"</span><span class="op">)</span></span>
 <span></span>

@@ -9,25 +9,26 @@ library(ggplot2)
 
 ## Overview
 
-The `measure` package provides a comprehensive suite of functions for
-analytical method validation. These functions are designed to be
-compatible with regulatory frameworks including: - **ICH Q2(R2)**:
-Validation of Analytical Procedures - **ISO/IEC 17025**: General
-requirements for testing and calibration laboratories - **USP
-\<1225\>**: Validation of Compendial Procedures - **ICH M10**:
+The `measure` package includes calculations and plots used in analytical
+method validation work. The examples reference procedures described
+in: - **ICH Q2(R2)**: Validation of Analytical Procedures - **ISO/IEC
+17025**: General requirements for testing and calibration laboratories -
+**USP \<1225\>**: Validation of Compendial Procedures - **ICH M10**:
 Bioanalytical Method Validation (for applicable workflows)
 
-This vignette demonstrates key validation workflows including
-calibration, precision, accuracy, uncertainty, and quality control.
+The examples use simulated measurements to demonstrate calibration,
+precision, accuracy, uncertainty, and quality-control workflows. They do
+not establish method suitability or regulatory acceptance; those
+conclusions depend on the study design, data, and criteria for the
+intended use.
 
 ## Calibration Curves
 
 ### Fitting Calibration Curves
 
-The
 [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md)
-function fits weighted or unweighted calibration curves with
-comprehensive diagnostics.
+fits weighted or unweighted calibration curves and returns model
+diagnostics.
 
 ``` r
 
@@ -59,19 +60,40 @@ print(cal)
 
 ``` r
 
-autoplot(cal, type = "curve")
+autoplot(cal, type = "curve") +
+  labs(
+    x = "Nominal concentration (simulated scale)",
+    y = "Response (simulated scale)"
+  )
 ```
 
-![](reference-validation_files/figure-html/calibration-plot-1.png)
+![Scatter chart of nominal concentration versus response for eight
+simulated standards, with a fitted weighted regression line. The points
+follow an increasing trend across the concentration range; the line
+summarizes the fitted
+model.](reference-validation_files/figure-html/calibration-plot-1.png)
+
+Eight simulated standards and the fitted calibration line from a model
+weighted by 1/x². The points show the supplied observations; the line is
+the fitted response over the calibration range.
 
 ### Checking Residuals
 
 ``` r
 
-autoplot(cal, type = "residuals")
+autoplot(cal, type = "residuals") +
+  labs(x = "Nominal concentration (simulated scale)")
 ```
 
-![](reference-validation_files/figure-html/calibration-residuals-1.png)
+![Residual scatter chart for the eight simulated calibration standards.
+Nominal concentration is on the x-axis and residual is on the y-axis;
+the dashed horizontal line marks zero. One point near 250 has a much
+larger positive residual than the
+others.](reference-validation_files/figure-html/calibration-residuals-1.png)
+
+Residuals from the weighted calibration model plotted against nominal
+concentration, with a horizontal zero reference line. The standard near
+concentration 250 has a larger positive residual than the other points.
 
 ### Predicting Unknown Concentrations
 
@@ -97,7 +119,7 @@ cbind(unknowns, predictions)
 
 ### Calibration Verification
 
-Verify that the calibration remains valid using QC samples:
+Check the fitted calibration against QC samples:
 
 ``` r
 
@@ -216,6 +238,49 @@ print(repeatability)
 #>   CV = 3.7 %
 #>   95% CI: [481.6, 520.6]
 ```
+
+The plot keeps the six replicate results visible at each level. Diamonds
+mark the group means; horizontal jitter separates observations with
+similar values.
+
+``` r
+
+ggplot(
+  repeat_data,
+  aes(
+    x = factor(sample_id, levels = c("Low", "Mid", "High")),
+    y = concentration
+  )
+) +
+  geom_point(
+    position = position_jitter(width = 0.08, height = 0, seed = 42),
+    colour = "#2166AC",
+    size = 2
+  ) +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    shape = 23,
+    size = 3,
+    fill = "white",
+    colour = "#B2182B"
+  ) +
+  labs(
+    x = "Sample level",
+    y = "Concentration (simulated scale)"
+  )
+```
+
+![Jittered dot plot of six concentration replicates for each of three
+levels, ordered low, mid, high from left to right. Concentration is on
+the y-axis; white diamonds mark the group means. The vertical spread
+shows within-level variation in these simulated
+results.](reference-validation_files/figure-html/repeatability-plot-1.png)
+
+Six simulated repeatability measurements at each of the low, mid, and
+high sample levels, ordered from left to right. Diamonds mark the mean
+within each level; point positions are jittered horizontally only to
+separate observations.
 
 ### Intermediate Precision
 
@@ -402,10 +467,22 @@ print(linearity)
 #>   Result: Not significant (linearity acceptable)
 
 # Plot with fit line
-autoplot(linearity, type = "fit")
+autoplot(linearity, type = "fit") +
+  labs(
+    x = "Concentration (simulated scale)",
+    y = "Response (simulated scale)"
+  )
 ```
 
-![](reference-validation_files/figure-html/linearity-1.png)
+![Scatter chart of response against concentration for 15 simulated
+observations. Points form five concentration groups with three
+observations each; a fitted straight line is overlaid. Both axes use the
+simulated data
+scale.](reference-validation_files/figure-html/linearity-1.png)
+
+Fifteen simulated observations across five concentration levels, with
+the fitted linear model. The plot describes this generated example and
+does not establish linearity for a method.
 
 ## Uncertainty Budgets
 
@@ -458,10 +535,20 @@ print(budget)
 
 ``` r
 
-autoplot(budget)
+autoplot(budget) +
+  guides(fill = guide_legend(title = "Component type"))
 ```
 
-![](reference-validation_files/figure-html/uncertainty-plot-1.png)
+![Pareto chart of percentage contribution to variance for Repeatability,
+Calibration, Reference Standard, and Temperature, ordered from largest
+to smallest. Bars use fill to distinguish Type A from Type B; a line
+with points shows the cumulative percentage on the secondary
+axis.](reference-validation_files/figure-html/uncertainty-plot-1.png)
+
+The simulated uncertainty budget ranks four components by their
+percentage contribution to combined variance. Bar fill distinguishes
+Type A and Type B components; the line tracks the cumulative
+contribution.
 
 ## Control Charts
 
@@ -528,10 +615,23 @@ print(chart)
 
 ``` r
 
-autoplot(chart)
+autoplot(chart) +
+  labs(
+    x = "Run order",
+    y = "QC response (simulated scale)"
+  )
 ```
 
-![](reference-validation_files/figure-html/control-chart-plot-1.png)
+![Control chart of QC response by run order. A green solid center line,
+orange dotted warning limits, and red dashed action limits run
+horizontally. Four points are flagged; run 20 is the highest and lies
+above the upper action
+limit.](reference-validation_files/figure-html/control-chart-plot-1.png)
+
+The simulated QC run is plotted against the green solid center line,
+orange dotted warning limits, and red dashed action limits estimated
+from historical QC results. Point colour indicates whether a rule
+violation was flagged.
 
 ## Acceptance Criteria
 
@@ -651,11 +751,24 @@ print(ba)
 
 ``` r
 
-autoplot(ba)
+autoplot(ba) +
+  labs(
+    x = "Mean of methods (simulated scale)",
+    y = "Difference, method B minus method A (simulated scale)"
+  )
 #> `geom_smooth()` using formula = 'y ~ x'
 ```
 
-![](reference-validation_files/figure-html/bland-altman-plot-1.png)
+![Bland–Altman scatter chart for 30 simulated pairs. Mean of the two
+methods is on the x-axis and method B minus method A is on the y-axis. A
+solid line marks mean bias, dashed lines mark the estimated limits of
+agreement, and a dotted line shows the fitted linear
+trend.](reference-validation_files/figure-html/bland-altman-plot-1.png)
+
+Differences between simulated method B and method A results are plotted
+against their pairwise means. Horizontal lines mark the estimated mean
+bias and limits of agreement; a dotted line shows the tested linear
+trend. These data are illustrative only.
 
 ### Regression Methods
 
@@ -762,10 +875,25 @@ print(z_scores)
 
 ``` r
 
-autoplot(z_scores)
+autoplot(z_scores, type = "point") +
+  scale_x_continuous(breaks = seq_len(nrow(pt_data)), labels = pt_data$lab_id) +
+  labs(
+    x = "Laboratory",
+    y = "z score",
+    colour = "Score classification"
+  )
 ```
 
-![](reference-validation_files/figure-html/proficiency-plot-1.png)
+![Point chart of z-scores for Lab_1 through Lab_10. The y-axis is
+z-score; horizontal lines mark zero and plus or minus 2 and 3. Lab_10
+falls below −2 and is marked questionable; the other nine points are
+marked
+satisfactory.](reference-validation_files/figure-html/proficiency-plot-1.png)
+
+Proficiency z-scores for the ten simulated laboratories, using an
+assigned value of 100 and the specified sigma of 2.5. Horizontal
+reference lines mark zero and the ±2 and ±3 score boundaries; Lab_10 is
+classified as questionable and the other nine results as satisfactory.
 
 ## Matrix Effects
 
@@ -816,10 +944,26 @@ print(me)
 
 ``` r
 
-autoplot(me, type = "bar")
+autoplot(me, type = "bar") +
+  scale_x_discrete(labels = c("1" = "Low", "2" = "High")) +
+  guides(fill = guide_legend(title = "Interpretation")) +
+  labs(
+    x = "Concentration group",
+    y = "Matrix effect (%)",
+    fill = "Interpretation"
+  )
 ```
 
-![](reference-validation_files/figure-html/matrix-effect-plot-1.png)
+![Bar chart of matrix effect percentage for low and high concentration
+groups. The y-axis is matrix effect percent, the solid horizontal line
+marks 100%, dashed lines mark 80% and 120%, and bar fill indicates the
+returned interpretation
+category.](reference-validation_files/figure-html/matrix-effect-plot-1.png)
+
+Estimated matrix effect percentages for the low and high simulated
+concentration groups. The solid line marks 100% and dashed lines mark
+80% and 120%; classification colours follow the result returned by
+[`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md).
 
 ### Standard Addition Correction
 
@@ -973,24 +1117,23 @@ corrected <- bake(rec, new_data = NULL)
 
 ## Validation Reports
 
-Once you’ve completed your validation studies, you can compile all
-results into a reproducible validation report using
-[`measure_validation_report()`](https://jameshwade.github.io/measure/dev/reference/measure_validation_report.md).
-The package provides templates following regulatory frameworks like ICH
-Q2(R2) and USP \<1225\>. \### Creating a Validation Report
+[`measure_validation_report()`](https://jameshwade.github.io/measure/dev/reference/measure_validation_report.md)
+collects analysis objects, metadata, and text sections in a report
+object. The package includes templates organized around ICH Q2(R2) and
+USP \<1225\> sections. \### Creating a Validation Report
 
 ``` r
 
 # Gather validation results (using objects from above)
 report <- measure_validation_report(
   # Metadata
-  title = "HPLC-UV Method Validation Report",
-  method_name = "Compound X Assay",
-  method_description = "Reversed-phase HPLC with UV detection at 254 nm",
-  analyst = "J. Smith",
-  reviewer = "A. Jones",
-  lab = "Analytical Development",
-  instrument = "Agilent 1260 Infinity II",
+  title = "Illustrative Method Validation Report",
+  method_name = "Simulated Assay",
+  method_description = "Example metadata; study measurements in this vignette are simulated",
+  analyst = "Example analyst",
+  reviewer = "Example reviewer",
+  lab = "Example laboratory",
+  instrument = "Example instrument",
 
 
   # Validation sections (results from earlier in this vignette)
@@ -999,22 +1142,22 @@ report <- measure_validation_report(
   accuracy = accuracy,
   precision = list(repeatability = repeatability, intermediate = ip_result),
   linearity = linearity,
-  range = list(lower = 1, upper = 500, units = "ng/mL"),
+  range = list(lower = 1, upper = 500, units = "simulated scale"),
   uncertainty = budget,
 
   # Text sections
-  specificity = "No interfering peaks observed at the analyte retention time when analyzing blank matrix samples.",
+  specificity = "Example placeholder; blank-matrix results are not included in this vignette.",
   robustness = list(
     factors = c("Flow rate (±0.1 mL/min)", "Column temperature (±5°C)", "Mobile phase pH (±0.2)"),
-    conclusion = "Method showed acceptable robustness within tested parameter ranges."
+    conclusion = "Example placeholder; robustness-study data are not included in this vignette."
   ),
 
   # Conclusions
   conclusions = list(
-    summary = "The analytical method meets all acceptance criteria for precision, accuracy, and linearity.",
+    summary = "No method suitability conclusion is supported by the simulated data in this vignette.",
     recommendations = c(
-      "Method is suitable for intended use",
-      "Revalidate if significant changes are made to instrumentation or reagents"
+      "Repeat the analyses with representative study data for the intended use",
+      "Document the acceptance criteria and any changes to instruments or reagents"
     )
   ),
 
@@ -1028,10 +1171,10 @@ report <- measure_validation_report(
 print(report)
 #> 
 #> ── Validation Report ───────────────────────────────────────────────────────────
-#> Title: HPLC-UV Method Validation Report
-#> Method: Compound X Assay
-#> Analyst: J. Smith
-#> Lab: Analytical Development
+#> Title: Illustrative Method Validation Report
+#> Method: Simulated Assay
+#> Analyst: Example analyst
+#> Lab: Example laboratory
 #> Date: 2026-11-16
 #> 
 #> ── Validation Sections ──
@@ -1048,12 +1191,12 @@ print(report)
 #> 
 #> ── Conclusions ──
 #> 
-#> The analytical method meets all acceptance criteria for precision, accuracy,
-#> and linearity.
+#> No method suitability conclusion is supported by the simulated data in this
+#> vignette.
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-11-16 01:09:52.998777
+#> Generated: 2026-11-16 15:21:32.000916
 #> R version: 4.6.2
 #> measure version: 0.0.1.9003
 #> 
@@ -1068,7 +1211,7 @@ print(report)
 summary(report)
 #> 
 #> ── Validation Report Summary ───────────────────────────────────────────────────
-#> Method: Compound X Assay
+#> Method: Simulated Assay
 #> Date: 2026-11-16
 #> 
 #> # A tibble: 9 × 4
@@ -1101,7 +1244,7 @@ get_validation_section(report, "range")
 #> [1] 500
 #> 
 #> $units
-#> [1] "ng/mL"
+#> [1] "simulated scale"
 ```
 
 ### Adding Custom Sections
@@ -1183,13 +1326,6 @@ render_validation_report(
   output_format = "pdf",
   template = "usp_1225"
 )
-
-# Use a custom Quarto template
-render_validation_report(
-  report,
-  output_file = "custom_report.html",
-  template_path = "path/to/custom_template.qmd"
-)
 ```
 
 The rendered report includes:
@@ -1202,8 +1338,7 @@ The rendered report includes:
 
 ## Summary
 
-The `measure` package provides a complete toolkit for analytical method
-validation:
+Functions shown in this vignette include:
 
 | Category | Key Functions |
 |----|----|
@@ -1220,18 +1355,10 @@ validation:
 | **Drift** | [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md), [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md) |
 | **Validation Reports** | [`measure_validation_report()`](https://jameshwade.github.io/measure/dev/reference/measure_validation_report.md), [`render_validation_report()`](https://jameshwade.github.io/measure/dev/reference/render_validation_report.md) |
 
-All functions follow a consistent design philosophy: - **Tidy outputs**:
-Results are tibbles with
-[`tidy()`](https://generics.r-lib.org/reference/tidy.html),
-[`glance()`](https://generics.r-lib.org/reference/glance.html), and
-[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-methods - **Transparent diagnostics**: No hidden decisions; all
-parameters and flags are visible - **Regulatory compatibility**:
-Designed with ICH, ISO, and FDA guidelines in mind - **Provenance
-tracking**: Audit trails for outlier handling and data modifications
-
-For more details on any function, see the package documentation with
-`?function_name`.
+The examples use simulated measurements and illustrative report text.
+They demonstrate API results, not evidence that a method meets criteria
+or is suitable for a particular intended use. Check each function’s help
+page for its inputs and assumptions.
 
 ## See Also
 

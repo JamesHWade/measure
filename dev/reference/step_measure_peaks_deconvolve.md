@@ -116,8 +116,8 @@ metrics.
 ## Details
 
 Peak deconvolution fits mathematical models to overlapping peaks to
-determine their individual contributions. This is essential for
-quantitative analysis when peaks are not baseline-resolved.
+estimate their individual contributions. The result depends on the
+selected peak model, starting values and fit constraints.
 
 **Peak Models:**
 
@@ -141,7 +141,7 @@ Technique packs may register additional models.
 
 - `"lbfgsb"`: L-BFGS-B (fast, local optimization)
 
-- `"multistart"`: Multiple L-BFGS-B runs from perturbed starts (robust)
+- `"multistart"`: Multiple L-BFGS-B runs from perturbed starting values
 
 - `"nelder_mead"`: Derivative-free Nelder-Mead simplex
 

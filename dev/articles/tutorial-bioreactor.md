@@ -1,4 +1,4 @@
-# Tutorial: Bioreactor Glucose Prediction
+# Tutorial: bioreactor glucose prediction
 
 ``` r
 
@@ -7,19 +7,32 @@ library(recipes)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+
+article_plot_theme <- ggplot2::theme_minimal(base_size = 12) +
+  ggplot2::theme(
+    text = ggplot2::element_text(colour = "#222222"),
+    plot.background = ggplot2::element_rect(fill = "white", colour = NA),
+    panel.background = ggplot2::element_rect(fill = "white", colour = NA),
+    legend.background = ggplot2::element_rect(fill = "white", colour = NA),
+    legend.key = ggplot2::element_rect(fill = "white", colour = NA),
+    strip.background = ggplot2::element_rect(fill = "white", colour = NA)
+  )
 ```
 
 ## Introduction
 
-This vignette demonstrates a complete chemometric modeling workflow
-using measure. We’ll predict glucose concentration in bioreactors using
-Raman spectroscopy data.
+This tutorial applies measure preprocessing to Raman spectra from
+small-scale bioreactors, fits a linear model for glucose, and applies
+the fitted recipe and model to records from large-scale reactors.
 
 ## The dataset
 
-The `glucose_bioreactors` dataset contains Raman spectra from bioreactor
-experiments described in Kuhn and Johnson’s *Feature Engineering and
-Selection* (2020).
+The `glucose_bioreactors` dataset contains Raman assay values, glucose
+measurements, sampling days, and reactor identifiers. It includes 15
+small- scale reactors and three large-scale reactors monitored over 14
+days; both sets came from the same batch of cells. The data are
+described in Kuhn and Johnson’s *Feature Engineering and Selection*
+(2020).
 
 ``` r
 
@@ -38,9 +51,11 @@ Each dataset has: - 2,651 spectral channels (Raman wavenumbers) -
 `glucose`: the target variable to predict - `day`: sampling day (1-14) -
 `batch_id` and `batch_sample`: reactor identifiers
 
-## Exploratory visualization
+## Exploring the spectra
 
-Let’s visualize some spectra from the small-scale reactors:
+The chart uses the first 500 of 2,651 spectral coordinates from 10
+small-scale records. Color represents the recorded glucose
+concentration.
 
 ``` r
 
@@ -63,28 +78,31 @@ ggplot(viz_data, aes(x = wavenumber, y = intensity, group = sample_id, color = g
   geom_line(alpha = 0.7) +
   scale_color_viridis_c() +
   labs(
-    x = "Wavenumber",
-    y = "Intensity",
-    title = "Raman Spectra from Small-Scale Bioreactors",
-    subtitle = "Color indicates glucose concentration",
-    color = "Glucose"
+    x = "Raman wavenumber (dataset coordinate)",
+    y = "Assay intensity (dataset scale)",
+    title = "Small-scale bioreactor spectra",
+    color = "Glucose concentration (dataset scale)"
   ) +
-  theme_minimal()
+  article_plot_theme
 ```
 
-![](tutorial-bioreactor_files/figure-html/viz-spectra-1.png)
+![Line chart of 10 small-scale Raman spectra. The x-axis is the Raman
+wavenumber as stored in the dataset, the y-axis is assay intensity on
+the dataset scale, and color encodes glucose concentration on its
+dataset scale.](tutorial-bioreactor_files/figure-html/viz-spectra-1.png)
+
+First 500 Raman coordinates for 10 small-scale records. Color encodes
+each record’s glucose concentration.
 
 ## Building a preprocessing recipe
 
-For Raman spectroscopy, a typical preprocessing pipeline includes:
-
-1.  Smoothing to reduce noise
-2.  Baseline correction (via derivatives)
-3.  Normalization for instrument variations
+This recipe applies a Savitzky-Golay first derivative followed by SNV.
+These steps change the scale and shape of the spectra; inspect the
+processed traces before using them for a scientific interpretation.
 
 ``` r
 
-# Use first 500 spectral columns for faster example
+# Use the first 500 spectral columns in this example
 spec_cols_subset <- spec_cols[1:500]
 wavenumbers <- as.numeric(spec_cols_subset)
 
@@ -147,7 +165,7 @@ The preprocessed data has fewer columns because: - The `day` and
 `batch_id` columns are preserved as ID columns - The 500 spectral
 columns have been transformed and renamed with prefix `raman_`
 
-## Visualize preprocessed spectra
+## Inspecting preprocessed spectra
 
 ``` r
 
@@ -169,26 +187,33 @@ ggplot(proc_viz, aes(x = wavenumber, y = value, group = sample_id, color = gluco
   geom_line(alpha = 0.7) +
   scale_color_viridis_c() +
   labs(
-    x = "Wavenumber",
-    y = "Preprocessed Intensity",
-    title = "Preprocessed Raman Spectra",
-    subtitle = "After SG derivative + SNV normalization",
-    color = "Glucose"
+    x = "Raman wavenumber (dataset coordinate)",
+    y = "Processed signal (SNV scale)",
+    title = "Processed small-scale spectra",
+    color = "Glucose concentration (dataset scale)"
   ) +
-  theme_minimal()
+  article_plot_theme
 ```
 
-![](tutorial-bioreactor_files/figure-html/viz-processed-1.png)
+![Line chart of 10 processed Raman spectra across the first 500 dataset
+coordinates. The x-axis is the stored Raman wavenumber, the y-axis is
+processed signal on the SNV scale, and color identifies glucose
+concentration. A large negative excursion appears near the lowest
+coordinate; the remaining traces cluster around
+zero.](tutorial-bioreactor_files/figure-html/viz-processed-1.png)
+
+The same 10 small-scale records after Savitzky-Golay first-derivative
+processing and SNV.
 
 ## Fitting a model
 
-Now we can fit a model to predict glucose:
+The example fits a linear model to the preprocessed small-scale records.
 
 ``` r
 
 library(parsnip)
 
-# Simple linear model (PLS would be better for real applications)
+# Small linear-model example
 lm_spec <- linear_reg() |>
   set_engine("lm")
 
@@ -196,7 +221,7 @@ lm_spec <- linear_reg() |>
 model <- lm_spec |>
   fit(glucose ~ ., data = train_processed |> select(-day, -batch_id))
 
-# Training performance
+# In-sample training summary; this is not a held-out performance estimate.
 train_preds <- predict(model, train_processed) |>
   bind_cols(train_processed |> select(glucose))
 
@@ -211,68 +236,63 @@ train_preds |>
 #> 1 2.29e-12         1
 ```
 
-## Applying to new data
+## Applying the recipe and model to new records
 
-The key advantage of the recipes framework is consistent preprocessing
-of new data:
+The fitted recipe applies its small-scale estimates to records from the
+large- scale reactors.
 
 ``` r
 
-# Prepare test data from large-scale bioreactors
-test_data <- bioreactors_large |>
+# Prepare large-scale records
+large_data <- bioreactors_large |>
   select(glucose, day, batch_id, all_of(spec_cols_subset))
 
-# Apply the same preprocessing
-test_processed <- bake(rec_prepped, new_data = test_data)
-
-# Predict
-test_preds <- predict(model, test_processed) |>
-  bind_cols(test_processed |> select(glucose, batch_id, day))
+# Apply the fitted preprocessing and predict
+large_processed <- bake(rec_prepped, new_data = large_data)
+large_preds <- predict(model, large_processed) |>
+  bind_cols(large_processed |> select(glucose, batch_id, day))
 #> Warning in predict.lm(object = object$fit, newdata = new_data, type =
 #> "response", : prediction from rank-deficient fit; consider predict(.,
 #> rankdeficient="NA")
 
-# Plot predictions vs actual
-ggplot(test_preds, aes(x = glucose, y = .pred, color = batch_id)) +
+# Compare predictions with observed glucose values
+ggplot(large_preds, aes(x = glucose, y = .pred, color = batch_id)) +
   geom_point(alpha = 0.7) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
   labs(
-    x = "Actual Glucose",
-    y = "Predicted Glucose",
-    title = "Model Performance on Large-Scale Bioreactors",
-    color = "Reactor"
+    x = "Observed glucose (dataset scale)",
+    y = "Predicted glucose (dataset scale)",
+    title = "Large-scale reactor records",
+    color = "Reactor ID"
   ) +
-  theme_minimal()
+  article_plot_theme
 ```
 
-![](tutorial-bioreactor_files/figure-html/new-data-1.png)
+![Point chart of predicted versus recorded glucose for 42 records from
+three large-scale reactors. The x-axis is observed glucose, the y-axis
+is predicted glucose, and color identifies reactor. A dashed diagonal
+marks equal observed and predicted values; many points lie far from it,
+including negative
+predictions.](tutorial-bioreactor_files/figure-html/new-data-1.png)
 
-## Summary
+Predicted versus recorded glucose for 42 large-scale records. The dashed
+line marks equal observed and predicted values; color identifies
+reactor.
 
-This case study demonstrated:
+## Interpretation
 
-1.  Loading and exploring spectral data from bioreactors
-2.  Building a preprocessing recipe with measure steps
-3.  Fitting a model on preprocessed training data
-4.  Applying consistent preprocessing to new data
+The training metrics are in-sample summaries. The final chart compares
+model predictions with recorded glucose for the three large-scale
+reactors in this dataset. Those records came from the same cell batch as
+the small-scale data, so this example does not establish performance on
+a new study or cell batch. Most large-scale predictions are also far
+from the equal-value reference line.
 
-Key takeaways:
+For a study, keep preprocessing within the resampling workflow, compare
+model and preprocessing choices on training data, and use data from the
+intended application setting for final evaluation.
 
-- The recipe framework ensures identical preprocessing for training and
-  test data
-- [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)
-  handles the conversion of many spectral columns
-- Processing steps like Savitzky-Golay and SNV remove unwanted variation
-- [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)
-  produces modeling-ready data
-
-For real applications, consider:
-
-- Using PLS or ridge regression for high-dimensional spectral data
-- Tuning preprocessing parameters with cross-validation
-- Validating on truly independent test sets
-
-## See Also
+## See also
 
 - [Getting
   Started](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.md) -

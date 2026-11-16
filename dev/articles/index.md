@@ -4,23 +4,23 @@
 
 Learning-oriented guides that take you through a complete workflow
 
-- [Tutorial: Getting Started with
+- [Tutorial: getting started with
   measure](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.md):
-- [Tutorial: Bioreactor Glucose
-  Prediction](https://jameshwade.github.io/measure/dev/articles/tutorial-bioreactor.md):
+- [Tutorial: bioreactor glucose
+  prediction](https://jameshwade.github.io/measure/dev/articles/tutorial-bioreactor.md):
 
 ### How-To Guides
 
 Task-oriented guides for solving specific problems
 
-- [How-To: Baseline
-  Correction](https://jameshwade.github.io/measure/dev/articles/howto-baseline.md):
-- [How-To: Extend measure with a technique
+- [How-to: baseline
+  correction](https://jameshwade.github.io/measure/dev/articles/howto-baseline.md):
+- [How-to: extend measure with a technique
   pack](https://jameshwade.github.io/measure/dev/articles/howto-technique-packs.md):
-- [How-To: Integrating with
+- [How-to: integrating with
   tidymodels](https://jameshwade.github.io/measure/dev/articles/howto-tidymodels.md):
-- [How-To: Data Organization and
-  Diagnostics](https://jameshwade.github.io/measure/dev/articles/howto-data-organization.md):
+- [How-to: data organization and
+  diagnostics](https://jameshwade.github.io/measure/dev/articles/howto-data-organization.md):
 - [Analytical records: samples, injections, channels, and
   curves](https://jameshwade.github.io/measure/dev/articles/analytical-records.md):
 - [Retaining acquisition data and extracting MS

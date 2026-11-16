@@ -93,14 +93,13 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jameshwade.github.io/measure/">measure</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="keep-the-acquisition-beside-the-analytical-record">Keep the acquisition beside the analytical record<a class="anchor" aria-label="anchor" href="#keep-the-acquisition-beside-the-analytical-record"></a>
+<h2 id="link-raw-acquisitions-to-analytical-records">Link raw acquisitions to analytical records<a class="anchor" aria-label="anchor" href="#link-raw-acquisitions-to-analytical-records"></a>
 </h2>
-<p><code><a href="../reference/measure_record.html">measure_record()</a></code> remains the relational record for
-samples, injections, channels, sources, and independent one-dimensional
-curves. A <code><a href="../reference/measure_acquisition.html">measure_acquisition()</a></code> adds stream declarations,
-per-scan spectra, and two-dimensional arrays without changing that
-record. It preserves raw point order and each scan’s own m/z vector; a
-shared grid is not required.</p>
+<p><code><a href="../reference/measure_record.html">measure_record()</a></code> stores the relationships among samples,
+injections, channels, sources, and one-dimensional curves.
+<code><a href="../reference/measure_acquisition.html">measure_acquisition()</a></code> adds stream declarations, per-scan
+spectra, and two-dimensional arrays. Each scan keeps its own m/z
+coordinates and point order; scans need not share a grid.</p>
 <p>This example starts with a small synthetic CSV written for the
 vignette. It is not an instrument recording or a vendor export. The
 input contains point rows and explicit scan-event rows for an
@@ -362,12 +361,11 @@ Show the caller-side scan and array import mapping
 <span>  value_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ion abundance"</span>, <span class="st">"ion abundance"</span>, <span class="st">"signal"</span><span class="op">)</span>,</span>
 <span>  value_unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"counts"</span>, <span class="st">"counts"</span>, <span class="st">"declared signal units"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-</details><p>The acquisition contains one MS stream with positive and negative
-scans and two MS levels, plus a separate profile stream and a 2D stream.
-IDs, units, scan state, representation, saturation declarations, and
-array axis labels are caller-supplied. The constructor validates
-relationships and supported structure; it does not infer these
-values.</p>
+</details><p>The acquisition contains positive and negative scans at two MS
+levels, a separate profile stream, and a 2D stream. The caller supplies
+IDs, units, scan states, representations, saturation declarations, and
+array axis labels; the constructor validates their relationships without
+inferring them.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">acquisition</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_acquisition.html">measure_acquisition</a></span><span class="op">(</span></span>
 <span>  record <span class="op">=</span> <span class="va">record</span>,</span>
@@ -385,10 +383,9 @@ values.</p>
 <span><span class="co">#&gt;   streams: 3</span></span>
 <span><span class="co">#&gt;   scans: 10</span></span>
 <span><span class="co">#&gt;   arrays: 1</span></span></code></pre></div>
-<p>The synthetic record has no scalar curves. An extracted trace has
-many-to-one links into raw scan points, so it remains beside its
-acquisition ancestry rather than being represented as though one trace
-value came from one scan point.</p>
+<p>The synthetic record has no scalar curves. Each trace value may
+summarize multiple scan points, so the extracted trace remains linked to
+its raw acquisition.</p>
 </div>
 <div class="section level2">
 <h2 id="write-and-reload-the-raw-acquisition-first">Write and reload the raw acquisition first<a class="anchor" aria-label="anchor" href="#write-and-reload-the-raw-acquisition-first"></a>
@@ -410,11 +407,10 @@ calculations below use the reloaded raw data.</p>
 <span><span class="co">#&gt;   streams: 3</span></span>
 <span><span class="co">#&gt;   scans: 10</span></span>
 <span><span class="co">#&gt;   arrays: 1</span></span></code></pre></div>
-<p>The raw scan vectors are ragged: their lengths and m/z coordinates
-belong to each scan. The native bundle retains acquired-empty and
-missing scans, ordinary missing intensities, and the three-valued
-saturation mask (<code>TRUE</code>/<code>FALSE</code>/unknown) as
-separate states.</p>
+<p>Each scan retains its own point count and m/z coordinates. The bundle
+also retains acquired-empty and missing scans, missing intensities, and
+the three-valued saturation mask (<code>TRUE</code>, <code>FALSE</code>,
+or unknown) as separate states.</p>
 </div>
 <div class="section level2">
 <h2 id="derive-an-explicit-centroid-tic-and-xic">Derive an explicit centroid TIC and XIC<a class="anchor" aria-label="anchor" href="#derive-an-explicit-centroid-tic-and-xic"></a>
@@ -549,10 +545,151 @@ intensity produces a different status.</p>
 </tr>
 </tbody>
 </table>
-<p>The corresponding TIC is a total-ion sum over all points in the same
-selected scans. These are derived traces, not source-reported
-chromatograms.</p>
+<p>This plot shows numeric results for the selected centroid XIC. The
+acquired-empty scan and the empty m/z window both yield zero, with
+distinct statuses. Missing-intensity, saturated, and missing-scan
+results have no numeric value and are omitted here.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">xic_value_plot_data</span> <span class="op">&lt;-</span> <span class="va">xic_table</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/is.finite.html" class="external-link">is.finite</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span>
+<span>      <span class="va">status</span>,</span>
+<span>      levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"calculated"</span>, <span class="st">"empty_scan"</span>, <span class="st">"empty_window"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    scan_label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"scan "</span>, <span class="va">scan_index</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>  <span class="va">xic_value_plot_data</span>,</span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="va">retention_time_s</span>,</span>
+<span>    y <span class="op">=</span> <span class="va">value</span>,</span>
+<span>    colour <span class="op">=</span> <span class="va">status</span>,</span>
+<span>    shape <span class="op">=</span> <span class="va">status</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">scan_label</span><span class="op">)</span>,</span>
+<span>    nudge_y <span class="op">=</span> <span class="fl">0.55</span>,</span>
+<span>    size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    show.legend <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"Trace status"</span>,</span>
+<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      calculated <span class="op">=</span> <span class="st">"#176B87"</span>,</span>
+<span>      empty_scan <span class="op">=</span> <span class="st">"#69757A"</span>,</span>
+<span>      empty_window <span class="op">=</span> <span class="st">"#3A7864"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      calculated <span class="op">=</span> <span class="st">"Calculated"</span>,</span>
+<span>      empty_scan <span class="op">=</span> <span class="st">"Acquired empty"</span>,</span>
+<span>      empty_window <span class="op">=</span> <span class="st">"Empty m/z window"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_shape_manual</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"Trace status"</span>,</span>
+<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>calculated <span class="op">=</span> <span class="fl">16</span>, empty_scan <span class="op">=</span> <span class="fl">15</span>, empty_window <span class="op">=</span> <span class="fl">17</span><span class="op">)</span>,</span>
+<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      calculated <span class="op">=</span> <span class="st">"Calculated"</span>,</span>
+<span>      empty_scan <span class="op">=</span> <span class="st">"Acquired empty"</span>,</span>
+<span>      empty_window <span class="op">=</span> <span class="st">"Empty m/z window"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span></span>
+<span>    breaks <span class="op">=</span> <span class="va">xic_value_plot_data</span><span class="op">$</span><span class="va">retention_time_s</span>,</span>
+<span>    expand <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span></span>
+<span>    expand <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Retention time (s)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"XIC ion abundance (counts)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">guide_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="acquisition-ms_files/figure-html/xic-value-plot-1.png" class="r-plt" alt="Point chart of XIC intensity in counts against retention time in seconds. Scan 1 has a 15-count sum at 0.25 s from two m/z 100 contributors. Scan 5 is acquired-empty and has value zero at 0.8 s. Scan 6 has a 2.25-count result at 1.0 s with an unknown saturation mask. Scan 8 has value zero at 1.6 s because no point falls in the selected m/z interval. The acquired-empty and empty-window zeros have different shapes. Missing-intensity, saturated, and missing-scan results have no numeric value and are not plotted." width="672"><p class="caption">
+Numeric XIC results for the declared positive-ion, MS1 centroid
+selection. The acquired-empty scan and the scan with no point in the m/z
+window both return zero, with distinct statuses.
+</p>
+</div>
+<p>The status column distinguishes an acquired-empty scan from a missing
+scan, a missing intensity, a saturated point, and a scan with no point
+in the XIC window. Both an acquired-empty scan and an empty m/z window
+produce a numeric zero here, with different statuses; missing-intensity,
+saturated, and missing-scan results have no numeric trace value.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">xic_status_levels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"calculated"</span>,</span>
+<span>  <span class="st">"empty_scan"</span>,</span>
+<span>  <span class="st">"missing_intensity"</span>,</span>
+<span>  <span class="st">"empty_window"</span>,</span>
+<span>  <span class="st">"saturated"</span>,</span>
+<span>  <span class="st">"missing_scan"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">xic_status_plot_data</span> <span class="op">&lt;-</span> <span class="va">xic_table</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    status <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">status</span>, levels <span class="op">=</span> <span class="va">xic_status_levels</span><span class="op">)</span>,</span>
+<span>    scan_label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"scan "</span>, <span class="va">scan_index</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>  <span class="va">xic_status_plot_data</span>,</span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">retention_time_s</span>, y <span class="op">=</span> <span class="va">status</span>, colour <span class="op">=</span> <span class="va">status</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">scan_label</span><span class="op">)</span>,</span>
+<span>    nudge_x <span class="op">=</span> <span class="fl">0.06</span>,</span>
+<span>    hjust <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>    size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    show.legend <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span></span>
+<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      calculated <span class="op">=</span> <span class="st">"#176B87"</span>,</span>
+<span>      empty_scan <span class="op">=</span> <span class="st">"#69757A"</span>,</span>
+<span>      missing_intensity <span class="op">=</span> <span class="st">"#C05A2B"</span>,</span>
+<span>      empty_window <span class="op">=</span> <span class="st">"#3A7864"</span>,</span>
+<span>      saturated <span class="op">=</span> <span class="st">"#A52A2A"</span>,</span>
+<span>      missing_scan <span class="op">=</span> <span class="st">"#7356A2"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    guide <span class="op">=</span> <span class="st">"none"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_y_discrete</a></span><span class="op">(</span></span>
+<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      calculated <span class="op">=</span> <span class="st">"Calculated"</span>,</span>
+<span>      empty_scan <span class="op">=</span> <span class="st">"Acquired empty"</span>,</span>
+<span>      missing_intensity <span class="op">=</span> <span class="st">"Missing intensity"</span>,</span>
+<span>      empty_window <span class="op">=</span> <span class="st">"Empty m/z window"</span>,</span>
+<span>      saturated <span class="op">=</span> <span class="st">"Saturated"</span>,</span>
+<span>      missing_scan <span class="op">=</span> <span class="st">"Missing scan"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span></span>
+<span>    expand <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.03</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Retention time (s)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"XIC result status"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">guide_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="acquisition-ms_files/figure-html/xic-status-plot-1.png" class="r-plt" alt="Categorical scatter chart of XIC result status. Retention time in seconds is on the x-axis and trace status is on the y-axis. Scan 1 is calculated at 0.25 s, scan 5 is acquired-empty with value zero at 0.8 s, scan 6 is calculated at 1.0 s, scan 7 has missing intensity at 1.3 s, scan 8 has an empty m/z window with value zero at 1.6 s, scan 9 is saturated at 1.9 s, and scan 12 is a missing scan at 2.2 s. The two zero-valued states retain different categories; missing-intensity, saturated, and missing-scan results have no numeric value." width="672"><p class="caption">
+XIC status by retention time for the declared positive-ion, MS1 centroid
+selection. Acquired-empty scans and empty m/z windows both return zero,
+while missing-intensity, saturated, and missing-scan states remain
+separate.
+</p>
+</div>
+<p>The corresponding TIC sums all points in the same selected scans.
+Both traces are derived from the raw spectra, not source-reported
+chromatograms.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  scan_index <span class="op">=</span> <span class="va">tic</span><span class="op">$</span><span class="va">scan_index</span>,</span>
 <span>  retention_time_s <span class="op">=</span> <span class="va">tic</span><span class="op">$</span><span class="va">retention_time</span>,</span>
@@ -614,7 +751,7 @@ chromatograms.</p>
 <p>The trace processing attribute records the selectors, units, source
 digest, aggregation, missing-intensity policy, saturation policy, and
 lack of synchronization.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trace_processing</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">xic</span>, <span class="st">"processing"</span><span class="op">)</span></span>
 <span><span class="va">trace_processing</span></span>
 <span><span class="co">#&gt; $version</span></span>
@@ -737,7 +874,7 @@ parsed CSV record ordinals point back to source rows. They do not
 collapse extraction into a one-source-row scalar observation.</p>
 <details><summary>
 Show how trace point indices map to input rows
-</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">link_parts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">xic</span><span class="op">)</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">point_index</span> <span class="op">&lt;-</span> <span class="va">xic</span><span class="op">$</span><span class="va">.point_indices</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">point_index</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0L</span><span class="op">)</span> <span class="op">{</span></span>
@@ -763,11 +900,11 @@ Show how trace point indices map to input rows
 <span>  <span class="va">link_parts</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">link_parts</span>, <span class="va">is.null</span>, <span class="fu"><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">trace_point_links</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
-</details><p>The table shows every selected contributor position and its parallel
-parsed source-row reference. It includes the two repeated m/z points in
-the first scan, plus the point with a missing intensity and the point
-declared saturated.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+</details><p>The table shows each selected contributor’s position in its scan and
+parsed CSV record ordinal. It includes the two distinct m/z 100 points
+in scan 1, a point with missing intensity, and a point declared
+saturated.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">trace_point_links</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -836,6 +973,95 @@ declared saturated.</p>
 </tr>
 </tbody>
 </table>
+<p>This plot maps each XIC contributor from its parsed CSV record to its
+scan. Point labels give the within-scan point index; shape marks whether
+an intensity is present, and color shows the point’s saturation mask.
+The two m/z 100 contributors in scan 1 remain separate points.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">trace_point_plot_data</span> <span class="op">&lt;-</span> <span class="va">trace_point_links</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    intensity_state <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">intensity</span><span class="op">)</span>,</span>
+<span>      <span class="st">"Missing intensity"</span>,</span>
+<span>      <span class="st">"Numeric intensity"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    saturation_state <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">saturated</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Saturation unknown"</span>,</span>
+<span>      <span class="va">saturated</span> <span class="op">~</span> <span class="st">"Declared saturated"</span>,</span>
+<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="st">"Declared not saturated"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    point_label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"p"</span>, <span class="va">point_index</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>  <span class="va">trace_point_plot_data</span>,</span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="va">parsed_csv_record</span>,</span>
+<span>    y <span class="op">=</span> <span class="va">scan_index</span>,</span>
+<span>    colour <span class="op">=</span> <span class="va">saturation_state</span>,</span>
+<span>    shape <span class="op">=</span> <span class="va">intensity_state</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">point_label</span><span class="op">)</span>,</span>
+<span>    nudge_y <span class="op">=</span> <span class="fl">0.28</span>,</span>
+<span>    size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    show.legend <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"Saturation mask"</span>,</span>
+<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Declared not saturated"</span> <span class="op">=</span> <span class="st">"#176B87"</span>,</span>
+<span>      <span class="st">"Saturation unknown"</span> <span class="op">=</span> <span class="st">"#C05A2B"</span>,</span>
+<span>      <span class="st">"Declared saturated"</span> <span class="op">=</span> <span class="st">"#A52A2A"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Declared not saturated"</span> <span class="op">=</span> <span class="st">"Not saturated"</span>,</span>
+<span>      <span class="st">"Saturation unknown"</span> <span class="op">=</span> <span class="st">"Unknown"</span>,</span>
+<span>      <span class="st">"Declared saturated"</span> <span class="op">=</span> <span class="st">"Saturated"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_shape_manual</a></span><span class="op">(</span></span>
+<span>    name <span class="op">=</span> <span class="st">"Intensity"</span>,</span>
+<span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Numeric intensity"</span> <span class="op">=</span> <span class="fl">16</span>,</span>
+<span>      <span class="st">"Missing intensity"</span> <span class="op">=</span> <span class="fl">15</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Numeric intensity"</span> <span class="op">=</span> <span class="st">"Numeric"</span>,</span>
+<span>      <span class="st">"Missing intensity"</span> <span class="op">=</span> <span class="st">"Missing"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span></span>
+<span>    breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">trace_point_plot_data</span><span class="op">$</span><span class="va">parsed_csv_record</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    minor_breaks <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span></span>
+<span>    breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">trace_point_plot_data</span><span class="op">$</span><span class="va">scan_index</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    minor_breaks <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Parsed CSV data-record ordinal"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Scan index (within stream)"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span></span>
+<span>    colour <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    shape <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>    legend.box <span class="op">=</span> <span class="st">"vertical"</span>,</span>
+<span>    legend.justification <span class="op">=</span> <span class="st">"left"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">guide_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="acquisition-ms_files/figure-html/trace-lineage-plot-1.png" class="r-plt" alt="Lineage scatter chart with parsed CSV data-record ordinal on the x-axis and scan index on the y-axis. Rows 1 and 2 map to scan 1 as separate numeric points at the same m/z coordinate; row 6 maps to scan 6 with numeric intensity and an unknown saturation mask. Row 7 maps to scan 7 with missing intensity and an unknown mask. Row 9 maps to scan 9 with numeric intensity marked saturated. Point labels give within-scan indices." width="672"><p class="caption">
+Parsed CSV records contributing to the selected XIC, mapped to scan
+indices. Labels give within-scan point indices; shape indicates whether
+an intensity is present, and color indicates the declared saturation
+mask.
+</p>
+</div>
 <p>The source digest and these local links are provenance aids; they do
 not authenticate the source or assert that it is complete.</p>
 </div>
@@ -845,7 +1071,7 @@ not authenticate the source or assert that it is complete.</p>
 <p>The profile stream’s coordinates and intensities remain in the
 acquisition. The centroid trace operation rejects it rather than summing
 profile samples as though they were discrete centroid peaks.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">profile_row</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="st">"scan-profile"</span>, <span class="va">raw_acquisition</span><span class="op">$</span><span class="va">scans</span><span class="op">$</span><span class="va">scan_id</span><span class="op">)</span></span>
 <span><span class="va">profile_spectrum</span> <span class="op">&lt;-</span> <span class="va">raw_acquisition</span><span class="op">$</span><span class="va">scans</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="va">profile_row</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">profile_spectrum</span></span>
@@ -876,7 +1102,7 @@ time in seconds and wavelength in nanometres. Two dimensions by
 themselves do not establish that a payload is a physical DAD
 measurement. The array keeps its own sparse coordinate grid; it is not
 regridded to scan order or an MS m/z axis.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">array_row</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="st">"array-01"</span>, <span class="va">raw_acquisition</span><span class="op">$</span><span class="va">arrays</span><span class="op">$</span><span class="va">array_id</span><span class="op">)</span></span>
 <span><span class="va">array_payload</span> <span class="op">&lt;-</span> <span class="va">raw_acquisition</span><span class="op">$</span><span class="va">arrays</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="va">array_row</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">array_table</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
@@ -935,7 +1161,7 @@ regridded to scan order or an MS m/z axis.</p>
 </table>
 </div>
 <div class="section level2">
-<h2 id="capability-boundary">Capability boundary<a class="anchor" aria-label="anchor" href="#capability-boundary"></a>
+<h2 id="capabilities-and-limits">Capabilities and limits<a class="anchor" aria-label="anchor" href="#capabilities-and-limits"></a>
 </h2>
 <table class="table">
 <colgroup>

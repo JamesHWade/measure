@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>How-To: Integrating with tidymodels • measure</title>
+<title>How-to: integrating with tidymodels • measure</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <link href="../deps/Montserrat-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="How-To: Integrating with tidymodels">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="How-to: integrating with tidymodels">
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -81,7 +81,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>How-To: Integrating with tidymodels</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>How-to: integrating with tidymodels</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/JamesHWade/measure/blob/main/vignettes/articles/howto-tidymodels.Rmd" class="external-link"><code>vignettes/articles/howto-tidymodels.Rmd</code></a></small>
@@ -91,27 +91,31 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jameshwade.github.io/measure/">measure</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jameshwade.github.io/measure/">measure</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">article_plot_theme</span> <span class="op">&lt;-</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>    text <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#222222"</span><span class="op">)</span>,</span>
+<span>    plot.background <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    panel.background <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    legend.background <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    legend.key <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    strip.background <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>One of measure’s key design goals is integration with the tidymodels
-ecosystem. This article shows how to use measure preprocessing in
-complete modeling workflows, including:</p>
-<ul>
-<li>Bundling preprocessing with models using workflows</li>
-<li>Cross-validation with measure recipes</li>
-<li>Hyperparameter tuning for preprocessing steps</li>
-<li>Comparing preprocessing strategies</li>
-</ul>
+<p>This article keeps measure preprocessing inside tidymodels workflows.
+It shows cross-validation, preprocessing-parameter tuning, recipe
+comparison, and one final evaluation on a reserved test partition.</p>
 </div>
 <div class="section level2">
-<h2 id="setup-the-meats-dataset">Setup: The meats dataset<a class="anchor" aria-label="anchor" href="#setup-the-meats-dataset"></a>
+<h2 id="setup-the-meats-dataset">Setup: the meats dataset<a class="anchor" aria-label="anchor" href="#setup-the-meats-dataset"></a>
 </h2>
-<p>We’ll use the NIR spectroscopy dataset from <code>modeldata</code> to
-predict water content in meat samples. The example uses a training
-partition for resampling and keeps the held-out partition for one final
-evaluation.</p>
+<p>The <code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code> dataset contains 100 NIR absorbance
+channels and water, fat, and protein measurements. This example predicts
+water content. It uses the training partition for resampling and
+reserves the held-out partition for one final evaluation.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"meats"</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span>
 <span></span>
@@ -125,10 +129,9 @@ evaluation.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Training samples:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">train</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Training samples: 159</span></span></code></pre></div>
 <p>The dataset has no sample identifier, so <code>sample_id</code> gives
-each spectrum a unique key. The recipe marks it as an ID rather than a
-predictor. This also lets <code><a href="../reference/step_measure_output_wide.html">step_measure_output_wide()</a></code>
-restore one row per sample when spectral measurements are converted back
-to ordinary columns.</p>
+each row a unique key. The recipe marks it as an ID, not a predictor.
+The ID also lets <code><a href="../reference/step_measure_output_wide.html">step_measure_output_wide()</a></code> restore one row
+per sample.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">make_measure_recipe</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -186,9 +189,9 @@ follows <code><a href="../reference/step_measure_output_wide.html">step_measure_
 <div class="section level3">
 <h3 id="fit-and-evaluate-with-resampling">Fit and evaluate with resampling<a class="anchor" aria-label="anchor" href="#fit-and-evaluate-with-resampling"></a>
 </h3>
-<p>Assess the workflow on the training partition first.
-<code>fit_resamples()</code> fits the recipe using each fold’s analysis
-rows and applies it to that fold’s assessment rows.</p>
+<p><code>fit_resamples()</code> preps the recipe on each fold’s analysis
+rows, then applies it to that fold’s assessment rows. The metrics below
+summarize performance on the training partition’s assessment folds.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu">yardstick</span><span class="fu">::</span><span class="fu"><a href="https://yardstick.tidymodels.org/reference/metric_set.html" class="external-link">metric_set</a></span><span class="op">(</span><span class="fu">yardstick</span><span class="fu">::</span><span class="va"><a href="https://yardstick.tidymodels.org/reference/rmse.html" class="external-link">rmse</a></span>, <span class="fu">yardstick</span><span class="fu">::</span><span class="va"><a href="https://yardstick.tidymodels.org/reference/rsq.html" class="external-link">rsq</a></span><span class="op">)</span></span>
 <span><span class="va">baseline_resamples</span> <span class="op">&lt;-</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://tune.tidymodels.org/reference/fit_resamples.html" class="external-link">fit_resamples</a></span><span class="op">(</span></span>
@@ -209,9 +212,10 @@ rows and applies it to that fold’s assessment rows.</p>
 <div class="section level2">
 <h2 id="cross-validation">Cross-validation<a class="anchor" aria-label="anchor" href="#cross-validation"></a>
 </h2>
-<p><code>folds</code> contains three resamples made only from the
-training partition. The recipe stays inside the workflow so
-data-dependent preprocessing is estimated within each analysis fold.</p>
+<p><code>folds</code> contains three resamples from the training
+partition. Because the recipe stays inside the workflow, data-dependent
+preprocessing is estimated within each analysis fold and applied to its
+assessment fold.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">folds</span></span>
 <span><span class="co">#&gt; #  3-fold cross-validation using stratification </span></span>
@@ -329,17 +333,29 @@ performance.</p>
 <h3 id="visualize-tuning-results">Visualize tuning results<a class="anchor" aria-label="anchor" href="#visualize-tuning-results"></a>
 </h3>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">tune_results</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-tidymodels_files/figure-html/tune-viz-1.png" class="r-plt" alt="" width="672"></p>
+<code class="sourceCode R"><span><span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">tune_results</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Savitzky-Golay window_side value"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Cross-validation RMSE (water-content percentage points)"</span>,</span>
+<span>    colour <span class="op">=</span> <span class="st">"Differentiation order"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Savitzky-Golay tuning results"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-tidymodels_files/figure-html/tune-viz-1.png" class="r-plt" alt="Point-and-line chart of mean cross-validation RMSE by Savitzky-Golay window_side value. Color identifies differentiation order 0 or 2; the four points summarize the same three training folds. Order 2 has lower RMSE than order 0 at both window values." width="672"><p class="caption">
+Mean cross-validation RMSE for two window-side values and two
+differentiation orders, summarized over three training folds.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="comparing-preprocessing-strategies">Comparing preprocessing strategies<a class="anchor" aria-label="anchor" href="#comparing-preprocessing-strategies"></a>
 </h2>
-<p>This comparison keeps the model and the number of principal
-components fixed while changing spectral preprocessing. Every recipe is
-evaluated on the training folds; no test-set metric is used to rank
-these strategies.</p>
+<p>The comparison keeps the model and number of principal components
+fixed while changing spectral preprocessing. Each workflow uses the same
+training folds; the reserved test partition does not affect the
+ranking.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_snv</span> <span class="op">&lt;-</span> <span class="fu">make_measure_recipe</span><span class="op">(</span><span class="va">train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">measure</span><span class="fu">::</span><span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -430,15 +446,58 @@ these strategies.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> d1_snv_lm     pre0_mod0_… rmse     1.88 0.009<span style="text-decoration: underline;">30</span>     3 recipe       line…     3</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> msc_lm        pre0_mod0_… rmse     1.99 0.072<span style="text-decoration: underline;">7</span>      3 recipe       line…     4</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> norm_scale_lm pre0_mod0_… rmse     2.25 0.251       3 recipe       line…     5</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> d2_lm         pre0_mod0_… rmse     2.76 0.208       3 recipe       line…     6</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> d2_lm         pre0_mod0_… rmse     2.76 0.208       3 recipe       line…     6</span></span>
+<span></span>
+<span><span class="va">strategy_plot_data</span> <span class="op">&lt;-</span> <span class="va">strategy_results</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    strategy <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/recode.html" class="external-link">recode</a></span><span class="op">(</span></span>
+<span>      <span class="va">wflow_id</span>,</span>
+<span>      snv_lm <span class="op">=</span> <span class="st">"SNV"</span>,</span>
+<span>      d1_snv_lm <span class="op">=</span> <span class="st">"First derivative + SNV"</span>,</span>
+<span>      msc_lm <span class="op">=</span> <span class="st">"MSC"</span>,</span>
+<span>      d2_lm <span class="op">=</span> <span class="st">"Second derivative"</span>,</span>
+<span>      snv_center_lm <span class="op">=</span> <span class="st">"SNV + centering"</span>,</span>
+<span>      norm_scale_lm <span class="op">=</span> <span class="st">"Sum normalization + auto-scaling"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    strategy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span>
+<span>      <span class="va">strategy</span>,</span>
+<span>      levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        <span class="st">"SNV + centering"</span>,</span>
+<span>        <span class="st">"SNV"</span>,</span>
+<span>        <span class="st">"First derivative + SNV"</span>,</span>
+<span>        <span class="st">"MSC"</span>,</span>
+<span>        <span class="st">"Sum normalization + auto-scaling"</span>,</span>
+<span>        <span class="st">"Second derivative"</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="visualize-comparison">Visualize comparison<a class="anchor" aria-label="anchor" href="#visualize-comparison"></a>
 </h3>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">workflowsets</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">comparison</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Preprocessing Strategy Comparison"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="howto-tidymodels_files/figure-html/compare-viz-1.png" class="r-plt" alt="" width="672"></p>
+<code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
+<span>  <span class="va">strategy_plot_data</span>,</span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="va">mean</span>,</span>
+<span>    y <span class="op">=</span> <span class="va">strategy</span>,</span>
+<span>    xmin <span class="op">=</span> <span class="va">mean</span> <span class="op">-</span> <span class="va">std_err</span>,</span>
+<span>    xmax <span class="op">=</span> <span class="va">mean</span> <span class="op">+</span> <span class="va">std_err</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_pointrange</a></span><span class="op">(</span>orientation <span class="op">=</span> <span class="st">"y"</span>, linewidth <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Mean cross-validation RMSE (water-content percentage points)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Preprocessing workflow"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Preprocessing strategy comparison"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-tidymodels_files/figure-html/compare-viz-1.png" class="r-plt" alt="Horizontal point-and-interval chart comparing six preprocessing workflows: SNV plus centering, SNV, first derivative plus SNV, MSC, sum normalization plus auto-scaling, and second derivative. The horizontal axis shows mean cross-validation RMSE in water-content percentage points. Error bars show plus or minus one standard error across three folds. The second derivative has the largest mean RMSE; SNV, SNV plus centering, and first derivative plus SNV cluster near the lowest values." width="672"><p class="caption">
+Mean RMSE with plus-or-minus one standard-error bars for six
+preprocessing workflows on the same three training folds.
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
@@ -469,10 +528,10 @@ the finalized workflow on the reserved test partition once with
 <div class="section level2">
 <h2 id="working-with-workflows-and-new-data">Working with workflows and new data<a class="anchor" aria-label="anchor" href="#working-with-workflows-and-new-data"></a>
 </h2>
-<p><code>last_fit()</code> retains a workflow fitted on the training
-partition. After the final evaluation, it can be extracted and used to
-predict new spectra. The example below uses only the held-out predictors
-to demonstrate prediction; it does not feed predictions back into model
+<p><code>last_fit()</code> fits the finalized workflow on the training
+partition and calculates metrics on the reserved test partition. The
+fitted workflow can then predict new spectra. The example below uses
+held-out predictors only; it does not feed predictions back into model
 selection.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">final_trained</span> <span class="op">&lt;-</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_workflow</a></span><span class="op">(</span><span class="va">final_fit</span><span class="op">)</span></span>
@@ -499,10 +558,10 @@ selection.</p>
 <h3 id="high-dimensional-data">High-dimensional data<a class="anchor" aria-label="anchor" href="#high-dimensional-data"></a>
 </h3>
 <p>The <code>meats</code> training partition has about 160 samples and
-100 wavelength columns. In smaller studies, the number of wavelengths
-can exceed the number of samples, and spectral predictors are often
-strongly correlated. This example reduces the linear fit to five
-principal components. Other options include:</p>
+100 wavelength columns. In smaller studies, there may be more
+wavelengths than samples, and spectral predictors can be strongly
+correlated. This example uses five principal components. Other options
+include:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Regularization</strong>: Use ridge or elastic net with an
@@ -547,13 +606,10 @@ for a compromise that preserves some magnitude information.</p>
 <div class="section level3">
 <h3 id="memory-considerations">Memory considerations<a class="anchor" aria-label="anchor" href="#memory-considerations"></a>
 </h3>
-<p>For very large spectral datasets:</p>
-<ul>
-<li>The internal <code>.measures</code> format is memory-efficient</li>
-<li>Consider processing in batches if memory is limited</li>
-<li>Use <code><a href="../reference/step_measure_output_wide.html">step_measure_output_wide()</a></code> when standard modeling
-steps need numeric predictor columns</li>
-</ul>
+<p>For a large spectral dataset, measure memory use on representative
+data and process in batches if needed. Use
+<code><a href="../reference/step_measure_output_wide.html">step_measure_output_wide()</a></code> when later modeling steps need
+ordinary numeric predictor columns.</p>
 </div>
 <div class="section level3">
 <h3 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a>
@@ -573,26 +629,15 @@ steps need numeric predictor columns</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
+<h2 id="avoiding-leakage">Avoiding leakage<a class="anchor" aria-label="anchor" href="#avoiding-leakage"></a>
 </h2>
-<p>measure integrates with tidymodels workflows:</p>
-<ul>
-<li>Use workflows to bundle measure preprocessing and a model</li>
-<li>Use <code>fit_resamples()</code> or <code>tune_grid()</code> on the
-training partition</li>
-<li>Tune measure step parameters through the recipe interface</li>
-<li>Compare preprocessing strategies on the same resamples</li>
-<li>Use <code>last_fit()</code> for one final evaluation on a reserved
-test partition</li>
-</ul>
-<p>Workflow resampling prepares each recipe from the analysis portion of
-a fold, then applies it to that fold’s assessment portion. This keeps
-learned preprocessing estimates out of assessment data in these
-workflows. Steps performed before resampling can still leak information,
-so keep learned preprocessing inside the resampled recipe.</p>
+<p>A learned transform prepared on all training rows before
+cross-validation can use information from the assessment folds. Keep
+learned preprocessing inside the workflow so each fold estimates it from
+its analysis rows.</p>
 </div>
 <div class="section level2">
-<h2 id="see-also">See Also<a class="anchor" aria-label="anchor" href="#see-also"></a>
+<h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
 </h2>
 <ul>
 <li>

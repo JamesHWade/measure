@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Tutorial: Getting Started with measure • measure</title>
+<title>Tutorial: getting started with measure • measure</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <link href="../deps/Montserrat-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial: Getting Started with measure">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial: getting started with measure">
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -81,7 +81,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>Tutorial: Getting Started with measure</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>Tutorial: getting started with measure</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/JamesHWade/measure/blob/main/vignettes/articles/tutorial-getting-started.Rmd" class="external-link"><code>vignettes/articles/tutorial-getting-started.Rmd</code></a></small>
@@ -95,55 +95,48 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">article_plot_theme</span> <span class="op">&lt;-</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>    text <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#222222"</span><span class="op">)</span>,</span>
+<span>    plot.background <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    panel.background <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    legend.background <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    legend.key <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>    strip.background <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>The measure package extends <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a> with preprocessing
-steps designed specifically for analytical measurement data. If you work
-with spectroscopy, chromatography, or other instrument-generated
-signals, measure provides familiar recipes-style preprocessing that
-integrates seamlessly with the tidymodels ecosystem.</p>
+<p>measure adds recipes preprocessing steps for spectroscopy,
+chromatography, and other instrument signals. This tutorial uses long
+and wide spectral data to show how to create a recipe, prep it on
+training data, and apply it to new data.</p>
 <div class="section level3">
-<h3 id="why-measure">Why measure?<a class="anchor" aria-label="anchor" href="#why-measure"></a>
+<h3 id="why-use-measure">Why use measure?<a class="anchor" aria-label="anchor" href="#why-use-measure"></a>
 </h3>
-<p>Analytical data has unique preprocessing requirements:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Multi-dimensional signals</strong>: Each sample produces
-many measurements (e.g., absorbance at hundreds of wavelengths)</li>
-<li>
-<strong>Specialized transformations</strong>: Techniques like
-Savitzky-Golay derivatives and scatter correction are standard
-practice</li>
-<li>
-<strong>Format flexibility</strong>: Data may arrive in wide format
-(one column per wavelength) or long format (one row per
-measurement)</li>
-</ol>
-<p>measure handles all of this while keeping the intuitive recipes
-interface you already know. ## The measure workflow</p>
-<p>The typical measure workflow has three phases:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Input step</strong>: Convert your data to measure’s internal
-format</li>
-<li>
-<strong>Processing steps</strong>: Apply spectral preprocessing
-(smoothing, derivatives, normalization)</li>
-<li>
-<strong>Output step</strong>: Convert back to a format suitable for
-modeling</li>
-</ol>
-<p>Let’s see this in action with real data.</p>
+<p>Spectral data can have hundreds of measurements per sample. measure’s
+recipe steps handle common transformations such as Savitzky-Golay
+derivatives, scatter correction, and conversion between long and wide
+formats.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="the-measure-workflow">The measure workflow<a class="anchor" aria-label="anchor" href="#the-measure-workflow"></a>
+</h2>
+<p>A recipe converts data to measure’s internal format, applies
+processing steps, then converts the result to the format needed by later
+analysis.</p>
 </div>
 <div class="section level2">
 <h2 id="example-nir-spectroscopy-of-meat-samples">Example: NIR spectroscopy of meat samples<a class="anchor" aria-label="anchor" href="#example-nir-spectroscopy-of-meat-samples"></a>
 </h2>
-<p>We’ll use the <code>meats_long</code> dataset included in measure.
-This contains NIR (Near-Infrared) transmittance spectra of meat samples,
-with the goal of predicting water, fat, and protein content.</p>
+<p>The included <code>meats_long</code> data contain 100 spectral
+channels per sample and measurements of water, fat, and protein. The
+signal column is named <code>transmittance</code>, but the values are
+the absorbances from <code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code>. Absorbance is
+unitless.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
 <span></span>
@@ -172,13 +165,18 @@ spectra:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">channel</span>, y <span class="op">=</span> <span class="va">transmittance</span>, group <span class="op">=</span> <span class="va">id</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="st">"Channel"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"Transmittance"</span>,</span>
-<span>    title <span class="op">=</span> <span class="st">"Raw NIR Spectra"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Absorbance (unitless)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Meat spectra before processing"</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"Sample ID"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="tutorial-getting-started_files/figure-html/raw-spectra-1.png" class="r-plt" alt="" width="672"></p>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="tutorial-getting-started_files/figure-html/raw-spectra-1.png" class="r-plt" alt="Line chart of ten meat spectra across 100 spectral channel indices. Each colored line identifies a sample; the spectra share a broad peak near channel 60. The y-axis shows absorbance in unitless values." width="672"><p class="caption">
+Ten of the 215 meat spectra in <code>meats_long</code>. Color identifies
+sample ID.
+</p>
+</div>
 <div class="section level3">
 <h3 id="creating-a-recipe">Creating a recipe<a class="anchor" aria-label="anchor" href="#creating-a-recipe"></a>
 </h3>
@@ -200,7 +198,7 @@ and predictors:</p>
 <span><span class="co">#&gt; id:        1</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-1-input-the-measurements">Step 1: Input the measurements<a class="anchor" aria-label="anchor" href="#step-1-input-the-measurements"></a>
+<h3 id="step-1-input-the-measurements">Step 1: input the measurements<a class="anchor" aria-label="anchor" href="#step-1-input-the-measurements"></a>
 </h3>
 <p>Since our data is in long format, we use
 <code><a href="../reference/step_measure_input_long.html">step_measure_input_long()</a></code>. This converts the
@@ -265,7 +263,7 @@ by a <code>.measures</code> column containing nested tibbles:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 90 more rows</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-2-apply-preprocessing">Step 2: Apply preprocessing<a class="anchor" aria-label="anchor" href="#step-2-apply-preprocessing"></a>
+<h3 id="step-2-apply-preprocessing">Step 2: apply preprocessing<a class="anchor" aria-label="anchor" href="#step-2-apply-preprocessing"></a>
 </h3>
 <p>Now we can add spectral preprocessing steps. These operate on the
 internal <code>.measures</code> column:</p>
@@ -274,7 +272,7 @@ internal <code>.measures</code> column:</p>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span></span>
-<span>  <span class="co"># Savitzky-Golay first derivative for baseline removal</span></span>
+<span>  <span class="co"># Savitzky-Golay first derivative to reduce constant baseline offsets</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span></span>
 <span>    window_side <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    differentiation_order <span class="op">=</span> <span class="fl">1</span></span>
@@ -296,7 +294,7 @@ internal <code>.measures</code> column:</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Collate long analytical measurements: <span style="color: #0000BB;">transmittance</span></span></span>
 <span><span class="co">#&gt; Savitzky-Golay preprocessing on </span></span>
 <span><span class="co">#&gt; SNV transformation on</span></span></code></pre></div>
-<p>measure provides many built-in preprocessing steps:</p>
+<p>The package includes preprocessing steps for:</p>
 <ul>
 <li>
 <strong>Filtering</strong>:
@@ -323,30 +321,54 @@ needs</li>
 </ul>
 <p>See the <a href="reference-preprocessing.html">Preprocessing
 Reference</a> for details on all available options.</p>
-<p>Let’s see how this transforms our spectra:</p>
+<p>The paired plot compares raw absorbance with the processed spectra.
+Each panel has its own y-axis scale.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Unnest for plotting</span></span>
-<span><span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="va">processed</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.measures</span><span class="op">)</span></span>
+<span><span class="va">raw_plot_data</span> <span class="op">&lt;-</span> <span class="va">meats_long</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op">&lt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span></span>
+<span>    <span class="va">id</span>,</span>
+<span>    location <span class="op">=</span> <span class="va">channel</span>,</span>
+<span>    value <span class="op">=</span> <span class="va">transmittance</span>,</span>
+<span>    processing <span class="op">=</span> <span class="st">"Raw"</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">location</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">sample_id</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">sample_id</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="va">processed_plot_data</span> <span class="op">&lt;-</span> <span class="va">processed</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op">&lt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">.measures</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.measures</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span></span>
+<span>    <span class="va">id</span>,</span>
+<span>    <span class="va">location</span>,</span>
+<span>    <span class="va">value</span>,</span>
+<span>    processing <span class="op">=</span> <span class="st">"First derivative + SNV"</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">raw_plot_data</span>, <span class="va">processed_plot_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>processing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span>
+<span>    <span class="va">processing</span>,</span>
+<span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Raw"</span>, <span class="st">"First derivative + SNV"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">location</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#2A6F97"</span>, alpha <span class="op">=</span> <span class="fl">0.55</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">processing</span>, ncol <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="st">"Channel"</span>,</span>
-<span>    y <span class="op">=</span> <span class="st">"Preprocessed Signal"</span>,</span>
-<span>    title <span class="op">=</span> <span class="st">"After Savitzky-Golay + SNV"</span>,</span>
-<span>    subtitle <span class="op">=</span> <span class="st">"First derivative removes baseline; SNV normalizes scatter"</span>,</span>
-<span>    color <span class="op">=</span> <span class="st">"Sample"</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Spectral channel (index)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Signal (unitless; panel-specific scale)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Meat spectra before and after processing"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="tutorial-getting-started_files/figure-html/processed-spectra-1.png" class="r-plt" alt="" width="672"></p>
+<span>  <span class="va">article_plot_theme</span></span></code></pre></div>
+<div class="figure">
+<img src="tutorial-getting-started_files/figure-html/processed-spectra-1.png" class="r-plt" alt="Two-panel line chart of ten meat samples. The top panel shows raw absorbance by spectral channel; the bottom shows the same samples after a Savitzky-Golay first derivative and SNV. Each panel uses its own y-axis scale, and each line is a sample. The processed traces show a sharp peak near channel 60 and a negative feature near channel 45." width="672"><p class="caption">
+Raw and processed views of the same 10 samples. The processed panel uses
+a separate y-axis scale after a Savitzky-Golay first derivative and SNV.
+</p>
+</div>
 </div>
 <div class="section level3">
-<h3 id="step-3-output-for-modeling">Step 3: Output for modeling<a class="anchor" aria-label="anchor" href="#step-3-output-for-modeling"></a>
+<h3 id="step-3-output-for-modeling">Step 3: output for modeling<a class="anchor" aria-label="anchor" href="#step-3-output-for-modeling"></a>
 </h3>
 <p>For most modeling workflows, you’ll want data in wide format (one
 column per spectral feature):</p>
@@ -471,9 +493,8 @@ data:</p>
 <div class="section level2">
 <h2 id="integration-with-tidymodels">Integration with tidymodels<a class="anchor" aria-label="anchor" href="#integration-with-tidymodels"></a>
 </h2>
-<p>measure recipes work seamlessly with the broader tidymodels
-ecosystem. See <a href="howto-tidymodels.html">Integrating with
-tidymodels</a> for complete examples including:</p>
+<p>measure recipes can be used in tidymodels workflows. See <a href="howto-tidymodels.html">Integrating with tidymodels</a> for
+examples of:</p>
 <ul>
 <li>Bundling preprocessing with models using workflows</li>
 <li>Cross-validation with measure recipes</li>
@@ -500,7 +521,7 @@ examples:</p>
 <span></span>
 <span><span class="co"># Chromatography</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">hplc_chromatograms</span><span class="op">)</span></span>
-<span><span class="co"># 20 simulated HPLC samples</span></span>
+<span><span class="co"># 20 synthetic HPLC samples</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sec_chromatograms</span><span class="op">)</span></span>
 <span><span class="co"># 10 SEC samples (5 standards + 5 polymers)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sec_calibration</span><span class="op">)</span></span>
@@ -508,7 +529,7 @@ examples:</p>
 <span></span>
 <span><span class="co"># Mass spectrometry</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">maldi_spectra</span><span class="op">)</span></span>
-<span><span class="co"># 16 simulated MALDI-TOF spectra</span></span></code></pre></div>
+<span><span class="co"># 16 synthetic MALDI-TOF spectra</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="external-data-sources">External data sources<a class="anchor" aria-label="anchor" href="#external-data-sources"></a>

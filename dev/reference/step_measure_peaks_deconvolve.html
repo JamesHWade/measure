@@ -176,8 +176,8 @@ quality metrics.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Peak deconvolution fits mathematical models to overlapping peaks to
-determine their individual contributions. This is essential for
-quantitative analysis when peaks are not baseline-resolved.</p>
+estimate their individual contributions. The result depends on the selected
+peak model, starting values and fit constraints.</p>
 <p><strong>Peak Models:</strong></p>
 <p>Built-in models (use <code><a href="peak_models.html">peak_models()</a></code> to see all):</p><ul><li><p><code>"gaussian"</code>: Symmetric Gaussian (3 params: height, center, width)</p></li>
 <li><p><code>"emg"</code>: Exponentially Modified Gaussian (4 params, handles tailing)</p></li>
@@ -186,7 +186,7 @@ quantitative analysis when peaks are not baseline-resolved.</p>
 </ul><p>Technique packs may register additional models.</p>
 <p><strong>Optimizers:</strong></p><ul><li><p><code>"auto"</code>: Selects based on problem complexity and SNR</p></li>
 <li><p><code>"lbfgsb"</code>: L-BFGS-B (fast, local optimization)</p></li>
-<li><p><code>"multistart"</code>: Multiple L-BFGS-B runs from perturbed starts (robust)</p></li>
+<li><p><code>"multistart"</code>: Multiple L-BFGS-B runs from perturbed starting values</p></li>
 <li><p><code>"nelder_mead"</code>: Derivative-free Nelder-Mead simplex</p></li>
 </ul><p><strong>Reported Peak Properties:</strong></p>
 <p>For EMG fits, <code>location</code> and <code>height</code> report the apex of the fitted

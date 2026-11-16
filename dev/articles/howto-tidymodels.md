@@ -1,26 +1,34 @@
-# How-To: Integrating with tidymodels
+# How-to: integrating with tidymodels
 
 ``` r
 
 library(measure)
+
+article_plot_theme <- ggplot2::theme_minimal(base_size = 12) +
+  ggplot2::theme(
+    text = ggplot2::element_text(colour = "#222222"),
+    plot.background = ggplot2::element_rect(fill = "white", colour = NA),
+    panel.background = ggplot2::element_rect(fill = "white", colour = NA),
+    legend.background = ggplot2::element_rect(fill = "white", colour = NA),
+    legend.key = ggplot2::element_rect(fill = "white", colour = NA),
+    strip.background = ggplot2::element_rect(fill = "white", colour = NA)
+  )
 ```
 
 ## Introduction
 
-One of measure’s key design goals is integration with the tidymodels
-ecosystem. This article shows how to use measure preprocessing in
-complete modeling workflows, including:
+This article keeps measure preprocessing inside tidymodels workflows. It
+shows cross-validation, preprocessing-parameter tuning, recipe
+comparison, and one final evaluation on a reserved test partition.
 
-- Bundling preprocessing with models using workflows
-- Cross-validation with measure recipes
-- Hyperparameter tuning for preprocessing steps
-- Comparing preprocessing strategies
+## Setup: the meats dataset
 
-## Setup: The meats dataset
-
-We’ll use the NIR spectroscopy dataset from `modeldata` to predict water
-content in meat samples. The example uses a training partition for
-resampling and keeps the held-out partition for one final evaluation.
+The
+[`modeldata::meats`](https://modeldata.tidymodels.org/reference/meats.html)
+dataset contains 100 NIR absorbance channels and water, fat, and protein
+measurements. This example predicts water content. It uses the training
+partition for resampling and reserves the held-out partition for one
+final evaluation.
 
 ``` r
 
@@ -37,12 +45,11 @@ cat("Training samples:", nrow(train), "\n")
 #> Training samples: 159
 ```
 
-The dataset has no sample identifier, so `sample_id` gives each spectrum
-a unique key. The recipe marks it as an ID rather than a predictor. This
-also lets
+The dataset has no sample identifier, so `sample_id` gives each row a
+unique key. The recipe marks it as an ID, not a predictor. The ID also
+lets
 [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)
-restore one row per sample when spectral measurements are converted back
-to ordinary columns.
+restore one row per sample.
 
 ``` r
 
@@ -106,9 +113,9 @@ wf
 
 ### Fit and evaluate with resampling
 
-Assess the workflow on the training partition first. `fit_resamples()`
-fits the recipe using each fold’s analysis rows and applies it to that
-fold’s assessment rows.
+`fit_resamples()` preps the recipe on each fold’s analysis rows, then
+applies it to that fold’s assessment rows. The metrics below summarize
+performance on the training partition’s assessment folds.
 
 ``` r
 
@@ -130,9 +137,9 @@ baseline_metrics
 
 ## Cross-validation
 
-`folds` contains three resamples made only from the training partition.
-The recipe stays inside the workflow so data-dependent preprocessing is
-estimated within each analysis fold.
+`folds` contains three resamples from the training partition. Because
+the recipe stays inside the workflow, data-dependent preprocessing is
+estimated within each analysis fold and applied to its assessment fold.
 
 ``` r
 
@@ -258,17 +265,30 @@ tune::show_best(tune_results, metric = "rmse", n = 4)
 
 ``` r
 
-tune::autoplot(tune_results, metric = "rmse")
+tune::autoplot(tune_results, metric = "rmse") +
+  ggplot2::labs(
+    x = "Savitzky-Golay window_side value",
+    y = "Cross-validation RMSE (water-content percentage points)",
+    colour = "Differentiation order",
+    title = "Savitzky-Golay tuning results"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-tidymodels_files/figure-html/tune-viz-1.png)
+![Point-and-line chart of mean cross-validation RMSE by Savitzky-Golay
+window_side value. Color identifies differentiation order 0 or 2; the
+four points summarize the same three training folds. Order 2 has lower
+RMSE than order 0 at both window
+values.](howto-tidymodels_files/figure-html/tune-viz-1.png)
+
+Mean cross-validation RMSE for two window-side values and two
+differentiation orders, summarized over three training folds.
 
 ## Comparing preprocessing strategies
 
-This comparison keeps the model and the number of principal components
-fixed while changing spectral preprocessing. Every recipe is evaluated
-on the training folds; no test-set metric is used to rank these
-strategies.
+The comparison keeps the model and number of principal components fixed
+while changing spectral preprocessing. Each workflow uses the same
+training folds; the reserved test partition does not affect the ranking.
 
 ``` r
 
@@ -364,17 +384,65 @@ strategy_results
 #> 4 msc_lm        pre0_mod0_… rmse     1.99 0.0727      3 recipe       line…     4
 #> 5 norm_scale_lm pre0_mod0_… rmse     2.25 0.251       3 recipe       line…     5
 #> 6 d2_lm         pre0_mod0_… rmse     2.76 0.208       3 recipe       line…     6
+
+strategy_plot_data <- strategy_results |>
+  dplyr::mutate(
+    strategy = dplyr::recode(
+      wflow_id,
+      snv_lm = "SNV",
+      d1_snv_lm = "First derivative + SNV",
+      msc_lm = "MSC",
+      d2_lm = "Second derivative",
+      snv_center_lm = "SNV + centering",
+      norm_scale_lm = "Sum normalization + auto-scaling"
+    ),
+    strategy = factor(
+      strategy,
+      levels = c(
+        "SNV + centering",
+        "SNV",
+        "First derivative + SNV",
+        "MSC",
+        "Sum normalization + auto-scaling",
+        "Second derivative"
+      )
+    )
+  )
 ```
 
 ### Visualize comparison
 
 ``` r
 
-workflowsets::autoplot(comparison, metric = "rmse") +
-  ggplot2::labs(title = "Preprocessing Strategy Comparison")
+ggplot2::ggplot(
+  strategy_plot_data,
+  ggplot2::aes(
+    x = mean,
+    y = strategy,
+    xmin = mean - std_err,
+    xmax = mean + std_err
+  )
+) +
+  ggplot2::geom_pointrange(orientation = "y", linewidth = 0.6) +
+  ggplot2::labs(
+    x = "Mean cross-validation RMSE (water-content percentage points)",
+    y = "Preprocessing workflow",
+    title = "Preprocessing strategy comparison"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-tidymodels_files/figure-html/compare-viz-1.png)
+![Horizontal point-and-interval chart comparing six preprocessing
+workflows: SNV plus centering, SNV, first derivative plus SNV, MSC, sum
+normalization plus auto-scaling, and second derivative. The horizontal
+axis shows mean cross-validation RMSE in water-content percentage
+points. Error bars show plus or minus one standard error across three
+folds. The second derivative has the largest mean RMSE; SNV, SNV plus
+centering, and first derivative plus SNV cluster near the lowest
+values.](howto-tidymodels_files/figure-html/compare-viz-1.png)
+
+Mean RMSE with plus-or-minus one standard-error bars for six
+preprocessing workflows on the same three training folds.
 
 ## Finalize and evaluate on the held-out set
 
@@ -405,11 +473,10 @@ final_metrics
 
 ## Working with workflows and new data
 
-`last_fit()` retains a workflow fitted on the training partition. After
-the final evaluation, it can be extracted and used to predict new
-spectra. The example below uses only the held-out predictors to
-demonstrate prediction; it does not feed predictions back into model
-selection.
+`last_fit()` fits the finalized workflow on the training partition and
+calculates metrics on the reserved test partition. The fitted workflow
+can then predict new spectra. The example below uses held-out predictors
+only; it does not feed predictions back into model selection.
 
 ``` r
 
@@ -436,10 +503,9 @@ dplyr::bind_cols(
 ### High-dimensional data
 
 The `meats` training partition has about 160 samples and 100 wavelength
-columns. In smaller studies, the number of wavelengths can exceed the
-number of samples, and spectral predictors are often strongly
-correlated. This example reduces the linear fit to five principal
-components. Other options include:
+columns. In smaller studies, there may be more wavelengths than samples,
+and spectral predictors can be strongly correlated. This example uses
+five principal components. Other options include:
 
 1.  **Regularization**: Use ridge or elastic net with an available
     parsnip engine, and tune its penalty within resampling.
@@ -486,13 +552,10 @@ for a compromise that preserves some magnitude information.
 
 ### Memory considerations
 
-For very large spectral datasets:
-
-- The internal `.measures` format is memory-efficient
-- Consider processing in batches if memory is limited
-- Use
-  [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)
-  when standard modeling steps need numeric predictor columns
+For a large spectral dataset, measure memory use on representative data
+and process in batches if needed. Use
+[`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)
+when later modeling steps need ordinary numeric predictor columns.
 
 ### Reproducibility
 
@@ -512,23 +575,14 @@ reproducible_folds
 #> 3 <split [107/52]> Fold3
 ```
 
-## Summary
+## Avoiding leakage
 
-measure integrates with tidymodels workflows:
+A learned transform prepared on all training rows before
+cross-validation can use information from the assessment folds. Keep
+learned preprocessing inside the workflow so each fold estimates it from
+its analysis rows.
 
-- Use workflows to bundle measure preprocessing and a model
-- Use `fit_resamples()` or `tune_grid()` on the training partition
-- Tune measure step parameters through the recipe interface
-- Compare preprocessing strategies on the same resamples
-- Use `last_fit()` for one final evaluation on a reserved test partition
-
-Workflow resampling prepares each recipe from the analysis portion of a
-fold, then applies it to that fold’s assessment portion. This keeps
-learned preprocessing estimates out of assessment data in these
-workflows. Steps performed before resampling can still leak information,
-so keep learned preprocessing inside the resampled recipe.
-
-## See Also
+## See also
 
 - [Getting
   Started](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.md) -

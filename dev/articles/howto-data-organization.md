@@ -1,4 +1,4 @@
-# How-To: Data Organization and Diagnostics
+# How-to: data organization and diagnostics
 
 ``` r
 
@@ -6,23 +6,27 @@ library(measure)
 library(recipes)
 library(dplyr)
 library(ggplot2)
+
+set.seed(42)
+
+article_plot_theme <- theme_minimal(base_size = 12) +
+  theme(
+    text = element_text(colour = "#222222"),
+    plot.background = element_rect(fill = "white", colour = NA),
+    panel.background = element_rect(fill = "white", colour = NA),
+    legend.background = element_rect(fill = "white", colour = NA),
+    legend.key = element_rect(fill = "white", colour = NA),
+    strip.background = element_rect(fill = "white", colour = NA)
+  )
 ```
 
 ## Introduction
 
-When working with analytical data, proper organization and visualization
-are essential for building effective preprocessing pipelines. The
-measure package provides tools to:
+This guide covers column detection, recipe roles, recipe checks, and
+plots for inspecting spectra after preprocessing. The role examples use
+generated data; the spectral plots use the packaged meat spectra.
 
-1.  **Detect column types** automatically based on naming conventions
-2.  **Assign roles** to columns for use in recipes
-3.  **Validate recipes** before running them
-4.  **Visualize spectra** and preprocessing effects
-
-This vignette covers these data organization and diagnostic
-capabilities.
-
-## Detecting Column Types
+## Detecting column types
 
 Analytical data often follows naming conventions that indicate what each
 column represents. The
@@ -39,13 +43,13 @@ function automatically detects these patterns:
 | `ch_*`  | channel        | Generic channel data     |
 | `x_*`   | generic        | Generic measurements     |
 
-### Example: Identifying columns in wide-format data
+### Example: identifying columns in wide-format data
 
 ``` r
 
-# Create example wide-format spectral data
+# Create synthetic wide-format example data
 spec_data <- data.frame(
- sample_id = paste0("S", 1:5),
+  sample_id = paste0("S", 1:5),
   concentration = c(10.2, 25.1, 50.3, 75.0, 100.5),
   batch = c("A", "A", "B", "B", "B"),
   wn_1000 = rnorm(5),
@@ -91,7 +95,7 @@ measure_column_summary(spec_data)
 #> 2 other              3 sample_id, concentration, batch
 ```
 
-## Assigning Roles in Recipes
+## Assigning roles in recipes
 
 Recipes use roles to determine how columns should be treated. Common
 roles include:
@@ -106,7 +110,7 @@ roles include:
 | `standard`  | Calibration standards                      |
 | `metadata`  | Sample metadata (excluded from modeling)   |
 
-### Using set_measure_roles()
+### Using `set_measure_roles()`
 
 The
 [`set_measure_roles()`](https://jameshwade.github.io/measure/dev/reference/set_measure_roles.md)
@@ -176,7 +180,7 @@ rec
 #> id:       1
 ```
 
-## Validating Recipe Structure
+## Validating recipe structure
 
 Before running a preprocessing pipeline,
 [`check_measure_recipe()`](https://jameshwade.github.io/measure/dev/reference/check_measure_recipe.md)
@@ -241,26 +245,41 @@ check_measure_recipe(bad_rec, strict = FALSE)
 #> ℹ No ID column identified. Consider using update_role(col, new_role = 'id').
 ```
 
-## Visualizing Spectra
+## Visualizing spectra
 
-The measure package provides
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-methods for quick visualization of spectral data.
+methods display `measure_tbl` and `measure_list` objects. The first
+example uses generated data; the remaining examples use `meats_long`.
+Its `transmittance` column stores the absorbance values from
+[`modeldata::meats`](https://modeldata.tidymodels.org/reference/meats.html).
 
 ### Plotting a single spectrum
 
 ``` r
 
-# Create a single spectrum
+# Create a synthetic single spectrum
 spec <- new_measure_tbl(
   location = seq(1000, 1100, by = 1),
   value = sin(seq(1000, 1100, by = 1) / 20) + rnorm(101, sd = 0.1)
 )
 
-autoplot(spec)
+autoplot(spec) +
+  labs(
+    x = "Location (synthetic coordinate)",
+    y = "Signal (synthetic, unitless)",
+    title = "Synthetic example spectrum"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-data-organization_files/figure-html/autoplot-single-1.png)
+![Line chart of a generated signal across locations 1000 to 1100. The
+sinusoidal trace includes small random variation; both location and
+signal use synthetic, unitless
+scales.](howto-data-organization_files/figure-html/autoplot-single-1.png)
+
+A synthetic spectrum created with
+[`new_measure_tbl()`](https://jameshwade.github.io/measure/dev/reference/new_measure_tbl.md)
+to illustrate the single-spectrum plotting method.
 
 ### Plotting multiple spectra
 
@@ -275,29 +294,51 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 baked <- bake(rec, new_data = NULL)
 
 # Plot the spectra
-autoplot(baked$.measures, max_spectra = 20)
+autoplot(baked$.measures, max_spectra = 20) +
+  labs(
+    x = "Spectral channel (index)",
+    y = "Absorbance (unitless)"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-data-organization_files/figure-html/autoplot-multiple-1.png)
+![Overlay line chart of 20 meat spectra drawn in gray. The x-axis is
+spectral channel index and the y-axis is unitless absorbance. Each line
+is a sample; the spectra have broad peaks near channel
+60.](howto-data-organization_files/figure-html/autoplot-multiple-1.png)
+
+Twenty meat spectra from `meats_long`; each gray line is one sample.
 
 ### Adding summary statistics
 
-Use `summary = TRUE` to overlay mean ± standard deviation:
+Use `summary = TRUE` to add a mean curve and standard-deviation band to
+the sample traces.
 
 ``` r
 
-autoplot(baked$.measures, summary = TRUE, max_spectra = 30, alpha = 0.2)
+autoplot(baked$.measures, summary = TRUE, max_spectra = 30, alpha = 0.2) +
+  labs(
+    x = "Spectral channel (index)",
+    y = "Absorbance (unitless)"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-data-organization_files/figure-html/autoplot-summary-1.png)
+![Line chart of meat spectra across spectral channel indices, with a
+central mean curve and a shaded standard-deviation band. The y-axis is
+unitless
+absorbance.](howto-data-organization_files/figure-html/autoplot-summary-1.png)
 
-## Visualizing Preprocessing Effects
+Meat spectra with the mean and standard-deviation band added to the
+displayed sample traces.
 
-### Before/after comparison
+## Visualizing preprocessing effects
 
-The
-[`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-method for recipes shows preprocessing effects:
+### Plotting the recipe output
+
+This recipe applies a first derivative and SNV to each spectrum. The
+plot shows the processed signals; it does not include the original
+spectra.
 
 ``` r
 
@@ -309,7 +350,12 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   step_measure_snv() |>
   prep(retain = TRUE)
 
-autoplot(rec, n_samples = 10)
+autoplot(rec, n_samples = 10) +
+  labs(
+    x = "Spectral channel (index)",
+    y = "Processed signal (unitless)"
+  ) +
+  article_plot_theme
 #> Warning: Could not extract 'before' data for comparison.
 #> ℹ Showing processed data only.
 #> ✖ Required column not found in data: transmittance ℹ These columns were
@@ -317,18 +363,34 @@ autoplot(rec, n_samples = 10)
 #>   training data.
 ```
 
-![](howto-data-organization_files/figure-html/autoplot-recipe-1.png)
+![Overlay line chart of 10 processed meat spectra across the recorded
+channel range. Each line is a sample; the y-axis is the unitless
+processed
+signal.](howto-data-organization_files/figure-html/autoplot-recipe-1.png)
 
-### Summary statistics view
+Processed spectra for 10 meat samples after a Savitzky-Golay first
+derivative and SNV.
+
+### Summary view
 
 ``` r
 
-autoplot(rec, which = "summary", n_samples = 50)
+autoplot(rec, which = "summary", n_samples = 50) +
+  labs(
+    x = "Spectral channel (index)",
+    y = "Processed signal (unitless)"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-data-organization_files/figure-html/autoplot-recipe-summary-1.png)
+![Summary line chart of 50 processed meat spectra. The mean is shown
+with a standard-deviation band and a minimum-to-maximum band across the
+recorded channel
+range.](howto-data-organization_files/figure-html/autoplot-recipe-summary-1.png)
 
-## Comparing Preprocessing Strategies
+Mean, standard deviation, and range for 50 processed meat spectra.
+
+## Comparing preprocessing strategies
 
 Use
 [`plot_measure_comparison()`](https://jameshwade.github.io/measure/dev/reference/plot_measure_comparison.md)
@@ -341,7 +403,7 @@ base_rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel))
 
-# Strategy 1: Just SNV
+# Strategy 1: SNV
 snv_rec <- base_rec |>
   step_measure_snv() |>
   prep(retain = TRUE)
@@ -363,14 +425,28 @@ plot_measure_comparison(
   "SG + SNV" = sg_snv_rec,
   "MSC" = msc_rec,
   n_samples = 15
-)
+) +
+  labs(
+    x = "Spectral channel (index)",
+    y = "Processed signal (unitless)"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-data-organization_files/figure-html/compare-recipes-1.png)
+![Three-panel line chart comparing processed meat spectra by recipe:
+SNV, Savitzky-Golay plus SNV, and MSC. Each panel contains 15 sample
+traces across the input channel range. The derivative panel has sharper
+changes near the central peak; values are unitless and y-axis scales
+vary by
+panel.](howto-data-organization_files/figure-html/compare-recipes-1.png)
+
+Processed spectra from the SNV, Savitzky-Golay plus SNV, and MSC
+recipes; each panel shows 15 samples on a method-specific y scale.
 
 ### Summary comparison
 
-For a cleaner comparison, use `summary_only = TRUE`:
+Use `summary_only = TRUE` to compare the means and spreads without
+displaying every sample trace.
 
 ``` r
 
@@ -380,56 +456,78 @@ plot_measure_comparison(
   "MSC" = msc_rec,
   n_samples = 50,
   summary_only = TRUE
-)
+) +
+  labs(
+    x = "Spectral channel (index)",
+    y = "Processed signal (unitless)"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-data-organization_files/figure-html/compare-summary-1.png)
+![Three-panel summary line chart comparing the mean and
+standard-deviation band for SNV, Savitzky-Golay plus SNV, and MSC across
+the input channel range. Each panel has its own y-axis range; values are
+unitless processed
+signals.](howto-data-organization_files/figure-html/compare-summary-1.png)
 
-## Summary Plot for Processed Data
+Mean and standard-deviation bands for 50 spectra processed by each of
+three recipes; panels use method-specific y scales.
 
-The
-[`measure_plot_summary()`](https://jameshwade.github.io/measure/dev/reference/measure_plot_summary.md)
-function creates publication-ready summary plots:
+## Summary plots for processed data
+
+The functions below summarize the processed meat spectra. The first
+shows the mean and standard deviation; `show_range = TRUE` also displays
+the observed minimum and maximum.
 
 ``` r
 
 baked <- bake(sg_snv_rec, new_data = NULL)
-measure_plot_summary(baked)
+measure_plot_summary(baked) +
+  labs(
+    x = "Spectral channel (index)",
+    y = "Processed signal (unitless)"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-data-organization_files/figure-html/measure-plot-summary-1.png)
+![Summary line chart of 215 processed meat spectra across the recorded
+channel range. A mean curve is surrounded by a standard-deviation band;
+the y-axis is unitless processed
+signal.](howto-data-organization_files/figure-html/measure-plot-summary-1.png)
 
-Show the full range with `show_range = TRUE`:
+Mean and standard deviation across all 215 spectra after Savitzky-Golay
+derivative and SNV processing.
 
 ``` r
 
-measure_plot_summary(baked, show_range = TRUE)
+measure_plot_summary(baked, show_range = TRUE) +
+  labs(
+    x = "Spectral channel (index)",
+    y = "Processed signal (unitless)"
+  ) +
+  article_plot_theme
 ```
 
-![](howto-data-organization_files/figure-html/measure-plot-summary-range-1.png)
+![Summary line chart of 215 processed meat spectra across the recorded
+channel range. It shows the mean, a standard-deviation band, and a
+minimum-to-maximum band; the y-axis is unitless processed
+signal.](howto-data-organization_files/figure-html/measure-plot-summary-range-1.png)
 
-## Best Practices
+Mean, standard deviation, and observed range across all 215 processed
+spectra.
 
-1.  **Always check your recipe** with
-    [`check_measure_recipe()`](https://jameshwade.github.io/measure/dev/reference/check_measure_recipe.md)
-    before running long preprocessing pipelines
+## Checks to make
 
-2.  **Use
-    [`measure_identify_columns()`](https://jameshwade.github.io/measure/dev/reference/measure_identify_columns.md)**
-    to understand your data structure before building recipes
+Use
+[`check_measure_recipe()`](https://jameshwade.github.io/measure/dev/reference/check_measure_recipe.md)
+to catch recipe issues,
+[`measure_identify_columns()`](https://jameshwade.github.io/measure/dev/reference/measure_identify_columns.md)
+to inspect input structure, and
+[`plot_measure_comparison()`](https://jameshwade.github.io/measure/dev/reference/plot_measure_comparison.md)
+to review how recipe choices change the processed signals. Assign ID and
+metadata roles before modeling.
 
-3.  **Assign roles explicitly** for ID columns, metadata, and special
-    sample types
-
-4.  **Visualize at each stage** - use
-    [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
-    to verify preprocessing effects
-
-5.  **Compare strategies** with
-    [`plot_measure_comparison()`](https://jameshwade.github.io/measure/dev/reference/plot_measure_comparison.md)
-    before committing to a preprocessing approach
-
-## Next Steps
+## Next steps
 
 - See the [Preprocessing
   Reference](https://jameshwade.github.io/measure/dev/articles/reference-preprocessing.md)

@@ -1,4 +1,4 @@
-# How-To: Extend measure with a technique pack
+# How-to: extend measure with a technique pack
 
 ``` r
 
@@ -16,10 +16,19 @@ The core package provides input and output steps, registry functions,
 and reusable processing steps. A pack owns the technique-specific
 analysis and declares which steps it provides.
 
-This guide shows the small registration contract, builds a runnable
-example step from the public
+This guide shows the registration contract, wraps
 [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
-constructor, and composes it with the public peak-processing steps.
+in a small example step, and uses the public peak-processing steps.
+
+| Stage | Extension task | measure API |
+|----|----|----|
+| Package load | Register the package and its step metadata | [`register_measure_pack()`](https://jameshwade.github.io/measure/dev/reference/register_measure_pack.md), [`register_measure_step()`](https://jameshwade.github.io/measure/dev/reference/register_measure_step.md) |
+| Recipe execution | Implement or compose a step | [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md), recipe [`prep()`](https://recipes.tidymodels.org/reference/prep.html) and [`bake()`](https://recipes.tidymodels.org/reference/bake.html) |
+| Discovery | Inspect registered packages and steps | [`measure_packs()`](https://jameshwade.github.io/measure/dev/reference/measure_packs.md), [`measure_steps()`](https://jameshwade.github.io/measure/dev/reference/measure_steps.md) |
+
+The registry contains package and step metadata, not measurement values.
+A numeric plot would not help explain registration or discovery, so the
+examples use a table and runnable recipe instead.
 
 ## Register a pack when it loads
 
@@ -75,9 +84,10 @@ step_example_center_spectrum <- function(recipe, measures = NULL) {
 }
 ```
 
-Use a stable sample identifier and make the measurement axis explicit
-when working with long data. The `time` column below becomes the
-measurement location; `sample_id` stays outside the measurement and is
+The next example uses simulated peak shapes with an arbitrary location
+coordinate from 0 to 20. The signal has no physical units or
+calibration. In long data, the `time` column becomes the measurement
+location, while `sample_id` stays outside the measurement and is
 retained as an ID.
 
 ``` r
@@ -174,7 +184,7 @@ registered_steps
 ## A real pack: `measure.sec`
 
 `measure.sec` is a companion package that uses this registry for Size
-Exclusion Chromatography steps, including the current
+Exclusion Chromatography steps, including
 `measure.sec::step_sec_baseline()`. Loading the package registers its
 pack and step metadata. The check below runs only when that optional
 package is installed; no dependency is added to `measure`.

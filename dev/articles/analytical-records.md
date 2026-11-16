@@ -7,7 +7,7 @@ library(dplyr)
 library(recipes)
 ```
 
-## Record grain
+## Record relationships
 
 A `measure_record` connects four practical levels:
 
@@ -26,7 +26,7 @@ an injection has at most one curve per channel.
 
 ## Map an interleaved long table
 
-The small table below has two samples, two detector channels, and three
+This synthetic table has two samples, two detector channels, and three
 injections. `inj-02` is a reinjection of sample `0007`. Rows from four
 curves are interleaved; the curves have unequal grids, including a
 descending axis. The literal ID `NA` is text. A blank signal is an
@@ -211,6 +211,111 @@ stopifnot(
   identical(source_rows_for(record, "ri-02"), c(4L, 8L))
 )
 ```
+
+Each panel below uses one curve’s declared axes and units. Points retain
+the recorded coordinates, with parsed input row ordinals beside numeric
+signals. The red baseline mark identifies a coordinate whose signal is
+missing; it has no y value. No values are interpolated between points.
+
+``` r
+
+curve_plot_parts <- lapply(seq_len(nrow(record$curves)), function(i) {
+  curve_row <- record$curves[i, , drop = FALSE]
+  curve <- curve_row$.measures[[1L]]
+  channel <- record$channels$channel_name[
+    match(curve_row$channel_id, record$channels$channel_id)
+  ]
+  data.frame(
+    panel = paste(
+      channel,
+      curve_row$injection_id,
+      curve_row$curve_id,
+      sep = " | "
+    ),
+    axis_name = curve_row$axis_name,
+    axis_unit = curve_row$axis_unit,
+    value_name = curve_row$value_name,
+    value_unit = ifelse(
+      is.na(curve_row$value_unit) | !nzchar(curve_row$value_unit),
+      "unit unknown",
+      curve_row$value_unit
+    ),
+    coordinate = curve$location,
+    signal = curve$value,
+    source_record = curve_row$.source_rows[[1L]],
+    stringsAsFactors = FALSE
+  )
+})
+curve_plot_data <- dplyr::bind_rows(curve_plot_parts) |>
+  dplyr::mutate(
+    panel = paste0(
+      panel,
+      "\n",
+      axis_name,
+      " (",
+      axis_unit,
+      ") / ",
+      value_name,
+      " (",
+      value_unit,
+      ")"
+    )
+  )
+curve_observed <- dplyr::filter(curve_plot_data, !is.na(signal))
+curve_missing <- dplyr::filter(curve_plot_data, is.na(signal))
+
+ggplot2::ggplot(curve_observed, ggplot2::aes(x = coordinate, y = signal)) +
+  ggplot2::geom_point(
+    ggplot2::aes(colour = "Recorded signal"),
+    size = 2.7
+  ) +
+  ggplot2::geom_text(
+    ggplot2::aes(label = paste0("r", source_record)),
+    vjust = -0.8,
+    size = 2.8,
+    show.legend = FALSE
+  ) +
+  ggplot2::geom_rug(
+    data = curve_missing,
+    ggplot2::aes(x = coordinate, colour = "Signal missing"),
+    sides = "b",
+    length = grid::unit(0.06, "npc"),
+    inherit.aes = FALSE,
+    linewidth = 0.9
+  ) +
+  ggplot2::facet_wrap(~panel, scales = "free", ncol = 2) +
+  ggplot2::scale_colour_manual(
+    name = "Observation",
+    values = c(
+      "Recorded signal" = "#176B87",
+      "Signal missing" = "#B4493A"
+    )
+  ) +
+  ggplot2::labs(
+    x = "Coordinate (panel-specific axis and declared unit)",
+    y = "Signal (panel-specific declared unit)"
+  ) +
+  ggplot2::scale_y_continuous(
+    expand = ggplot2::expansion(mult = c(0.06, 0.28))
+  ) +
+  guide_plot_theme
+```
+
+![Faceted point chart with four panels. The two UV panels use wavelength
+in nanometres on the x-axis and absorbance in AU on the y-axis; the two
+RI panels use retention time in minutes and response, with RIU declared
+for one curve and unknown for the other. The UV curve for inj-01 has
+numeric points at 250 and 253 nm and a missing signal at 251 nm, shown
+as a red rug on the x-axis. The inj-02 UV curve has points at 250.2,
+251.6, and 252.7 nm. The two RI curves have separate retention-time
+grids. Point labels give source record ordinals, and no line joins or
+interpolates
+observations.](analytical-records_files/figure-html/curve-grid-plot-1.png)
+
+Recorded points for the four curves, separated by injection and channel.
+Each panel has its own coordinate and signal scales; point labels
+identify parsed CSV records. The rug marks the missing UV signal at 251
+nm without assigning it a signal value.
 
 `axis_unit` and `value_unit` are declarations only. For example, `nm`,
 `min`, and `RIU` are retained as supplied; a missing unit stays missing.
