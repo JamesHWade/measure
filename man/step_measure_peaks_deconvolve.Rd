@@ -81,8 +81,8 @@ peaks to have been detected first using \code{\link[=step_measure_peaks_detect]{
 }
 \details{
 Peak deconvolution fits mathematical models to overlapping peaks to
-determine their individual contributions. This is essential for
-quantitative analysis when peaks are not baseline-resolved.
+estimate their individual contributions. The result depends on the selected
+peak model, starting values and fit constraints.
 
 \strong{Peak Models:}
 
@@ -100,7 +100,7 @@ Technique packs may register additional models.
 \itemize{
 \item \code{"auto"}: Selects based on problem complexity and SNR
 \item \code{"lbfgsb"}: L-BFGS-B (fast, local optimization)
-\item \code{"multistart"}: Multiple L-BFGS-B runs from perturbed starts (robust)
+\item \code{"multistart"}: Multiple L-BFGS-B runs from perturbed starting values
 \item \code{"nelder_mead"}: Derivative-free Nelder-Mead simplex
 }
 
@@ -164,10 +164,10 @@ result$.peaks[[1]]
 \code{\link[=peak_models]{peak_models()}}, \code{\link[=gaussian_peak_model]{gaussian_peak_model()}}
 
 Other peak-operations:
-\code{\link{step_measure_peaks_detect}()},
-\code{\link{step_measure_peaks_filter}()},
-\code{\link{step_measure_peaks_integrate}()},
-\code{\link{step_measure_peaks_properties}()},
-\code{\link{step_measure_peaks_to_table}()}
+\code{\link[=step_measure_peaks_detect]{step_measure_peaks_detect()}},
+\code{\link[=step_measure_peaks_filter]{step_measure_peaks_filter()}},
+\code{\link[=step_measure_peaks_integrate]{step_measure_peaks_integrate()}},
+\code{\link[=step_measure_peaks_properties]{step_measure_peaks_properties()}},
+\code{\link[=step_measure_peaks_to_table]{step_measure_peaks_to_table()}}
 }
 \concept{peak-operations}

@@ -77,7 +77,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
   library(ggplot2)
   ggplot(spec_1, aes(x = mz, y = intensity)) +
     geom_line() +
-    labs(x = "m/z (Da)", y = "Intensity",
+    labs(x = "m/z", y = "Intensity",
          title = "MALDI-TOF Mass Spectrum")
 }
 
@@ -90,7 +90,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
   ggplot(comparison, aes(x = mz, y = intensity, color = group)) +
     geom_line(alpha = 0.7) +
     facet_wrap(~group, ncol = 1) +
-    labs(x = "m/z (Da)", y = "Intensity",
+    labs(x = "m/z", y = "Intensity",
          title = "MALDI-TOF Spectra by Group")
 }
 
