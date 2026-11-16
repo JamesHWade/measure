@@ -422,6 +422,8 @@ reference:
   - is_measure_acquisition
   - validate_measure_acquisition
   - measure_ms_trace
+  - write_measure_acquisition
+  - read_measure_acquisition
 - title: Utilities
   desc: Helper functions and utilities
   contents:

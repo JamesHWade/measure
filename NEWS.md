@@ -8,6 +8,11 @@
   storage, missing versus acquired-empty scans and per-point saturation and
   source references remain explicit (#162).
 
+* `write_measure_acquisition()` and `read_measure_acquisition()` preserve linked
+  raw acquisitions in a fixed native CSV/TSV profile. Typed values, numerical
+  states, masks, point/source links and metadata survive readback; publication
+  is exclusive and selected-file reads use one cumulative byte limit (#162).
+
 * `measure_ms_trace()` calculates explicitly selected centroid TIC/XIC traces
   with scan and point contributor links. Missing scans, empty spectra/windows,
   missing intensities and known or unknown saturation remain distinguishable;
