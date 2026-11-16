@@ -51,6 +51,8 @@ navbar:
         href: articles/multidimensional-measurements.html
       - text: Analytical Records
         href: articles/analytical-records.html
+      - text: Acquisition and MS Traces
+        href: articles/acquisition-ms.html
       - text: '---'
       - text: Reference
       - text: Preprocessing Techniques
@@ -79,6 +81,7 @@ articles:
   - articles/howto-tidymodels
   - articles/howto-data-organization
   - analytical-records
+  - acquisition-ms
   - multidimensional-measurements
 - title: Reference
   desc: Information-oriented technical descriptions

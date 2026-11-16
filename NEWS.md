@@ -8,6 +8,12 @@
   storage, missing versus acquired-empty scans and per-point saturation and
   source references remain explicit (#162).
 
+* The acquisition/MS guide maps raw source records to ragged MS scans and an
+  independently sampled array, saves and reloads the acquisition, then traces
+  each selected centroid result to its contributing points and source ordinals.
+  Missingness, saturation, declared m/z conventions and interpretation limits
+  remain visible (#162).
+
 * Acquisition interchange has a public installed-R/Python qualification profile
   with fixed binary64 truth, typed raw acquisitions, independent trace checks,
   reverse/reorder controls and corruption rejection. CI also runs the tools
