@@ -12,3 +12,10 @@ tools/nd-interchange/fixtures.json -text
 tools/nd-interchange/declaration.json -text
 tools/nd-interchange/input-manifest.json -text
 tools/nd-interchange/finite-stress.bin -text
+
+# Acquisition qualification truth retains exact declared bytes.
+tools/acquisition-interchange/fixtures.json -text
+tools/acquisition-interchange/declaration.json -text
+tools/acquisition-interchange/wire-schema.json -text
+tools/acquisition-interchange/finite-stress.bin -text
+tools/acquisition-interchange/input-manifest.json -text

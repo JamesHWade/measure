@@ -1,0 +1,589 @@
+{
+  "profile": "measure-acquisition/1",
+  "contract_sha256": "5453fee9de2ca695633fe1f76a91e2c169085399f491d8083b29d912f1f9b2ec",
+  "wire_schema_sha256": "a4f53803ff81dbf05bf61860a2103b86ad9510968bd60ae1af8eeadda06923c3",
+  "object_ids": [
+    "ms-centroid",
+    "dad-only-unequal",
+    "combined-reinjections",
+    "sparse-numeric-states",
+    "literal-identities",
+    "typed-empty-acquisition",
+    "typed-empty-scans",
+    "typed-empty-array",
+    "ms-ambiguous-polarity",
+    "ms-ambiguous-level",
+    "ms-unknowns-excluded",
+    "ms-spectrum-type-errors",
+    "ms-numeric-errors",
+    "ms-xic-unselected-infinite",
+    "ms-trace-metadata-errors",
+    "finite-stress"
+  ],
+  "forward": [
+    {
+      "id": "ms-centroid-csv",
+      "object_id": "ms-centroid",
+      "path": "bundles/ms-centroid-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "ms-centroid-tsv",
+      "object_id": "ms-centroid",
+      "path": "bundles/ms-centroid-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "dad-only-unequal-csv",
+      "object_id": "dad-only-unequal",
+      "path": "bundles/dad-only-unequal-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "dad-only-unequal-tsv",
+      "object_id": "dad-only-unequal",
+      "path": "bundles/dad-only-unequal-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "combined-reinjections-csv",
+      "object_id": "combined-reinjections",
+      "path": "bundles/combined-reinjections-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "combined-reinjections-tsv",
+      "object_id": "combined-reinjections",
+      "path": "bundles/combined-reinjections-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "sparse-numeric-states-csv",
+      "object_id": "sparse-numeric-states",
+      "path": "bundles/sparse-numeric-states-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "sparse-numeric-states-tsv",
+      "object_id": "sparse-numeric-states",
+      "path": "bundles/sparse-numeric-states-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "literal-identities-csv",
+      "object_id": "literal-identities",
+      "path": "bundles/literal-identities-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "literal-identities-tsv",
+      "object_id": "literal-identities",
+      "path": "bundles/literal-identities-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "typed-empty-acquisition-csv",
+      "object_id": "typed-empty-acquisition",
+      "path": "bundles/typed-empty-acquisition-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "typed-empty-acquisition-tsv",
+      "object_id": "typed-empty-acquisition",
+      "path": "bundles/typed-empty-acquisition-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "typed-empty-scans-csv",
+      "object_id": "typed-empty-scans",
+      "path": "bundles/typed-empty-scans-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "typed-empty-scans-tsv",
+      "object_id": "typed-empty-scans",
+      "path": "bundles/typed-empty-scans-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "typed-empty-array-csv",
+      "object_id": "typed-empty-array",
+      "path": "bundles/typed-empty-array-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "typed-empty-array-tsv",
+      "object_id": "typed-empty-array",
+      "path": "bundles/typed-empty-array-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "ms-ambiguous-polarity-csv",
+      "object_id": "ms-ambiguous-polarity",
+      "path": "bundles/ms-ambiguous-polarity-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "ms-ambiguous-polarity-tsv",
+      "object_id": "ms-ambiguous-polarity",
+      "path": "bundles/ms-ambiguous-polarity-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "ms-ambiguous-level-csv",
+      "object_id": "ms-ambiguous-level",
+      "path": "bundles/ms-ambiguous-level-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "ms-ambiguous-level-tsv",
+      "object_id": "ms-ambiguous-level",
+      "path": "bundles/ms-ambiguous-level-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "ms-unknowns-excluded-csv",
+      "object_id": "ms-unknowns-excluded",
+      "path": "bundles/ms-unknowns-excluded-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "ms-unknowns-excluded-tsv",
+      "object_id": "ms-unknowns-excluded",
+      "path": "bundles/ms-unknowns-excluded-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "ms-spectrum-type-errors-csv",
+      "object_id": "ms-spectrum-type-errors",
+      "path": "bundles/ms-spectrum-type-errors-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "ms-spectrum-type-errors-tsv",
+      "object_id": "ms-spectrum-type-errors",
+      "path": "bundles/ms-spectrum-type-errors-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "ms-numeric-errors-csv",
+      "object_id": "ms-numeric-errors",
+      "path": "bundles/ms-numeric-errors-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "ms-numeric-errors-tsv",
+      "object_id": "ms-numeric-errors",
+      "path": "bundles/ms-numeric-errors-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "ms-xic-unselected-infinite-csv",
+      "object_id": "ms-xic-unselected-infinite",
+      "path": "bundles/ms-xic-unselected-infinite-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "ms-xic-unselected-infinite-tsv",
+      "object_id": "ms-xic-unselected-infinite",
+      "path": "bundles/ms-xic-unselected-infinite-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "ms-trace-metadata-errors-csv",
+      "object_id": "ms-trace-metadata-errors",
+      "path": "bundles/ms-trace-metadata-errors-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "ms-trace-metadata-errors-tsv",
+      "object_id": "ms-trace-metadata-errors",
+      "path": "bundles/ms-trace-metadata-errors-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "finite-stress-csv",
+      "object_id": "finite-stress",
+      "path": "bundles/finite-stress-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "finite-stress-tsv",
+      "object_id": "finite-stress",
+      "path": "bundles/finite-stress-tsv",
+      "delimiter": "tsv"
+    }
+  ],
+  "controls": [
+    {
+      "id": "python-ms-centroid-tsv",
+      "kind": "reverse",
+      "object_id": "ms-centroid",
+      "path": "controls/python-ms-centroid-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "python-sparse-states-csv",
+      "kind": "reverse",
+      "object_id": "sparse-numeric-states",
+      "path": "controls/python-sparse-states-csv",
+      "delimiter": "csv"
+    },
+    {
+      "id": "reordered-ms-centroid-tsv",
+      "kind": "reorder",
+      "object_id": "ms-centroid",
+      "source_case_id": "ms-centroid-tsv",
+      "path": "controls/reordered-ms-centroid-tsv",
+      "delimiter": "tsv"
+    },
+    {
+      "id": "reordered-combined-csv",
+      "kind": "reorder",
+      "object_id": "combined-reinjections",
+      "source_case_id": "combined-reinjections-csv",
+      "path": "controls/reordered-combined-csv",
+      "delimiter": "csv"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "wrong-format",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/wrong-format",
+      "mutation": "wrong-format"
+    },
+    {
+      "id": "wrong-version",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/wrong-version",
+      "mutation": "wrong-version"
+    },
+    {
+      "id": "duplicate-manifest-field",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/duplicate-manifest-field",
+      "mutation": "duplicate-manifest-field"
+    },
+    {
+      "id": "unknown-manifest-field",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/unknown-manifest-field",
+      "mutation": "unknown-manifest-field"
+    },
+    {
+      "id": "missing-manifest-field",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/missing-manifest-field",
+      "mutation": "missing-manifest-field"
+    },
+    {
+      "id": "invalid-hash-syntax",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/invalid-hash-syntax",
+      "mutation": "invalid-hash-syntax"
+    },
+    {
+      "id": "hash-mismatch",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/hash-mismatch",
+      "mutation": "hash-mismatch"
+    },
+    {
+      "id": "row-count-mismatch",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/row-count-mismatch",
+      "mutation": "row-count-mismatch"
+    },
+    {
+      "id": "column-count-mismatch",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/column-count-mismatch",
+      "mutation": "column-count-mismatch"
+    },
+    {
+      "id": "missing-manifest",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/missing-manifest",
+      "mutation": "missing-manifest"
+    },
+    {
+      "id": "missing-payload",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/missing-payload",
+      "mutation": "missing-payload"
+    },
+    {
+      "id": "wrong-delimiter",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/wrong-delimiter",
+      "mutation": "wrong-delimiter"
+    },
+    {
+      "id": "wrong-header-order",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/wrong-header-order",
+      "mutation": "wrong-header-order"
+    },
+    {
+      "id": "duplicate-column-header",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/duplicate-column-header",
+      "mutation": "duplicate-column-header"
+    },
+    {
+      "id": "extra-column",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/extra-column",
+      "mutation": "extra-column"
+    },
+    {
+      "id": "malformed-quoting",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/malformed-quoting",
+      "mutation": "malformed-quoting"
+    },
+    {
+      "id": "invalid-utf8",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/invalid-utf8",
+      "mutation": "invalid-utf8"
+    },
+    {
+      "id": "embedded-nul",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/embedded-nul",
+      "mutation": "embedded-nul"
+    },
+    {
+      "id": "duplicate-sample-row-index",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/duplicate-sample-row-index",
+      "mutation": "duplicate-sample-row-index"
+    },
+    {
+      "id": "metadata-row-gap",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/metadata-row-gap",
+      "mutation": "metadata-row-gap"
+    },
+    {
+      "id": "duplicate-scan-id",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/duplicate-scan-id",
+      "mutation": "duplicate-scan-id"
+    },
+    {
+      "id": "scan-index-zero",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/scan-index-zero",
+      "mutation": "scan-index-zero"
+    },
+    {
+      "id": "scan-point-orphan",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/scan-point-orphan",
+      "mutation": "scan-point-orphan"
+    },
+    {
+      "id": "scan-point-duplicate-index",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/scan-point-duplicate-index",
+      "mutation": "scan-point-duplicate-index"
+    },
+    {
+      "id": "scan-point-gap",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/scan-point-gap",
+      "mutation": "scan-point-gap"
+    },
+    {
+      "id": "unknown-stream-reference",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/unknown-stream-reference",
+      "mutation": "unknown-stream-reference"
+    },
+    {
+      "id": "scan-point-count-mismatch",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/scan-point-count-mismatch",
+      "mutation": "scan-point-count-mismatch"
+    },
+    {
+      "id": "scan-location-type-invalid",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/scan-location-type-invalid",
+      "mutation": "scan-location-type-invalid"
+    },
+    {
+      "id": "scan-value-type-invalid",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/scan-value-type-invalid",
+      "mutation": "scan-value-type-invalid"
+    },
+    {
+      "id": "source-row-zero",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/source-row-zero",
+      "mutation": "source-row-zero"
+    },
+    {
+      "id": "invalid-saturation-token",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/invalid-saturation-token",
+      "mutation": "invalid-saturation-token"
+    },
+    {
+      "id": "double-token-invalid",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/double-token-invalid",
+      "mutation": "double-token-invalid"
+    },
+    {
+      "id": "double-overflow",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/double-overflow",
+      "mutation": "double-overflow"
+    },
+    {
+      "id": "double-underflow",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/double-underflow",
+      "mutation": "double-underflow"
+    },
+    {
+      "id": "integer-overflow",
+      "source_case_id": "ms-centroid-csv",
+      "path": "mutants/integer-overflow",
+      "mutation": "integer-overflow"
+    },
+    {
+      "id": "duplicate-array-id",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/duplicate-array-id",
+      "mutation": "duplicate-array-id"
+    },
+    {
+      "id": "array-axis-orphan",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/array-axis-orphan",
+      "mutation": "array-axis-orphan"
+    },
+    {
+      "id": "array-axis-duplicate",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/array-axis-duplicate",
+      "mutation": "array-axis-duplicate"
+    },
+    {
+      "id": "missing-array-axis",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/missing-array-axis",
+      "mutation": "missing-array-axis"
+    },
+    {
+      "id": "array-point-orphan",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/array-point-orphan",
+      "mutation": "array-point-orphan"
+    },
+    {
+      "id": "array-point-count-mismatch",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/array-point-count-mismatch",
+      "mutation": "array-point-count-mismatch"
+    },
+    {
+      "id": "array-location-storage-invalid",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/array-location-storage-invalid",
+      "mutation": "array-location-storage-invalid"
+    },
+    {
+      "id": "array-value-type-invalid",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/array-value-type-invalid",
+      "mutation": "array-value-type-invalid"
+    },
+    {
+      "id": "array-dim-flag-invalid",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/array-dim-flag-invalid",
+      "mutation": "array-dim-flag-invalid"
+    },
+    {
+      "id": "absent-dimension-with-text",
+      "source_case_id": "dad-only-unequal-csv",
+      "path": "mutants/absent-dimension-with-text",
+      "mutation": "absent-dimension-with-text"
+    },
+    {
+      "id": "array-double-token-invalid",
+      "source_case_id": "sparse-numeric-states-csv",
+      "path": "mutants/array-double-token-invalid",
+      "mutation": "array-double-token-invalid"
+    }
+  ],
+  "cross_format": [
+    {
+      "id": "acquisition-reader-on-scalar",
+      "reader": "acquisition",
+      "source_kind": "scalar-record"
+    },
+    {
+      "id": "acquisition-reader-on-nd",
+      "reader": "acquisition",
+      "source_kind": "nd-object"
+    },
+    {
+      "id": "scalar-reader-on-acquisition",
+      "reader": "scalar-record",
+      "source_case_id": "ms-centroid-csv"
+    },
+    {
+      "id": "nd-reader-on-acquisition",
+      "reader": "nd-object",
+      "source_case_id": "sparse-numeric-states-tsv"
+    }
+  ],
+  "semantic_rejection_ids": [
+    "ambiguous-polarity",
+    "ambiguous-ms-level",
+    "profile-spectrum",
+    "unknown-spectrum-type",
+    "nonfinite-mz-outside-window",
+    "selected-nan-intensity",
+    "negative-intensity",
+    "unrepresentable-centroid-sum",
+    "unknown-time-unit",
+    "unknown-retention-time",
+    "unknown-mz-unit-xic",
+    "tic-selected-infinite-intensity",
+    "no-selected-scans",
+    "reversed-mz-range",
+    "saturated-invalid-selected-intensity"
+  ],
+  "trace_ids": [
+    "main-tic",
+    "main-xic-duplicate-boundary",
+    "main-xic-101",
+    "main-negative-tic",
+    "main-ms2",
+    "unknown-selectors-excluded",
+    "unknown-source-and-units-tic",
+    "reinjection-a-tic",
+    "reinjection-b-tic",
+    "xic-ignores-unselected-infinite"
+  ],
+  "finite_stress": {
+    "file": "finite-stress.bin",
+    "storage": "double",
+    "byte_order": "big",
+    "values": 8208,
+    "bytes": 65664,
+    "sha256": "d11301fb08fce7aab29a12ab49e82b32c8438c7bdd0b9489a5ff49587e3cf63c"
+  },
+  "payload_table_count": 12,
+  "declaration_before_qualification_execution": true,
+  "scope": "Synthetic software qualification of the fixed native acquisition interchange profile; not named external-reader, hosted-user, instrument, method, or physical qualification."
+}

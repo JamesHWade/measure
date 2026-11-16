@@ -3,6 +3,32 @@
 * Native bundle readers recognize symbolic links on Windows as well as Unix-like
   systems. Scalar and nD writers preserve existing dangling-link destinations.
 
+* `measure_acquisition()` links raw ragged MS scans and two-dimensional arrays
+  to declared samples, injections, channels and sources. Scan order, raw numeric
+  storage, missing versus acquired-empty scans and per-point saturation and
+  source references remain explicit (#162).
+
+* The acquisition/MS guide maps raw source records to ragged MS scans and an
+  independently sampled array, saves and reloads the acquisition, then traces
+  each selected centroid result to its contributing points and source ordinals.
+  Missingness, saturation, declared m/z conventions and interpretation limits
+  remain visible (#162).
+
+* Acquisition interchange has a public installed-R/Python qualification profile
+  with fixed binary64 truth, typed raw acquisitions, independent trace checks,
+  reverse/reorder controls and corruption rejection. CI also runs the tools
+  outside the checkout from paths containing spaces (#162).
+
+* `write_measure_acquisition()` and `read_measure_acquisition()` preserve linked
+  raw acquisitions in a fixed native CSV/TSV profile. Typed values, numerical
+  states, masks, point/source links and metadata survive readback; publication
+  is exclusive and selected-file reads use one cumulative byte limit (#162).
+
+* `measure_ms_trace()` calculates explicitly selected centroid TIC/XIC traces
+  with scan and point contributor links. Missing scans, empty spectra/windows,
+  missing intensities and known or unknown saturation remain distinguishable;
+  profile integration and detector synchronization are not inferred (#162).
+
 * `write_measure_nd()` and `read_measure_nd()` preserve supported nD tables and
   collections in a native CSV or TSV bundle, including column storage types,
   finite numerical values, signed zero, missing/nonfinite states, member and
