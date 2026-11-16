@@ -1,5 +1,5 @@
 ---
-title: "Tutorial: Getting Started with measure"
+title: "Tutorial: getting started with measure"
 ---
 
 ```{r, include = FALSE}
@@ -7,7 +7,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 7,
-  fig.height = 4
+  fig.height = 4.5
 )
 ```
 
@@ -17,34 +17,42 @@ library(recipes)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+
+article_plot_theme <- ggplot2::theme_minimal(base_size = 12) +
+  ggplot2::theme(
+    text = ggplot2::element_text(colour = "#222222"),
+    plot.background = ggplot2::element_rect(fill = "white", colour = NA),
+    panel.background = ggplot2::element_rect(fill = "white", colour = NA),
+    legend.background = ggplot2::element_rect(fill = "white", colour = NA),
+    legend.key = ggplot2::element_rect(fill = "white", colour = NA),
+    strip.background = ggplot2::element_rect(fill = "white", colour = NA)
+  )
 ```
 
 ## Introduction
 
-The measure package extends [tidymodels](https://www.tidymodels.org/) with preprocessing steps designed specifically for analytical measurement data. If you work with spectroscopy, chromatography, or other instrument-generated signals, measure provides familiar recipes-style preprocessing that integrates seamlessly with the tidymodels ecosystem.
+measure adds recipes preprocessing steps for spectroscopy, chromatography, and
+other instrument signals. This tutorial uses long and wide spectral data to
+show how to create a recipe, prep it on training data, and apply it to new
+data.
 
-### Why measure?
+### Why use measure?
 
-Analytical data has unique preprocessing requirements:
+Spectral data can have hundreds of measurements per sample. measure's recipe
+steps handle common transformations such as Savitzky-Golay derivatives, scatter
+correction, and conversion between long and wide formats.
 
-1. **Multi-dimensional signals**: Each sample produces many measurements (e.g., absorbance at hundreds of wavelengths)
-2. **Specialized transformations**: Techniques like Savitzky-Golay derivatives and scatter correction are standard practice
-3. **Format flexibility**: Data may arrive in wide format (one column per wavelength) or long format (one row per measurement)
-
-measure handles all of this while keeping the intuitive recipes interface you already know.
 ## The measure workflow
 
-The typical measure workflow has three phases:
-
-1. **Input step**: Convert your data to measure's internal format
-2. **Processing steps**: Apply spectral preprocessing (smoothing, derivatives, normalization)
-3. **Output step**: Convert back to a format suitable for modeling
-
-Let's see this in action with real data.
+A recipe converts data to measure's internal format, applies processing
+steps, then converts the result to the format needed by later analysis.
 
 ## Example: NIR spectroscopy of meat samples
 
-We'll use the `meats_long` dataset included in measure. This contains NIR (Near-Infrared) transmittance spectra of meat samples, with the goal of predicting water, fat, and protein content.
+The included `meats_long` data contain 100 spectral channels per sample and
+measurements of water, fat, and protein. The signal column is named
+`transmittance`, but the values are the absorbances from `modeldata::meats`.
+Absorbance is unitless.
 
 ```{r data}
 data(meats_long)
@@ -55,18 +63,18 @@ meats_long
 
 The data is in "long" format where each row represents one measurement at one channel for one sample. Let's visualize a few spectra:
 
-```{r raw-spectra}
+```{r raw-spectra, fig.cap = "Ten of the 215 meat spectra in `meats_long`. Color identifies sample ID.", fig.alt = "Line chart of ten meat spectra across 100 spectral channel indices. Each colored line identifies a sample; the spectra share a broad peak near channel 60. The y-axis shows absorbance in unitless values."}
 meats_long |>
   filter(id <= 10) |>
   ggplot(aes(x = channel, y = transmittance, group = id, color = factor(id))) +
   geom_line(alpha = 0.8) +
   labs(
-    x = "Channel",
-    y = "Transmittance",
-    title = "Raw NIR Spectra",
+    x = "Spectral channel (index)",
+    y = "Absorbance (unitless)",
+    title = "Meat spectra before processing",
     color = "Sample ID"
   ) +
-  theme_minimal()
+  article_plot_theme
 ```
 
 ### Creating a recipe
@@ -81,7 +89,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 rec
 ```
 
-### Step 1: Input the measurements
+### Step 1: input the measurements
 
 Since our data is in long format, we use `step_measure_input_long()`. This converts the `transmittance` values (indexed by `channel`) into measure's internal format:
 
@@ -105,7 +113,7 @@ internal_format
 internal_format$.measures[[1]]
 ```
 
-### Step 2: Apply preprocessing
+### Step 2: apply preprocessing
 
 Now we can add spectral preprocessing steps. These operate on the internal `.measures` column:
 
@@ -114,7 +122,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
 
-  # Savitzky-Golay first derivative for baseline removal
+  # Savitzky-Golay first derivative to reduce constant baseline offsets
   step_measure_savitzky_golay(
     window_side = 5,
     differentiation_order = 1
@@ -125,7 +133,7 @@ rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
 rec
 ```
 
-measure provides many built-in preprocessing steps:
+The package includes preprocessing steps for:
 
 - **Filtering**: `step_measure_savitzky_golay()` for smoothing and derivatives
 - **Scatter correction**: `step_measure_snv()`, `step_measure_msc()`
@@ -135,30 +143,49 @@ measure provides many built-in preprocessing steps:
 
 See the [Preprocessing Reference](reference-preprocessing.html) for details on all available options.
 
-Let's see how this transforms our spectra:
+The paired plot compares raw absorbance with the processed spectra. Each
+panel has its own y-axis scale.
 
-```{r processed-spectra}
+```{r processed-spectra, fig.cap = "Raw and processed views of the same 10 samples. The processed panel uses a separate y-axis scale after a Savitzky-Golay first derivative and SNV.", fig.alt = "Two-panel line chart of ten meat samples. The top panel shows raw absorbance by spectral channel; the bottom shows the same samples after a Savitzky-Golay first derivative and SNV. Each panel uses its own y-axis scale, and each line is a sample. The processed traces show a sharp peak near channel 60 and a negative feature near channel 45."}
 processed <- bake(prep(rec), new_data = NULL)
 
-# Unnest for plotting
-plot_data <- processed |>
-  filter(row_number() <= 10) |>
-  mutate(sample_id = row_number()) |>
-  unnest(.measures)
+raw_plot_data <- meats_long |>
+  filter(id <= 10) |>
+  transmute(
+    id,
+    location = channel,
+    value = transmittance,
+    processing = "Raw"
+  )
 
-ggplot(plot_data, aes(x = location, y = value, group = sample_id, color = factor(sample_id))) +
-  geom_line(alpha = 0.8) +
+processed_plot_data <- processed |>
+  filter(id <= 10) |>
+  select(id, .measures) |>
+  unnest(.measures) |>
+  transmute(
+    id,
+    location,
+    value,
+    processing = "First derivative + SNV"
+  )
+
+bind_rows(raw_plot_data, processed_plot_data) |>
+  mutate(processing = factor(
+    processing,
+    levels = c("Raw", "First derivative + SNV")
+  )) |>
+  ggplot(aes(x = location, y = value, group = id)) +
+  geom_line(colour = "#2A6F97", alpha = 0.55) +
+  facet_wrap(~processing, ncol = 1, scales = "free_y") +
   labs(
-    x = "Channel",
-    y = "Preprocessed Signal",
-    title = "After Savitzky-Golay + SNV",
-    subtitle = "First derivative removes baseline; SNV normalizes scatter",
-    color = "Sample"
+    x = "Spectral channel (index)",
+    y = "Signal (unitless; panel-specific scale)",
+    title = "Meat spectra before and after processing"
   ) +
-  theme_minimal()
+  article_plot_theme
 ```
 
-### Step 3: Output for modeling
+### Step 3: output for modeling
 
 For most modeling workflows, you'll want data in wide format (one column per spectral feature):
 
@@ -230,7 +257,8 @@ cat("Test samples:", nrow(test_processed), "\n")
 
 ## Integration with tidymodels
 
-measure recipes work seamlessly with the broader tidymodels ecosystem. See [Integrating with tidymodels](howto-tidymodels.html) for complete examples including:
+measure recipes can be used in tidymodels workflows. See [Integrating with
+tidymodels](howto-tidymodels.html) for examples of:
 
 - Bundling preprocessing with models using workflows
 - Cross-validation with measure recipes
@@ -253,7 +281,7 @@ data(glucose_bioreactors)
 
 # Chromatography
 data(hplc_chromatograms)
-# 20 simulated HPLC samples
+# 20 synthetic HPLC samples
 data(sec_chromatograms)
 # 10 SEC samples (5 standards + 5 polymers)
 data(sec_calibration)
@@ -261,7 +289,7 @@ data(sec_calibration)
 
 # Mass spectrometry
 data(maldi_spectra)
-# 16 simulated MALDI-TOF spectra
+# 16 synthetic MALDI-TOF spectra
 ```
 
 ### External data sources
