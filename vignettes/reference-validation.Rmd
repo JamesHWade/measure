@@ -824,13 +824,6 @@ render_validation_report(
   output_format = "pdf",
   template = "usp_1225"
 )
-
-# Use a custom Quarto template
-render_validation_report(
-  report,
-  output_file = "custom_report.html",
-  template_path = "path/to/custom_template.qmd"
-)
 ```
 
 The rendered report includes:
