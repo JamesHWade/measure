@@ -143,13 +143,13 @@ The Savitzky-Golay filter performs polynomial smoothing and can compute derivati
 
 - **Smoothing (order = 0)**: Reduce random noise while preserving peak shapes
 - **First derivative (order = 1)**: Remove constant baseline offsets, enhance peak differences
-- **Second derivative (order = 2)**: Remove linear baseline trends, further enhance peak resolution
+- **Second derivative (order = 2)**: Remove linear baseline trends and emphasize curvature
 
 ### Parameters
 
 - `window_side`: Number of points on each side of the center point (total window = 2 * window_side + 1)
 - `differentiation_order`: 0 for smoothing, 1 for first derivative, 2 for second derivative
-- `degree`: Polynomial degree (defaults to differentiation_order + 1)
+- `degree`: Polynomial degree (defaults to 3)
 
 ### Examples
 
