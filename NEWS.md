@@ -8,6 +8,11 @@
   storage, missing versus acquired-empty scans and per-point saturation and
   source references remain explicit (#162).
 
+* `measure_ms_trace()` calculates explicitly selected centroid TIC/XIC traces
+  with scan and point contributor links. Missing scans, empty spectra/windows,
+  missing intensities and known or unknown saturation remain distinguishable;
+  profile integration and detector synchronization are not inferred (#162).
+
 * `write_measure_nd()` and `read_measure_nd()` preserve supported nD tables and
   collections in a native CSV or TSV bundle, including column storage types,
   finite numerical values, signed zero, missing/nonfinite states, member and

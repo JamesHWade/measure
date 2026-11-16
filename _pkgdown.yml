@@ -421,6 +421,7 @@ reference:
   - measure_acquisition
   - is_measure_acquisition
   - validate_measure_acquisition
+  - measure_ms_trace
 - title: Utilities
   desc: Helper functions and utilities
   contents:
