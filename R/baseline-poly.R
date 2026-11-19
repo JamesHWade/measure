@@ -170,13 +170,17 @@ prep.step_measure_baseline_poly <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_baseline_poly <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
     result <- .compute_baseline_poly(
-      new_data[[col]],
+      input,
       degree = object$degree,
       max_iter = object$max_iter,
       threshold = object$threshold
     )
-    new_data[[col]] <- new_measure_list(result)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result
+    )
   }
   tibble::as_tibble(new_data)
 }

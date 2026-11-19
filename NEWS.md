@@ -1,3 +1,18 @@
+# measure 0.0.1.9004
+
+* Use `set_measure_value_metadata()` to declare what the values in a
+  measurement column represent and `measure_value_metadata()` to read the
+  declaration. Compatible declarations survive row slicing and binding.
+
+* Moving-average, median, Gaussian and Fourier smoothing, and ALS and
+  polynomial baseline correction, retain a declared value unit. Sample-wise
+  normalization marks declared values as normalized. If a divisor is unusable,
+  the step reports the affected sample before returning a mislabeled column.
+
+* Savitzky–Golay smoothing at order zero preserves a declared signal unit.
+  Positive-order Savitzky–Golay, finite-difference and gap derivatives mark
+  the result as a signal derivative. Their output unit is left unspecified.
+
 # measure 0.0.1.9003
 
 * Guides and the homepage now pair preprocessing, records, acquisitions and

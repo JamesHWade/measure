@@ -42,7 +42,8 @@
 #' Calculations use unit spacing between measurement indices. Differentiation
 #' therefore follows `prospectr::savitzkyGolay()` with `delta.wav = 1` and is
 #' scaled per index step, without adjustment for the numeric spacing between
-#' location labels.
+#' location labels. Smoothing preserves the declared quantity and unit. A
+#' positive order records `signal_derivative` and leaves its unit unspecified.
 #'
 #' The polynomial degree should be less than the window size. Also, window
 #' size must be greater than polynomial degree. If either case is true, the
@@ -206,14 +207,25 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
     res <-
       .comp_savitzky_golay(
-        new_data[[col]],
+        input,
         diffs = object$differentiation_order,
         degree = object$degree,
         window = 2 * object$window_side + 1
       )
-    new_data[[col]] <- new_measure_list(res)
+    quantity <- if (object$differentiation_order == 0) {
+      NULL
+    } else {
+      "signal_derivative"
+    }
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      res,
+      quantity = quantity,
+      unit = NULL
+    )
   }
   tibble::as_tibble(new_data)
 }

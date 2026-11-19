@@ -639,6 +639,10 @@ required_pkgs.step_measure_kubelka_munk <- function(x, ...) {
 #'
 #' The location values are updated to the left point of each difference.
 #'
+#' Numeric spacing between adjacent locations is used in the finite-difference
+#' calculation. On a declared signal, the result records `signal_derivative`
+#' and leaves the unit unspecified because the axis unit is unknown.
+#'
 #' **Note**: For smoothed derivatives, consider using [step_measure_savitzky_golay()]
 #' with `differentiation_order > 0` instead.
 #'
@@ -732,12 +736,25 @@ prep.step_measure_derivative <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_derivative <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
+    if (!is.null(measure_value_metadata(input))) {
+      .require_derivative_points(
+        input,
+        required = object$order + 1L,
+        operation = "step_measure_derivative"
+      )
+    }
     result <- purrr::map(
-      new_data[[col]],
+      input,
       .derivative_single,
       order = object$order
     )
-    new_data[[col]] <- new_measure_list(result)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result,
+      quantity = "signal_derivative",
+      unit = NULL
+    )
   }
 
   tibble::as_tibble(new_data)
@@ -815,8 +832,12 @@ required_pkgs.step_measure_derivative <- function(x, ...) {
 #' The spectrum length is reduced by `2 * gap` points.
 #'
 #' Gap derivatives are often used in NIR chemometrics as an alternative to
-
 #' Savitzky-Golay derivatives when less smoothing is desired.
+#'
+#' Numeric spacing between the locations used for each gap is included in the
+#' finite-difference calculation. On a declared signal, the result records
+#' `signal_derivative` and leaves the unit unspecified because the axis unit
+#' is unknown.
 #'
 #' @family measure-preprocessing
 #' @seealso [step_measure_derivative()] for simple finite differences,
@@ -918,13 +939,26 @@ prep.step_measure_derivative_gap <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_derivative_gap <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
+    if (!is.null(measure_value_metadata(input))) {
+      .require_derivative_points(
+        input,
+        required = 2L * (object$gap + max(object$segment - 1L, 0L)) + 1L,
+        operation = "step_measure_derivative_gap"
+      )
+    }
     result <- purrr::map(
-      new_data[[col]],
+      input,
       .derivative_gap_single,
       gap = object$gap,
       segment = object$segment
     )
-    new_data[[col]] <- new_measure_list(result)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result,
+      quantity = "signal_derivative",
+      unit = NULL
+    )
   }
 
   tibble::as_tibble(new_data)
@@ -975,6 +1009,24 @@ required_pkgs.step_measure_derivative_gap <- function(x, ...) {
 # ==============================================================================
 # Internal helper functions
 # ==============================================================================
+
+.require_derivative_points <- function(input, required, operation) {
+  if (length(input) == 0L) {
+    return(invisible(input))
+  }
+
+  lengths <- vapply(input, nrow, integer(1))
+  short <- which(lengths < required)
+  if (length(short) > 0L) {
+    positions <- paste(short, collapse = ", ")
+    cli::cli_abort(
+      "Tagged measurements for {.code {operation}} must each contain at least
+      {required} points; short measurements occur at positions {positions}."
+    )
+  }
+
+  invisible(input)
+}
 
 #' Convert transmittance to absorbance for a single spectrum
 #' @param x A measure_tbl with location and value columns
