@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">measure</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1215,10 +1215,19 @@ the step uses one fixed value when preparing a recipe:</p>
 <div class="section level2">
 <h2 id="sample-wise-normalization">Sample-wise Normalization<a class="anchor" aria-label="anchor" href="#sample-wise-normalization"></a>
 </h2>
-<p>The measure package provides several sample-wise normalization
-methods that normalize each spectrum independently. Unlike SNV/MSC which
-address scatter, these methods adjust for differences in total signal
-intensity.</p>
+<p>Sample-wise normalization uses each spectrum’s own values to set its
+scale. For example, dividing a concentration trace by its maximum gives
+a peak height of one at every sample’s apex. This makes peak shapes
+easier to compare and removes the information needed to compare their
+concentrations.</p>
+<p>For a <code>measure_list</code> with a declared value quantity, the
+six steps below record <code>normalized_signal</code> as the output
+quantity. Dividing by a peak height gives a dimensionless ratio (unit
+<code>"1"</code>). Dividing by area gives a value per axis unit. Because
+a <code>measure_list</code> does not declare an axis unit here, the
+output unit for area normalization is left unspecified. Use
+<code><a href="../reference/measure_value_metadata.html">measure_value_metadata()</a></code> on the baked column to inspect its
+declaration.</p>
 <div class="section level3">
 <h3 id="available-methods-1">Available methods<a class="anchor" aria-label="anchor" href="#available-methods-1"></a>
 </h3>
@@ -1508,6 +1517,12 @@ auto-scaling step from the <code>meats</code> training data.
 <div class="section level2">
 <h2 id="custom-transformations">Custom Transformations<a class="anchor" aria-label="anchor" href="#custom-transformations"></a>
 </h2>
+<p>When a custom function changes what the values mean, declare the
+output quantity with <code><a href="../reference/set_measure_value_metadata.html">set_measure_value_metadata()</a></code>. An
+in-place edit to the values can leave the old column attributes
+attached. <code><a href="../reference/step_measure_map.html">step_measure_map()</a></code> rebuilds the column and clears
+its declaration, so you can inspect the returned values before assigning
+a new quantity and unit.</p>
 <div class="section level3">
 <h3 id="when-built-in-steps-arent-enough">When built-in steps aren’t enough<a class="anchor" aria-label="anchor" href="#when-built-in-steps-arent-enough"></a>
 </h3>

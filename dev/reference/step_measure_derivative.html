@@ -9,7 +9,7 @@ computes derivatives using simple finite differences."><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">measure</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -120,6 +120,9 @@ process. If <code>NULL</code> (the default), all measure columns will be process
 <p>For each derivative order, the spectrum length is reduced by 1.</p><ul><li><p>First derivative: n-1 points</p></li>
 <li><p>Second derivative: n-2 points</p></li>
 </ul><p>The location values are updated to the left point of each difference.</p>
+<p>Numeric spacing between adjacent locations is used in the finite-difference
+calculation. On a declared signal, the result records <code>signal_derivative</code>
+and leaves the unit unspecified because the axis unit is unknown.</p>
 <p><strong>Note</strong>: For smoothed derivatives, consider using <code><a href="step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code>
 with <code>differentiation_order &gt; 0</code> instead.</p>
     </div>

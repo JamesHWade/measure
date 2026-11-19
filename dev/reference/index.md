@@ -690,6 +690,10 @@ Helper functions and utilities
   : Test if object is a measure tibble
 - [`is_measure_list()`](https://jameshwade.github.io/measure/dev/reference/is_measure_list.md)
   : Test if object is a measure list
+- [`measure_value_metadata()`](https://jameshwade.github.io/measure/dev/reference/measure_value_metadata.md)
+  : Get measurement value metadata
+- [`set_measure_value_metadata()`](https://jameshwade.github.io/measure/dev/reference/set_measure_value_metadata.md)
+  : Set measurement value metadata
 - [`find_measure_cols()`](https://jameshwade.github.io/measure/dev/reference/find_measure_cols.md)
   : Find measure columns in a data frame
 - [`has_measure_col()`](https://jameshwade.github.io/measure/dev/reference/has_measure_col.md)

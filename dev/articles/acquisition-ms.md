@@ -596,7 +596,7 @@ trace_processing
 #> [1] "measure"
 #> 
 #> $package_version
-#> [1] "0.0.1.9003"
+#> [1] "0.0.1.9004"
 #> 
 #> $stream_id
 #> [1] "ms-centroid"

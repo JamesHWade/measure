@@ -9,7 +9,7 @@ that computes gap derivatives using the Norris-Williams method."><meta property=
 
     <a class="navbar-brand me-2" href="../index.html">measure</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -130,6 +130,10 @@ process. If <code>NULL</code> (the default), all measure columns will be process
 <p>The spectrum length is reduced by <code>2 * gap</code> points.</p>
 <p>Gap derivatives are often used in NIR chemometrics as an alternative to
 Savitzky-Golay derivatives when less smoothing is desired.</p>
+<p>Numeric spacing between the locations used for each gap is included in the
+finite-difference calculation. On a declared signal, the result records
+<code>signal_derivative</code> and leaves the unit unspecified because the axis unit
+is unknown.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

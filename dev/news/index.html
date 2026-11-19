@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">measure</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.1.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,6 +54,12 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.0.1.9004" id="measure-0019004">measure 0.0.1.9004<a class="anchor" aria-label="anchor" href="#measure-0019004"></a></h2>
+<ul><li><p>Use <code><a href="../reference/set_measure_value_metadata.html">set_measure_value_metadata()</a></code> to declare what the values in a measurement column represent and <code><a href="../reference/measure_value_metadata.html">measure_value_metadata()</a></code> to read the declaration. Compatible declarations survive row slicing and binding.</p></li>
+<li><p>Moving-average, median, Gaussian and Fourier smoothing, and ALS and polynomial baseline correction, retain a declared value unit. Sample-wise normalization marks declared values as normalized. If a divisor is unusable, the step reports the affected sample before returning a mislabeled column.</p></li>
+<li><p>Savitzky–Golay smoothing at order zero preserves a declared signal unit. Positive-order Savitzky–Golay, finite-difference and gap derivatives mark the result as a signal derivative. Their output unit is left unspecified.</p></li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.1.9003" id="measure-0019003">measure 0.0.1.9003<a class="anchor" aria-label="anchor" href="#measure-0019003"></a></h2>
 <ul><li><p>Guides and the homepage now pair preprocessing, records, acquisitions and validation examples with labeled plots, captions and descriptive alt text. Revised prose distinguishes source absorbance, arbitrary coordinates and simulated results from physical qualification (<a href="https://github.com/JamesHWade/measure/issues/169" class="external-link">#169</a>).</p></li>
 <li><p>Native bundle readers recognize symbolic links on Windows as well as Unix-like systems. Scalar and nD writers preserve existing dangling-link destinations.</p></li>
@@ -88,7 +94,8 @@
 <li><p><code><a href="../reference/step_measure_peaks_detect.html">step_measure_peaks_detect()</a></code> and <code><a href="../reference/step_measure_peaks_deconvolve.html">step_measure_peaks_deconvolve()</a></code> now expose detection thresholds, fit quality, and iteration limits to <code>tune</code> through dials parameters (<a href="https://github.com/JamesHWade/measure/issues/116" class="external-link">#116</a>). Unresolved tuning calls are retained in list columns when inspecting untrained steps with <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>.</p></li>
 <li><p><code><a href="../reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code> now preserves the centered input locations after trimming edge points and rejects measurements with inconsistent axes (<a href="https://github.com/JamesHWade/measure/issues/113" class="external-link">#113</a>).</p></li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

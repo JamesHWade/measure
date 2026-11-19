@@ -1133,9 +1133,20 @@ bake(prep(rec_bin_width), new_data = NULL)
 
 ## Sample-wise Normalization
 
-The measure package provides several sample-wise normalization methods
-that normalize each spectrum independently. Unlike SNV/MSC which address
-scatter, these methods adjust for differences in total signal intensity.
+Sample-wise normalization uses each spectrum’s own values to set its
+scale. For example, dividing a concentration trace by its maximum gives
+a peak height of one at every sample’s apex. This makes peak shapes
+easier to compare and removes the information needed to compare their
+concentrations.
+
+For a `measure_list` with a declared value quantity, the six steps below
+record `normalized_signal` as the output quantity. Dividing by a peak
+height gives a dimensionless ratio (unit `"1"`). Dividing by area gives
+a value per axis unit. Because a `measure_list` does not declare an axis
+unit here, the output unit for area normalization is left unspecified.
+Use
+[`measure_value_metadata()`](https://jameshwade.github.io/measure/dev/reference/measure_value_metadata.md)
+on the baked column to inspect its declaration.
 
 ### Available methods
 
@@ -1413,6 +1424,15 @@ The location-wise mean and one-standard-deviation band learned by the
 auto-scaling step from the `meats` training data.
 
 ## Custom Transformations
+
+When a custom function changes what the values mean, declare the output
+quantity with
+[`set_measure_value_metadata()`](https://jameshwade.github.io/measure/dev/reference/set_measure_value_metadata.md).
+An in-place edit to the values can leave the old column attributes
+attached.
+[`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
+rebuilds the column and clears its declaration, so you can inspect the
+returned values before assigning a new quantity and unit.
 
 ### When built-in steps aren’t enough
 

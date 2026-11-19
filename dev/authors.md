@@ -13,13 +13,13 @@ Source:
 [`DESCRIPTION`](https://github.com/JamesHWade/measure/blob/main/DESCRIPTION)
 
 Wade J (2026). *measure: A Recipes-Style Interface to Tidymodels for
-Analytical Measurements*. R package version 0.0.1.9003,
+Analytical Measurements*. R package version 0.0.1.9004,
 <https://jameshwade.github.io/measure/>.
 
     @Manual{,
       title = {measure: A Recipes-Style Interface to Tidymodels for Analytical Measurements},
       author = {James Wade},
       year = {2026},
-      note = {R package version 0.0.1.9003},
+      note = {R package version 0.0.1.9004},
       url = {https://jameshwade.github.io/measure/},
     }

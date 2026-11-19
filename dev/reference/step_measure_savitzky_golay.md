@@ -89,7 +89,9 @@ unit spacing between measurement indices. Differentiation therefore
 follows
 [`prospectr::savitzkyGolay()`](https://l-ramirez-lopez.github.io/prospectr/reference/savitzkyGolay.html)
 with `delta.wav = 1` and is scaled per index step, without adjustment
-for the numeric spacing between location labels.
+for the numeric spacing between location labels. Smoothing preserves the
+declared quantity and unit. A positive order records `signal_derivative`
+and leaves its unit unspecified.
 
 The polynomial degree should be less than the window size. Also, window
 size must be greater than polynomial degree. If either case is true, the

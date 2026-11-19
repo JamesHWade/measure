@@ -79,6 +79,11 @@ The spectrum length is reduced by `2 * gap` points.
 Gap derivatives are often used in NIR chemometrics as an alternative to
 Savitzky-Golay derivatives when less smoothing is desired.
 
+Numeric spacing between the locations used for each gap is included in
+the finite-difference calculation. On a declared signal, the result
+records `signal_derivative` and leaves the unit unspecified because the
+axis unit is unknown.
+
 ## See also
 
 [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md)

@@ -68,6 +68,11 @@ For each derivative order, the spectrum length is reduced by 1.
 
 The location values are updated to the left point of each difference.
 
+Numeric spacing between adjacent locations is used in the
+finite-difference calculation. On a declared signal, the result records
+`signal_derivative` and leaves the unit unspecified because the axis
+unit is unknown.
+
 **Note**: For smoothed derivatives, consider using
 [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md)
 with `differentiation_order > 0` instead.
