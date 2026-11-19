@@ -98,8 +98,14 @@ prep.step_measure_normalize_sum <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_normalize_sum <- function(object, new_data, ...) {
   for (col in object$measures) {
-    result <- .compute_normalize_sum(new_data[[col]])
-    new_data[[col]] <- new_measure_list(result)
+    input <- new_data[[col]]
+    result <- .compute_normalize_sum(input)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result,
+      quantity = "normalized_signal",
+      unit = "1"
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -134,12 +140,21 @@ tidy.step_measure_normalize_sum <- function(x, ...) {
 }
 
 .compute_normalize_sum <- function(dat) {
-  purrr::map(dat, .normalize_sum_single)
+  reject_singular <- !is.null(measure_value_metadata(dat))
+  purrr::map(
+    dat,
+    .normalize_sum_single,
+    reject_singular = reject_singular
+  )
 }
 
-.normalize_sum_single <- function(x) {
+.normalize_sum_single <- function(x, reject_singular = FALSE) {
   total <- sum(x$value, na.rm = TRUE)
-  if (is.na(total) || abs(total) < .Machine$double.eps) {
+  invalid <- is.na(total) || abs(total) < .Machine$double.eps
+  if (reject_singular && (invalid || !is.finite(total))) {
+    .abort_tagged_normalization("the sum is zero, missing, or non-finite")
+  }
+  if (invalid) {
     cli::cli_warn(
       "Sum is zero or NA for a spectrum; returning original values."
     )
@@ -246,8 +261,14 @@ prep.step_measure_normalize_max <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_normalize_max <- function(object, new_data, ...) {
   for (col in object$measures) {
-    result <- .compute_normalize_max(new_data[[col]])
-    new_data[[col]] <- new_measure_list(result)
+    input <- new_data[[col]]
+    result <- .compute_normalize_max(input)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result,
+      quantity = "normalized_signal",
+      unit = "1"
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -281,12 +302,23 @@ tidy.step_measure_normalize_max <- function(x, ...) {
 }
 
 .compute_normalize_max <- function(dat) {
-  purrr::map(dat, .normalize_max_single)
+  reject_singular <- !is.null(measure_value_metadata(dat))
+  purrr::map(
+    dat,
+    .normalize_max_single,
+    reject_singular = reject_singular
+  )
 }
 
-.normalize_max_single <- function(x) {
+.normalize_max_single <- function(x, reject_singular = FALSE) {
   max_val <- max(x$value, na.rm = TRUE)
-  if (is.na(max_val) || abs(max_val) < .Machine$double.eps) {
+  invalid <- is.na(max_val) || abs(max_val) < .Machine$double.eps
+  if (reject_singular && (invalid || !is.finite(max_val))) {
+    .abort_tagged_normalization(
+      "the maximum is zero, missing, or non-finite"
+    )
+  }
+  if (invalid) {
     cli::cli_warn(
       "Maximum is zero or NA for a spectrum; returning original values."
     )
@@ -399,8 +431,14 @@ prep.step_measure_normalize_range <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_normalize_range <- function(object, new_data, ...) {
   for (col in object$measures) {
-    result <- .compute_normalize_range(new_data[[col]])
-    new_data[[col]] <- new_measure_list(result)
+    input <- new_data[[col]]
+    result <- .compute_normalize_range(input)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result,
+      quantity = "normalized_signal",
+      unit = "1"
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -434,15 +472,24 @@ tidy.step_measure_normalize_range <- function(x, ...) {
 }
 
 .compute_normalize_range <- function(dat) {
-  purrr::map(dat, .normalize_range_single)
+  reject_singular <- !is.null(measure_value_metadata(dat))
+  purrr::map(
+    dat,
+    .normalize_range_single,
+    reject_singular = reject_singular
+  )
 }
 
-.normalize_range_single <- function(x) {
+.normalize_range_single <- function(x, reject_singular = FALSE) {
   min_val <- min(x$value, na.rm = TRUE)
   max_val <- max(x$value, na.rm = TRUE)
   range_val <- max_val - min_val
 
-  if (is.na(range_val) || abs(range_val) < .Machine$double.eps) {
+  invalid <- is.na(range_val) || abs(range_val) < .Machine$double.eps
+  if (reject_singular && (invalid || !is.finite(range_val))) {
+    .abort_tagged_normalization("the range is zero, missing, or non-finite")
+  }
+  if (invalid) {
     cli::cli_warn(
       "Range is zero or NA for a spectrum; returning centered values."
     )
@@ -556,8 +603,14 @@ prep.step_measure_normalize_vector <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_normalize_vector <- function(object, new_data, ...) {
   for (col in object$measures) {
-    result <- .compute_normalize_vector(new_data[[col]])
-    new_data[[col]] <- new_measure_list(result)
+    input <- new_data[[col]]
+    result <- .compute_normalize_vector(input)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result,
+      quantity = "normalized_signal",
+      unit = "1"
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -591,12 +644,21 @@ tidy.step_measure_normalize_vector <- function(x, ...) {
 }
 
 .compute_normalize_vector <- function(dat) {
-  purrr::map(dat, .normalize_vector_single)
+  reject_singular <- !is.null(measure_value_metadata(dat))
+  purrr::map(
+    dat,
+    .normalize_vector_single,
+    reject_singular = reject_singular
+  )
 }
 
-.normalize_vector_single <- function(x) {
+.normalize_vector_single <- function(x, reject_singular = FALSE) {
   l2_norm <- sqrt(sum(x$value^2, na.rm = TRUE))
-  if (is.na(l2_norm) || abs(l2_norm) < .Machine$double.eps) {
+  invalid <- is.na(l2_norm) || abs(l2_norm) < .Machine$double.eps
+  if (reject_singular && (invalid || !is.finite(l2_norm))) {
+    .abort_tagged_normalization("the L2 norm is zero, missing, or non-finite")
+  }
+  if (invalid) {
     cli::cli_warn(
       "L2 norm is zero or NA for a spectrum; returning original values."
     )
@@ -705,8 +767,13 @@ prep.step_measure_normalize_auc <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_normalize_auc <- function(object, new_data, ...) {
   for (col in object$measures) {
-    result <- .compute_normalize_auc(new_data[[col]])
-    new_data[[col]] <- new_measure_list(result)
+    input <- new_data[[col]]
+    result <- .compute_normalize_auc(input)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result,
+      quantity = "normalized_signal"
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -740,12 +807,20 @@ tidy.step_measure_normalize_auc <- function(x, ...) {
 }
 
 .compute_normalize_auc <- function(dat) {
-  purrr::map(dat, .normalize_auc_single)
+  reject_singular <- !is.null(measure_value_metadata(dat))
+  purrr::map(
+    dat,
+    .normalize_auc_single,
+    reject_singular = reject_singular
+  )
 }
 
-.normalize_auc_single <- function(x) {
+.normalize_auc_single <- function(x, reject_singular = FALSE) {
   n <- nrow(x)
   if (n < 2) {
+    if (reject_singular) {
+      .abort_tagged_normalization("at least two points are required for AUC")
+    }
     cli::cli_warn("Need at least 2 points for AUC; returning original values.")
     return(x)
   }
@@ -755,7 +830,11 @@ tidy.step_measure_normalize_auc <- function(x, ...) {
   y_avg <- (x$value[-n] + x$value[-1]) / 2
   auc <- sum(dx * y_avg, na.rm = TRUE)
 
-  if (is.na(auc) || abs(auc) < .Machine$double.eps) {
+  invalid <- is.na(auc) || abs(auc) < .Machine$double.eps
+  if (reject_singular && (invalid || !is.finite(auc))) {
+    .abort_tagged_normalization("the AUC is zero, missing, or non-finite")
+  }
+  if (invalid) {
     cli::cli_warn(
       "AUC is zero or NA for a spectrum; returning original values."
     )
@@ -929,13 +1008,19 @@ prep.step_measure_normalize_peak <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_normalize_peak <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
     result <- .compute_normalize_peak(
-      new_data[[col]],
+      input,
       location_min = object$location_min,
       location_max = object$location_max,
       method = object$method
     )
-    new_data[[col]] <- new_measure_list(result)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result,
+      quantity = "normalized_signal",
+      unit = if (identical(object$method, "integral")) NULL else "1"
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -985,23 +1070,39 @@ tidy.step_measure_normalize_peak <- function(x, ...) {
   }
 }
 
-.compute_normalize_peak <- function(dat, location_min, location_max, method) {
+.compute_normalize_peak <- function(
+  dat,
+  location_min,
+  location_max,
+  method
+) {
+  reject_singular <- !is.null(measure_value_metadata(dat))
   purrr::map(
     dat,
     .normalize_peak_single,
     location_min = location_min,
     location_max = location_max,
-    method = method
+    method = method,
+    reject_singular = reject_singular
   )
 }
 
-.normalize_peak_single <- function(x, location_min, location_max, method) {
+.normalize_peak_single <- function(
+  x,
+  location_min,
+  location_max,
+  method,
+  reject_singular = FALSE
+) {
   # Select values in the region
   in_region <- x$location >= location_min & x$location <= location_max
   region_locs <- x$location[in_region]
   region_values <- x$value[in_region]
 
   if (length(region_values) == 0) {
+    if (reject_singular) {
+      .abort_tagged_normalization("the peak region has no values")
+    }
     cli::cli_warn(
       "No values in region [{location_min}, {location_max}]; returning original values."
     )
@@ -1015,6 +1116,11 @@ tidy.step_measure_normalize_peak <- function(x, ...) {
     "integral" = {
       n <- length(region_values)
       if (n < 2) {
+        if (reject_singular) {
+          .abort_tagged_normalization(
+            "at least two points are required for an integral peak normalizer"
+          )
+        }
         mean(region_values, na.rm = TRUE)
       } else {
         dx <- diff(region_locs)
@@ -1024,7 +1130,13 @@ tidy.step_measure_normalize_peak <- function(x, ...) {
     }
   )
 
-  if (is.na(normalizer) || abs(normalizer) < .Machine$double.eps) {
+  invalid <- is.na(normalizer) || abs(normalizer) < .Machine$double.eps
+  if (reject_singular && (invalid || !is.finite(normalizer))) {
+    .abort_tagged_normalization(
+      "the peak normalizer is zero, missing, or non-finite"
+    )
+  }
+  if (invalid) {
     cli::cli_warn("Normalizer is zero or NA; returning original values.")
     return(x)
   }

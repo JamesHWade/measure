@@ -138,13 +138,17 @@ prep.step_measure_smooth_ma <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_smooth_ma <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
     result <- purrr::map(
-      new_data[[col]],
+      input,
       .smooth_ma_single,
       window = object$window,
       edge_method = object$edge_method
     )
-    new_data[[col]] <- new_measure_list(result)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -327,13 +331,17 @@ prep.step_measure_smooth_median <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_smooth_median <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
     result <- purrr::map(
-      new_data[[col]],
+      input,
       .smooth_median_single,
       window = object$window,
       edge_method = object$edge_method
     )
-    new_data[[col]] <- new_measure_list(result)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -540,14 +548,18 @@ prep.step_measure_smooth_gaussian <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_smooth_gaussian <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
     result <- purrr::map(
-      new_data[[col]],
+      input,
       .smooth_gaussian_single,
       sigma = object$sigma,
       window = object$window,
       edge_method = object$edge_method
     )
-    new_data[[col]] <- new_measure_list(result)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result
+    )
   }
   tibble::as_tibble(new_data)
 }
@@ -747,13 +759,17 @@ prep.step_measure_filter_fourier <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_filter_fourier <- function(object, new_data, ...) {
   for (col in object$measures) {
+    input <- new_data[[col]]
     result <- purrr::map(
-      new_data[[col]],
+      input,
       .filter_fourier_single,
       cutoff = object$cutoff,
       type = object$type
     )
-    new_data[[col]] <- new_measure_list(result)
+    new_data[[col]] <- .measure_operation_result(
+      input,
+      result
+    )
   }
   tibble::as_tibble(new_data)
 }
