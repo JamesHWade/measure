@@ -250,8 +250,8 @@ test_that("typed normalization rejects a singular sample in a fresh bake", {
     "Cannot normalize tagged measurement values"
   )
 
-  result <- expect_warning(
-    bake(rec, new_data = fresh_untagged),
+  expect_warning(
+    result <- bake(rec, new_data = fresh_untagged),
     "zero or NA"
   )
   expect_equal(
