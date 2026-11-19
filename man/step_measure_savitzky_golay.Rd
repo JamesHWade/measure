@@ -65,9 +65,10 @@ spaced,
 and all measurements processed together must have identical locations. The
 output retains the original location labels at the centers of each window.
 Calculations use unit spacing between measurement indices. Differentiation
-therefore follows \code{prospectr::savitzkyGolay()} with \code{delta.wav = 1}
-and is scaled per index step, without adjustment for the numeric spacing
-between location labels.
+therefore follows \code{prospectr::savitzkyGolay()} with \code{delta.wav = 1} and is
+scaled per index step, without adjustment for the numeric spacing between
+location labels. Smoothing preserves the declared quantity and unit. A
+positive order records \code{signal_derivative} and leaves its unit unspecified.
 
 The polynomial degree should be less than the window size. Also, window
 size must be greater than polynomial degree. If either case is true, the
