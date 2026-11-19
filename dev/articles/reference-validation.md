@@ -1175,7 +1175,7 @@ print(report)
 #> Method: Simulated Assay
 #> Analyst: Example analyst
 #> Lab: Example laboratory
-#> Date: 2026-11-16
+#> Date: 2026-11-19
 #> 
 #> ── Validation Sections ──
 #> 
@@ -1196,7 +1196,7 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-11-16 15:21:32.000916
+#> Generated: 2026-11-19 02:34:36.086462
 #> R version: 4.6.2
 #> measure version: 0.0.1.9003
 #> 
@@ -1212,7 +1212,7 @@ summary(report)
 #> 
 #> ── Validation Report Summary ───────────────────────────────────────────────────
 #> Method: Simulated Assay
-#> Date: 2026-11-16
+#> Date: 2026-11-19
 #> 
 #> # A tibble: 9 × 4
 #>   section                 status n_results notes             
