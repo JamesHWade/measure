@@ -1,3 +1,9 @@
+# measure 0.0.1.9004
+
+* Use `set_measure_value_metadata()` to declare what the values in a
+  measurement column represent and `measure_value_metadata()` to read the
+  declaration. Compatible declarations survive row slicing and binding.
+
 # measure 0.0.1.9003
 
 * Guides and the homepage now pair preprocessing, records, acquisitions and

@@ -434,6 +434,8 @@ reference:
   - new_measure_list
   - is_measure_tbl
   - is_measure_list
+  - measure_value_metadata
+  - set_measure_value_metadata
   - find_measure_cols
   - has_measure_col
   - required_pkgs.recipe

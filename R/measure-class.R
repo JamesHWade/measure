@@ -305,7 +305,8 @@ obj_print_data.measure_list <- function(x, ...) {
 #' @export
 `[.measure_list` <- function(x, i, ...) {
   out <- NextMethod()
-  new_measure_list(out)
+  out <- new_measure_list(out)
+  .measure_attach_value_metadata(out, x)
 }
 
 #' @rdname vctrs-methods
@@ -320,8 +321,14 @@ obj_print_data.measure_list <- function(x, ...) {
 #' @export
 c.measure_list <- function(...) {
   dots <- list(...)
+  metadata <- .measure_validate_common_value_metadata(dots)
   all_elements <- unlist(lapply(dots, unclass), recursive = FALSE)
-  new_measure_list(all_elements)
+  out <- new_measure_list(all_elements)
+  if (!is.null(metadata)) {
+    attr(out, .measure_value_metadata_attr) <- metadata
+  }
+
+  out
 }
 
 # ------------------------------------------------------------------------------
