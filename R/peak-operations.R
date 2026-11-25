@@ -233,8 +233,16 @@ find_peaks_cols <- function(data) {
   value,
   min_prominence = 0,
   min_height = 0,
-  min_distance = 0
+  min_distance = 0,
+  boundary_baseline = NULL,
+  boundary_tolerance = NULL
 ) {
+  band <- .prominence_boundary_band(
+    location,
+    value,
+    boundary_baseline,
+    boundary_tolerance
+  )
   n <- length(value)
   if (n < 3) {
     return(new_peaks_tbl())
@@ -365,6 +373,15 @@ find_peaks_cols <- function(data) {
     left_bases,
     right_bases
   )
+  if (!is.null(band)) {
+    clipped_bases <- .prominence_return_bounds(
+      location,
+      value,
+      peaks_idx,
+      clipped_bases,
+      band
+    )
+  }
 
   # Evaluate contour coordinates before tibble construction so `location`
   # cannot resolve to the new peak-location column inside `tibble()`.
@@ -418,6 +435,50 @@ find_peaks_cols <- function(data) {
 
 .is_peak_tune_parameter <- function(x) {
   rlang::is_call(x, "tune")
+}
+
+.validate_peak_tuning <- function(step, preparing = FALSE) {
+  params <- step$algorithm_params
+  nested <- vapply(params, .contains_tune_marker, logical(1))
+  if (any(nested)) {
+    keys <- names(params)
+    if (
+      is.null(keys) || anyNA(keys) || !all(nzchar(keys)) || anyDuplicated(keys)
+    ) {
+      cli::cli_abort(
+        "Tuning {.arg algorithm_params} requires unique, non-empty parameter names."
+      )
+    }
+    markers <- keys[nested]
+    unsupported <- setdiff(markers, .peak_cwt_tunable_names(step))
+    if (length(unsupported)) {
+      cli::cli_abort(
+        "Nested tuning is unsupported for {.val {unsupported}} with detector {.val {step$algorithm}}."
+      )
+    }
+    if (!all(vapply(params[nested], .is_peak_tune_parameter, logical(1)))) {
+      cli::cli_abort(
+        "Supply a single {.fn tune::tune} marker for each tunable detector parameter."
+      )
+    }
+    if (preparing) {
+      cli::cli_abort(
+        "Finalize the unresolved detector tuning parameters {.val {markers}} before preparing the recipe."
+      )
+    }
+  }
+
+  direct <- c("min_height", "min_distance", "min_prominence", "snr_threshold")
+  tuned <- direct[vapply(step[direct], .is_peak_tune_parameter, logical(1))]
+  overridden <- intersect(tuned, names(params))
+  if ("snr_threshold" %in% tuned && "min_height" %in% names(params)) {
+    overridden <- union(overridden, "snr_threshold")
+  }
+  if (length(overridden)) {
+    cli::cli_abort(
+      "An entry in {.arg algorithm_params} overrides the direct tuning parameter {.val {overridden}}."
+    )
+  }
 }
 
 .tidy_peak_parameter <- function(x) {
@@ -572,8 +633,10 @@ find_peaks_cols <- function(data) {
 #' height and prominence use signal units, distance uses x-axis units, and SNR
 #' uses MAD units. Adjust the ranges to the measurement scale. Prominence is
 #' offered as a tunable threshold only for the built-in prominence algorithm.
-#' Tuning covers these direct scalar arguments; values inside
-#' `algorithm_params` are not extracted as recipe tuning parameters.
+#' For the built-in CWT detector, use, for example,
+#' `algorithm_params = list(min_snr = tune::tune("ridge_snr"))` to search
+#' over wavelet ridge SNR. A grid column named `ridge_snr` supplies the
+#' candidate values. See [cwt_min_snr()] for the supported scalar controls.
 #'
 #' **Peak properties stored:**
 #'
@@ -594,6 +657,26 @@ find_peaks_cols <- function(data) {
 #' neighboring peak does not create a boundary. A low sample can also be far
 #' from its peak on a noisy or sloped baseline, so these bounds do not by
 #' themselves remove baseline or noise bias.
+#'
+#' To end a prominence peak when the signal returns to a known baseline,
+#' supply both `boundary_baseline` and `boundary_tolerance` in
+#' `algorithm_params`. The baseline is a finite signal level or a function
+#' of the location vector returning a level or one value per location.
+#' Set the positive tolerance in signal units, for example from independent
+#' blank or noise measurements. For a zero-corrected trace with a noise
+#' standard deviation of 0.05, `list(boundary_baseline = 0,
+#' boundary_tolerance = 0.15)` places the band three standard deviations
+#' above zero.
+#'
+#' Starting at the apex, each boundary is the nearest sample on that side
+#' at or below baseline plus tolerance, inside the default clipped bounds.
+#' This requires a finite signal on a strictly monotonic axis, an apex above
+#' the band and a sampled return on both sides. An unresolved peak raises an
+#' error with its location. A noise excursion can end a window early, and
+#' unresolved neighbors can contribute to the same window if the signal
+#' stays above the band between them. The original contours still determine
+#' prominence. Integration uses its own `baseline` setting.
+#'
 #' Deconvolution uses current `left_base` and `right_base` as finite limits, so
 #' fitted areas omit model tails outside them.
 #'
@@ -662,22 +745,21 @@ step_measure_peaks_detect <- function(
     cli::cli_abort("{.arg algorithm_params} must be a list.")
   }
 
-  recipes::add_step(
-    recipe,
-    step_measure_peaks_detect_new(
-      algorithm = algorithm,
-      min_height = min_height,
-      min_distance = min_distance,
-      min_prominence = min_prominence,
-      snr_threshold = snr_threshold,
-      algorithm_params = algorithm_params,
-      measures = measures,
-      role = role,
-      trained = trained,
-      skip = skip,
-      id = id
-    )
+  step <- step_measure_peaks_detect_new(
+    algorithm = algorithm,
+    min_height = min_height,
+    min_distance = min_distance,
+    min_prominence = min_prominence,
+    snr_threshold = snr_threshold,
+    algorithm_params = algorithm_params,
+    measures = measures,
+    role = role,
+    trained = trained,
+    skip = skip,
+    id = id
   )
+  .validate_peak_tuning(step)
+  recipes::add_step(recipe, step)
 }
 
 step_measure_peaks_detect_new <- function(
@@ -711,6 +793,7 @@ step_measure_peaks_detect_new <- function(
 
 #' @export
 prep.step_measure_peaks_detect <- function(x, training, info = NULL, ...) {
+  .validate_peak_tuning(x, preparing = TRUE)
   .validate_peak_detection_parameters(
     x$min_height,
     x$min_distance,
@@ -893,12 +976,16 @@ tidy.step_measure_peaks_detect <- function(x, ...) {
 #'
 #' - `"global"`: Subtracts the minimum value in the peak region.
 #'
-#' For prominence-based detection, `left_base` and `right_base` are clipped to
+#' By default for prominence-based detection, `left_base` and `right_base` are clipped to
 #' the lowest sampled value between adjacent retained peaks. Ties use the
 #' first sample in acquisition order. Only retained peaks define these bounds:
 #' an adjacent peak removed by a detection threshold does not split the
 #' interval. Consequently a bound can remain wide or include baseline/noise,
 #' and `baseline = "none"` retains any background signal within the interval.
+#' When the detector uses `boundary_baseline` and `boundary_tolerance`,
+#' integration uses the sampled return bounds from [step_measure_peaks_detect()].
+#' The supplied reference sets the window only. With `baseline = "local"`,
+#' the integrator draws its baseline through the observed window endpoints.
 #' Deconvolution uses current `left_base` and `right_base` as finite limits, so
 #' fitted areas omit model tails outside them.
 #'

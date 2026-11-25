@@ -32,8 +32,15 @@
 #' `min_height` remains in original signal units; `min_distance` remains in
 #' measurement-axis units. Nearby ridges can generate multiple candidates
 #' within one broad or noisy feature. Set `min_distance` for the separation
-#' appropriate to the measurement. Values nested in `algorithm_params` are
-#' currently not extracted as recipe tuning parameters.
+#' appropriate to the measurement.
+#'
+#' @section Tuning:
+#' To vary the minimum wavelet SNR across resamples, use
+#' `algorithm_params = list(min_snr = tune::tune("ridge_snr"))` and supply a
+#' grid with a `ridge_snr` column to `tune::tune_grid()`. With an unnamed
+#' marker, the default ID is `cwt_min_snr`. Ridge length, gap, noise window
+#' and noise quantile follow the same convention. Keep `scales` fixed to the
+#' widths appropriate for the sampled signal. See [cwt_min_snr()] for ranges.
 #'
 #' @section Axes, missing data, and output:
 #' The location axis must be finite, strictly monotonic, and uniformly spaced.

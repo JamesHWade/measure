@@ -244,6 +244,7 @@ reference:
   - peak_min_distance
   - peak_min_prominence
   - peak_snr_threshold
+  - cwt_min_snr
   - peak_fit_r_squared
   - peak_fit_iterations
   - derivative_order

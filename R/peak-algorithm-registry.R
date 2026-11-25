@@ -36,12 +36,16 @@
     default_params = list(
       min_prominence = 0,
       min_height = 0,
-      min_distance = 0
+      min_distance = 0,
+      boundary_baseline = NULL,
+      boundary_tolerance = NULL
     ),
     param_info = list(
       min_prominence = "Minimum peak prominence (how much peak stands out)",
       min_height = "Minimum peak height",
-      min_distance = "Minimum distance between peaks in x-axis units"
+      min_distance = "Minimum distance between peaks in x-axis units",
+      boundary_baseline = "Reference signal level or function of location for integration bounds",
+      boundary_tolerance = "Positive signal tolerance above the reference for a sampled return"
     )
   )
 

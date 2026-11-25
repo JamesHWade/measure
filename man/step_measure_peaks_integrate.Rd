@@ -63,12 +63,16 @@ peak bases before integration.
 \item \code{"global"}: Subtracts the minimum value in the peak region.
 }
 
-For prominence-based detection, \code{left_base} and \code{right_base} are clipped to
+By default for prominence-based detection, \code{left_base} and \code{right_base} are clipped to
 the lowest sampled value between adjacent retained peaks. Ties use the
 first sample in acquisition order. Only retained peaks define these bounds:
 an adjacent peak removed by a detection threshold does not split the
 interval. Consequently a bound can remain wide or include baseline/noise,
 and \code{baseline = "none"} retains any background signal within the interval.
+When the detector uses \code{boundary_baseline} and \code{boundary_tolerance},
+integration uses the sampled return bounds from \code{\link[=step_measure_peaks_detect]{step_measure_peaks_detect()}}.
+The supplied reference sets the window only. With \code{baseline = "local"},
+the integrator draws its baseline through the observed window endpoints.
 Deconvolution uses current \code{left_base} and \code{right_base} as finite limits, so
 fitted areas omit model tails outside them.
 
