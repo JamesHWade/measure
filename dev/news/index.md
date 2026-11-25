@@ -2,6 +2,19 @@
 
 ## measure 0.0.1.9004
 
+- `step_measure_peaks_detect(algorithm = "cwt")` supports tuning the
+  ridge SNR, minimum ridge length, allowed gap, noise window and noise
+  quantile. Put `tune::tune("ridge_snr")` inside
+  `algorithm_params$min_snr` to vary the wavelet threshold in a recipe
+  ([\#181](https://github.com/JamesHWade/measure/issues/181)).
+
+- Prominence detection can end an integration window when the signal
+  returns to a known baseline. Supply `boundary_baseline` and
+  `boundary_tolerance` in `algorithm_params` to keep a separated,
+  filtered-out neighbor from contributing to the area. The default still
+  uses valleys between retained peaks
+  ([\#131](https://github.com/JamesHWade/measure/issues/131)).
+
 - [`measure_slice_table()`](https://jameshwade.github.io/measure/dev/reference/measure_summary_table.md)
   returns one row per measurement point, and
   [`measure_summary_table()`](https://jameshwade.github.io/measure/dev/reference/measure_summary_table.md)

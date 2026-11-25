@@ -98,8 +98,18 @@ outside the immediate peak support used to estimate local noise.</p></li>
 </ul><p><code>min_height</code> remains in original signal units; <code>min_distance</code> remains in
 measurement-axis units. Nearby ridges can generate multiple candidates
 within one broad or noisy feature. Set <code>min_distance</code> for the separation
-appropriate to the measurement. Values nested in <code>algorithm_params</code> are
-currently not extracted as recipe tuning parameters.</p>
+appropriate to the measurement.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="tuning">Tuning<a class="anchor" aria-label="anchor" href="#tuning"></a></h2>
+
+
+<p>To vary the minimum wavelet SNR across resamples, use
+<code>algorithm_params = list(min_snr = tune::tune("ridge_snr"))</code> and supply a
+grid with a <code>ridge_snr</code> column to <code><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune::tune_grid()</a></code>. With an unnamed
+marker, the default ID is <code>cwt_min_snr</code>. Ridge length, gap, noise window
+and noise quantile follow the same convention. Keep <code>scales</code> fixed to the
+widths appropriate for the sampled signal. See <code><a href="cwt_min_snr.html">cwt_min_snr()</a></code> for ranges.</p>
     </div>
     <div class="section level2">
     <h2 id="axes-missing-data-and-output">Axes, missing data, and output<a class="anchor" aria-label="anchor" href="#axes-missing-data-and-output"></a></h2>

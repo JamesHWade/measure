@@ -799,6 +799,12 @@ Parameters for hyperparameter tuning with dials
   [`peak_fit_r_squared()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
   [`peak_fit_iterations()`](https://jameshwade.github.io/measure/dev/reference/peak_min_height.md)
   : Peak detection and deconvolution tuning parameters
+- [`cwt_min_snr()`](https://jameshwade.github.io/measure/dev/reference/cwt_min_snr.md)
+  [`cwt_min_ridge_length()`](https://jameshwade.github.io/measure/dev/reference/cwt_min_snr.md)
+  [`cwt_gap_thresh()`](https://jameshwade.github.io/measure/dev/reference/cwt_min_snr.md)
+  [`cwt_noise_window()`](https://jameshwade.github.io/measure/dev/reference/cwt_min_snr.md)
+  [`cwt_noise_quantile()`](https://jameshwade.github.io/measure/dev/reference/cwt_min_snr.md)
+  : CWT peak detection tuning parameters
 - [`derivative_order()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
   [`derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)
   [`derivative_segment()`](https://jameshwade.github.io/measure/dev/reference/derivative_order.md)

@@ -1926,6 +1926,56 @@ shift/scale-invariant models
 | [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md) | Separate overlapping peaks | Resolve co-eluting peaks |
 | [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md) | Wide format output | Modeling with peak features |
 
+#### Integrating a peak next to a filtered neighbor
+
+This synthetic trace contains Gaussians at 3, 6 and 9 minutes on a known
+sloping background. A prominence threshold of 10 excludes the middle
+peak from the peak table. Its signal is still present in the trace. To
+keep that signal out of the other two areas, end each integration window
+when the trace falls within 0.02 signal units of the background.
+
+``` r
+
+time <- seq(0, 12, by = 0.01)
+peak <- function(center, height) height * exp(-0.5 * ((time - center) / 0.1)^2)
+background <- function(time) 0.02 * time
+trace <- tibble::tibble(
+  sample = "A", time = time,
+  signal = background(time) + peak(3, 80) + peak(6, 5) + peak(9, 35)
+)
+integrate_trace <- function(bounds) {
+  result <- recipe(~ ., data = trace) |>
+    update_role(sample, new_role = "id") |>
+    step_measure_input_long(signal, location = vars(time)) |>
+    step_measure_peaks_detect(min_prominence = 10, algorithm_params = bounds) |>
+    step_measure_peaks_integrate(baseline = "local") |>
+    prep() |>
+    bake(new_data = NULL)
+  result$.peaks[[1L]]
+}
+default <- integrate_trace(list())
+bounded <- integrate_trace(list(
+  boundary_baseline = background, boundary_tolerance = 0.02
+))
+tibble::tibble(
+  time = bounded$location,
+  default_area = default$area,
+  return_area = bounded$area,
+  generating_area = c(80, 35) * 0.1 * sqrt(2 * pi)
+)
+#> # A tibble: 2 × 4
+#>    time default_area return_area generating_area
+#>   <dbl>        <dbl>       <dbl>           <dbl>
+#> 1     3         20.1       20.0            20.1 
+#> 2     9         10.0        8.76            8.77
+```
+
+The generating area includes the full Gaussian tails. The sampled return
+window omits those tails and local integration subtracts the line
+through its two observed endpoints. On instrument data, choose the
+reference and tolerance from evidence about the background and its
+variability.
+
 ### SEC/GPC Analysis
 
 | Step | Effect | Use when |

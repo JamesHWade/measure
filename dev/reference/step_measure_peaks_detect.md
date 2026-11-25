@@ -128,8 +128,12 @@ The default search ranges are only starting points: height and
 prominence use signal units, distance uses x-axis units, and SNR uses
 MAD units. Adjust the ranges to the measurement scale. Prominence is
 offered as a tunable threshold only for the built-in prominence
-algorithm. Tuning covers these direct scalar arguments; values inside
-`algorithm_params` are not extracted as recipe tuning parameters.
+algorithm. For the built-in CWT detector, use, for example,
+`algorithm_params = list(min_snr = tune::tune("ridge_snr"))` to search
+over wavelet ridge SNR. A grid column named `ridge_snr` supplies the
+candidate values. See
+[`cwt_min_snr()`](https://jameshwade.github.io/measure/dev/reference/cwt_min_snr.md)
+for the supported scalar controls.
 
 **Peak properties stored:**
 
@@ -156,9 +160,29 @@ retained in `prominence_left_base` and `prominence_right_base` for
 prominence calculations. This rule considers retained peaks only, so a
 filtered-out neighboring peak does not create a boundary. A low sample
 can also be far from its peak on a noisy or sloped baseline, so these
-bounds do not by themselves remove baseline or noise bias. Deconvolution
-uses current `left_base` and `right_base` as finite limits, so fitted
-areas omit model tails outside them.
+bounds do not by themselves remove baseline or noise bias.
+
+To end a prominence peak when the signal returns to a known baseline,
+supply both `boundary_baseline` and `boundary_tolerance` in
+`algorithm_params`. The baseline is a finite signal level or a function
+of the location vector returning a level or one value per location. Set
+the positive tolerance in signal units, for example from independent
+blank or noise measurements. For a zero-corrected trace with a noise
+standard deviation of 0.05,
+`list(boundary_baseline = 0, boundary_tolerance = 0.15)` places the band
+three standard deviations above zero.
+
+Starting at the apex, each boundary is the nearest sample on that side
+at or below baseline plus tolerance, inside the default clipped bounds.
+This requires a finite signal on a strictly monotonic axis, an apex
+above the band and a sampled return on both sides. An unresolved peak
+raises an error with its location. A noise excursion can end a window
+early, and unresolved neighbors can contribute to the same window if the
+signal stays above the band between them. The original contours still
+determine prominence. Integration uses its own `baseline` setting.
+
+Deconvolution uses current `left_base` and `right_base` as finite
+limits, so fitted areas omit model tails outside them.
 
 Use
 [`step_measure_peaks_properties()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_properties.md)

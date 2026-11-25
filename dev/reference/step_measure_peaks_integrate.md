@@ -81,15 +81,20 @@ The areas are stored in the `area` column of the `.peaks` tibble.
 
 - `"global"`: Subtracts the minimum value in the peak region.
 
-For prominence-based detection, `left_base` and `right_base` are clipped
-to the lowest sampled value between adjacent retained peaks. Ties use
-the first sample in acquisition order. Only retained peaks define these
-bounds: an adjacent peak removed by a detection threshold does not split
-the interval. Consequently a bound can remain wide or include
-baseline/noise, and `baseline = "none"` retains any background signal
-within the interval. Deconvolution uses current `left_base` and
-`right_base` as finite limits, so fitted areas omit model tails outside
-them.
+By default for prominence-based detection, `left_base` and `right_base`
+are clipped to the lowest sampled value between adjacent retained peaks.
+Ties use the first sample in acquisition order. Only retained peaks
+define these bounds: an adjacent peak removed by a detection threshold
+does not split the interval. Consequently a bound can remain wide or
+include baseline/noise, and `baseline = "none"` retains any background
+signal within the interval. When the detector uses `boundary_baseline`
+and `boundary_tolerance`, integration uses the sampled return bounds
+from
+[`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md).
+The supplied reference sets the window only. With `baseline = "local"`,
+the integrator draws its baseline through the observed window endpoints.
+Deconvolution uses current `left_base` and `right_base` as finite
+limits, so fitted areas omit model tails outside them.
 
 Peaks with fitted model metadata from
 [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md)
