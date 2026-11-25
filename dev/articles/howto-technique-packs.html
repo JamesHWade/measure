@@ -176,6 +176,13 @@ from the step function and its <code><a href="https://recipes.tidymodels.org/ref
 implementation. A pack can implement a step itself, or compose an
 existing public step when that already expresses the needed
 operation.</p>
+<p>Discovery reflects what has registered in the current R session. For
+example, <code>loadNamespace("measure.sec")</code> runs the companion
+package’s <code>.onLoad()</code> and makes its SEC/GPC steps
+discoverable. Its metadata stays in the registry after the companion is
+unloaded. Loading the companion again updates the same entries. To start
+with a fresh registry, start a new R session and load the packs you
+need.</p>
 </div>
 <div class="section level2">
 <h2 id="a-runnable-step-built-from-the-public-api">A runnable step built from the public API<a class="anchor" aria-label="anchor" href="#a-runnable-step-built-from-the-public-api"></a>

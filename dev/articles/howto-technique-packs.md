@@ -62,6 +62,13 @@ the step function and its
 implementation. A pack can implement a step itself, or compose an
 existing public step when that already expresses the needed operation.
 
+Discovery reflects what has registered in the current R session. For
+example, `loadNamespace("measure.sec")` runs the companion package’s
+`.onLoad()` and makes its SEC/GPC steps discoverable. Its metadata stays
+in the registry after the companion is unloaded. Loading the companion
+again updates the same entries. To start with a fresh registry, start a
+new R session and load the packs you need.
+
 ## A runnable step built from the public API
 
 This minimal pack step centers each sample’s measurements. It delegates
