@@ -97,3 +97,34 @@
       Caused by error in `prep()`:
       ! 100 columns were selected as inputs but `location_values` has 2 values.
 
+# wide input reports missing trained columns
+
+    Code
+      bake.step_measure_input_wide(rec$steps[[1]], training[c("sample_id", "x_001",
+        "outcome")])
+    Condition
+      Error in `bake.step_measure_input_wide()`:
+      ! Required measurement column not found in `new_data`: x_002.
+      i These columns were selected when the recipe was prepared.
+
+# wide input rejects matrix-valued measurement columns
+
+    Code
+      prep(step_measure_input_wide(recipe(outcome ~ ., data = training), measurements))
+    Condition
+      Error in `step_measure_input_wide()`:
+      Caused by error in `check_wide_measure_columns()`:
+      ! Wide measurement columns must be scalar numeric vectors.
+      x Array-valued column selected: measurements.
+
+# wide input rejects output column collisions
+
+    Code
+      prep(step_measure_input_wide(recipe(outcome ~ ., data = training), x_001:x_002,
+      col_name = "sample_id"))
+    Condition
+      Error in `step_measure_input_wide()`:
+      Caused by error in `bake()`:
+      ! Output column sample_id already exists in `new_data`.
+      i Choose a different `col_name` or remove the existing column.
+

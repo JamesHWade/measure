@@ -147,11 +147,13 @@ reference:
   contents:
   - step_measure_calibrate_x
   - step_measure_calibrate_y
-- title: Output Steps
-  desc: Convert internal format back to modeling-ready data
+- title: Output Steps and Tables
+  desc: Prepare modeling data or extract tables from processed measurements
   contents:
   - step_measure_output_wide
   - step_measure_output_long
+  - measure_summary_table
+  - measure_slice_table
 - title: Peak Operations
   desc: Peak detection, integration, and analysis for chromatography
   contents:

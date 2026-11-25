@@ -26,7 +26,9 @@
 #'   (e.g., `c("min", "nm")`). Only used for multi-dimensional data.
 #' @param pad Whether to pad the measurements to ensure that they all have the
 #'   same number of values. This is useful when there are missing values in the
-#'   measurements.
+#'   measurements. For n-dimensional data, padding uses the union of observed
+#'   coordinate tuples across samples; it does not create unobserved Cartesian
+#'   combinations.
 #' @param columns A character vector of column names determined by the recipe.
 #'
 #' @details
@@ -67,10 +69,20 @@
 #'
 #' # Missing Data
 #'
-#' Currently, \pkg{measure} assumes that there are equal numbers of values
-#' within a sample. If there are missing values in the measurements, you'll
-#' need to pad them with missing values (as opposed to an absent row in the
-#' long format). If not, an error will occur.
+#' One-dimensional samples must have the same point count. With `pad = TRUE`,
+#' shorter samples receive missing rows up to the most frequent point count.
+#'
+#' Multidimensional samples keep their own coordinates by default. With
+#' `pad = TRUE`, each sample gets one row per distinct coordinate tuple
+#' observed in the batch being baked. The step visits samples in order and
+#' uses the first occurrence of each tuple to order the shared grid. A sample
+#' with no observation at a tuple receives a missing value. A measured
+#' missing value also remains missing. Coordinates must be finite and each
+#' tuple must be unique within its sample.
+#'
+#' Training and prediction batches can have different grids. Padding
+#' allocates one value for every sample and distinct tuple in the current
+#' batch, which can be expensive for disjoint grids.
 #'
 #' # Tidying
 #'
@@ -491,11 +503,9 @@ bake.step_measure_input_long <- function(object, new_data, ...) {
     if (ndim == 1) {
       new_data <- pad_measure_dims(new_data, col = col_name)
     } else {
-      # For nD, we don't enforce equal dimensions by default (flexible grids)
-      # Padding would be more complex - skip for now
-      cli::cli_warn(
-        "Padding is not yet implemented for multi-dimensional data.
-         Consider using {.fn step_measure_regularize} for grid alignment."
+      new_data[[col_name]] <- pad_measure_nd_dims(
+        new_data[[col_name]],
+        paste0("location_", seq_len(ndim))
       )
     }
   }
@@ -574,6 +584,24 @@ wrap_as_measure_nd_list <- function(nested_data, ndim, dim_names, dim_units) {
 
     do.call(new_measure_nd_tbl, args)
   })
+
+  if (length(result) == 0L) {
+    loc_cols <- paste0("location_", seq_len(ndim))
+    prototype_args <- stats::setNames(
+      rep(list(double()), ndim),
+      loc_cols
+    )
+    prototype_args$value <- double()
+    prototype_args$dim_names <- dim_names
+    prototype_args$dim_units <- dim_units
+    prototype <- do.call(new_measure_nd_tbl, prototype_args)
+
+    return(vctrs::new_list_of(
+      list(),
+      ptype = prototype,
+      class = c("measure_nd_list", "measure_list")
+    ))
+  }
 
   new_measure_nd_list(result)
 }

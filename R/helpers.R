@@ -1,17 +1,4 @@
 # ------------------------------------------------------------------------------
-# Add location columns
-
-add_location_col <- function(x, loc) {
-  x$location <- loc
-  x
-}
-
-add_location <- function(.data, loc, col = ".measures") {
-  .data[[col]] <- purrr::map(.data[[col]], add_location_col, loc = loc)
-  .data
-}
-
-# ------------------------------------------------------------------------------
 # Move between lists of tibbles and matrices (and back)
 # Assumes identical locations. We have code to check that the per-sample
 # dimensions are equal but nothing yet for identical locations.
