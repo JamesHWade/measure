@@ -28,7 +28,6 @@ docs
 ^doc$
 ^Meta$
 ^AGENTS\.md$
-^\.beads$
 ^[.]git$
 ^tools$
 ^[.]ruff_cache$

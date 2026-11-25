@@ -1,15 +1,15 @@
 # Agent Instructions
 
-This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
+Track bugs, feature requests, and follow-up work in [GitHub Issues](https://github.com/JamesHWade/measure/issues). Search open and closed issues before filing one. Link the issue from its pull request and close it when the work lands.
 
 ## Quick Reference
 
 ```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --status in_progress  # Claim work
-bd close <id>         # Complete work
-bd sync               # Sync with git (also commits beads changes)
+gh issue list                       # Browse the open backlog
+gh issue view <number>              # Read the issue
+gh issue edit <number> --add-assignee @me  # Claim work
+gh issue create                     # File a bug, feature, or follow-up
+gh issue close <number>             # Close completed work
 ```
 
 ## Landing the Plane (Session Completion)
@@ -24,11 +24,9 @@ bd sync               # Sync with git (also commits beads changes)
 4. **PUSH TO REMOTE** - This is MANDATORY:
    ```bash
    git pull --rebase
-   bd sync              # Commits any pending beads changes
    git push
    git status           # MUST show "up to date with origin"
    ```
-   **Note:** If `git push` fails with "uncommitted changes detected", run `bd sync` again to commit beads database updates, then retry push.
 5. **Clean up** - Clear stashes, prune remote branches
 6. **Verify** - All changes committed AND pushed
 7. **Hand off** - Provide context for next session
