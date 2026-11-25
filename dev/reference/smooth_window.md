@@ -38,12 +38,24 @@ despike_threshold(range = c(2, 10), trans = NULL)
 
 A function with classes `"quant_param"` and `"param"`.
 
+## Details
+
+Candidate widths from `smooth_window()` are odd integers of at least
+three points. Known bounds are narrowed to the first and last eligible
+widths. Use `smooth_window(range = c(4L, 14L))` to search widths 5
+through 13. When updating an existing parameter with
+[`dials::range_set()`](https://dials.tidymodels.org/reference/range_validate.html),
+supply bounds that correspond to odd widths, since that function updates
+the search range directly. With a transformation, supply bounds in
+transformed units.
+
 ## Examples
 
 ``` r
 smooth_window()
 #> Smoothing Window Size (quantitative)
-#> Range: [3, 21]
+#> Transformer: identity-odd-window [-Inf, Inf]
+#> Range (transformed scale): [3, 21]
 smooth_sigma()
 #> Gaussian Sigma (quantitative)
 #> Range: [0.5, 5]

@@ -302,6 +302,26 @@ degree.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           4                     0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           2                     2</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           4                     2</span></span></code></pre></div>
+<p>Moving-average and median filters use an odd number of points in
+their window. To tune a moving average, set
+<code>window = tune::tune("width")</code>. The grid uses that ID as its
+column name and gives widths in points.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ma_recipe</span> <span class="op">&lt;-</span> <span class="fu">make_measure_recipe</span><span class="op">(</span><span class="va">train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">measure</span><span class="fu">::</span><span class="fu"><a href="../reference/step_measure_smooth_ma.html">step_measure_smooth_ma</a></span><span class="op">(</span>window <span class="op">=</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/tune.html" class="external-link">tune</a></span><span class="op">(</span><span class="st">"width"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ma_grid</span> <span class="op">&lt;-</span> <span class="fu">dials</span><span class="fu">::</span><span class="fu"><a href="https://dials.tidymodels.org/reference/grid_regular.html" class="external-link">grid_regular</a></span><span class="op">(</span></span>
+<span>  <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_parameter_set_dials</a></span><span class="op">(</span><span class="va">ma_recipe</span><span class="op">)</span>,</span>
+<span>  levels <span class="op">=</span> <span class="fl">4</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">ma_grid</span><span class="op">$</span><span class="va">width</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ma_grid</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 1</span></span></span>
+<span><span class="co">#&gt;   width</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     9</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>    15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>    21</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="run-the-tuning">Run the tuning<a class="anchor" aria-label="anchor" href="#run-the-tuning"></a>
@@ -309,7 +329,7 @@ degree.</p>
 <p>Each of the four parameter combinations is evaluated on the same
 three training folds. The returned table shows the measured resampling
 performance.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tune_results</span> <span class="op">&lt;-</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://tune.tidymodels.org/reference/tune_grid.html" class="external-link">tune_grid</a></span><span class="op">(</span></span>
 <span>  <span class="va">wf_tune</span>,</span>
 <span>  resamples <span class="op">=</span> <span class="va">folds</span>,</span>
@@ -332,7 +352,7 @@ performance.</p>
 <div class="section level3">
 <h3 id="visualize-tuning-results">Visualize tuning results<a class="anchor" aria-label="anchor" href="#visualize-tuning-results"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">tune_results</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="st">"Savitzky-Golay window_side value"</span>,</span>
@@ -356,7 +376,7 @@ differentiation orders, summarized over three training folds.
 fixed while changing spectral preprocessing. Each workflow uses the same
 training folds; the reserved test partition does not affect the
 ranking.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_snv</span> <span class="op">&lt;-</span> <span class="fu">make_measure_recipe</span><span class="op">(</span><span class="va">train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">measure</span><span class="fu">::</span><span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">measure</span><span class="fu">::</span><span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -423,7 +443,7 @@ ranking.</p>
 <div class="section level3">
 <h3 id="evaluate-all-strategies">Evaluate all strategies<a class="anchor" aria-label="anchor" href="#evaluate-all-strategies"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu">workflowsets</span><span class="fu">::</span><span class="fu"><a href="https://workflowsets.tidymodels.org/reference/workflow_map.html" class="external-link">workflow_map</a></span><span class="op">(</span></span>
 <span>  <span class="va">wf_set</span>,</span>
 <span>  fn <span class="op">=</span> <span class="st">"fit_resamples"</span>,</span>
@@ -475,7 +495,7 @@ ranking.</p>
 <div class="section level3">
 <h3 id="visualize-comparison">Visualize comparison<a class="anchor" aria-label="anchor" href="#visualize-comparison"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">strategy_plot_data</span>,</span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
@@ -506,7 +526,7 @@ preprocessing workflows on the same three training folds.
 <p>Use the training resamples to choose the tuning values, then evaluate
 the finalized workflow on the reserved test partition once with
 <code>last_fit()</code>.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">best_params</span> <span class="op">&lt;-</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://tune.tidymodels.org/reference/show_best.html" class="external-link">select_best</a></span><span class="op">(</span><span class="va">tune_results</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span></span>
 <span><span class="va">best_params</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
@@ -533,7 +553,7 @@ partition and calculates metrics on the reserved test partition. The
 fitted workflow can then predict new spectra. The example below uses
 held-out predictors only; it does not feed predictions back into model
 selection.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">final_trained</span> <span class="op">&lt;-</span> <span class="fu">tune</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_workflow</a></span><span class="op">(</span><span class="va">final_fit</span><span class="op">)</span></span>
 <span><span class="va">new_spectra</span> <span class="op">&lt;-</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/initial_split.html" class="external-link">testing</a></span><span class="op">(</span><span class="va">split</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">sample_id</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -578,7 +598,7 @@ resampling workflow.</li>
 <p><code><a href="https://recipes.tidymodels.org/reference/step_pca.html" class="external-link">step_pca()</a></code> expects ordinary numeric columns, so place it
 after <code><a href="../reference/step_measure_output_wide.html">step_measure_output_wide()</a></code>. In a workflow, the PCA
 rotation is estimated within each analysis fold.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_for_pca</span> <span class="op">&lt;-</span> <span class="fu">make_measure_recipe</span><span class="op">(</span><span class="va">train</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">measure</span><span class="fu">::</span><span class="fu"><a href="../reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">measure</span><span class="fu">::</span><span class="fu"><a href="../reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -615,7 +635,7 @@ ordinary numeric predictor columns.</p>
 <h3 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a>
 </h3>
 <p>Set a seed before creating resamples or random tuning grids:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">reproducible_folds</span> <span class="op">&lt;-</span> <span class="fu">rsample</span><span class="fu">::</span><span class="fu"><a href="https://rsample.tidymodels.org/reference/vfold_cv.html" class="external-link">vfold_cv</a></span><span class="op">(</span><span class="va">train</span>, v <span class="op">=</span> <span class="fl">3</span>, strata <span class="op">=</span> <span class="va">water</span><span class="op">)</span></span>
 <span><span class="va">reproducible_folds</span></span>

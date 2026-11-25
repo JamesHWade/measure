@@ -2,6 +2,15 @@
 
 ## measure 0.0.1.9004
 
+- Moving-average and median smoothing, despiking, shift alignment,
+  finite and gap derivatives, and airPLS and arPLS baseline correction
+  now accept
+  [`tune::tune()`](https://hardhat.tidymodels.org/reference/tune.html)
+  for their advertised controls.
+  [`smooth_window()`](https://jameshwade.github.io/measure/dev/reference/smooth_window.md)
+  generates odd widths for filters that require a central point
+  ([\#193](https://github.com/JamesHWade/measure/issues/193)).
+
 - Preprocessing steps that learn a value at each measurement location
   now check the ordered coordinates at training and prediction. This
   prevents shifted spectra from being processed or labelled on the wrong

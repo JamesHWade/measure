@@ -233,6 +233,29 @@ grid
 #> 4           4                     2
 ```
 
+Moving-average and median filters use an odd number of points in their
+window. To tune a moving average, set `window = tune::tune("width")`.
+The grid uses that ID as its column name and gives widths in points.
+
+``` r
+
+ma_recipe <- make_measure_recipe(train) |>
+  measure::step_measure_smooth_ma(window = tune::tune("width"))
+ma_grid <- dials::grid_regular(
+  tune::extract_parameter_set_dials(ma_recipe),
+  levels = 4
+)
+stopifnot(all(ma_grid$width %% 2 == 1))
+ma_grid
+#> # A tibble: 4 × 1
+#>   width
+#>   <int>
+#> 1     3
+#> 2     9
+#> 3    15
+#> 4    21
+```
+
 ### Run the tuning
 
 Each of the four parameter combinations is evaluated on the same three

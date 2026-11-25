@@ -99,12 +99,22 @@ transformation, <code>NULL</code>.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A function with classes <code>"quant_param"</code> and <code>"param"</code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Candidate widths from <code>smooth_window()</code> are odd integers of at least three
+points. Known bounds are narrowed to the first and last eligible widths.
+Use <code>smooth_window(range = c(4L, 14L))</code> to search widths 5 through 13.
+When updating an existing parameter with <code><a href="https://dials.tidymodels.org/reference/range_validate.html" class="external-link">dials::range_set()</a></code>, supply bounds
+that correspond to odd widths, since that function updates the search range
+directly. With a transformation, supply bounds in transformed units.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">smooth_window</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Smoothing Window Size (quantitative)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Range: [3, 21]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Transformer: identity-odd-window [-Inf, Inf]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Range (transformed scale): [3, 21]</span>
 <span class="r-in"><span><span class="fu">smooth_sigma</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Gaussian Sigma (quantitative)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Range: [0.5, 5]</span>
