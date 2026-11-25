@@ -68,7 +68,9 @@ step_measure_input_long(
 
   Whether to pad the measurements to ensure that they all have the same
   number of values. This is useful when there are missing values in the
-  measurements.
+  measurements. For n-dimensional data, padding uses the union of
+  observed coordinate tuples across samples; it does not create
+  unobserved Cartesian combinations.
 
 - role:
 
@@ -136,10 +138,21 @@ The result will be a `measure_nd_list` column instead of a
 
 ## Missing Data
 
-Currently, measure assumes that there are equal numbers of values within
-a sample. If there are missing values in the measurements, you'll need
-to pad them with missing values (as opposed to an absent row in the long
-format). If not, an error will occur.
+One-dimensional samples must have the same point count. With
+`pad = TRUE`, shorter samples receive missing rows up to the most
+frequent point count.
+
+Multidimensional samples keep their own coordinates by default. With
+`pad = TRUE`, each sample gets one row per distinct coordinate tuple
+observed in the batch being baked. The step visits samples in order and
+uses the first occurrence of each tuple to order the shared grid. A
+sample with no observation at a tuple receives a missing value. A
+measured missing value also remains missing. Coordinates must be finite
+and each tuple must be unique within its sample.
+
+Training and prediction batches can have different grids. Padding
+allocates one value for every sample and distinct tuple in the current
+batch, which can be expensive for disjoint grids.
 
 ## Tidying
 

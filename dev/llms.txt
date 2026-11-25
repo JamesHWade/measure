@@ -610,14 +610,17 @@ X-axis and Y-axis calibration steps
 - [`step_measure_calibrate_y()`](https://jameshwade.github.io/measure/dev/reference/step_measure_calibrate_y.md)
   : Apply Y-Axis Calibration (Response Factor)
 
-## Output Steps
+## Output Steps and Tables
 
-Convert internal format back to modeling-ready data
+Prepare modeling data or extract tables from processed measurements
 
 - [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)
   : Reorganize Measurements to Separate Columns
 - [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md)
   : Reorganize Measurements to Long Format
+- [`measure_summary_table()`](https://jameshwade.github.io/measure/dev/reference/measure_summary_table.md)
+  [`measure_slice_table()`](https://jameshwade.github.io/measure/dev/reference/measure_summary_table.md)
+  : Export processed measurements as tables
 
 ## Peak Operations
 

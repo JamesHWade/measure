@@ -46,8 +46,8 @@ step_measure_input_wide(
 
   A character string of the selected variable names. This field is a
   placeholder and will be populated once
-  [`recipes::prep()`](https://recipes.tidymodels.org/reference/prep.html)
-  is used.
+  [`prep()`](https://recipes.tidymodels.org/reference/prep.html) is
+  used.
 
 - location_values:
 
@@ -86,15 +86,18 @@ measurements are in separate columns.
 `step_measure_input_wide()` will collect those data and put them into a
 format used internally by this package. The data structure has a row for
 each independent experimental unit and a nested tibble with that
-sample's measure (measurement and location). It assumes that there are
-unique combinations of the other columns in the data that define
-individual patterns associated with the pattern. If this is not the
-case, the special values might be inappropriately restructured.
+sample's measure (measurement and location). All columns that are not
+selected as measurements are retained as row-level metadata.
 
-The best advice is to have a column of any type that indicates the
-unique sample number for each measure. For example, if there are 20 rows
-in the input data set, the columns that are *not* analytically
-measurements show have no duplicate combinations in the 20 rows.
+Each input row produces one output row and one nested measurement. A
+sample identifier is still recommended for downstream joins and
+diagnostics, but duplicate values in the non-measurement columns do not
+merge input rows.
+
+The selected column names and their axis order are fixed when the recipe
+is prepared. When baking, those trained columns must be present in
+`new_data`; extra columns and the order of columns in `new_data` do not
+change the measurement axis.
 
 ## Tidying
 

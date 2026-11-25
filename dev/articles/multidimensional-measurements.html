@@ -187,6 +187,47 @@ distinguish numeric and missing signals.
 <p>The pair can share an nD list while preserving each member’s grid and
 metadata. The list does not assert that the two measurements have
 identical coordinates.</p>
+<div class="section level3">
+<h3 id="compare-signals-at-sampled-coordinates">Compare signals at sampled coordinates<a class="anchor" aria-label="anchor" href="#compare-signals-at-sampled-coordinates"></a>
+</h3>
+<p>Suppose two injections were sampled at different time and wavelength
+pairs. Use <code>pad = TRUE</code> when the next step needs the same
+coordinate rows for both injections. Here the two injections cover three
+distinct pairs between them. Each padded trace has three rows. The
+absent readings are <code>NA</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">observations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  injection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span><span class="op">)</span>,</span>
+<span>  time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  wavelength <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">210L</span>, <span class="fl">254L</span>, <span class="fl">254L</span>, <span class="fl">280L</span><span class="op">)</span>,</span>
+<span>  absorbance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.12</span>, <span class="fl">0.40</span>, <span class="fl">0.55</span>, <span class="fl">0.18</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">paired</span> <span class="op">&lt;-</span> <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">observations</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">injection</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span></span>
+<span>    <span class="va">absorbance</span>, location <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">wavelength</span><span class="op">)</span>, pad <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    dim_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"time"</span>, <span class="st">"wavelength"</span><span class="op">)</span>, dim_units <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"min"</span>, <span class="st">"nm"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/measure_summary_table.html">measure_slice_table</a></span><span class="op">(</span><span class="va">paired</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">injection</span>, time_min <span class="op">=</span> <span class="va">location_1</span>, wavelength_nm <span class="op">=</span> <span class="va">location_2</span>,</span>
+<span>                absorbance <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">#&gt;   injection time_min wavelength_nm absorbance</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A                1           210       0.12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> A                2           254       0.4 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> A                3           280      <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> B                1           210      <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> B                2           254       0.55</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> B                3           280       0.18</span></span></code></pre></div>
+<p>Both injections have a recorded signal at 2 minutes and 254 nm.
+Padding leaves the other time and wavelength combinations outside the
+comparison. Keep the original observations when you need to distinguish
+an absent row from a recorded row whose signal was already missing.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="preserve-sparse-coordinates-and-point-order">Preserve sparse coordinates and point order<a class="anchor" aria-label="anchor" href="#preserve-sparse-coordinates-and-point-order"></a>
@@ -199,7 +240,7 @@ values remain missing observations; they are not replaced with zero. The
 member names below are labels only. They do not supply sample or
 injection identifiers. These are synthetic teaching observations, not an
 instrument recording.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">raw_dad_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/new_measure_nd_tbl.html">new_measure_nd_tbl</a></span><span class="op">(</span></span>
 <span>  location_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1.5</span>, <span class="fl">1.5</span>, <span class="fl">1.5</span>, <span class="fl">1.5</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  location_2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">300L</span>, <span class="fl">254L</span>, <span class="fl">210L</span>, <span class="fl">300L</span>, <span class="fl">254L</span>, <span class="fl">210L</span>, <span class="fl">210L</span>, <span class="fl">300L</span>, <span class="fl">254L</span><span class="op">)</span>,</span>
@@ -438,7 +479,7 @@ requires the raw points.</p>
 <p>The plot keeps all 16 raw coordinate pairs. The cross and circle at
 the same member A coordinate mark two distinct observations: one numeric
 signal and one missing signal.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">raw_dad_plot_data</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">restored_raw_dad</span><span class="op">)</span>,</span>
 <span>  <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
@@ -500,7 +541,7 @@ coordinate: one numeric signal and one missing signal.
 <code>point_index</code> in <code>points.csv</code>, not on coordinates,
 so repeated tuples remain distinct. Its source ordinals count parsed CSV
 records, not physical text lines.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">point_mapping</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
 <span><span class="co">#&gt;   member_index point_index source_record_ordinal</span></span>
@@ -535,7 +576,7 @@ bundle does not embed the nD bundle or raw point file.</p>
 member’s fold metadata. Folding uses the saved coordinate mapping. The
 result is in canonical coordinate order; it does not restore the
 acquisition row order from the shuffled input.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">unfolded_pair</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_unfold.html">measure_unfold</a></span><span class="op">(</span><span class="va">dad_pair</span>, order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">restored_pair</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_fold.html">measure_fold</a></span><span class="op">(</span><span class="va">unfolded_pair</span><span class="op">)</span></span>
 <span></span>
@@ -567,7 +608,7 @@ that metadata; direct replacement through a list-column prototype can
 drop it. A missing member mapping or invalid point index is an error
 because the edited values could no longer be tied safely to
 coordinates.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">edited_members</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">unfolded_pair</span>, <span class="kw">function</span><span class="op">(</span><span class="va">member</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">member</span><span class="op">$</span><span class="va">value</span> <span class="op">&lt;-</span> <span class="fl">2</span> <span class="op">*</span> <span class="va">member</span><span class="op">$</span><span class="va">value</span></span>
 <span>  <span class="va">member</span></span>
@@ -588,7 +629,7 @@ coordinates.</p>
 numbers, to make the chosen axis clear. A slice preserves the selected
 point order. A predicate must return one complete logical decision per
 point.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trace_254</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_slice.html">measure_slice</a></span><span class="op">(</span></span>
 <span>  <span class="va">dad_a</span>,</span>
 <span>  wavelength <span class="op">=</span> <span class="fl">254</span>,</span>
@@ -623,7 +664,7 @@ point.</p>
 requested summary to observed values in each group. The next table
 compares two summaries across the wavelength points recorded at each
 retention time.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">total_by_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_project.html">measure_project</a></span><span class="op">(</span></span>
 <span>  <span class="va">dad_a</span>,</span>
 <span>  along <span class="op">=</span> <span class="fl">2L</span>,</span>
@@ -672,7 +713,7 @@ monotonic-axis requirement. For this tutorial curve, the caller declares
 identifier is inferred from the nD member label. The retention-time unit
 (<code>min</code>), selected wavelength (<code>254 nm</code>), and
 scalar response unit (<code>AU</code>) are also declared.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">record</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_record.html">measure_record</a></span><span class="op">(</span></span>
 <span>  samples <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="st">"sample-001"</span><span class="op">)</span>,</span>
 <span>  injections <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
@@ -716,7 +757,7 @@ scalar response unit (<code>AU</code>) are also declared.</p>
 <p>The scalar curve is ordered by retention time, while its labels
 retain the parsed <code>points.csv</code> record ordinals. These
 references show which raw point supplied each selected 254 nm value.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">record_trace_plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  retention_time <span class="op">=</span> <span class="va">record</span><span class="op">$</span><span class="va">curves</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">location</span>,</span>
 <span>  absorbance <span class="op">=</span> <span class="va">record</span><span class="op">$</span><span class="va">curves</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">value</span>,</span>
@@ -749,7 +790,7 @@ its parsed raw points.csv record ordinal.
 <code>dad_pair</code>, or the raw nD payload. The caller supplies the
 source hash and parsed-record ordinals; the scalar bundle stores these
 references without embedding the raw points file or nD bundle.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">record_bundle</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"measure-dad-record-"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
 <span>  <span class="op">{</span></span>

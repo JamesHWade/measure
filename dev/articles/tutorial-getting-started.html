@@ -337,8 +337,7 @@ Each panel has its own y-axis scale.</p>
 <span></span>
 <span><span class="va">processed_plot_data</span> <span class="op">&lt;-</span> <span class="va">processed</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op">&lt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">.measures</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.measures</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/measure_summary_table.html">measure_slice_table</a></span><span class="op">(</span>id_cols <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span></span>
 <span>    <span class="va">id</span>,</span>
 <span>    <span class="va">location</span>,</span>
@@ -366,13 +365,30 @@ Raw and processed views of the same 10 samples. The processed panel uses
 a separate y-axis scale after a Savitzky-Golay first derivative and SNV.
 </p>
 </div>
+<p>To compare the range of the processed signal across samples, use
+<code><a href="../reference/measure_summary_table.html">measure_summary_table()</a></code>. Each row summarizes one sample’s
+spectrum.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">processed</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/measure_summary_table.html">measure_summary_table</a></span><span class="op">(</span>id_cols <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">n_points</span>, <span class="va">n_missing</span>, <span class="va">min</span>, <span class="va">max</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
+<span><span class="co">#&gt;      id n_points n_missing   min   max</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1       90         0 -<span style="color: #BB0000;">1.48</span>  2.60</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2       90         0 -<span style="color: #BB0000;">1.47</span>  2.28</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3       90         0 -<span style="color: #BB0000;">1.36</span>  2.34</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4       90         0 -<span style="color: #BB0000;">1.43</span>  2.33</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5       90         0 -<span style="color: #BB0000;">1.44</span>  2.59</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6       90         0 -<span style="color: #BB0000;">1.45</span>  2.23</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="step-3-output-for-modeling">Step 3: output for modeling<a class="anchor" aria-label="anchor" href="#step-3-output-for-modeling"></a>
 </h3>
 <p>For most modeling workflows, you’ll want data in wide format (one
 column per spectral feature):</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -401,7 +417,7 @@ column per spectral feature):</p>
 <p>If your data starts in wide format (measurements as columns), use
 <code><a href="../reference/step_measure_input_wide.html">step_measure_input_wide()</a></code> instead. Here’s an example using
 data from modeldata:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats</span><span class="op">)</span></span>
 <span></span>
@@ -451,7 +467,7 @@ data from modeldata:</p>
 </h2>
 <p>Like any recipe, you prep once on training data, then bake on new
 data:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Split the data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">train_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">meats</span><span class="op">)</span>, <span class="fl">180</span><span class="op">)</span></span>
@@ -510,7 +526,7 @@ examples of:</p>
 </h3>
 <p>The measure package includes several datasets for testing and
 examples:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># NIR spectroscopy</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
 <span><span class="co"># 215 meat samples, long format</span></span>
@@ -530,13 +546,18 @@ examples:</p>
 <span><span class="co"># Mass spectrometry</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">maldi_spectra</span><span class="op">)</span></span>
 <span><span class="co"># 16 synthetic MALDI-TOF spectra</span></span></code></pre></div>
+<p>For SEC/GPC workflows using these chromatograms and calibration
+standards, see the <a href="https://jameshwade.github.io/measure.sec/">measure.sec
+documentation</a>. The <a href="howto-technique-packs.html">technique-pack guide</a> shows how to
+discover registered SEC steps. Their implementations are in the <a href="https://github.com/JamesHWade/measure.sec" class="external-link">measure.sec source
+repository</a>.</p>
 </div>
 <div class="section level3">
 <h3 id="external-data-sources">External data sources<a class="anchor" aria-label="anchor" href="#external-data-sources"></a>
 </h3>
 <p>For additional test data, several R packages provide spectral
 datasets:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># modeldata - meats dataset in wide format</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modeldata.tidymodels.org" class="external-link">modeldata</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats</span><span class="op">)</span></span>

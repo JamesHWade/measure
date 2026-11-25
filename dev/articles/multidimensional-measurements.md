@@ -113,6 +113,50 @@ The pair can share an nD list while preserving each member’s grid and
 metadata. The list does not assert that the two measurements have
 identical coordinates.
 
+### Compare signals at sampled coordinates
+
+Suppose two injections were sampled at different time and wavelength
+pairs. Use `pad = TRUE` when the next step needs the same coordinate
+rows for both injections. Here the two injections cover three distinct
+pairs between them. Each padded trace has three rows. The absent
+readings are `NA`.
+
+``` r
+
+observations <- tibble(
+  injection = c("A", "A", "B", "B"),
+  time = c(1, 2, 2, 3),
+  wavelength = c(210L, 254L, 254L, 280L),
+  absorbance = c(0.12, 0.40, 0.55, 0.18)
+)
+paired <- recipes::recipe(~ ., data = observations) |>
+  recipes::update_role(injection, new_role = "id") |>
+  step_measure_input_long(
+    absorbance, location = dplyr::vars(time, wavelength), pad = TRUE,
+    dim_names = c("time", "wavelength"), dim_units = c("min", "nm")
+  ) |>
+  recipes::prep() |>
+  recipes::bake(new_data = NULL)
+
+measure_slice_table(paired) |>
+  dplyr::select(injection, time_min = location_1, wavelength_nm = location_2,
+                absorbance = value)
+#> # A tibble: 6 × 4
+#>   injection time_min wavelength_nm absorbance
+#>   <chr>        <dbl>         <int>      <dbl>
+#> 1 A                1           210       0.12
+#> 2 A                2           254       0.4 
+#> 3 A                3           280      NA   
+#> 4 B                1           210      NA   
+#> 5 B                2           254       0.55
+#> 6 B                3           280       0.18
+```
+
+Both injections have a recorded signal at 2 minutes and 254 nm. Padding
+leaves the other time and wavelength combinations outside the
+comparison. Keep the original observations when you need to distinguish
+an absent row from a recorded row whose signal was already missing.
+
 ## Preserve sparse coordinates and point order
 
 The next paired example keeps the input point order. Retention-time

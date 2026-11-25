@@ -104,7 +104,7 @@ been estimated.</p></dd>
 
 <dt id="arg-columns">columns<a class="anchor" aria-label="anchor" href="#arg-columns"></a></dt>
 <dd><p>A character string of the selected variable names. This field
-is a placeholder and will be populated once <code><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">recipes::prep()</a></code> is used.</p></dd>
+is a placeholder and will be populated once <code><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep()</a></code> is used.</p></dd>
 
 
 <dt id="arg-location-values">location_values<a class="anchor" aria-label="anchor" href="#arg-location-values"></a></dt>
@@ -140,14 +140,15 @@ are in separate columns.</p>
 <p><code>step_measure_input_wide()</code> will collect those data and put them into a
 format used internally by this package. The data structure has a row for
 each independent experimental unit and a nested tibble with that sample's
-measure (measurement and location). It assumes that there are unique
-combinations of the other columns in the data that define individual
-patterns associated with the pattern. If this is not the case, the special
-values might be inappropriately restructured.</p>
-<p>The best advice is to have a column of any type that indicates the unique
-sample number for each measure. For example, if there are 20 rows in the
-input data set, the columns that are <em>not</em> analytically measurements show
-have no duplicate combinations in the 20 rows.</p>
+measure (measurement and location). All columns that are not selected as
+measurements are retained as row-level metadata.</p>
+<p>Each input row produces one output row and one nested measurement. A sample
+identifier is still recommended for downstream joins and diagnostics, but
+duplicate values in the non-measurement columns do not merge input rows.</p>
+<p>The selected column names and their axis order are fixed when the recipe is
+prepared. When baking, those trained columns must be present in <code>new_data</code>;
+extra columns and the order of columns in <code>new_data</code> do not change the
+measurement axis.</p>
     </div>
     <div class="section level2">
     <h2 id="tidying">Tidying<a class="anchor" aria-label="anchor" href="#tidying"></a></h2>

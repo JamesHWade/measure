@@ -265,8 +265,7 @@ raw_plot_data <- meats_long |>
 
 processed_plot_data <- processed |>
   filter(id <= 10) |>
-  select(id, .measures) |>
-  unnest(.measures) |>
+  measure_slice_table(id_cols = "id") |>
   transmute(
     id,
     location,
@@ -299,6 +298,27 @@ sharp peak near channel 60 and a negative feature near channel
 
 Raw and processed views of the same 10 samples. The processed panel uses
 a separate y-axis scale after a Savitzky-Golay first derivative and SNV.
+
+To compare the range of the processed signal across samples, use
+[`measure_summary_table()`](https://jameshwade.github.io/measure/dev/reference/measure_summary_table.md).
+Each row summarizes one sample’s spectrum.
+
+``` r
+
+processed |>
+  measure_summary_table(id_cols = "id") |>
+  select(id, n_points, n_missing, min, max) |>
+  head()
+#> # A tibble: 6 × 5
+#>      id n_points n_missing   min   max
+#>   <int>    <int>     <int> <dbl> <dbl>
+#> 1     1       90         0 -1.48  2.60
+#> 2     2       90         0 -1.47  2.28
+#> 3     3       90         0 -1.36  2.34
+#> 4     4       90         0 -1.43  2.33
+#> 5     5       90         0 -1.44  2.59
+#> 6     6       90         0 -1.45  2.23
+```
 
 ### Step 3: output for modeling
 
@@ -467,6 +487,15 @@ data(sec_calibration)
 data(maldi_spectra)
 # 16 synthetic MALDI-TOF spectra
 ```
+
+For SEC/GPC workflows using these chromatograms and calibration
+standards, see the [measure.sec
+documentation](https://jameshwade.github.io/measure.sec/). The
+[technique-pack
+guide](https://jameshwade.github.io/measure/dev/articles/howto-technique-packs.md)
+shows how to discover registered SEC steps. Their implementations are in
+the [measure.sec source
+repository](https://github.com/JamesHWade/measure.sec).
 
 ### External data sources
 

@@ -2,6 +2,23 @@
 
 ## measure 0.0.1.9004
 
+- [`measure_slice_table()`](https://jameshwade.github.io/measure/dev/reference/measure_summary_table.md)
+  returns one row per measurement point, and
+  [`measure_summary_table()`](https://jameshwade.github.io/measure/dev/reference/measure_summary_table.md)
+  summarizes the values for each sample
+  ([\#189](https://github.com/JamesHWade/measure/issues/189)).
+
+- `step_measure_input_long(pad = TRUE)` brings multidimensional samples
+  onto the coordinate tuples observed in the current batch. An absent
+  tuple receives a missing signal. The step checks for repeated tuples
+  before padding
+  ([\#182](https://github.com/JamesHWade/measure/issues/182)).
+
+- [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md)
+  keeps each input row as a separate sample and pairs its values with
+  the axis in the column order learned at prep time
+  ([\#183](https://github.com/JamesHWade/measure/issues/183)).
+
 - Use
   [`set_measure_value_metadata()`](https://jameshwade.github.io/measure/dev/reference/set_measure_value_metadata.md)
   to declare what the values in a measurement column represent and
