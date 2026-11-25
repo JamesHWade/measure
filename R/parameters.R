@@ -570,6 +570,13 @@ tunable.step_measure_derivative_gap <- function(x, ...) {
 #' smoothing. `fourier_cutoff()` controls the frequency cutoff for Fourier
 #' filtering.
 #'
+#' Candidate widths from `smooth_window()` are odd integers of at least three
+#' points. Known bounds are narrowed to the first and last eligible widths.
+#' Use `smooth_window(range = c(4L, 14L))` to search widths 5 through 13.
+#' When updating an existing parameter with [dials::range_set()], supply bounds
+#' that correspond to odd widths, since that function updates the search range
+#' directly. With a transformation, supply bounds in transformed units.
+#'
 #' @inheritParams window_side
 #'
 #' @return A function with classes `"quant_param"` and `"param"`.
@@ -579,7 +586,7 @@ tunable.step_measure_derivative_gap <- function(x, ...) {
 #' fourier_cutoff()
 #' @export
 smooth_window <- function(range = c(3L, 21L), trans = NULL) {
-  dials::new_quant_param(
+  parameter <- dials::new_quant_param(
     type = "integer",
     range = range,
     inclusive = c(TRUE, TRUE),
@@ -587,6 +594,36 @@ smooth_window <- function(range = c(3L, 21L), trans = NULL) {
     label = c(smooth_window = "Smoothing Window Size"),
     finalize = NULL
   )
+
+  # dials generates both regular and space-filling grids on the search scale
+  # and applies the inverse transformation to get the recipe argument.
+  scale <- trans %||% scales::transform_identity()
+  inverse <- scale$inverse
+  if (!any(dials::is_unknown(parameter$range))) {
+    widths <- sort(inverse(unlist(parameter$range, use.names = FALSE)))
+    if (length(widths) != 2L || !all(is.finite(widths))) {
+      cli::cli_abort("{.arg range} must specify finite window sizes.")
+    }
+    # Invert custom scales up to floating-point error at integer endpoints.
+    widths <- signif(widths, 15)
+    lower <- max(3, 2 * ceiling((widths[1] - 1) / 2) + 1)
+    upper <- min(.Machine$integer.max, 2 * floor((widths[2] - 1) / 2) + 1)
+    if (lower > upper) {
+      cli::cli_abort(
+        "{.arg range} must contain an odd window of at least 3 points."
+      )
+    }
+    parameter <- dials::range_set(
+      parameter,
+      sort(scale$transform(c(lower, upper)))
+    )
+  }
+  scale$name <- paste0(scale$name, "-odd-window")
+  scale$inverse <- function(x) {
+    pmin(.Machine$integer.max, pmax(3, 2 * floor(inverse(x) / 2) + 1))
+  }
+  parameter$trans <- scale
+  parameter
 }
 
 #' @rdname smooth_window

@@ -78,7 +78,11 @@ step_measure_align_shift <- function(
     recipe,
     step_measure_align_shift_new(
       measures = measures,
-      max_shift = as.integer(max_shift),
+      max_shift = .check_tunable_integer(
+        max_shift,
+        "max_shift",
+        message = "a single finite positive integer"
+      ),
       reference = reference,
       ref_spectrum = NULL,
       locations = NULL,
@@ -119,9 +123,12 @@ step_measure_align_shift_new <- function(
 prep.step_measure_align_shift <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
-  if (!is.numeric(x$max_shift) || x$max_shift < 1) {
-    cli::cli_abort("{.arg max_shift} must be a positive integer.")
-  }
+  max_shift <- .check_tunable_integer(
+    x$max_shift,
+    "max_shift",
+    message = "a single finite positive integer",
+    allow_tune = FALSE
+  )
 
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
@@ -145,7 +152,7 @@ prep.step_measure_align_shift <- function(x, training, info = NULL, ...) {
 
   step_measure_align_shift_new(
     measures = measure_cols,
-    max_shift = as.integer(x$max_shift),
+    max_shift = max_shift,
     reference = x$reference,
     ref_spectrum = ref_spectrum,
     locations = locations,
@@ -177,7 +184,11 @@ print.step_measure_align_shift <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  title <- paste0("Shift alignment (max_shift = ", x$max_shift, ") on ")
+  title <- paste0(
+    "Shift alignment (max_shift = ",
+    .format_step_parameter(x$max_shift),
+    ") on "
+  )
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
   } else {
@@ -193,7 +204,7 @@ print.step_measure_align_shift <- function(
 tidy.step_measure_align_shift <- function(x, ...) {
   tibble::tibble(
     terms = if (is_trained(x)) x$measures else "<all measure columns>",
-    max_shift = x$max_shift,
+    max_shift = .tidy_step_parameter(x$max_shift),
     reference = x$reference,
     id = x$id
   )

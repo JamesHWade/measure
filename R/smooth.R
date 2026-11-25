@@ -72,7 +72,12 @@ step_measure_smooth_ma <- function(
     recipe,
     step_measure_smooth_ma_new(
       measures = measures,
-      window = as.integer(window),
+      window = .check_tunable_integer(
+        window,
+        "window",
+        lower = 3L,
+        odd = TRUE
+      ),
       edge_method = edge_method,
       role = role,
       trained = trained,
@@ -107,16 +112,13 @@ step_measure_smooth_ma_new <- function(
 prep.step_measure_smooth_ma <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
-  # Validate window
-  if (!is.numeric(x$window) || length(x$window) != 1 || x$window < 3) {
-    cli::cli_abort("{.arg window} must be an integer >= 3.")
-  }
-
-  # Ensure window is odd
-  window <- as.integer(x$window)
-  if (window %% 2 == 0) {
-    cli::cli_abort("{.arg window} must be an odd number.")
-  }
+  window <- .check_tunable_integer(
+    x$window,
+    "window",
+    lower = 3L,
+    odd = TRUE,
+    allow_tune = FALSE
+  )
 
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
@@ -159,7 +161,11 @@ print.step_measure_smooth_ma <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  title <- paste0("Moving average smoothing (window = ", x$window, ") on ")
+  title <- paste0(
+    "Moving average smoothing (window = ",
+    .format_step_parameter(x$window),
+    ") on "
+  )
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
   } else {
@@ -175,7 +181,7 @@ print.step_measure_smooth_ma <- function(
 tidy.step_measure_smooth_ma <- function(x, ...) {
   tibble::tibble(
     terms = if (is_trained(x)) x$measures else "<all measure columns>",
-    window = x$window,
+    window = .tidy_step_parameter(x$window),
     id = x$id
   )
 }
@@ -267,7 +273,12 @@ step_measure_smooth_median <- function(
     recipe,
     step_measure_smooth_median_new(
       measures = measures,
-      window = as.integer(window),
+      window = .check_tunable_integer(
+        window,
+        "window",
+        lower = 3L,
+        odd = TRUE
+      ),
       edge_method = edge_method,
       role = role,
       trained = trained,
@@ -302,14 +313,13 @@ step_measure_smooth_median_new <- function(
 prep.step_measure_smooth_median <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
-  if (!is.numeric(x$window) || length(x$window) != 1 || x$window < 3) {
-    cli::cli_abort("{.arg window} must be an integer >= 3.")
-  }
-
-  window <- as.integer(x$window)
-  if (window %% 2 == 0) {
-    cli::cli_abort("{.arg window} must be an odd number.")
-  }
+  window <- .check_tunable_integer(
+    x$window,
+    "window",
+    lower = 3L,
+    odd = TRUE,
+    allow_tune = FALSE
+  )
 
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
@@ -352,7 +362,11 @@ print.step_measure_smooth_median <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  title <- paste0("Median filter smoothing (window = ", x$window, ") on ")
+  title <- paste0(
+    "Median filter smoothing (window = ",
+    .format_step_parameter(x$window),
+    ") on "
+  )
   if (x$trained) {
     cat(title, "<internal measurements>", sep = "")
   } else {
@@ -368,7 +382,7 @@ print.step_measure_smooth_median <- function(
 tidy.step_measure_smooth_median <- function(x, ...) {
   tibble::tibble(
     terms = if (is_trained(x)) x$measures else "<all measure columns>",
-    window = x$window,
+    window = .tidy_step_parameter(x$window),
     id = x$id
   )
 }

@@ -82,8 +82,16 @@ step_measure_despike <- function(
     recipe,
     step_measure_despike_new(
       measures = measures,
-      window = as.integer(window),
-      threshold = threshold,
+      window = .check_tunable_integer(
+        window,
+        "window",
+        lower = 3L,
+        odd = TRUE
+      ),
+      threshold = .check_tunable_positive(
+        threshold,
+        "threshold"
+      ),
       method = method,
       max_width = as.integer(max_width),
       role = role,
@@ -123,22 +131,18 @@ step_measure_despike_new <- function(
 prep.step_measure_despike <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
-  # Validate window
-  if (!is.numeric(x$window) || length(x$window) != 1 || x$window < 3) {
-    cli::cli_abort("{.arg window} must be an integer >= 3.")
-  }
-
-  window <- as.integer(x$window)
-  if (window %% 2 == 0) {
-    cli::cli_abort("{.arg window} must be an odd number.")
-  }
-
-  # Validate threshold
-  if (
-    !is.numeric(x$threshold) || length(x$threshold) != 1 || x$threshold <= 0
-  ) {
-    cli::cli_abort("{.arg threshold} must be a positive number.")
-  }
+  window <- .check_tunable_integer(
+    x$window,
+    "window",
+    lower = 3L,
+    odd = TRUE,
+    allow_tune = FALSE
+  )
+  threshold <- .check_tunable_positive(
+    x$threshold,
+    "threshold",
+    allow_tune = FALSE
+  )
 
   # Validate max_width
   if (!is.numeric(x$max_width) || length(x$max_width) != 1 || x$max_width < 1) {
@@ -154,7 +158,7 @@ prep.step_measure_despike <- function(x, training, info = NULL, ...) {
   step_measure_despike_new(
     measures = measure_cols,
     window = window,
-    threshold = x$threshold,
+    threshold = threshold,
     method = x$method,
     max_width = as.integer(x$max_width),
     role = x$role,
@@ -189,9 +193,9 @@ print.step_measure_despike <- function(
 ) {
   title <- paste0(
     "Spike removal (threshold = ",
-    x$threshold,
+    .format_step_parameter(x$threshold),
     ", window = ",
-    x$window,
+    .format_step_parameter(x$window),
     ") on "
   )
   if (x$trained) {
@@ -209,8 +213,8 @@ print.step_measure_despike <- function(
 tidy.step_measure_despike <- function(x, ...) {
   tibble::tibble(
     terms = if (is_trained(x)) x$measures else "<all measure columns>",
-    window = x$window,
-    threshold = x$threshold,
+    window = .tidy_step_parameter(x$window),
+    threshold = .tidy_step_parameter(x$threshold),
     method = x$method,
     id = x$id
   )
