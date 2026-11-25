@@ -72,6 +72,16 @@ step function and its `prep()`/`bake()` implementation. A pack can implement a
 step itself, or compose an existing public step when that already expresses the
 needed operation.
 
+Registry entries are process-local and are created when an extension package's
+`.onLoad()` runs. `measure_packs()` and `measure_steps()` therefore report
+loaded and registered packs, not every package installed in the library. The
+current registration contract has no public deregistration function, so
+unloading an extension does not automatically prune its metadata. The
+`measure.sec` companion package currently registers only from `.onLoad()`.
+If `measure` is reloaded, its registry is initialized again; load the
+extension package afterwards so its entries are registered in the new session
+state.
+
 ## A runnable step built from the public API
 
 This minimal pack step centers each sample's measurements. It delegates the
@@ -174,6 +184,8 @@ see the [baseline correction guide](howto-baseline.html).
 - Put the extension step and its `prep()`/`bake()` methods in the pack package.
 - Register the package name with the `.onLoad()` `pkgname` argument.
 - Register exported step names with concise categories and descriptions.
+- Treat the registry as load-time metadata; do not rely on it to enumerate
+  packages that are merely installed.
 - Keep sample identifiers and measurement axes explicit in recipe examples.
 - Use public measure constructors where they already express the operation.
 - Add tests in the extension package for the recipe lifecycle and registry entry.

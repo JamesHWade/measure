@@ -2,6 +2,25 @@
 # Technique Pack Registry Tests
 # ==============================================================================
 
+# Keep registry mutations local to each test.  A companion package may already
+# have registered itself in the process, so rebuilding only the core registry
+# would otherwise erase valid entries.  `defer()` also restores the state when
+# an expectation aborts the test early.
+local_measure_registry <- function() {
+  previous <- list(
+    packs = .measure_registry$packs,
+    steps = .measure_registry$steps
+  )
+
+  withr::defer(
+    {
+      .measure_registry$packs <- previous$packs
+      .measure_registry$steps <- previous$steps
+    },
+    envir = parent.frame()
+  )
+}
+
 test_that("registry initializes correctly on package load", {
   # measure should be registered as a pack
   packs <- measure_packs()
@@ -76,6 +95,45 @@ test_that("measure_steps filtering by pack works", {
   expect_true(all(measure_core$pack_name == "measure"))
 })
 
+test_that("measure_steps combines pack and technique filters", {
+  local_measure_registry()
+  .measure_registry_reset()
+
+  register_measure_pack(
+    pack_name = "measure.sec",
+    technique = "SEC/GPC",
+    version = "0.0.0.9000"
+  )
+  register_measure_step(
+    step_name = "step_sec_baseline",
+    pack_name = "measure.sec",
+    category = "baseline",
+    description = "SEC baseline correction"
+  )
+  register_measure_pack(
+    pack_name = "measure.ftir",
+    technique = "FTIR",
+    version = "0.0.0.9000"
+  )
+  register_measure_step(
+    step_name = "step_ftir_baseline",
+    pack_name = "measure.ftir",
+    category = "baseline",
+    description = "FTIR baseline correction"
+  )
+
+  sec_steps <- measure_steps(
+    packs = "measure.sec",
+    techniques = "SEC/GPC"
+  )
+  expect_identical(sec_steps$step_name, "step_sec_baseline")
+  expect_identical(sec_steps$pack_name, "measure.sec")
+  expect_identical(sec_steps$technique, "SEC/GPC")
+
+  sec_by_technique <- measure_steps(techniques = "SEC/GPC")
+  expect_identical(sec_by_technique$step_name, "step_sec_baseline")
+})
+
 test_that("measure_steps multiple category filter works", {
   steps <- measure_steps(categories = c("baseline", "smoothing"))
 
@@ -84,7 +142,7 @@ test_that("measure_steps multiple category filter works", {
 })
 
 test_that("register_measure_pack works correctly", {
-  # Reset registry to test registration
+  local_measure_registry()
   .measure_registry_reset()
 
   # Register a test pack
@@ -101,15 +159,10 @@ test_that("register_measure_pack works correctly", {
   expect_equal(packs$technique[packs$name == "test.pack"], "Testing")
   expect_equal(packs$version[packs$name == "test.pack"], "0.1.0")
   expect_equal(packs$description[packs$name == "test.pack"], "A test pack")
-
-  # Restore registry
-  .measure_registry_reset()
-  register_measure_pack("measure", "general", description = "Core")
-  .register_core_steps()
 })
 
 test_that("register_measure_step works correctly", {
-  # Reset registry
+  local_measure_registry()
   .measure_registry_reset()
   register_measure_pack("test.pack", "Testing")
 
@@ -134,15 +187,10 @@ test_that("register_measure_step works correctly", {
     steps$technique[steps$step_name == "step_test_example"],
     "Testing"
   )
-
-  # Restore registry
-  .measure_registry_reset()
-  register_measure_pack("measure", "general", description = "Core")
-  .register_core_steps()
 })
 
 test_that("registration is idempotent (no duplicates)", {
-  # Reset registry
+  local_measure_registry()
   .measure_registry_reset()
   register_measure_pack("test.pack", "Testing")
 
@@ -159,15 +207,10 @@ test_that("registration is idempotent (no duplicates)", {
   expect_equal(nrow(dup_steps), 1)
   # Should have the latest description
   expect_equal(dup_steps$description, "Third")
-
-  # Restore registry
-  .measure_registry_reset()
-  register_measure_pack("measure", "general", description = "Core")
-  .register_core_steps()
 })
 
 test_that("empty registry returns empty tibbles", {
-  # Reset registry without registering anything
+  local_measure_registry()
   .measure_registry_reset()
 
   packs <- measure_packs()
@@ -177,11 +220,6 @@ test_that("empty registry returns empty tibbles", {
   expect_s3_class(steps, "tbl_df")
   expect_equal(nrow(packs), 0)
   expect_equal(nrow(steps), 0)
-
-  # Restore registry
-  .measure_registry_reset()
-  register_measure_pack("measure", "general", description = "Core")
-  .register_core_steps()
 })
 
 test_that("measure_steps filtering returns empty when no match", {
