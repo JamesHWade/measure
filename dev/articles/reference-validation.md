@@ -5,6 +5,10 @@
 library(measure)
 library(dplyr)
 library(ggplot2)
+
+has_mcr <- requireNamespace("mcr", quietly = TRUE)
+has_quarto <- requireNamespace("quarto", quietly = TRUE) && quarto::quarto_available()
+has_pdf_tools <- has_quarto && nzchar(Sys.which("lualatex"))
 ```
 
 ## Overview
@@ -779,8 +783,8 @@ regression which account for error in both methods:
 
 # Method comparison with known measurement error
 deming_data <- data.frame(
-  reference = c(5, 10, 25, 50, 100, 200, 400),
-  test_method = c(5.2, 10.3, 25.8, 51.2, 101.5, 203.1, 408.2)
+  reference = c(5, 10, 25, 50, 100, 200, 400, 600, 800, 1000),
+  test_method = c(5.2, 10.3, 25.8, 51.2, 101.5, 203.1, 408.2, 610.2, 812, 1013)
 )
 
 deming <- measure_deming_regression(
@@ -800,13 +804,13 @@ print(deming)
 #> # A tibble: 2 × 4
 #>   term      estimate ci_lower ci_upper
 #>   <chr>        <dbl>    <dbl>    <dbl>
-#> 1 intercept -0.00414   -0.325    0.437
-#> 2 slope      1.02       1.01     1.02 
+#> 1 intercept    0.581   0.0272     1.32
+#> 2 slope        1.01    1.01       1.02
 #> 
 #> Statistics:
-#>   n = 7 
+#>   n = 10 
 #>   Error ratio = 1 
-#>   RMSE = 0.4087 
+#>   RMSE = 0.9394 
 #>   R² = 1 
 #> 
 #> (Fitted using mcr package)
@@ -816,21 +820,37 @@ glance(deming)
 #> # A tibble: 1 × 6
 #>   intercept slope intercept_ci_includes_0 slope_ci_includes_1 r_squared  rmse
 #>       <dbl> <dbl> <lgl>                   <lgl>                   <dbl> <dbl>
-#> 1  -0.00414  1.02 TRUE                    FALSE                   1.000 0.409
+#> 1     0.581  1.01 FALSE                   FALSE                   1.000 0.939
 ```
 
-For Passing-Bablok regression (non-parametric), install the `mcr`
-package:
+The nonparametric Passing–Bablok fit below runs when the optional `mcr`
+package is installed. It uses all ten paired measurements.
 
 ``` r
 
-# Requires: install.packages("mcr")
 pb <- measure_passing_bablok(
   deming_data,
   method1_col = "reference",
   method2_col = "test_method"
 )
 print(pb)
+#> measure_passing_bablok
+#> ──────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> Coefficients:
+#> # A tibble: 2 × 4
+#>   term      estimate ci_lower ci_upper
+#>   <chr>        <dbl>    <dbl>    <dbl>
+#> 1 intercept    0.143   0.0625     1.12
+#> 2 slope        1.01    1.01       1.02
+#> 
+#> Statistics:
+#>   n = 10 
+#>   RMSE = 0.9977 
+#>   Correlation = 1 
+#> 
+#> Linearity Test (CUSUM):
+#>   Not available
 ```
 
 ### Proficiency Testing
@@ -984,16 +1004,26 @@ sa_data <- data.frame(
   )
 )
 
-rec <- recipe(~ ., data = sa_data) |>
+sa_recipe <- recipe(~ ., data = sa_data) |>
   step_measure_standard_addition(
     response,
     addition_col = "addition",
     sample_id_col = "sample_id"
   ) |>
   prep()
+#> Warning in summary.lm(fit): essentially perfect fit: summary may be unreliable
+#> Warning in summary.lm(fit): essentially perfect fit: summary may be unreliable
 
-# Original concentrations calculated via extrapolation
-bake(rec, new_data = NULL)
+# Original concentrations calculated via extrapolation. `bake()` returns the
+# corrected concentration and fit diagnostics for every row in each sample.
+sa_baked <- bake(sa_recipe, new_data = NULL)
+sa_baked |>
+  distinct(sample_id, response_corrected, response_sa_rsquared)
+#> # A tibble: 2 × 3
+#>   sample_id response_corrected response_sa_rsquared
+#>   <fct>                  <dbl>                <dbl>
+#> 1 Sample1                   15                    1
+#> 2 Sample2                   25                    1
 ```
 
 ## Sample Preparation QC
@@ -1094,8 +1124,8 @@ print(drift_result)
 #> # A tibble: 2 × 5
 #>   feature    slope slope_pvalue percent_change significant
 #>   <chr>      <dbl>        <dbl>          <dbl> <lgl>      
-#> 1 feature1  0.630     0.0000148         11.1   TRUE       
-#> 2 feature2 -0.0351    0.634             -0.662 FALSE
+#> 1 feature1 0.660     0.00000152        11.5    TRUE       
+#> 2 feature2 0.00405   0.963              0.0767 FALSE
 ```
 
 ### Correcting Drift
@@ -1105,14 +1135,27 @@ print(drift_result)
 library(recipes)
 
 # Using QC-LOESS correction in a recipe
-rec <- recipe(~ ., data = drift_data) |>
+drift_recipe <- recipe(~ ., data = drift_data) |>
   step_measure_drift_qc_loess(
     feature1, feature2,
     qc_type = "qc"
   ) |>
   prep()
 
-corrected <- bake(rec, new_data = NULL)
+# `bake()` applies the learned QC-LOESS correction to the training rows.
+corrected <- bake(drift_recipe, new_data = NULL)
+corrected |>
+  select(sample_type, run_order, feature1, feature2) |>
+  head()
+#> # A tibble: 6 × 4
+#>   sample_type run_order feature1 feature2
+#>   <fct>           <int>    <dbl>    <dbl>
+#> 1 qc                  1     108.     99.5
+#> 2 qc                  2     110.     98.6
+#> 3 qc                  3     110.    102. 
+#> 4 qc                  4     108.    106. 
+#> 5 qc                  5     110.     99.7
+#> 6 qc                  6     111.    104.
 ```
 
 ## Validation Reports
@@ -1196,7 +1239,7 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-11-25 11:44:29.206658
+#> Generated: 2026-11-25 13:55:26.371057
 #> R version: 4.6.2
 #> measure version: 0.0.1.9004
 #> 
@@ -1310,22 +1353,46 @@ Two templates are provided:
   linearity, range, accuracy, precision, etc.)
 - **USP \<1225\>**: Organized by procedure category (I, II, III, IV)
 
+The HTML example runs when the `quarto` R package and the Quarto CLI are
+available. Both examples write to a temporary directory. To keep the
+reports, set `report_dir` to a project directory.
+
 ``` r
 
-# Render to HTML using ICH Q2 template (default)
-render_validation_report(
+report_dir <- tempfile("validation-reports-")
+html_report <- render_validation_report(
   report,
+  template = "ich_q2",
+  output_format = "html",
   output_file = "validation_report.html",
-  template = "ich_q2"
+  output_dir = report_dir,
+  open = FALSE
 )
+```
 
-# Render to PDF using USP <1225> template
-render_validation_report(
+``` r
+
+basename(html_report)
+#> [1] "validation_report.html"
+```
+
+The USP PDF example also requires LuaLaTeX.
+
+``` r
+
+pdf_report <- render_validation_report(
   report,
-  output_file = "validation_report.pdf",
+  template = "usp_1225",
   output_format = "pdf",
-  template = "usp_1225"
+  output_file = "validation_report.pdf",
+  output_dir = report_dir,
+  open = FALSE
 )
+```
+
+``` r
+
+basename(pdf_report)
 ```
 
 The rendered report includes:

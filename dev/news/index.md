@@ -2,6 +2,24 @@
 
 ## measure 0.0.1.9004
 
+- [`render_validation_report()`](https://jameshwade.github.io/measure/dev/reference/render_validation_report.md)
+  uses the caller’s R libraries when Quarto renders a report. This lets
+  both templates find `measure` when it is installed in a temporary or
+  project-specific library
+  ([\#186](https://github.com/JamesHWade/measure/issues/186)).
+
+- Matrix-based preprocessing steps now reject samples with different
+  point counts. Previously, a short signal could be repeated to fill a
+  matrix row and produce results for points that were never measured
+  ([\#180](https://github.com/JamesHWade/measure/issues/180)).
+
+- [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md)
+  now centers a flat spectrum reliably when its fitted slope is zero.
+  [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md)
+  honors `skip = TRUE` on new data and checks that its filter settings
+  are finite integers
+  ([\#180](https://github.com/JamesHWade/measure/issues/180)).
+
 - `step_measure_peaks_detect(algorithm = "cwt")` supports tuning the
   ridge SNR, minimum ridge length, allowed gap, noise window and noise
   quantile. Put `tune::tune("ridge_snr")` inside
