@@ -11,7 +11,7 @@ option <- function(name, default) {
   if (!is.na(exact)) {
     return(args[[exact + 1L]])
   }
-  prefixed <- grep(paste0("^", bare, "="), args, value = TRUE)
+  prefixed <- grepv(paste0("^", bare, "="), args)
   if (length(prefixed) == 0L) {
     return(default)
   }

@@ -2,24 +2,18 @@
 # Technique Pack Registry Tests
 # ==============================================================================
 
-# Keep registry mutations local to each test.  A companion package may already
-# have registered itself in the process, so rebuilding only the core registry
-# would otherwise erase valid entries.  `defer()` also restores the state when
-# an expectation aborts the test early.
-local_measure_registry <- function() {
-  previous <- list(
-    packs = .measure_registry$packs,
-    steps = .measure_registry$steps
-  )
-
-  withr::defer(
-    {
-      .measure_registry$packs <- previous$packs
-      .measure_registry$steps <- previous$steps
-    },
-    envir = parent.frame()
-  )
-}
+test_that("a failed registry test restores previously registered packs and steps", {
+  packs <- measure_packs()
+  steps <- measure_steps()
+  failing_test <- function() {
+    local_measure_registry()
+    .measure_registry_reset()
+    stop("fixture error")
+  }
+  expect_error(failing_test(), "fixture error")
+  expect_identical(measure_packs(), packs)
+  expect_identical(measure_steps(), steps)
+})
 
 test_that("registry initializes correctly on package load", {
   # measure should be registered as a pack
