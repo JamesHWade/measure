@@ -1,0 +1,9 @@
+Package: measure.registry.fixture
+Type: Package
+Title: Installed Fixture for the Measure Registry Tests
+Version: 0.1.0
+Authors@R: person("Measure", "Tests", role = c("aut", "cre"), email = "tests@example.org")
+Description: A small installed package used to exercise measure registry
+    registration across a package namespace boundary.
+License: MIT
+Encoding: UTF-8

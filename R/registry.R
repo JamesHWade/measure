@@ -2,6 +2,10 @@
 # Technique Pack Registry
 #
 # Registration and discovery system for technique packs (external packages).
+# The registry is process-local: measure initializes its core entries from
+# `.onLoad()`, and extension packages add their entries from their own
+# `.onLoad()`. It intentionally has no public deregistration operation; the
+# metadata is rebuilt when measure's registry is initialized again.
 # ==============================================================================
 
 # Internal registry environment
