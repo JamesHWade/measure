@@ -289,6 +289,91 @@ peak_fit_iterations <- function(range = c(100L, 1000L), trans = NULL) {
   )
 }
 
+#' CWT peak detection tuning parameters
+#'
+#' `cwt_min_snr()` controls the minimum signal-to-noise ratio of a continuous
+#' wavelet transform ridge. `cwt_min_ridge_length()` and `cwt_gap_thresh()`
+#' control ridge linking, while `cwt_noise_window()` and
+#' `cwt_noise_quantile()` control the local noise estimate.
+#'
+#' These parameters apply to scalar entries in `algorithm_params` for
+#' `step_measure_peaks_detect(algorithm = "cwt")`. Keep the vector of wavelet
+#' widths (`scales`) fixed. When extracted from a recipe, the ridge-length
+#' and gap ranges use the number of widths in that vector.
+#'
+#' @inheritParams window_side
+#'
+#' @return A dials parameter object with classes `"quant_param"` and `"param"`.
+#' @examples
+#' cwt_min_snr()
+#' cwt_min_ridge_length()
+#' cwt_gap_thresh()
+#' cwt_noise_window()
+#' cwt_noise_quantile()
+#' @export
+cwt_min_snr <- function(range = c(0, 20), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(cwt_min_snr = "CWT Minimum Ridge Signal-to-noise Ratio"),
+    finalize = NULL
+  )
+}
+
+#' @rdname cwt_min_snr
+#' @export
+cwt_min_ridge_length <- function(range = c(1L, 7L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(cwt_min_ridge_length = "CWT Minimum Ridge Length"),
+    finalize = NULL
+  )
+}
+
+#' @rdname cwt_min_snr
+#' @export
+cwt_gap_thresh <- function(range = c(0L, 6L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(cwt_gap_thresh = "CWT Ridge Gap Threshold"),
+    finalize = NULL
+  )
+}
+
+#' @rdname cwt_min_snr
+#' @export
+cwt_noise_window <- function(range = c(3L, 101L), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(cwt_noise_window = "CWT Noise Window"),
+    finalize = NULL
+  )
+}
+
+#' @rdname cwt_min_snr
+#' @export
+cwt_noise_quantile <- function(range = c(0.5, 0.99), trans = NULL) {
+  dials::new_quant_param(
+    type = "double",
+    range = range,
+    inclusive = c(FALSE, FALSE),
+    trans = trans,
+    label = c(cwt_noise_quantile = "CWT Noise Quantile"),
+    finalize = NULL
+  )
+}
+
 #' Parameters for derivative steps
 #'
 #' `derivative_order()` controls the order of differentiation in
@@ -743,25 +828,27 @@ tunable.step_measure_qc_outlier <- function(x, ...) {
 #' @rdname tunable_measure
 #' @export
 tunable.step_measure_peaks_detect <- function(x, ...) {
-  names <- c("min_height", "min_distance", "snr_threshold")
-  call_info <- list(
-    list(pkg = "measure", fun = "peak_min_height"),
-    list(pkg = "measure", fun = "peak_min_distance"),
-    list(pkg = "measure", fun = "peak_snr_threshold")
-  )
-
+  direct <- c("min_height", "min_distance", "snr_threshold")
   if (identical(x$algorithm, "prominence")) {
-    names <- append(names, "min_prominence", after = 2L)
-    call_info <- append(
-      call_info,
-      list(list(pkg = "measure", fun = "peak_min_prominence")),
-      after = 2L
-    )
+    direct <- append(direct, "min_prominence", after = 2L)
   }
-
+  nested <- .peak_cwt_tunable_names(x)
+  fields <- c(direct, nested)
+  constructors <- c(
+    paste0("peak_", direct),
+    if (length(nested)) paste0("cwt_", nested)
+  )
+  info <- lapply(constructors, function(name) list(pkg = "measure", fun = name))
+  n_scales <- length(x$algorithm_params$scales %||% .cwt_default_scales)
+  if ("min_ridge_length" %in% nested) {
+    info[[match("min_ridge_length", fields)]]$range <- c(1L, n_scales)
+  }
+  if ("gap_thresh" %in% nested) {
+    info[[match("gap_thresh", fields)]]$range <- c(0L, n_scales - 1L)
+  }
   tibble::tibble(
-    name = names,
-    call_info = call_info,
+    name = fields,
+    call_info = info,
     source = "recipe",
     component = "step_measure_peaks_detect",
     component_id = x$id

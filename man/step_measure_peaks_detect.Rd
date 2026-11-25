@@ -89,8 +89,10 @@ The detection thresholds are tunable with \code{\link[=peak_min_height]{peak_min
 height and prominence use signal units, distance uses x-axis units, and SNR
 uses MAD units. Adjust the ranges to the measurement scale. Prominence is
 offered as a tunable threshold only for the built-in prominence algorithm.
-Tuning covers these direct scalar arguments; values inside
-\code{algorithm_params} are not extracted as recipe tuning parameters.
+For the built-in CWT detector, use, for example,
+\code{algorithm_params = list(min_snr = tune::tune("ridge_snr"))} to search
+over wavelet ridge SNR. A grid column named \code{ridge_snr} supplies the
+candidate values. See \code{\link[=cwt_min_snr]{cwt_min_snr()}} for the supported scalar controls.
 
 \strong{Peak properties stored:}
 \itemize{
@@ -112,6 +114,25 @@ calculations. This rule considers retained peaks only, so a filtered-out
 neighboring peak does not create a boundary. A low sample can also be far
 from its peak on a noisy or sloped baseline, so these bounds do not by
 themselves remove baseline or noise bias.
+
+To end a prominence peak when the signal returns to a known baseline,
+supply both \code{boundary_baseline} and \code{boundary_tolerance} in
+\code{algorithm_params}. The baseline is a finite signal level or a function
+of the location vector returning a level or one value per location.
+Set the positive tolerance in signal units, for example from independent
+blank or noise measurements. For a zero-corrected trace with a noise
+standard deviation of 0.05, \code{list(boundary_baseline = 0, boundary_tolerance = 0.15)} places the band three standard deviations
+above zero.
+
+Starting at the apex, each boundary is the nearest sample on that side
+at or below baseline plus tolerance, inside the default clipped bounds.
+This requires a finite signal on a strictly monotonic axis, an apex above
+the band and a sampled return on both sides. An unresolved peak raises an
+error with its location. A noise excursion can end a window early, and
+unresolved neighbors can contribute to the same window if the signal
+stays above the band between them. The original contours still determine
+prominence. Integration uses its own \code{baseline} setting.
+
 Deconvolution uses current \code{left_base} and \code{right_base} as finite limits, so
 fitted areas omit model tails outside them.
 

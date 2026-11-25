@@ -40,8 +40,17 @@ outside the immediate peak support used to estimate local noise.
 \code{min_height} remains in original signal units; \code{min_distance} remains in
 measurement-axis units. Nearby ridges can generate multiple candidates
 within one broad or noisy feature. Set \code{min_distance} for the separation
-appropriate to the measurement. Values nested in \code{algorithm_params} are
-currently not extracted as recipe tuning parameters.
+appropriate to the measurement.
+}
+
+\section{Tuning}{
+
+To vary the minimum wavelet SNR across resamples, use
+\code{algorithm_params = list(min_snr = tune::tune("ridge_snr"))} and supply a
+grid with a \code{ridge_snr} column to \code{tune::tune_grid()}. With an unnamed
+marker, the default ID is \code{cwt_min_snr}. Ridge length, gap, noise window
+and noise quantile follow the same convention. Keep \code{scales} fixed to the
+widths appropriate for the sampled signal. See \code{\link[=cwt_min_snr]{cwt_min_snr()}} for ranges.
 }
 
 \section{Axes, missing data, and output}{
