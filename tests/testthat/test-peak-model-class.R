@@ -2,6 +2,10 @@
 # Tests for Peak Model Class and Registry
 # ==============================================================================
 
+integration_peak_value <- function(model, x, params) {
+  params$slope * x
+}
+
 test_that("new_peak_model creates valid peak model objects", {
   model <- new_peak_model(
     name = "test",
@@ -536,4 +540,152 @@ test_that("models handle single-point evaluation", {
   y <- peak_model_value(model, 0, params)
   expect_equal(y, 1)
   expect_equal(length(y), 1)
+})
+
+test_that("peak model class validates generic and fallback contracts", {
+  expect_error(
+    new_peak_model("", 1, "a"),
+    "non-empty string"
+  )
+  expect_error(
+    new_peak_model("invalid", 0, character()),
+    "positive integer"
+  )
+
+  model <- new_peak_model(
+    "integration",
+    1,
+    "slope",
+    description = "Linear test model",
+    technique = "test-technique"
+  )
+  expect_equal(peak_model_param_names(model), "slope")
+  output <- capture.output(print(model))
+  expect_true(any(grepl("Technique: test-technique", output, fixed = TRUE)))
+
+  expect_error(
+    peak_model_bounds(model, c(0, 1), c(0, 1)),
+    "No.*peak_model_bounds"
+  )
+  expect_error(
+    peak_model_initial_guess(model, 0:2, 0:2, 0),
+    "valid index"
+  )
+  expect_error(
+    peak_model_initial_guess(model, 0:2, 0:2, 4),
+    "valid index"
+  )
+  expect_error(
+    peak_model_initial_guess(model, 0:2, 0:2, 1),
+    "No.*peak_model_initial_guess"
+  )
+})
+
+test_that("default peak area integrates models with only a value method", {
+  rlang::local_bindings(
+    peak_model_value.integration_peak_model = integration_peak_value,
+    .env = globalenv()
+  )
+
+  model <- new_peak_model("integration", 1, "slope")
+  area <- peak_model_area(
+    model,
+    params = list(slope = 2),
+    x_range = c(3, 1)
+  )
+
+  expect_equal(area, 8, tolerance = 1e-10)
+  expect_equal(
+    peak_model_area(model, list(slope = 2), x_range = c(1, 1)),
+    0
+  )
+  expect_error(
+    peak_model_area(model, list(slope = 2)),
+    "required for numerical integration"
+  )
+  expect_error(
+    peak_model_area(model, list(slope = 2), x_range = c(1, Inf)),
+    "pair of finite numeric endpoints"
+  )
+})
+
+test_that("peak model utilities reject mismatched inputs", {
+  model <- gaussian_peak_model()
+
+  expect_error(
+    sum_peak_models(1:3, list(model), list()),
+    "must match"
+  )
+  expect_false(unregister_peak_model("not-registered"))
+})
+
+test_that("peak model registry validates and filters technique metadata", {
+  rlang::local_bindings(peak_models = list(), .env = .measure_registry)
+
+  expect_error(
+    register_peak_model("", function() gaussian_peak_model(), "test-pack"),
+    "non-empty string"
+  )
+  expect_error(
+    register_peak_model("invalid", NULL, "test-pack"),
+    "must be a function"
+  )
+  expect_false(unregister_peak_model("not-registered"))
+
+  .register_core_peak_models()
+  register_peak_model(
+    "sec_test",
+    function() new_peak_model("sec_test", 1, "a"),
+    pack_name = "test-pack",
+    technique = "SEC/GPC"
+  )
+  register_peak_model(
+    "other_test",
+    function() new_peak_model("other_test", 1, "a"),
+    pack_name = "test-pack",
+    technique = "other"
+  )
+
+  filtered <- peak_models(techniques = "SEC/GPC")
+  expect_true(all(c("gaussian", "sec_test") %in% filtered$name))
+  expect_false("other_test" %in% filtered$name)
+  expect_true("sec_test" %in% peak_models(packs = "test-pack")$name)
+})
+
+test_that("asymmetric built-in models provide usable guesses and bounds", {
+  x <- seq(-6, 6, by = 0.1)
+  bigaussian <- bigaussian_peak_model()
+  bigaussian_params <- list(
+    height = 4,
+    center = 0.5,
+    width_left = 0.6,
+    width_right = 1.2
+  )
+  bigaussian_guess <- peak_model_initial_guess(
+    bigaussian,
+    x,
+    peak_model_value(bigaussian, x, bigaussian_params),
+    which.max(peak_model_value(bigaussian, x, bigaussian_params))
+  )
+
+  expect_equal(bigaussian_guess$height, 4)
+  expect_equal(bigaussian_guess$center, 0.5)
+  expect_equal(bigaussian_guess$width_left, 0.6, tolerance = 0.15)
+  expect_equal(bigaussian_guess$width_right, 1.2, tolerance = 0.15)
+
+  bounds <- peak_model_bounds(bigaussian, c(-2, 4), c(0, 5))
+  expect_equal(unname(bounds$lower), c(0, -2, 0.001, 0.001))
+  expect_equal(unname(bounds$upper), c(7.5, 4, 3, 3))
+
+  lorentzian <- lorentzian_peak_model()
+  lorentzian_params <- list(height = 4, center = 0.5, gamma = 0.8)
+  lorentzian_guess <- peak_model_initial_guess(
+    lorentzian,
+    x,
+    peak_model_value(lorentzian, x, lorentzian_params),
+    which.max(peak_model_value(lorentzian, x, lorentzian_params))
+  )
+  expect_equal(lorentzian_guess$height, 4)
+  expect_equal(lorentzian_guess$center, 0.5)
+  expect_equal(lorentzian_guess$gamma, 0.8, tolerance = 0.1)
 })

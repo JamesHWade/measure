@@ -53,3 +53,55 @@ test_that("transform tidy format", {
 
   expect_equal(spect_df, exp_df)
 })
+
+test_that("matrix conversion rejects ambiguous shapes and mismatched axes", {
+  expect_error(matrix_to_measure(1:4, c(12, 10)), "matrix")
+  expect_error(matrix_to_measure(matrix(1:4, nrow = 2), 12), "locations")
+})
+
+test_that("column validation prefers typed measures and accepts legacy .measures", {
+  member <- new_measure_tbl(c(12, 10), c(0.1, 0.3))
+  legacy <- tibble::tibble(.measures = list(member))
+  mixed <- legacy
+  mixed$signal <- new_measure_list(list(member))
+  expect_identical(check_for_measure(mixed), "signal")
+  expect_identical(check_for_measure(legacy), ".measures")
+  expect_identical(
+    check_has_measure(legacy, quote(prep.step_measure_output_long())),
+    ".measures"
+  )
+})
+
+test_that("one-dimensional padding appends missing points only to short samples", {
+  data <- tibble::tibble(
+    id = rep(c("a", "b", "c"), c(3, 2, 3)),
+    axis = c(3, 2, 1, 3, 1, 3, 2, 1),
+    signal = c(11, NA, 13, 21, 23, 31, 32, 33)
+  )
+  rec <- recipe(~., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(
+      signal,
+      location = vars(axis),
+      col_name = "spectrum",
+      pad = TRUE
+    )
+  baked <- bake(prep(rec), new_data = data)
+  expect_identical(baked$id, c("a", "b", "c"))
+  expect_equal(baked$spectrum[[1]], new_measure_tbl(c(3, 2, 1), c(11, NA, 13)))
+  expect_equal(baked$spectrum[[2]], new_measure_tbl(c(3, 1, NA), c(21, 23, NA)))
+  expect_equal(baked$spectrum[[3]], new_measure_tbl(c(3, 2, 1), 31:33))
+})
+
+test_that("matrix-based centering rejects ragged spectra before recycling signal", {
+  data <- tibble::tibble(
+    signal = new_measure_list(list(
+      new_measure_tbl(1:4, c(1, 2, 3, 4)),
+      new_measure_tbl(1:2, c(7, 9))
+    ))
+  )
+  rec <- recipe(~., data = data) |> step_measure_center()
+  expect_error(prep(rec), "different point counts")
+  trained <- prep(rec, training = data[1, ])
+  expect_error(bake(trained, new_data = data), "different point counts")
+})

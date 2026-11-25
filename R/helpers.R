@@ -1,11 +1,15 @@
 # ------------------------------------------------------------------------------
 # Move between lists of tibbles and matrices (and back)
-# Assumes identical locations. We have code to check that the per-sample
-# dimensions are equal but nothing yet for identical locations.
+# Callers that compare points by location must also check their axes.
 
 measure_to_matrix <- function(x) {
-  res <- do.call("rbind", purrr::map(x, ~ .x[["value"]]))
-  res
+  values <- purrr::map(x, "value")
+  if (length(unique(lengths(values))) > 1L) {
+    cli::cli_abort(
+      "Cannot form a measurement matrix from samples with different point counts."
+    )
+  }
+  do.call(rbind, values)
 }
 
 matrix_to_measure <- function(x, loc) {

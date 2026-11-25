@@ -30,6 +30,10 @@ ggplot2::theme_set(
 library(measure)
 library(dplyr)
 library(ggplot2)
+
+has_mcr <- requireNamespace("mcr", quietly = TRUE)
+has_quarto <- requireNamespace("quarto", quietly = TRUE) && quarto::quarto_available()
+has_pdf_tools <- has_quarto && nzchar(Sys.which("lualatex"))
 ```
 
 ## Overview
@@ -476,8 +480,8 @@ For method comparison regression, use Deming or Passing-Bablok regression which 
 ```{r deming-regression}
 # Method comparison with known measurement error
 deming_data <- data.frame(
-  reference = c(5, 10, 25, 50, 100, 200, 400),
-  test_method = c(5.2, 10.3, 25.8, 51.2, 101.5, 203.1, 408.2)
+  reference = c(5, 10, 25, 50, 100, 200, 400, 600, 800, 1000),
+  test_method = c(5.2, 10.3, 25.8, 51.2, 101.5, 203.1, 408.2, 610.2, 812, 1013)
 )
 
 deming <- measure_deming_regression(
@@ -493,10 +497,10 @@ print(deming)
 glance(deming)
 ```
 
-For Passing-Bablok regression (non-parametric), install the `mcr` package:
+The nonparametric Passing–Bablok fit below runs when the optional `mcr`
+package is installed. It uses all ten paired measurements.
 
-```{r passing-bablok, eval = FALSE}
-# Requires: install.packages("mcr")
+```{r passing-bablok, eval = has_mcr}
 pb <- measure_passing_bablok(
   deming_data,
   method1_col = "reference",
@@ -585,7 +589,7 @@ autoplot(me, type = "bar") +
 
 When matrix effects vary between samples, standard addition provides sample-specific correction:
 
-```{r standard-addition, eval = FALSE}
+```{r standard-addition}
 library(recipes)
 
 # Standard addition data
@@ -598,7 +602,7 @@ sa_data <- data.frame(
   )
 )
 
-rec <- recipe(~ ., data = sa_data) |>
+sa_recipe <- recipe(~ ., data = sa_data) |>
   step_measure_standard_addition(
     response,
     addition_col = "addition",
@@ -606,8 +610,11 @@ rec <- recipe(~ ., data = sa_data) |>
   ) |>
   prep()
 
-# Original concentrations calculated via extrapolation
-bake(rec, new_data = NULL)
+# Original concentrations calculated via extrapolation. `bake()` returns the
+# corrected concentration and fit diagnostics for every row in each sample.
+sa_baked <- bake(sa_recipe, new_data = NULL)
+sa_baked |>
+  distinct(sample_id, response_corrected, response_sa_rsquared)
 ```
 
 ## Sample Preparation QC
@@ -689,18 +696,22 @@ print(drift_result)
 
 ### Correcting Drift
 
-```{r drift-correction, eval = FALSE}
+```{r drift-correction}
 library(recipes)
 
 # Using QC-LOESS correction in a recipe
-rec <- recipe(~ ., data = drift_data) |>
+drift_recipe <- recipe(~ ., data = drift_data) |>
   step_measure_drift_qc_loess(
     feature1, feature2,
     qc_type = "qc"
   ) |>
   prep()
 
-corrected <- bake(rec, new_data = NULL)
+# `bake()` applies the learned QC-LOESS correction to the training rows.
+corrected <- bake(drift_recipe, new_data = NULL)
+corrected |>
+  select(sample_type, run_order, feature1, feature2) |>
+  head()
 ```
 
 ## Validation Reports
@@ -809,21 +820,37 @@ To render a validation report to HTML or PDF, use `render_validation_report()`. 
 - **ICH Q2(R2)**: Organized by validation characteristics (specificity, linearity, range, accuracy, precision, etc.)
 - **USP <1225>**: Organized by procedure category (I, II, III, IV)
 
-```{r render-report, eval = FALSE}
-# Render to HTML using ICH Q2 template (default)
-render_validation_report(
-  report,
-  output_file = "validation_report.html",
-  template = "ich_q2"
-)
+The HTML example runs when the `quarto` R package and the Quarto CLI are
+available. Both examples write to a temporary directory. To keep the reports,
+set `report_dir` to a project directory.
 
-# Render to PDF using USP <1225> template
-render_validation_report(
+```{r render-report-html, eval = has_quarto}
+report_dir <- tempfile("validation-reports-")
+html_report <- render_validation_report(
   report,
-  output_file = "validation_report.pdf",
-  output_format = "pdf",
-  template = "usp_1225"
+  template = "ich_q2",
+  output_format = "html",
+  output_file = "validation_report.html",
+  output_dir = report_dir,
+  open = FALSE,
+  quiet = TRUE
 )
+basename(html_report)
+```
+
+The USP PDF example also requires LuaLaTeX.
+
+```{r render-report-pdf, eval = has_pdf_tools}
+pdf_report <- render_validation_report(
+  report,
+  template = "usp_1225",
+  output_format = "pdf",
+  output_file = "validation_report.pdf",
+  output_dir = report_dir,
+  open = FALSE,
+  quiet = TRUE
+)
+basename(pdf_report)
 ```
 
 The rendered report includes:

@@ -1,5 +1,13 @@
 # measure 0.0.1.9004
 
+* Matrix-based preprocessing steps now reject samples with different point
+  counts. Previously, a short signal could be repeated to fill a matrix row
+  and produce results for points that were never measured (#180).
+
+* `step_measure_msc()` now centers a flat spectrum reliably when its fitted
+  slope is zero. `step_measure_savitzky_golay()` honors `skip = TRUE` on
+  new data and checks that its filter settings are finite integers (#180).
+
 * `step_measure_peaks_detect(algorithm = "cwt")` supports tuning the ridge
   SNR, minimum ridge length, allowed gap, noise window and noise quantile.
   Put `tune::tune("ridge_snr")` inside `algorithm_params$min_snr` to vary

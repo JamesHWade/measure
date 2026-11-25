@@ -218,10 +218,11 @@ tidy.step_measure_msc <- function(x, ...) {
 .msc_single <- function(x, ref_spectrum) {
   values <- x$value
 
-  # Fit linear regression: values = slope * ref_spectrum + intercept
-  # Using lm.fit for efficiency
-  fit <- stats::lm.fit(cbind(1, ref_spectrum), values)
-  intercept <- fit$coefficients[1]
+  # Center the response before fitting so a constant spectrum has exactly
+  # zero slope, independent of its signal level and QR rounding.
+  level <- mean(values)
+  fit <- stats::lm.fit(cbind(1, ref_spectrum), values - level)
+  intercept <- level + fit$coefficients[1]
   slope <- fit$coefficients[2]
 
   # Handle edge case where slope is zero or NA

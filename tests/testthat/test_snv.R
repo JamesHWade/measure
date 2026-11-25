@@ -100,6 +100,44 @@ test_that("SNV fails without measure input step", {
   )
 })
 
+test_that("SNV honors an explicit measure column", {
+  data <- meats_small |>
+    dplyr::mutate(transmittance_2 = 2 * transmittance)
+
+  rec <-
+    recipe(water + fat + protein ~ ., data = data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(
+      transmittance,
+      location = vars(channel),
+      col_name = ".first"
+    ) |>
+    step_measure_input_long(
+      transmittance_2,
+      location = vars(channel),
+      col_name = ".second"
+    ) |>
+    step_measure_snv(measures = ".first") |>
+    prep()
+
+  expect_equal(rec$steps[[3]]$measures, ".first")
+
+  result <- bake(rec, new_data = NULL)
+  first_values <- data |>
+    dplyr::filter(id == dplyr::first(id)) |>
+    dplyr::pull(transmittance)
+  second_values <- data |>
+    dplyr::filter(id == dplyr::first(id)) |>
+    dplyr::pull(transmittance_2)
+
+  expect_equal(
+    result$.first[[1]]$value,
+    (first_values - mean(first_values)) / sd(first_values),
+    tolerance = 1e-10
+  )
+  expect_equal(result$.second[[1]]$value, second_values)
+})
+
 test_that("SNV handles constant spectrum with warning", {
   # Create data with a constant spectrum
   constant_data <- meats_small

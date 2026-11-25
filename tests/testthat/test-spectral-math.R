@@ -105,6 +105,21 @@ test_that("step_measure_absorbance tidy method works", {
   expect_true("terms" %in% names(tidy_result))
 })
 
+test_that("absorbance warns and retains non-positive edge behavior", {
+  input <- tibble::tibble(
+    location = 1:3,
+    value = c(0, 0.5, 1)
+  )
+
+  expect_warning(
+    result <- .absorbance_single(input),
+    "Non-positive transmittance"
+  )
+  expect_equal(result$location, input$location)
+  expected <- suppressWarnings(-log10(input$value))
+  expect_equal(result$value, expected)
+})
+
 # ==============================================================================
 # step_measure_transmittance tests
 # ==============================================================================
@@ -259,6 +274,21 @@ test_that("step_measure_log tidy method works", {
   expect_equal(tidy_result$offset, 0.5)
 })
 
+test_that("log warns when the offset leaves non-positive values", {
+  input <- tibble::tibble(
+    location = 1:3,
+    value = c(0, 1, 2)
+  )
+
+  expect_warning(
+    result <- .log_single(input),
+    "Non-positive values after offset"
+  )
+  expect_equal(result$location, input$location)
+  expected <- suppressWarnings(log(input$value))
+  expect_equal(result$value, expected)
+})
+
 # ==============================================================================
 # step_measure_kubelka_munk tests
 # ==============================================================================
@@ -323,6 +353,20 @@ test_that("step_measure_kubelka_munk tidy method works", {
 
   expect_s3_class(tidy_result, "tbl_df")
   expect_true("terms" %in% names(tidy_result))
+})
+
+test_that("Kubelka-Munk warns at reflectance boundaries", {
+  input <- tibble::tibble(
+    location = 1:3,
+    value = c(0, 1, 1.2)
+  )
+
+  expect_warning(
+    result <- .kubelka_munk_single(input),
+    "outside \\(0, 1\\)"
+  )
+  expect_equal(result$location, input$location)
+  expect_equal(result$value, (1 - input$value)^2 / (2 * input$value))
 })
 
 # ==============================================================================
