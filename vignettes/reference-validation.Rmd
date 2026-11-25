@@ -824,7 +824,7 @@ The HTML example runs when the `quarto` R package and the Quarto CLI are
 available. Both examples write to a temporary directory. To keep the reports,
 set `report_dir` to a project directory.
 
-```{r render-report-html, eval = has_quarto}
+```{r render-report-html, eval = has_quarto, results = 'hide', message = FALSE}
 report_dir <- tempfile("validation-reports-")
 html_report <- render_validation_report(
   report,
@@ -832,24 +832,28 @@ html_report <- render_validation_report(
   output_format = "html",
   output_file = "validation_report.html",
   output_dir = report_dir,
-  open = FALSE,
-  quiet = TRUE
+  open = FALSE
 )
+```
+
+```{r html-filename, eval = has_quarto}
 basename(html_report)
 ```
 
 The USP PDF example also requires LuaLaTeX.
 
-```{r render-report-pdf, eval = has_pdf_tools}
+```{r render-report-pdf, eval = has_pdf_tools, results = 'hide', message = FALSE}
 pdf_report <- render_validation_report(
   report,
   template = "usp_1225",
   output_format = "pdf",
   output_file = "validation_report.pdf",
   output_dir = report_dir,
-  open = FALSE,
-  quiet = TRUE
+  open = FALSE
 )
+```
+
+```{r pdf-filename, eval = has_pdf_tools}
 basename(pdf_report)
 ```
 
