@@ -465,7 +465,10 @@ render_validation_report <- function(
     input = temp_qmd,
     output_format = output_format,
     output_file = output_file,
-    execute_params = list(report_data_path = report_data_file),
+    execute_params = list(
+      report_data_path = report_data_file,
+      library_paths = .libPaths()
+    ),
     quiet = quiet,
     ...
   )

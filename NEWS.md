@@ -1,5 +1,9 @@
 # measure 0.0.1.9004
 
+* `render_validation_report()` uses the caller's R libraries when Quarto
+  renders a report. This lets both templates find `measure` when it is
+  installed in a temporary or project-specific library (#186).
+
 * Matrix-based preprocessing steps now reject samples with different point
   counts. Previously, a short signal could be repeated to fill a matrix row
   and produce results for points that were never measured (#180).
