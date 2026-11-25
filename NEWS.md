@@ -1,5 +1,17 @@
 # measure 0.0.1.9004
 
+* `measure_slice_table()` returns one row per measurement point, and
+  `measure_summary_table()` summarizes the values for each sample (#189).
+
+* `step_measure_input_long(pad = TRUE)` brings multidimensional samples
+  onto the coordinate tuples observed in the current batch. An absent tuple
+  receives a missing signal. The step checks for repeated tuples before
+  padding (#182).
+
+* `step_measure_input_wide()` keeps each input row as a separate sample and
+  pairs its values with the axis in the column order learned at prep time
+  (#183).
+
 * Use `set_measure_value_metadata()` to declare what the values in a
   measurement column represent and `measure_value_metadata()` to read the
   declaration. Compatible declarations survive row slicing and binding.

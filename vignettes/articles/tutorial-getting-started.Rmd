@@ -160,8 +160,7 @@ raw_plot_data <- meats_long |>
 
 processed_plot_data <- processed |>
   filter(id <= 10) |>
-  select(id, .measures) |>
-  unnest(.measures) |>
+  measure_slice_table(id_cols = "id") |>
   transmute(
     id,
     location,
@@ -183,6 +182,16 @@ bind_rows(raw_plot_data, processed_plot_data) |>
     title = "Meat spectra before and after processing"
   ) +
   article_plot_theme
+```
+
+To compare the range of the processed signal across samples, use
+`measure_summary_table()`. Each row summarizes one sample's spectrum.
+
+```{r processed-summaries}
+processed |>
+  measure_summary_table(id_cols = "id") |>
+  select(id, n_points, n_missing, min, max) |>
+  head()
 ```
 
 ### Step 3: output for modeling
@@ -291,6 +300,12 @@ data(sec_calibration)
 data(maldi_spectra)
 # 16 synthetic MALDI-TOF spectra
 ```
+
+For SEC/GPC workflows using these chromatograms and calibration standards,
+see the [measure.sec documentation](https://jameshwade.github.io/measure.sec/).
+The [technique-pack guide](howto-technique-packs.html) shows how to discover
+registered SEC steps. Their implementations are in the
+[measure.sec source repository](https://github.com/JamesHWade/measure.sec).
 
 ### External data sources
 

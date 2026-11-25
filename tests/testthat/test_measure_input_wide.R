@@ -58,3 +58,115 @@ test_that("ingest wide format data", {
     error = TRUE
   )
 })
+
+test_that("wide input keeps one sample for every input row", {
+  training <- tibble::tibble(
+    sample_id = c("duplicate", "duplicate"),
+    ..row = c("batch-A", "batch-A"),
+    x_001 = c(1, 10),
+    x_002 = c(2, 20),
+    outcome = c(0, 0)
+  )
+
+  rec <-
+    recipe(outcome ~ ., data = training) |>
+    step_measure_input_wide(x_001:x_002, location_values = c(100, 200)) |>
+    prep()
+
+  result <- bake(rec, new_data = NULL)
+
+  expect_equal(nrow(result), nrow(training))
+  expect_equal(as.character(result$..row), training$..row)
+  expect_equal(
+    result$.measures[[1]],
+    new_measure_tbl(location = c(100, 200), value = c(1, 2))
+  )
+  expect_equal(
+    result$.measures[[2]],
+    new_measure_tbl(location = c(100, 200), value = c(10, 20))
+  )
+})
+
+test_that("wide input uses trained columns and axis order when baking", {
+  training <- tibble::tibble(
+    sample_id = 1:2,
+    x_001 = c(1, 10),
+    x_002 = c(2, 20),
+    outcome = c(0, 1)
+  )
+
+  rec <-
+    recipe(outcome ~ ., data = training) |>
+    step_measure_input_wide(
+      starts_with("x_"),
+      location_values = c(100, 200)
+    ) |>
+    prep()
+
+  new_data <- tibble::tibble(
+    sample_id = 1:2,
+    x_002 = c(20, 200),
+    x_001 = c(10, 100),
+    x_extra = c(99, 999),
+    outcome = c(0, 1)
+  )
+
+  result <- bake.step_measure_input_wide(rec$steps[[1]], new_data)
+
+  expect_equal(result$.measures[[1]]$location, c(100, 200))
+  expect_equal(result$.measures[[1]]$value, c(10, 20))
+  expect_equal(result$.measures[[2]]$value, c(100, 200))
+  expect_in("x_extra", names(result))
+})
+
+test_that("wide input reports missing trained columns", {
+  training <- tibble::tibble(
+    sample_id = 1:2,
+    x_001 = c(1, 10),
+    x_002 = c(2, 20),
+    outcome = c(0, 1)
+  )
+
+  rec <-
+    recipe(outcome ~ ., data = training) |>
+    step_measure_input_wide(starts_with("x_")) |>
+    prep()
+
+  expect_snapshot(
+    bake.step_measure_input_wide(
+      rec$steps[[1]],
+      training[c("sample_id", "x_001", "outcome")]
+    ),
+    error = TRUE
+  )
+})
+
+test_that("wide input rejects matrix-valued measurement columns", {
+  training <- tibble::tibble(
+    outcome = 1:2,
+    measurements = I(matrix(1:4, nrow = 2))
+  )
+
+  expect_snapshot(
+    recipe(outcome ~ ., data = training) |>
+      step_measure_input_wide(measurements) |>
+      prep(),
+    error = TRUE
+  )
+})
+
+test_that("wide input rejects output column collisions", {
+  training <- tibble::tibble(
+    sample_id = 1:2,
+    x_001 = c(1, 10),
+    x_002 = c(2, 20),
+    outcome = c(0, 1)
+  )
+
+  expect_snapshot(
+    recipe(outcome ~ ., data = training) |>
+      step_measure_input_wide(x_001:x_002, col_name = "sample_id") |>
+      prep(),
+    error = TRUE
+  )
+})

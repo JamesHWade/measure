@@ -23,15 +23,17 @@
 #' `step_measure_input_wide()` will collect those data and put them into a
 #' format used internally by this package. The data structure has a row for
 #' each independent experimental unit and a nested tibble with that sample's
-#' measure (measurement and location). It assumes that there are unique
-#' combinations of the other columns in the data that define individual
-#' patterns associated with the pattern. If this is not the case, the special
-#' values might be inappropriately restructured.
+#' measure (measurement and location). All columns that are not selected as
+#' measurements are retained as row-level metadata.
 #'
-#' The best advice is to have a column of any type that indicates the unique
-#' sample number for each measure. For example, if there are 20 rows in the
-#' input data set, the columns that are _not_ analytically measurements show
-#' have no duplicate combinations in the 20 rows.
+#' Each input row produces one output row and one nested measurement. A sample
+#' identifier is still recommended for downstream joins and diagnostics, but
+#' duplicate values in the non-measurement columns do not merge input rows.
+#'
+#' The selected column names and their axis order are fixed when the recipe is
+#' prepared. When baking, those trained columns must be present in `new_data`;
+#' extra columns and the order of columns in `new_data` do not change the
+#' measurement axis.
 #'
 #' # Tidying
 #'
@@ -114,9 +116,15 @@ step_measure_input_wide_new <-
 #' @export
 prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
-  check_type(training[, col_names], types = c("double", "integer"))
+  if (length(col_names) == 0) {
+    cli::cli_abort("At least one measurement column must be selected.")
+  }
+  check_wide_measure_columns(training, col_names)
 
   if (!is.null(x$location_values)) {
+    if (!is.numeric(x$location_values) || !is.null(dim(x$location_values))) {
+      cli::cli_abort("{.arg location_values} must be a numeric vector.")
+    }
     num_inputs <- length(col_names)
     num_loc <- length(x$location_values)
     if (num_inputs != num_loc) {
@@ -129,7 +137,6 @@ prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
       )
       rlang::abort(msg)
     }
-    # if
   } else {
     x$location_values <- seq_along(col_names)
   }
@@ -148,9 +155,33 @@ prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_input_wide <- function(object, new_data, ...) {
-  # TODO check to make sure that the nested tibble has the same number of rows
-  # in case the nesting was bad
-  wide_to_list(new_data, object$location_values, object$terms, object$col_name)
+  columns <- unname(object$columns)
+  missing_cols <- setdiff(columns, names(new_data))
+  if (length(missing_cols) > 0) {
+    cli::cli_abort(c(
+      "Required measurement column{?s} not found in {.arg new_data}: {.field {missing_cols}}.",
+      "i" = "These columns were selected when the recipe was prepared."
+    ))
+  }
+  check_wide_measure_columns(new_data, columns)
+
+  output_col <- object$col_name
+  if (!rlang::is_string(output_col) || !nzchar(output_col)) {
+    cli::cli_abort("{.arg col_name} must be a single column name.")
+  }
+  if (output_col %in% setdiff(names(new_data), columns)) {
+    cli::cli_abort(c(
+      "Output column {.field {output_col}} already exists in {.arg new_data}.",
+      "i" = "Choose a different {.arg col_name} or remove the existing column."
+    ))
+  }
+
+  values <- as.matrix(new_data[columns])
+  measures <- matrix_to_measure(values, object$location_values)
+  result <- new_data[, setdiff(names(new_data), columns), drop = FALSE]
+  result[[output_col]] <- new_measure_list(measures)
+
+  result
 }
 
 #' @export
@@ -181,27 +212,18 @@ tidy.step_measure_input_wide <- function(x, ...) {
 }
 
 
-wide_to_list <- function(x, ind, selections, col_name = ".measures") {
-  x <- x |>
-    dplyr::mutate(..row = seq_len(nrow(x))) |>
-    tidyr::pivot_longer(
-      cols = c(!!!selections),
-      names_to = "temp",
-      values_to = "value"
-    ) |>
-    dplyr::select(-temp) |>
-    tidyr::nest(.by = c(-value), .key = ".measures_temp") |>
-    dplyr::select(-..row)
-
-  # Rename to the user-specified column name
-  if (col_name != ".measures_temp") {
-    names(x)[names(x) == ".measures_temp"] <- col_name
+check_wide_measure_columns <- function(data, columns) {
+  matrix_cols <- columns[vapply(
+    data[columns],
+    function(x) !is.null(dim(x)),
+    logical(1)
+  )]
+  if (length(matrix_cols) > 0) {
+    cli::cli_abort(c(
+      "Wide measurement columns must be scalar numeric vectors.",
+      "x" = "Array-valued column{?s} selected: {.field {matrix_cols}}."
+    ))
   }
 
-  x <- add_location(x, ind, col = col_name)
-
-  # Wrap as measure_list for class-based detection
-  x[[col_name]] <- new_measure_list(x[[col_name]])
-
-  x
+  check_type(data[, columns, drop = FALSE], types = c("double", "integer"))
 }
