@@ -20,6 +20,7 @@ format:
     number-sections: true
 params:
   report_data_path: ""
+  library_paths: null
 execute:
   echo: false
   warning: false
@@ -28,6 +29,8 @@ execute:
 
 ```{r setup}
 #| include: false
+# Use the caller's package libraries in Quarto's separate R session.
+.libPaths(c(params$library_paths, .libPaths()))
 library(measure)
 library(ggplot2)
 library(knitr)

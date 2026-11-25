@@ -10,8 +10,13 @@
 # ------------------------------------------------------------------------------
 
 # Create test data: 3D array-like structure (samples x time x wavelength)
-create_nd_test_data <- function(n_samples = 10, n_time = 5, n_wavelength = 4) {
-  set.seed(42)
+create_nd_test_data <- function(
+  n_samples = 10,
+  n_time = 5,
+  n_wavelength = 4,
+  seed = 42
+) {
+  withr::local_seed(seed)
 
   # Simulate 3-component mixture data
   # Component profiles
@@ -72,6 +77,59 @@ create_nd_test_data <- function(n_samples = 10, n_time = 5, n_wavelength = 4) {
 }
 
 # ==============================================================================
+# nD array assembly tests
+
+test_that("nD array assembly follows coordinates and validates sparse grids", {
+  # Deliberately shuffle the point order so that the array is assembled from
+  # coordinates rather than relying on the row order of each measurement.
+  shuffled <- new_measure_nd_tbl(
+    location_1 = c(20, 10, 20, 10, 20, 10),
+    location_2 = c(300, 200, 100, 100, 200, 300),
+    value = c(6, 1, 5, 2, 4, 3)
+  )
+  complete <- new_measure_nd_tbl(
+    location_1 = c(10, 10, 10, 20, 20, 20),
+    location_2 = c(100, 200, 300, 100, 200, 300),
+    value = 11:16
+  )
+
+  assembled <- .nd_list_to_array(new_measure_nd_list(list(shuffled, complete)))
+
+  expect_equal(unname(dim(assembled$array)), c(2L, 2L, 3L))
+  expect_equal(assembled$grid_info$location_1, c(10, 20))
+  expect_equal(assembled$grid_info$location_2, c(100, 200, 300))
+  actual <- assembled$array[1, , ]
+  dim(actual) <- unname(dim(actual))
+  expect_equal(
+    actual,
+    matrix(c(2, 1, 3, 5, 4, 6), nrow = 2, byrow = TRUE)
+  )
+
+  one_missing <- new_measure_nd_tbl(
+    location_1 = c(10, 10, 10, 20, 20),
+    location_2 = c(100, 200, 300, 100, 200),
+    value = 21:25
+  )
+  expect_warning(
+    sparse <- .nd_list_to_array(new_measure_nd_list(list(
+      complete,
+      one_missing
+    ))),
+    "missing"
+  )
+  expect_true(anyNA(sparse$array))
+
+  two_missing <- new_measure_nd_tbl(
+    location_1 = c(10, 10, 10, 20),
+    location_2 = c(100, 200, 300, 100),
+    value = 31:34
+  )
+  expect_error(
+    .nd_list_to_array(new_measure_nd_list(list(complete, two_missing))),
+    "missing values"
+  )
+})
+
 # PARAFAC Tests
 # ==============================================================================
 
@@ -115,6 +173,15 @@ test_that("step_measure_parafac prep extracts components", {
   # Check loadings are extracted
   expect_true(!is.null(rec$steps[[1]]$loadings))
   expect_true("spectrum" %in% names(rec$steps[[1]]$loadings))
+
+  # Trained printing includes the selected measurement column, and tidy()
+  # exposes every fitted mode when requested.
+  expect_output(print(rec$steps[[1]]), "on spectrum")
+  tidy_loadings <- recipes::tidy(rec, number = 1, type = "loadings")
+  expect_true(all(
+    c("column", "mode", "location", "id") %in% names(tidy_loadings)
+  ))
+  expect_setequal(unique(tidy_loadings$mode), 1:3)
 })
 
 test_that("step_measure_parafac bake produces score columns", {
@@ -182,6 +249,32 @@ test_that("step_measure_parafac works with centering/scaling options", {
       baked_scaled$parafac_spectrum_1
     )
   )
+})
+
+test_that("PARAFAC projection handles a degenerate loading mode", {
+  grid <- expand.grid(location_1 = 1:2, location_2 = 1:2)
+  measure <- new_measure_nd_list(list(
+    new_measure_nd_tbl(
+      location_1 = grid$location_1,
+      location_2 = grid$location_2,
+      value = 1:4
+    )
+  ))
+  loadings <- list(
+    matrix(1, nrow = 1, ncol = 1),
+    matrix(0, nrow = 2, ncol = 1),
+    matrix(0, nrow = 2, ncol = 1)
+  )
+
+  scores <- .project_parafac(
+    measure,
+    loadings = loadings,
+    center_values = NULL,
+    scale_values = NULL,
+    grid_info = NULL
+  )
+
+  expect_equal(scores, matrix(0, nrow = 1, ncol = 1))
 })
 
 test_that("step_measure_parafac tidy returns parameters", {
@@ -258,7 +351,7 @@ test_that("step_measure_tucker prep extracts loadings and core", {
 
   suppressWarnings({
     rec <- recipes::recipe(outcome ~ ., data = test_data) |>
-      step_measure_tucker(spectrum, ranks = c(3, 2)) |>
+      step_measure_tucker(spectrum, ranks = c(3, 2), scale = TRUE) |>
       recipes::prep()
   })
 
@@ -266,6 +359,13 @@ test_that("step_measure_tucker prep extracts loadings and core", {
   expect_true(!is.null(rec$steps[[1]]$loadings))
   expect_true(!is.null(rec$steps[[1]]$core))
   expect_true("spectrum" %in% names(rec$steps[[1]]$loadings))
+  expect_true(!is.null(rec$steps[[1]]$scale_values$spectrum))
+  expect_output(print(rec$steps[[1]]), "on spectrum")
+  tidy_loadings <- recipes::tidy(rec, number = 1, type = "loadings")
+  expect_true(all(
+    c("column", "mode", "location", "id") %in% names(tidy_loadings)
+  ))
+  expect_setequal(unique(tidy_loadings$mode), 1:3)
 })
 
 test_that("step_measure_tucker bake produces score columns", {
@@ -289,6 +389,22 @@ test_that("step_measure_tucker bake produces score columns", {
   expect_false("spectrum" %in% names(baked))
 
   expect_equal(nrow(baked), 8)
+})
+
+test_that("Tucker validates the number of content ranks", {
+  test_data <- create_nd_test_data(n_samples = 5)
+
+  expect_error(
+    .fit_tucker(
+      test_data$spectrum,
+      ranks = c(2, 2, 2),
+      center = FALSE,
+      scale = FALSE,
+      max_iter = 1L,
+      tol = 1e-6
+    ),
+    "must match number of dimensions"
+  )
 })
 
 test_that("step_measure_tucker print method works", {
@@ -355,6 +471,32 @@ test_that("step_measure_mcr_als prep extracts spectra", {
   expect_true(rec$steps[[1]]$trained)
   expect_true(!is.null(rec$steps[[1]]$spectra))
   expect_true("spectrum" %in% names(rec$steps[[1]]$spectra))
+  expect_output(print(rec$steps[[1]]), "on spectrum")
+})
+
+test_that("MCR-ALS selects nD columns by default and reports iteration limits", {
+  test_data <- create_nd_test_data(n_samples = 6)
+
+  suppressWarnings({
+    rec <- recipes::recipe(outcome ~ ., data = test_data) |>
+      step_measure_mcr_als(n_components = 2) |>
+      recipes::prep()
+  })
+  expect_equal(rec$steps[[1]]$measure_cols, "spectrum")
+
+  expect_warning(
+    fit <- .fit_mcr_als(
+      test_data$spectrum,
+      n_components = 2,
+      max_iter = 1L,
+      tol = 1e-12,
+      non_negativity = TRUE,
+      unimodality = FALSE
+    ),
+    "did not converge"
+  )
+  expect_equal(dim(fit$spectra), c(4L, 2L))
+  expect_equal(unname(dim(fit$concentrations)), c(6L, 5L, 2L))
 })
 
 test_that("step_measure_mcr_als bake produces score columns", {
@@ -474,26 +616,52 @@ test_that("multi-way steps fail gracefully without nD data", {
   expect_error(recipes::prep(rec), "should be in the data")
 })
 
-test_that("multi-way steps handle new data projection correctly", {
+test_that("multi-way steps reject scalar selections", {
   skip_if_not_installed("multiway")
+  rec <- recipes::recipe(outcome ~ ., data = create_nd_test_data(n_samples = 4))
+  for (step in list(
+    step_measure_mcr_als,
+    step_measure_parafac,
+    step_measure_tucker
+  )) {
+    expect_error(recipes::prep(step(rec, id)), "not nD measure column")
+  }
+})
 
-  # Create training and test data
-  train_data <- create_nd_test_data(n_samples = 10)
-  test_data <- create_nd_test_data(n_samples = 5)
+check_scaled_projection <- function(recipe, score_cols) {
+  fit <- suppressWarnings(recipes::prep(recipe))
+  held_out <- create_nd_test_data(n_samples = 3, seed = 717)
+  scaled <- held_out
+  scaled$spectrum <- new_measure_nd_list(lapply(held_out$spectrum, function(m) {
+    m$value <- 1.75 * m$value
+    m
+  }))
+  original <- recipes::bake(fit, new_data = held_out)
+  transformed <- recipes::bake(fit, new_data = scaled)
+  scores <- as.matrix(original[score_cols])
+  expect_equal(original$id, held_out$id)
+  expect_false("spectrum" %in% names(original))
+  expect_gt(max(abs(scores)), 0)
+  expect_equal(as.matrix(transformed[score_cols]), 1.75 * scores)
+}
 
-  suppressWarnings({
-    rec <- recipes::recipe(outcome ~ ., data = train_data) |>
-      step_measure_parafac(spectrum, n_components = 2) |>
-      recipes::prep()
-  })
+test_that("MCR-ALS projects held-out spectra linearly onto fixed components", {
+  rec <- recipes::recipe(outcome ~ ., data = create_nd_test_data(n_samples = 8))
+  check_scaled_projection(
+    step_measure_mcr_als(rec, spectrum, n_components = 2),
+    paste0("mcr_spectrum_", 1:2)
+  )
+})
 
-  # Bake on training data
-  baked_train <- recipes::bake(rec, new_data = NULL)
-
-  # Bake on test data (using trained loadings)
-  baked_test <- recipes::bake(rec, new_data = test_data)
-
-  expect_equal(nrow(baked_train), 10)
-  expect_equal(nrow(baked_test), 5)
-  expect_equal(names(baked_train), names(baked_test))
+test_that("uncentered Tucker and PARAFAC projections scale with held-out signal", {
+  skip_if_not_installed("multiway")
+  rec <- recipes::recipe(outcome ~ ., data = create_nd_test_data(n_samples = 8))
+  check_scaled_projection(
+    step_measure_tucker(rec, ranks = c(2, 2), center = FALSE, scale = TRUE),
+    paste0("tucker_spectrum_", 1:4)
+  )
+  check_scaled_projection(
+    step_measure_parafac(rec, spectrum, n_components = 2, center = FALSE),
+    paste0("parafac_spectrum_", 1:2)
+  )
 })

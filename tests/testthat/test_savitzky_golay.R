@@ -226,6 +226,101 @@ test_that("savitzky-golay inputs", {
   }
 })
 
+test_that("Savitzky-Golay validates its arguments", {
+  skip_if_not_installed("prospectr")
+
+  base_rec <-
+    recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel))
+
+  expect_error(
+    base_rec |>
+      step_measure_savitzky_golay(degree = 0) |>
+      prep(),
+    "degree"
+  )
+  expect_error(
+    base_rec |>
+      step_measure_savitzky_golay(differentiation_order = -1) |>
+      prep(),
+    "differentiation_order"
+  )
+  expect_error(
+    base_rec |>
+      step_measure_savitzky_golay(window_side = 0) |>
+      prep(),
+    "window_side"
+  )
+})
+
+test_that("Savitzky-Golay requires finite integer filter settings", {
+  data <- tibble::tibble(
+    signal = new_measure_list(list(new_measure_tbl(1:9, 1:9)))
+  )
+  rec <- recipe(~., data = data)
+  expect_error(prep(step_measure_savitzky_golay(rec, degree = 1.5)), "degree")
+  expect_error(
+    prep(step_measure_savitzky_golay(rec, differentiation_order = 0.5)),
+    "differentiation_order"
+  )
+  expect_error(
+    prep(step_measure_savitzky_golay(rec, window_side = Inf)),
+    "window_side"
+  )
+})
+
+test_that("Savitzky-Golay preserves skip and explicit measure settings", {
+  skip_if_not_installed("prospectr")
+
+  rec <-
+    recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_savitzky_golay(
+      measures = ".measures",
+      degree = 2,
+      window_side = 2,
+      skip = TRUE
+    )
+
+  expect_true(rec$steps[[2]]$skip)
+
+  prepped <- prep(rec)
+  expect_true(prepped$steps[[2]]$skip)
+  expect_equal(prepped$steps[[2]]$measures, ".measures")
+  training <- bake(prepped, new_data = NULL)$.measures[[1]]
+  held_out <- bake(prepped, new_data = meats_small)$.measures[[1]]
+  original <- meats_small[meats_small$id == meats_small$id[1], ]
+  expect_equal(held_out$location, original$channel)
+  expect_equal(held_out$value, original$transmittance)
+  expect_equal(nrow(training), nrow(held_out) - 4L)
+})
+
+test_that("Savitzky-Golay metadata methods report recipe state", {
+  skip_if_not_installed("prospectr")
+
+  rec <-
+    recipe(water + fat + protein ~ ., data = meats_small) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    step_measure_savitzky_golay(window_side = 2, degree = 2)
+
+  expect_output(print(rec$steps[[2]]), "Savitzky-Golay preprocessing")
+  expect_equal(tidy(rec, number = 2)$terms, "<all measure columns>")
+  expect_setequal(
+    required_pkgs(rec$steps[[2]]),
+    c("measure", "prospectr")
+  )
+
+  prepped <- prep(rec)
+  expect_output(
+    print(prepped$steps[[2]]),
+    "Savitzky-Golay preprocessing on <internal measurements>"
+  )
+  expect_equal(tidy(prepped, number = 2)$terms, ".measures")
+})
+
 
 test_that("savitzky-golay tuning parameters", {
   expect_snapshot(window_side())

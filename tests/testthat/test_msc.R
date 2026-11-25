@@ -31,6 +31,21 @@ test_that("MSC single spectrum correction works", {
   expect_equal(result$location, 1:5)
 })
 
+test_that("MSC warns and centers a spectrum with zero slope", {
+  test_tibble <- tibble::tibble(
+    location = 1:5,
+    value = rep(4, 5)
+  )
+  ref_spectrum <- 1:5
+
+  expect_warning(
+    result <- .msc_single(test_tibble, ref_spectrum),
+    "Multiplicative coefficient"
+  )
+  expect_equal(result$value, rep(0, 5))
+  expect_equal(result$location, test_tibble$location)
+})
+
 test_that("MSC works with recipe workflow (long format)", {
   rec <-
     recipe(water + fat + protein ~ ., data = meats_small) |>
@@ -124,17 +139,36 @@ test_that("MSC uses same reference for new data", {
     recipe(water + fat + protein ~ ., data = train_data) |>
     update_role(id, new_role = "id") |>
     step_measure_input_long(transmittance, location = vars(channel)) |>
-    step_measure_msc() |>
+    step_measure_msc(measures = ".measures") |>
     prep()
 
-  # Get the reference spectrum from training
-  ref_from_training <- rec$steps[[2]]$ref_spectrum
+  # Derive the training reference independently of the MSC step.
+  input_rec <-
+    recipe(water + fat + protein ~ ., data = train_data) |>
+    update_role(id, new_role = "id") |>
+    step_measure_input_long(transmittance, location = vars(channel)) |>
+    prep()
+  training_input <- bake(input_rec, new_data = NULL)
+  ref_from_training <- colMeans(
+    measure_to_matrix(training_input$.measures),
+    na.rm = TRUE
+  )
+
+  held_out <- dplyr::arrange(test_data, channel)$transmittance
+  fit <- stats::lm.fit(cbind(1, ref_from_training), held_out)
+  expected <- (held_out - fit$coefficients[1]) / fit$coefficients[2]
 
   # Bake on new data
   result <- bake(rec, new_data = test_data)
 
-  # The reference spectrum should still be the same (from training)
-  expect_equal(rec$steps[[2]]$ref_spectrum, ref_from_training)
+  expect_equal(result$.measures[[1]]$value, expected, tolerance = 1e-10)
+
+  # Recomputing the reference from the held-out spectrum would return that
+  # spectrum unchanged; the trained reference must produce a different result.
+  new_fit <- stats::lm.fit(cbind(1, held_out), held_out)
+  recomputed <-
+    (held_out - new_fit$coefficients[1]) / new_fit$coefficients[2]
+  expect_gt(max(abs(expected - recomputed)), 1e-3)
   expect_true(".measures" %in% names(result))
 })
 
