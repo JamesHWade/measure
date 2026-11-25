@@ -144,7 +144,9 @@ paired <- recipes::recipe(~ ., data = observations) |>
   recipes::prep() |>
   recipes::bake(new_data = NULL)
 
-measure_slice_table(paired)
+measure_slice_table(paired) |>
+  dplyr::select(injection, time_min = location_1, wavelength_nm = location_2,
+                absorbance = value)
 ```
 
 Both injections have a recorded signal at 2 minutes and 254 nm. Padding
