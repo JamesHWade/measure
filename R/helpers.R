@@ -132,3 +132,63 @@ check_has_measure <- function(x, cl) {
           before {.fn {step_fn}}."
   ))
 }
+
+.tidy_step_parameter <- function(x) {
+  if (rlang::is_call(x, "tune")) {
+    list(x)
+  } else {
+    x
+  }
+}
+
+.format_step_parameter <- function(x, ...) {
+  if (rlang::is_call(x, "tune")) rlang::expr_deparse(x) else format(x, ...)
+}
+
+# A tunable step stores the call until tune::finalize_recipe() substitutes a
+# candidate. Recheck at prep because finalization updates the stored field.
+.check_tunable_integer <- function(
+  x,
+  arg,
+  lower = 1L,
+  upper = .Machine$integer.max,
+  odd = FALSE,
+  message = NULL,
+  allow_tune = TRUE
+) {
+  if (rlang::is_call(x, "tune")) {
+    if (allow_tune) {
+      return(x)
+    }
+    cli::cli_abort("Finalize {.arg {arg}} before preparing the recipe.")
+  }
+  if (
+    !is.numeric(x) ||
+      length(x) != 1L ||
+      !is.finite(x) ||
+      x != trunc(x) ||
+      x < lower ||
+      x > upper ||
+      (odd && x %% 2 != 1)
+  ) {
+    if (is.null(message)) {
+      type <- if (odd) "odd integer" else "integer"
+      message <- paste("a single finite", type, ">=", lower)
+    }
+    cli::cli_abort("{.arg {arg}} must be {message}.")
+  }
+  as.integer(x)
+}
+
+.check_tunable_positive <- function(x, arg, allow_tune = TRUE) {
+  if (rlang::is_call(x, "tune")) {
+    if (allow_tune) {
+      return(x)
+    }
+    cli::cli_abort("Finalize {.arg {arg}} before preparing the recipe.")
+  }
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) || x <= 0) {
+    cli::cli_abort("{.arg {arg}} must be a positive number.")
+  }
+  x
+}

@@ -266,9 +266,7 @@ step_measure_baseline_airpls <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_baseline_airpls")
 ) {
-  if (!is.numeric(lambda) || lambda <= 0) {
-    cli::cli_abort("{.arg lambda} must be a positive number.")
-  }
+  lambda <- .check_tunable_positive(lambda, "lambda")
 
   recipes::add_step(
     recipe,
@@ -312,6 +310,12 @@ step_measure_baseline_airpls_new <- function(
 prep.step_measure_baseline_airpls <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
+  lambda <- .check_tunable_positive(
+    x$lambda,
+    "lambda",
+    allow_tune = FALSE
+  )
+
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
   } else {
@@ -320,7 +324,7 @@ prep.step_measure_baseline_airpls <- function(x, training, info = NULL, ...) {
 
   step_measure_baseline_airpls_new(
     measures = measure_cols,
-    lambda = x$lambda,
+    lambda = lambda,
     max_iter = x$max_iter,
     tol = x$tol,
     role = x$role,
@@ -482,7 +486,7 @@ print.step_measure_baseline_airpls <- function(
 ) {
   title <- paste0(
     "airPLS baseline (lambda=",
-    format(x$lambda, scientific = TRUE),
+    .format_step_parameter(x$lambda, scientific = TRUE),
     ")"
   )
   if (x$trained) {
@@ -500,7 +504,7 @@ print.step_measure_baseline_airpls <- function(
 tidy.step_measure_baseline_airpls <- function(x, ...) {
   tibble::tibble(
     terms = if (is_trained(x)) x$measures else "<all measure columns>",
-    lambda = x$lambda,
+    lambda = .tidy_step_parameter(x$lambda),
     max_iter = x$max_iter,
     id = x$id
   )
@@ -756,9 +760,7 @@ step_measure_baseline_arpls <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_baseline_arpls")
 ) {
-  if (!is.numeric(lambda) || length(lambda) != 1 || lambda <= 0) {
-    cli::cli_abort("{.arg lambda} must be a positive number.")
-  }
+  lambda <- .check_tunable_positive(lambda, "lambda")
   if (!is.numeric(ratio) || length(ratio) != 1 || ratio <= 0 || ratio >= 1) {
     cli::cli_abort("{.arg ratio} must be a number between 0 and 1.")
   }
@@ -808,6 +810,12 @@ step_measure_baseline_arpls_new <- function(
 prep.step_measure_baseline_arpls <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
+  lambda <- .check_tunable_positive(
+    x$lambda,
+    "lambda",
+    allow_tune = FALSE
+  )
+
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
   } else {
@@ -816,7 +824,7 @@ prep.step_measure_baseline_arpls <- function(x, training, info = NULL, ...) {
 
   step_measure_baseline_arpls_new(
     measures = measure_cols,
-    lambda = x$lambda,
+    lambda = lambda,
     ratio = x$ratio,
     max_iter = x$max_iter,
     tol = x$tol,
@@ -899,7 +907,7 @@ print.step_measure_baseline_arpls <- function(
 ) {
   title <- paste0(
     "arPLS baseline (lambda=",
-    format(x$lambda, scientific = TRUE),
+    .format_step_parameter(x$lambda, scientific = TRUE),
     ")"
   )
   if (x$trained) {
@@ -917,7 +925,7 @@ print.step_measure_baseline_arpls <- function(
 tidy.step_measure_baseline_arpls <- function(x, ...) {
   tibble::tibble(
     terms = if (is_trained(x)) x$measures else "<all measure columns>",
-    lambda = x$lambda,
+    lambda = .tidy_step_parameter(x$lambda),
     ratio = x$ratio,
     id = x$id
   )

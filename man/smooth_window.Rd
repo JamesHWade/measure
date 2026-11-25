@@ -34,6 +34,14 @@ smoothing. \code{smooth_sigma()} controls the standard deviation for Gaussian
 smoothing. \code{fourier_cutoff()} controls the frequency cutoff for Fourier
 filtering.
 }
+\details{
+Candidate widths from \code{smooth_window()} are odd integers of at least three
+points. Known bounds are narrowed to the first and last eligible widths.
+Use \code{smooth_window(range = c(4L, 14L))} to search widths 5 through 13.
+When updating an existing parameter with \code{\link[dials:range_set]{dials::range_set()}}, supply bounds
+that correspond to odd widths, since that function updates the search range
+directly. With a transformation, supply bounds in transformed units.
+}
 \examples{
 smooth_window()
 smooth_sigma()

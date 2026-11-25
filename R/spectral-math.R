@@ -676,10 +676,12 @@ step_measure_derivative <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_derivative")
 ) {
-  order <- as.integer(order)
-  if (order < 1 || order > 2) {
-    cli::cli_abort("{.arg order} must be 1 or 2, not {order}.")
-  }
+  order <- .check_tunable_integer(
+    order,
+    "order",
+    upper = 2L,
+    message = "1 or 2"
+  )
 
   recipes::add_step(
     recipe,
@@ -717,6 +719,14 @@ step_measure_derivative_new <- function(
 prep.step_measure_derivative <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
+  order <- .check_tunable_integer(
+    x$order,
+    "order",
+    upper = 2L,
+    message = "1 or 2",
+    allow_tune = FALSE
+  )
+
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
   } else {
@@ -724,7 +734,7 @@ prep.step_measure_derivative <- function(x, training, info = NULL, ...) {
   }
 
   step_measure_derivative_new(
-    order = x$order,
+    order = order,
     measures = measure_cols,
     role = x$role,
     trained = TRUE,
@@ -766,7 +776,13 @@ print.step_measure_derivative <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  order_str <- if (x$order == 1) "1st" else "2nd"
+  order_str <- if (rlang::is_call(x$order, "tune")) {
+    paste0("order=", .format_step_parameter(x$order))
+  } else if (x$order == 1) {
+    "1st"
+  } else {
+    "2nd"
+  }
   title <- paste0(order_str, " derivative (finite difference)")
 
   if (x$trained) {
@@ -791,7 +807,7 @@ tidy.step_measure_derivative <- function(x, ...) {
 
   tibble::tibble(
     terms = terms,
-    order = x$order,
+    order = .tidy_step_parameter(x$order),
     id = x$id
   )
 }
@@ -870,15 +886,16 @@ step_measure_derivative_gap <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_derivative_gap")
 ) {
-  gap <- as.integer(gap)
-  segment <- as.integer(segment)
-
-  if (gap < 1) {
-    cli::cli_abort("{.arg gap} must be at least 1, not {gap}.")
-  }
-  if (segment < 1) {
-    cli::cli_abort("{.arg segment} must be at least 1, not {segment}.")
-  }
+  gap <- .check_tunable_integer(
+    gap,
+    "gap",
+    message = "at least 1 and an integer"
+  )
+  segment <- .check_tunable_integer(
+    segment,
+    "segment",
+    message = "at least 1 and an integer"
+  )
 
   recipes::add_step(
     recipe,
@@ -919,6 +936,19 @@ step_measure_derivative_gap_new <- function(
 prep.step_measure_derivative_gap <- function(x, training, info = NULL, ...) {
   check_for_measure(training)
 
+  gap <- .check_tunable_integer(
+    x$gap,
+    "gap",
+    message = "at least 1 and an integer",
+    allow_tune = FALSE
+  )
+  segment <- .check_tunable_integer(
+    x$segment,
+    "segment",
+    message = "at least 1 and an integer",
+    allow_tune = FALSE
+  )
+
   if (is.null(x$measures)) {
     measure_cols <- find_measure_cols(training)
   } else {
@@ -926,8 +956,8 @@ prep.step_measure_derivative_gap <- function(x, training, info = NULL, ...) {
   }
 
   step_measure_derivative_gap_new(
-    gap = x$gap,
-    segment = x$segment,
+    gap = gap,
+    segment = segment,
     measures = measure_cols,
     role = x$role,
     trained = TRUE,
@@ -970,8 +1000,13 @@ print.step_measure_derivative_gap <- function(
   width = max(20, options()$width - 30),
   ...
 ) {
-  seg_str <- if (x$segment > 1) paste0(", segment=", x$segment) else ""
-  title <- paste0("Gap derivative (gap=", x$gap, seg_str, ")")
+  gap_str <- .format_step_parameter(x$gap)
+  seg_str <- if (rlang::is_call(x$segment, "tune") || x$segment > 1) {
+    paste0(", segment=", .format_step_parameter(x$segment))
+  } else {
+    ""
+  }
+  title <- paste0("Gap derivative (gap=", gap_str, seg_str, ")")
 
   if (x$trained) {
     cat(title, " on <internal measurements>", sep = "")
@@ -995,8 +1030,8 @@ tidy.step_measure_derivative_gap <- function(x, ...) {
 
   tibble::tibble(
     terms = terms,
-    gap = x$gap,
-    segment = x$segment,
+    gap = .tidy_step_parameter(x$gap),
+    segment = .tidy_step_parameter(x$segment),
     id = x$id
   )
 }

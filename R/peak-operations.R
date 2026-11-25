@@ -481,14 +481,6 @@ find_peaks_cols <- function(data) {
   }
 }
 
-.tidy_peak_parameter <- function(x) {
-  if (.is_peak_tune_parameter(x)) {
-    list(x)
-  } else {
-    x
-  }
-}
-
 .validate_peak_nonnegative <- function(x, arg, allow_logical = FALSE) {
   if (.is_peak_tune_parameter(x)) {
     return(invisible(NULL))
@@ -923,10 +915,10 @@ tidy.step_measure_peaks_detect <- function(x, ...) {
   tibble::tibble(
     terms = if (is_trained(x)) x$measures else "<all measure columns>",
     algorithm = x$algorithm,
-    min_height = .tidy_peak_parameter(x$min_height),
-    min_distance = .tidy_peak_parameter(x$min_distance),
-    min_prominence = .tidy_peak_parameter(x$min_prominence),
-    snr_threshold = .tidy_peak_parameter(x$snr_threshold),
+    min_height = .tidy_step_parameter(x$min_height),
+    min_distance = .tidy_step_parameter(x$min_distance),
+    min_prominence = .tidy_step_parameter(x$min_prominence),
+    snr_threshold = .tidy_step_parameter(x$snr_threshold),
     id = x$id
   )
 }
@@ -2801,8 +2793,8 @@ tidy.step_measure_peaks_deconvolve <- function(x, ...) {
   tibble::tibble(
     model = model_name,
     optimizer = x$optimizer,
-    max_iter = .tidy_peak_parameter(x$max_iter),
-    quality_threshold = .tidy_peak_parameter(x$quality_threshold),
+    max_iter = .tidy_step_parameter(x$max_iter),
+    quality_threshold = .tidy_step_parameter(x$quality_threshold),
     id = x$id
   )
 }
