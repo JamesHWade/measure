@@ -71,8 +71,10 @@ location. Useful when channels should be fused into a single signal.
 }
 }
 \note{
-Channels must be aligned to the same grid before combining. Use
-\code{\link[=step_measure_channel_align]{step_measure_channel_align()}} first if grids differ.
+For \code{weighted_sum} and \code{mean}, channels must use the same ordered grid
+within each sample. Use \code{\link[=step_measure_channel_align]{step_measure_channel_align()}} first if grids differ.
+\code{stack} preserves each channel's own coordinates (and may therefore produce
+a sparse nD measurement), while \code{concat} accepts independent channel grids.
 }
 \examples{
 library(recipes)

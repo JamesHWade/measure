@@ -49,6 +49,9 @@ applies Pareto scaling at each measurement location. This is a compromise
 between no scaling and auto-scaling, commonly used in metabolomics.
 }
 \details{
+Within each selected column, training and prediction samples must use the
+same measurement locations in the same order.
+
 Pareto scaling divides by the square root of the standard deviation rather
 than the standard deviation itself. This reduces the relative importance of
 large values while still giving more weight to larger fold changes.

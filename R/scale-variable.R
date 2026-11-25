@@ -20,6 +20,9 @@
 #'   sequence of any existing operations.
 #'
 #' @details
+#' Within each selected column, training and prediction samples must use the
+#' same measurement locations in the same order.
+#'
 #' Mean centering is a fundamental preprocessing step for multivariate analysis
 #' methods like PCA and PLS. It removes the average signal at each measurement
 #' location.
@@ -112,10 +115,11 @@ prep.step_measure_center <- function(x, training, info = NULL, ...) {
 
   learned_params <- list()
   for (col in measure_cols) {
+    locations <- check_measure_grid(training[[col]])
     mat <- measure_to_matrix(training[[col]])
     learned_params[[col]] <- list(
       means = colMeans(mat, na.rm = TRUE),
-      locations = training[[col]][[1]]$location
+      locations = locations
     )
   }
 
@@ -133,13 +137,15 @@ prep.step_measure_center <- function(x, training, info = NULL, ...) {
 bake.step_measure_center <- function(object, new_data, ...) {
   for (col in object$measures) {
     params <- object$learned_params[[col]]
+    locations <- require_trained_grid(params$locations)
+    check_measure_grid(new_data[[col]], locations)
     mat <- measure_to_matrix(new_data[[col]])
 
     mat <- sweep(mat, 2, params$means, "-")
 
     new_data[[col]] <- new_measure_list(matrix_to_measure(
       mat,
-      params$locations
+      locations
     ))
   }
   tibble::as_tibble(new_data)
@@ -207,6 +213,9 @@ required_pkgs.step_measure_center <- function(x, ...) {
 #'   sequence of any existing operations.
 #'
 #' @details
+#' Within each selected column, training and prediction samples must use the
+#' same measurement locations in the same order.
+#'
 #' Auto-scaling (standardization) transforms each variable to have zero mean
 #' and unit variance. This gives equal importance to all measurement locations
 #' regardless of their original scale.
@@ -297,11 +306,12 @@ prep.step_measure_scale_auto <- function(x, training, info = NULL, ...) {
 
   learned_params <- list()
   for (col in measure_cols) {
+    locations <- check_measure_grid(training[[col]])
     mat <- measure_to_matrix(training[[col]])
     learned_params[[col]] <- list(
       means = colMeans(mat, na.rm = TRUE),
       sds = apply(mat, 2, stats::sd, na.rm = TRUE),
-      locations = training[[col]][[1]]$location
+      locations = locations
     )
   }
 
@@ -319,6 +329,8 @@ prep.step_measure_scale_auto <- function(x, training, info = NULL, ...) {
 bake.step_measure_scale_auto <- function(object, new_data, ...) {
   for (col in object$measures) {
     params <- object$learned_params[[col]]
+    locations <- require_trained_grid(params$locations)
+    check_measure_grid(new_data[[col]], locations)
     mat <- measure_to_matrix(new_data[[col]])
 
     # Center
@@ -331,7 +343,7 @@ bake.step_measure_scale_auto <- function(object, new_data, ...) {
 
     new_data[[col]] <- new_measure_list(matrix_to_measure(
       mat,
-      params$locations
+      locations
     ))
   }
   tibble::as_tibble(new_data)
@@ -402,6 +414,9 @@ required_pkgs.step_measure_scale_auto <- function(x, ...) {
 #'   sequence of any existing operations.
 #'
 #' @details
+#' Within each selected column, training and prediction samples must use the
+#' same measurement locations in the same order.
+#'
 #' Pareto scaling divides by the square root of the standard deviation rather
 #' than the standard deviation itself. This reduces the relative importance of
 #' large values while still giving more weight to larger fold changes.
@@ -497,11 +512,12 @@ prep.step_measure_scale_pareto <- function(x, training, info = NULL, ...) {
 
   learned_params <- list()
   for (col in measure_cols) {
+    locations <- check_measure_grid(training[[col]])
     mat <- measure_to_matrix(training[[col]])
     learned_params[[col]] <- list(
       means = colMeans(mat, na.rm = TRUE),
       sds = apply(mat, 2, stats::sd, na.rm = TRUE),
-      locations = training[[col]][[1]]$location
+      locations = locations
     )
   }
 
@@ -519,6 +535,8 @@ prep.step_measure_scale_pareto <- function(x, training, info = NULL, ...) {
 bake.step_measure_scale_pareto <- function(object, new_data, ...) {
   for (col in object$measures) {
     params <- object$learned_params[[col]]
+    locations <- require_trained_grid(params$locations)
+    check_measure_grid(new_data[[col]], locations)
     mat <- measure_to_matrix(new_data[[col]])
 
     # Center
@@ -532,7 +550,7 @@ bake.step_measure_scale_pareto <- function(object, new_data, ...) {
 
     new_data[[col]] <- new_measure_list(matrix_to_measure(
       mat,
-      params$locations
+      locations
     ))
   }
   tibble::as_tibble(new_data)
@@ -602,6 +620,9 @@ required_pkgs.step_measure_scale_pareto <- function(x, ...) {
 #'   sequence of any existing operations.
 #'
 #' @details
+#' Within each selected column, training and prediction samples must use the
+#' same measurement locations in the same order.
+#'
 #' Range scaling centers the data and divides by the range, giving bounded
 #' values suitable for methods sensitive to variable scale.
 #'
@@ -690,11 +711,12 @@ prep.step_measure_scale_range <- function(x, training, info = NULL, ...) {
 
   learned_params <- list()
   for (col in measure_cols) {
+    locations <- check_measure_grid(training[[col]])
     mat <- measure_to_matrix(training[[col]])
     learned_params[[col]] <- list(
       means = colMeans(mat, na.rm = TRUE),
       ranges = apply(mat, 2, function(x) diff(range(x, na.rm = TRUE))),
-      locations = training[[col]][[1]]$location
+      locations = locations
     )
   }
 
@@ -712,6 +734,8 @@ prep.step_measure_scale_range <- function(x, training, info = NULL, ...) {
 bake.step_measure_scale_range <- function(object, new_data, ...) {
   for (col in object$measures) {
     params <- object$learned_params[[col]]
+    locations <- require_trained_grid(params$locations)
+    check_measure_grid(new_data[[col]], locations)
     mat <- measure_to_matrix(new_data[[col]])
 
     # Center
@@ -724,7 +748,7 @@ bake.step_measure_scale_range <- function(object, new_data, ...) {
 
     new_data[[col]] <- new_measure_list(matrix_to_measure(
       mat,
-      params$locations
+      locations
     ))
   }
   tibble::as_tibble(new_data)
@@ -794,6 +818,9 @@ required_pkgs.step_measure_scale_range <- function(x, ...) {
 #'   sequence of any existing operations.
 #'
 #' @details
+#' Within each selected column, training and prediction samples must use the
+#' same measurement locations in the same order.
+#'
 #' VAST scaling divides by the product of the standard deviation and the
 #' coefficient of variation (CV = SD/mean). This gives more weight to variables
 #' that are stable across samples (low CV).
@@ -889,6 +916,7 @@ prep.step_measure_scale_vast <- function(x, training, info = NULL, ...) {
 
   learned_params <- list()
   for (col in measure_cols) {
+    locations <- check_measure_grid(training[[col]])
     mat <- measure_to_matrix(training[[col]])
     means <- colMeans(mat, na.rm = TRUE)
     sds <- apply(mat, 2, stats::sd, na.rm = TRUE)
@@ -902,7 +930,7 @@ prep.step_measure_scale_vast <- function(x, training, info = NULL, ...) {
       means = means,
       sds = sds,
       cvs = cvs,
-      locations = training[[col]][[1]]$location
+      locations = locations
     )
   }
 
@@ -920,6 +948,8 @@ prep.step_measure_scale_vast <- function(x, training, info = NULL, ...) {
 bake.step_measure_scale_vast <- function(object, new_data, ...) {
   for (col in object$measures) {
     params <- object$learned_params[[col]]
+    locations <- require_trained_grid(params$locations)
+    check_measure_grid(new_data[[col]], locations)
     mat <- measure_to_matrix(new_data[[col]])
 
     # Center
@@ -933,7 +963,7 @@ bake.step_measure_scale_vast <- function(object, new_data, ...) {
 
     new_data[[col]] <- new_measure_list(matrix_to_measure(
       mat,
-      params$locations
+      locations
     ))
   }
   tibble::as_tibble(new_data)

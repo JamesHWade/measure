@@ -56,13 +56,14 @@ applies Parallel Factor Analysis (PARAFAC) to multi-dimensional measurement
 data, extracting component scores as features for modeling.
 }
 \details{
-PARAFAC (also known as CANDECOMP/PARAFAC or CP decomposition) decomposes
-a three-way or higher array into a sum of rank-one tensors. For measurement
-data like EEM (excitation-emission matrices) or LC-DAD, this extracts
-interpretable components corresponding to underlying chemical species.
+PARAFAC (also known as CANDECOMP/PARAFAC or CP decomposition) decomposes a
+three-way or four-way array into a sum of rank-one tensors. For measurement
+data like EEM (excitation-emission matrices) or 3D LC-DAD acquisitions,
+this extracts interpretable components corresponding to underlying chemical
+species.
 \subsection{Requirements}{
 \itemize{
-\item Input must be \code{measure_nd_list} with 2+ dimensions
+\item Input must be \code{measure_nd_list} with two or three content dimensions
 \item All samples must have the same grid (regular, aligned)
 \item The \code{multiway} package must be installed (in Suggests)
 }
@@ -70,13 +71,17 @@ interpretable components corresponding to underlying chemical species.
 
 \subsection{Output}{
 
-Creates numeric feature columns: \code{parafac_1}, \code{parafac_2}, ..., \code{parafac_n}
-representing each sample's scores on the extracted components.
+With the default prefix, each selected column produces scores named
+\verb{parafac_<column>_1} through \verb{parafac_<column>_<n_components>}.
+Baking fits the component scores jointly to the learned loading patterns.
+This avoids counting shared signal twice when those patterns overlap.
+For linearly dependent patterns it returns the least-squares solution with
+the smallest Euclidean norm.
+
+Missing cells are omitted from the projection for each sample. More than
+10\% missing cells across the batch is an error. Within that limit, a
+sample with no observed values receives missing scores.
 }
-}
-\note{
-This step requires the \code{multiway} package. Install with:
-\code{install.packages("multiway")}
 }
 \examples{
 \dontrun{

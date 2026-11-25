@@ -68,6 +68,11 @@ This step applies a simple reference correction to each spectrum:
 Unlike \code{\link[=step_measure_subtract_blank]{step_measure_subtract_blank()}}, this step always requires an
 externally provided reference and does not support learning from training
 data.
+
+A numeric \code{reference} is positional, so the step records the ordered
+training grid and requires prediction measurements to use that same grid.
+Coordinate-bearing references (\code{measure_tbl} or data frames) may still be
+interpolated to the training grid.
 }
 \examples{
 library(recipes)

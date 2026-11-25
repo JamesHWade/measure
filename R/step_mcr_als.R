@@ -36,9 +36,10 @@
 #' - Spectroscopic mixtures
 #' - Process analytical data
 #'
-#' Unlike PARAFAC, MCR-ALS is a bilinear method that works on 2D data
-#' (samples unfolded if 3D). It allows flexible constraints like
-#' non-negativity and unimodality.
+#' Unlike PARAFAC, MCR-ALS is a bilinear method that accepts exactly two
+#' measurement axes. The sample axis is unfolded alongside the first
+#' measurement axis. It allows flexible constraints like non-negativity and
+#' unimodality, but a three-axis measurement must use PARAFAC or Tucker.
 #'
 #' ## Experimental Status
 #'
@@ -46,8 +47,12 @@
 #'
 #' ## Requirements
 #'
-#' - Input must be `measure_nd_list` with 2 dimensions
-#' - All samples must have the same grid (regular, aligned)
+#' - Input must be `measure_nd_list` with exactly 2 measurement dimensions.
+#' - All training samples and held-out samples must use the same coordinate
+#'   levels on both axes. Rows may be in any order; the coordinates, rather
+#'   than row positions, determine the array cells.
+#' - The matrix factorization requires complete numeric values on that grid.
+#'   Align and fill measurements upstream when needed.
 #'
 #' @note
 #' This is an **experimental** feature. The implementation uses a simple
@@ -306,10 +311,20 @@ tidy.step_measure_mcr_als <- function(x, type = "parameters", ...) {
   non_negativity,
   unimodality
 ) {
-  # Convert to 3D array and unfold to 2D matrix
-  array_result <- .nd_list_to_array(measure_nd_list)
+  # MCR-ALS is bilinear: the measurement contributes exactly two axes and
+  # samples are unfolded into the row mode of the matrix.
+  array_result <- .nd_list_to_array(
+    measure_nd_list,
+    supported_dims = 2L,
+    method = "MCR-ALS"
+  )
   X <- array_result$array
   grid_info <- array_result$grid_info
+  if (!all(is.finite(X))) {
+    cli::cli_abort(
+      "MCR-ALS fitting requires finite values at every grid point."
+    )
+  }
 
   n_samples <- dim(X)[1]
   n_rows <- dim(X)[2]
@@ -417,8 +432,14 @@ tidy.step_measure_mcr_als <- function(x, type = "parameters", ...) {
 }
 
 .project_mcr_als <- function(measure_nd_list, spectra, grid_info) {
-  # Convert to array
-  array_result <- .nd_list_to_array(measure_nd_list)
+  # Use the grid learned during prep().  A held-out measurement must have the
+  # same two measurement axes and coordinate values; row order is immaterial.
+  array_result <- .nd_list_to_array(
+    measure_nd_list,
+    grid_info = grid_info,
+    supported_dims = 2L,
+    method = "MCR-ALS"
+  )
   X <- array_result$array
 
   n_samples <- dim(X)[1]

@@ -1,5 +1,25 @@
 # measure 0.0.1.9004
 
+* Preprocessing steps that learn a value at each measurement location now
+  check the ordered coordinates at training and prediction. This prevents
+  shifted spectra from being processed or labelled on the wrong grid. For
+  older fitted steps that did not record their grid, prep the recipe again
+  with its training data (#192).
+
+* `step_measure_channel_combine(strategy = "stack")` preserves each channel's
+  coordinates, including when channels have different lengths. Weighted
+  sums and means require matching locations within each sample (#192).
+
+* `step_measure_parafac()` now fits all component scores jointly when baking.
+  Scores can change for overlapping component loadings. Linearly dependent
+  loadings use the least-squares solution with the smallest Euclidean norm
+  (#194).
+
+* `step_measure_parafac()` and `step_measure_tucker()` now fit and project
+  measurements with two or three axes. Both steps and the two-axis
+  `step_measure_mcr_als()` use training coordinates to place each prediction
+  value, so point rows can be reordered without changing scores (#192, #195).
+
 * `render_validation_report()` uses the caller's R libraries when Quarto
   renders a report. This lets both templates find `measure` when it is
   installed in a temporary or project-specific library (#186).

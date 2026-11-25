@@ -47,6 +47,13 @@ This corrects for smooth, continuous distortions in the x-axis.
 
 Requires the \code{ptw} package to be installed.
 }
+\section{Coordinate grid}{
+
+The reference uses positions on the first selected column's training grid.
+All selected columns must use those locations in the same order during
+training and prediction. Resample spectra first if their grids differ.
+}
+
 \examples{
 \dontshow{if (rlang::is_installed("ptw")) withAutoprint(\{ # examplesIf}
 library(recipes)

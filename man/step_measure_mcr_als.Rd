@@ -64,9 +64,10 @@ contributions. It's particularly useful for:
 \item Process analytical data
 }
 
-Unlike PARAFAC, MCR-ALS is a bilinear method that works on 2D data
-(samples unfolded if 3D). It allows flexible constraints like
-non-negativity and unimodality.
+Unlike PARAFAC, MCR-ALS is a bilinear method that accepts exactly two
+measurement axes. The sample axis is unfolded alongside the first
+measurement axis. It allows flexible constraints like non-negativity and
+unimodality, but a three-axis measurement must use PARAFAC or Tucker.
 \subsection{Experimental Status}{
 
 This step is experimental and its API may change in future versions.
@@ -74,8 +75,12 @@ This step is experimental and its API may change in future versions.
 
 \subsection{Requirements}{
 \itemize{
-\item Input must be \code{measure_nd_list} with 2 dimensions
-\item All samples must have the same grid (regular, aligned)
+\item Input must be \code{measure_nd_list} with exactly 2 measurement dimensions.
+\item All training samples and held-out samples must use the same coordinate
+levels on both axes. Rows may be in any order; the coordinates, rather
+than row positions, determine the array cells.
+\item The matrix factorization requires complete numeric values on that grid.
+Align and fill measurements upstream when needed.
 }
 }
 }

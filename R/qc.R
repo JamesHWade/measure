@@ -743,6 +743,10 @@ tidy.step_measure_impute <- function(x, ...) {
 #' - `.outlier`: Logical flag
 #' - `.outlier_score`: Numeric score (higher = more extreme)
 #'
+#' The outlier score is computed pointwise across samples. The step records the
+#' ordered training grid and requires prediction measurements to use that same
+#' grid.
+#'
 #' @family measure-qc
 #' @export
 #'
@@ -784,6 +788,7 @@ step_measure_qc_outlier <- function(
       scale = NULL,
       pca_rotation = NULL,
       pca_sdev = NULL,
+      locations = NULL,
       role = role,
       trained = trained,
       skip = skip,
@@ -803,6 +808,7 @@ step_measure_qc_outlier_new <- function(
   scale,
   pca_rotation,
   pca_sdev,
+  locations,
   role,
   trained,
   skip,
@@ -820,6 +826,7 @@ step_measure_qc_outlier_new <- function(
     scale = scale,
     pca_rotation = pca_rotation,
     pca_sdev = pca_sdev,
+    locations = locations,
     role = role,
     trained = trained,
     skip = skip,
@@ -840,6 +847,7 @@ prep.step_measure_qc_outlier <- function(x, training, info = NULL, ...) {
   col <- measure_cols[1]
 
   # Convert to matrix for calculations
+  locations <- check_measure_grid(training[[col]])
   mat <- measure_to_matrix(training[[col]])
 
   # Compute robust center and scale
@@ -877,6 +885,7 @@ prep.step_measure_qc_outlier <- function(x, training, info = NULL, ...) {
     scale = scale,
     pca_rotation = pca_rotation,
     pca_sdev = pca_sdev,
+    locations = locations,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -887,6 +896,8 @@ prep.step_measure_qc_outlier <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_qc_outlier <- function(object, new_data, ...) {
   col <- object$measures[1]
+  locations <- require_trained_grid(object$locations)
+  check_measure_grid(new_data[[col]], locations)
 
   # Convert to matrix
   mat <- measure_to_matrix(new_data[[col]])

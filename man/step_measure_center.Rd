@@ -49,6 +49,9 @@ subtracts the mean at each measurement location (column-wise centering).
 The means are computed from the training data and applied to new data.
 }
 \details{
+Within each selected column, training and prediction samples must use the
+same measurement locations in the same order.
+
 Mean centering is a fundamental preprocessing step for multivariate analysis
 methods like PCA and PLS. It removes the average signal at each measurement
 location.

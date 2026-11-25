@@ -46,6 +46,13 @@ Similar to \code{\link[=step_measure_align_shift]{step_measure_align_shift()}}, 
 reference spectrum instead of computing one from training data. This is
 useful when you have a known standard or calibration spectrum.
 }
+\section{Coordinate grid}{
+
+The reference uses positions on the first selected column's training grid.
+All selected columns must use those locations in the same order during
+training and prediction. Resample spectra first if their grids differ.
+}
+
 \examples{
 library(recipes)
 

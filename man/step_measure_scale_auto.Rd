@@ -49,6 +49,9 @@ applies auto-scaling (also known as z-score normalization or standardization)
 at each measurement location. This centers and scales to unit variance.
 }
 \details{
+Within each selected column, training and prediction samples must use the
+same measurement locations in the same order.
+
 Auto-scaling (standardization) transforms each variable to have zero mean
 and unit variance. This gives equal importance to all measurement locations
 regardless of their original scale.

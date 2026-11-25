@@ -29,25 +29,30 @@
 #' @return An updated recipe with the new step added.
 #'
 #' @details
-#' PARAFAC (also known as CANDECOMP/PARAFAC or CP decomposition) decomposes
-#' a three-way or higher array into a sum of rank-one tensors. For measurement
-#' data like EEM (excitation-emission matrices) or LC-DAD, this extracts
-#' interpretable components corresponding to underlying chemical species.
+#' PARAFAC (also known as CANDECOMP/PARAFAC or CP decomposition) decomposes a
+#' three-way or four-way array into a sum of rank-one tensors. For measurement
+#' data like EEM (excitation-emission matrices) or 3D LC-DAD acquisitions,
+#' this extracts interpretable components corresponding to underlying chemical
+#' species.
 #'
 #' ## Requirements
 #'
-#' - Input must be `measure_nd_list` with 2+ dimensions
+#' - Input must be `measure_nd_list` with two or three content dimensions
 #' - All samples must have the same grid (regular, aligned)
 #' - The `multiway` package must be installed (in Suggests)
 #'
 #' ## Output
 #'
-#' Creates numeric feature columns: `parafac_1`, `parafac_2`, ..., `parafac_n`
-#' representing each sample's scores on the extracted components.
+#' With the default prefix, each selected column produces scores named
+#' `parafac_<column>_1` through `parafac_<column>_<n_components>`.
+#' Baking fits the component scores jointly to the learned loading patterns.
+#' This avoids counting shared signal twice when those patterns overlap.
+#' For linearly dependent patterns it returns the least-squares solution with
+#' the smallest Euclidean norm.
 #'
-#' @note
-#' This step requires the `multiway` package. Install with:
-#' `install.packages("multiway")`
+#' Missing cells are omitted from the projection for each sample. More than
+#' 10% missing cells across the batch is an error. Within that limit, a
+#' sample with no observed values receives missing scores.
 #'
 #' @seealso [step_measure_tucker()] for Tucker decomposition
 #'
@@ -311,51 +316,24 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
   max_iter,
   tol
 ) {
-  # Convert to 3D array (samples x dim1 x dim2)
-  array_result <- .nd_list_to_array(measure_nd_list)
-  X <- array_result$array
-  grid_info <- array_result$grid_info
-
-  n_samples <- dim(X)[1]
-
-  # Center and scale along sample dimension
-  center_values <- NULL
-  scale_values <- NULL
-
-  if (center) {
-    center_values <- apply(X, c(2, 3), mean, na.rm = TRUE)
-    for (i in seq_len(n_samples)) {
-      X[i, , ] <- X[i, , ] - center_values
-    }
-  }
-
-  if (scale) {
-    scale_values <- apply(X, c(2, 3), stats::sd, na.rm = TRUE)
-    scale_values[scale_values == 0] <- 1 # Avoid division by zero
-    for (i in seq_len(n_samples)) {
-      X[i, , ] <- X[i, , ] / scale_values
-    }
-  }
+  array_result <- .nd_list_to_array(measure_nd_list, method = "PARAFAC")
+  preprocessed <- .fit_multiway_preprocessing(array_result$array, center, scale)
 
   # Fit PARAFAC using multiway
   fit <- multiway::parafac(
-    X,
+    preprocessed$array,
     nfac = n_components,
     nstart = 10,
     maxit = max_iter,
     ctol = tol
   )
 
-  # multiway::parafac returns $A, $B, $C as separate matrices (not $A as a list)
-  # $A = sample scores (n_samples x nfac)
-  # $B = mode 2 loadings (dim1 x nfac)
-  # $C = mode 3 loadings (dim2 x nfac)
-  # Store as list for consistent access
+  mode_names <- c("A", "B", "C", "D")[seq_along(dim(preprocessed$array))]
   list(
-    loadings = list(fit$A, fit$B, fit$C),
-    center_values = center_values,
-    scale_values = scale_values,
-    grid_info = grid_info
+    loadings = unname(fit[mode_names]),
+    center_values = preprocessed$center_values,
+    scale_values = preprocessed$scale_values,
+    grid_info = array_result$grid_info
   )
 }
 
@@ -366,118 +344,64 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
   scale_values,
   grid_info
 ) {
-  # Convert to array
-  array_result <- .nd_list_to_array(measure_nd_list)
-  X <- array_result$array
+  array_result <- .nd_list_to_array(
+    measure_nd_list,
+    grid_info,
+    method = "PARAFAC"
+  )
+  X <- .apply_multiway_preprocessing(
+    array_result$array,
+    center_values = center_values,
+    scale_values = scale_values
+  )
 
   n_samples <- dim(X)[1]
   n_components <- ncol(loadings[[1]])
+  design <- .parafac_projection_design(loadings[-1L])
+  # Each row holds one spectrum in column-major coordinate order.
+  values <- matrix(X, nrow = n_samples, ncol = nrow(design))
+  missing <- is.na(values)
+  complete <- rowSums(missing) == 0
+  scores <- matrix(NA_real_, nrow = n_samples, ncol = n_components)
 
-  # Apply centering and scaling
-
-  if (!is.null(center_values)) {
-    for (i in seq_len(n_samples)) {
-      X[i, , ] <- X[i, , ] - center_values
-    }
+  if (any(complete)) {
+    operator <- .parafac_joint_ls_operator(design)
+    scores[complete, ] <- values[complete, , drop = FALSE] %*% t(operator)
   }
 
-  if (!is.null(scale_values)) {
-    for (i in seq_len(n_samples)) {
-      X[i, , ] <- X[i, , ] / scale_values
-    }
-  }
-
-  # Project onto loadings to get scores
-  # For PARAFAC, we need to solve for scores given fixed loadings
-  scores <- matrix(0, nrow = n_samples, ncol = n_components)
-
-  for (i in seq_len(n_samples)) {
-    Xi <- matrix(X[i, , ], nrow = dim(X)[2], ncol = dim(X)[3])
-    # Use least squares projection
-    # Xi ~= sum_r scores[i,r] * outer(loadings[[2]][,r], loadings[[3]][,r])
-    for (r in seq_len(n_components)) {
-      # Compute score as inner product
-      outer_r <- outer(loadings[[2]][, r], loadings[[3]][, r])
-      denom <- sum(outer_r^2, na.rm = TRUE)
-      # Protect against division by zero (degenerate loadings)
-      if (denom < .Machine$double.eps) {
-        scores[i, r] <- 0
-      } else {
-        scores[i, r] <- sum(Xi * outer_r, na.rm = TRUE) / denom
-      }
+  for (i in which(!complete)) {
+    observed <- !missing[i, ]
+    if (any(observed)) {
+      operator <- .parafac_joint_ls_operator(design[observed, , drop = FALSE])
+      scores[i, ] <- operator %*% values[i, observed]
     }
   }
 
   scores
 }
 
-.nd_list_to_array <- function(measure_nd_list) {
-  n_samples <- length(measure_nd_list)
+# Each column is one rank-one pattern, with the first coordinate varying fastest.
+.parafac_projection_design <- function(content_loadings) {
+  n_components <- ncol(content_loadings[[1L]])
+  n_cells <- prod(vapply(content_loadings, nrow, integer(1)))
+  design <- matrix(0, nrow = n_cells, ncol = n_components)
+  for (component in seq_len(n_components)) {
+    factors <- lapply(content_loadings, function(mode) mode[, component])
+    design[, component] <- Reduce(outer, factors)
+  }
+  design
+}
 
-  # Get grid info from first sample
-  first <- measure_nd_list[[1]]
-  ndim <- measure_ndim(first)
-
-  if (ndim < 2) {
-    cli::cli_abort("PARAFAC requires at least 2D measurement data.")
+# A relative singular-value threshold preserves the solution if signal units change.
+.parafac_joint_ls_operator <- function(design) {
+  decomposition <- svd(design)
+  tolerance <- max(dim(design)) * max(decomposition$d) * .Machine$double.eps
+  keep <- decomposition$d > tolerance
+  if (!any(keep)) {
+    return(matrix(0, nrow = ncol(design), ncol = nrow(design)))
   }
 
-  # Get unique values for each dimension
-  loc_cols <- paste0("location_", seq_len(ndim))
-  dim_sizes <- vapply(
-    loc_cols,
-    function(lc) {
-      length(unique(first[[lc]]))
-    },
-    integer(1)
-  )
-
-  grid_info <- lapply(loc_cols, function(lc) {
-    sort(unique(first[[lc]]))
-  })
-  names(grid_info) <- loc_cols
-
-  # Create array: samples x dim1 x dim2 x ...
-  arr <- array(NA_real_, dim = c(n_samples, dim_sizes))
-
-  for (i in seq_len(n_samples)) {
-    m <- measure_nd_list[[i]]
-
-    # Fill array based on location indices
-    for (j in seq_len(nrow(m))) {
-      idx <- vector("integer", ndim)
-      for (d in seq_len(ndim)) {
-        loc_val <- m[[loc_cols[d]]][j]
-        idx[d] <- match(loc_val, grid_info[[loc_cols[d]]])
-      }
-      # Build index expression: arr[i, idx[1], idx[2], ...]
-      # Use matrix with one row containing all indices for proper nD indexing
-      arr[matrix(c(i, idx), nrow = 1)] <- m$value[j]
-    }
-  }
-
-  # Warn about missing values
-
-  na_count <- sum(is.na(arr))
-  if (na_count > 0) {
-    pct_missing <- 100 * na_count / length(arr)
-    if (pct_missing > 10) {
-      cli::cli_abort(
-        c(
-          "Array has {.val {sprintf('%.1f%%', pct_missing)}} missing values.",
-          "i" = "All samples must have the same regular grid.",
-          "i" = "Use {.fn step_measure_channel_align} to align grids first."
-        )
-      )
-    } else if (pct_missing > 0) {
-      cli::cli_warn(
-        c(
-          "Array has {.val {na_count}} missing values ({.val {sprintf('%.1f%%', pct_missing)}}).",
-          "i" = "These will propagate through the decomposition."
-        )
-      )
-    }
-  }
-
-  list(array = arr, grid_info = grid_info)
+  left <- decomposition$u[, keep, drop = FALSE]
+  right <- decomposition$v[, keep, drop = FALSE]
+  right %*% (t(left) / decomposition$d[keep])
 }
