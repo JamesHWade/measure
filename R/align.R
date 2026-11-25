@@ -44,6 +44,11 @@
 #' each spectrum and the reference. After shifting, edge values are filled
 #' by constant extrapolation.
 #'
+#' @section Coordinate grid:
+#' The reference uses positions on the first selected column's training grid.
+#' All selected columns must use those locations in the same order during
+#' training and prediction. Resample spectra first if their grids differ.
+#'
 #' @family measure-align
 #' @export
 #'
@@ -76,6 +81,7 @@ step_measure_align_shift <- function(
       max_shift = as.integer(max_shift),
       reference = reference,
       ref_spectrum = NULL,
+      locations = NULL,
       role = role,
       trained = trained,
       skip = skip,
@@ -89,6 +95,7 @@ step_measure_align_shift_new <- function(
   max_shift,
   reference,
   ref_spectrum,
+  locations,
   role,
   trained,
   skip,
@@ -100,6 +107,7 @@ step_measure_align_shift_new <- function(
     max_shift = max_shift,
     reference = reference,
     ref_spectrum = ref_spectrum,
+    locations = locations,
     role = role,
     trained = trained,
     skip = skip,
@@ -121,6 +129,8 @@ prep.step_measure_align_shift <- function(x, training, info = NULL, ...) {
     measure_cols <- x$measures
   }
 
+  locations <- .alignment_training_grids(training, measure_cols)
+
   col <- measure_cols[1]
 
   # Compute reference spectrum from training data
@@ -138,6 +148,7 @@ prep.step_measure_align_shift <- function(x, training, info = NULL, ...) {
     max_shift = as.integer(x$max_shift),
     reference = x$reference,
     ref_spectrum = ref_spectrum,
+    locations = locations,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -148,6 +159,7 @@ prep.step_measure_align_shift <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_align_shift <- function(object, new_data, ...) {
   for (col in object$measures) {
+    .check_alignment_grid(object, new_data[[col]])
     result <- purrr::map(
       new_data[[col]],
       .align_shift_single,
@@ -271,6 +283,7 @@ tidy.step_measure_align_shift <- function(x, ...) {
 #' reference spectrum instead of computing one from training data. This is
 #' useful when you have a known standard or calibration spectrum.
 #'
+#' @inheritSection step_measure_align_shift Coordinate grid
 #' @family measure-align
 #' @export
 #'
@@ -308,6 +321,7 @@ step_measure_align_reference <- function(
       measures = measures,
       ref_spectrum = ref_spectrum,
       max_shift = as.integer(max_shift),
+      locations = NULL,
       role = role,
       trained = trained,
       skip = skip,
@@ -320,6 +334,7 @@ step_measure_align_reference_new <- function(
   measures,
   ref_spectrum,
   max_shift,
+  locations,
   role,
   trained,
   skip,
@@ -330,6 +345,7 @@ step_measure_align_reference_new <- function(
     measures = measures,
     ref_spectrum = ref_spectrum,
     max_shift = max_shift,
+    locations = locations,
     role = role,
     trained = trained,
     skip = skip,
@@ -347,21 +363,21 @@ prep.step_measure_align_reference <- function(x, training, info = NULL, ...) {
     measure_cols <- x$measures
   }
 
-  # Validate reference length matches data
-  col <- measure_cols[1]
-  first_spectrum <- training[[col]][[1]]
+  locations <- .alignment_training_grids(training, measure_cols)
 
-  if (length(x$ref_spectrum) != length(first_spectrum$value)) {
-    cli::cli_warn(
-      "Reference spectrum length ({length(x$ref_spectrum)}) differs from data ({length(first_spectrum$value)}). ",
-      "Alignment may not work correctly."
-    )
+  # Validate reference length matches data
+  if (length(locations) != length(x$ref_spectrum)) {
+    cli::cli_abort(c(
+      "{.arg ref_spectrum} length ({length(x$ref_spectrum)}) must match every selected measurement grid.",
+      "i" = "Expected {length(locations)} values."
+    ))
   }
 
   step_measure_align_reference_new(
     measures = measure_cols,
     ref_spectrum = x$ref_spectrum,
     max_shift = x$max_shift,
+    locations = locations,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -372,6 +388,7 @@ prep.step_measure_align_reference <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_align_reference <- function(object, new_data, ...) {
   for (col in object$measures) {
+    .check_alignment_grid(object, new_data[[col]])
     result <- purrr::map(
       new_data[[col]],
       .align_shift_single, # Reuse the same function
@@ -448,6 +465,7 @@ tidy.step_measure_align_reference <- function(x, ...) {
 #'
 #' Requires the `dtw` package to be installed.
 #'
+#' @inheritSection step_measure_align_shift Coordinate grid
 #' @family measure-align
 #' @export
 #'
@@ -483,6 +501,7 @@ step_measure_align_dtw <- function(
       window_type = window_type,
       window_size = as.integer(window_size),
       ref_spectrum = NULL,
+      locations = NULL,
       role = role,
       trained = trained,
       skip = skip,
@@ -497,6 +516,7 @@ step_measure_align_dtw_new <- function(
   window_type,
   window_size,
   ref_spectrum,
+  locations,
   role,
   trained,
   skip,
@@ -509,6 +529,7 @@ step_measure_align_dtw_new <- function(
     window_type = window_type,
     window_size = window_size,
     ref_spectrum = ref_spectrum,
+    locations = locations,
     role = role,
     trained = trained,
     skip = skip,
@@ -525,6 +546,8 @@ prep.step_measure_align_dtw <- function(x, training, info = NULL, ...) {
   } else {
     measure_cols <- x$measures
   }
+
+  locations <- .alignment_training_grids(training, measure_cols)
 
   col <- measure_cols[1]
 
@@ -544,6 +567,7 @@ prep.step_measure_align_dtw <- function(x, training, info = NULL, ...) {
     window_type = x$window_type,
     window_size = x$window_size,
     ref_spectrum = ref_spectrum,
+    locations = locations,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -556,6 +580,7 @@ bake.step_measure_align_dtw <- function(object, new_data, ...) {
   rlang::check_installed("dtw", reason = "for DTW alignment")
 
   for (col in object$measures) {
+    .check_alignment_grid(object, new_data[[col]])
     result <- purrr::map(
       new_data[[col]],
       .align_dtw_single,
@@ -706,6 +731,7 @@ required_pkgs.step_measure_align_dtw <- function(x, ...) {
 #' Eilers, P.H.C. (2004). Parametric Time Warping.
 #' Analytical Chemistry, 76(2), 404-411.
 #'
+#' @inheritSection step_measure_align_shift Coordinate grid
 #' @family measure-align
 #' @export
 #'
@@ -736,6 +762,7 @@ step_measure_align_ptw <- function(
       measures = measures,
       reference = reference,
       ref_spectrum = NULL,
+      locations = NULL,
       role = role,
       trained = trained,
       skip = skip,
@@ -748,6 +775,7 @@ step_measure_align_ptw_new <- function(
   measures,
   reference,
   ref_spectrum,
+  locations,
   role,
   trained,
   skip,
@@ -758,6 +786,7 @@ step_measure_align_ptw_new <- function(
     measures = measures,
     reference = reference,
     ref_spectrum = ref_spectrum,
+    locations = locations,
     role = role,
     trained = trained,
     skip = skip,
@@ -775,6 +804,8 @@ prep.step_measure_align_ptw <- function(x, training, info = NULL, ...) {
     measure_cols <- x$measures
   }
 
+  locations <- .alignment_training_grids(training, measure_cols)
+
   col <- measure_cols[1]
 
   # Compute reference spectrum
@@ -791,6 +822,7 @@ prep.step_measure_align_ptw <- function(x, training, info = NULL, ...) {
     measures = measure_cols,
     reference = x$reference,
     ref_spectrum = ref_spectrum,
+    locations = locations,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -803,6 +835,7 @@ bake.step_measure_align_ptw <- function(object, new_data, ...) {
   rlang::check_installed("ptw", reason = "for PTW alignment")
 
   for (col in object$measures) {
+    .check_alignment_grid(object, new_data[[col]])
     # Get locations from first spectrum
     locations <- new_data[[col]][[1]]$location
 
@@ -917,6 +950,7 @@ required_pkgs.step_measure_align_ptw <- function(x, ...) {
 #' for chemometric data analysis using correlation optimised warping.
 #' Journal of Chromatography A, 805, 17-35.
 #'
+#' @inheritSection step_measure_align_shift Coordinate grid
 #' @family measure-align
 #' @export
 #'
@@ -951,6 +985,7 @@ step_measure_align_cow <- function(
       segment_length = as.integer(segment_length),
       slack = as.integer(slack),
       ref_spectrum = NULL,
+      locations = NULL,
       role = role,
       trained = trained,
       skip = skip,
@@ -965,6 +1000,7 @@ step_measure_align_cow_new <- function(
   segment_length,
   slack,
   ref_spectrum,
+  locations,
   role,
   trained,
   skip,
@@ -977,6 +1013,7 @@ step_measure_align_cow_new <- function(
     segment_length = segment_length,
     slack = slack,
     ref_spectrum = ref_spectrum,
+    locations = locations,
     role = role,
     trained = trained,
     skip = skip,
@@ -1001,6 +1038,8 @@ prep.step_measure_align_cow <- function(x, training, info = NULL, ...) {
     measure_cols <- x$measures
   }
 
+  locations <- .alignment_training_grids(training, measure_cols)
+
   col <- measure_cols[1]
 
   # Compute reference spectrum
@@ -1019,6 +1058,7 @@ prep.step_measure_align_cow <- function(x, training, info = NULL, ...) {
     segment_length = x$segment_length,
     slack = x$slack,
     ref_spectrum = ref_spectrum,
+    locations = locations,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -1029,6 +1069,7 @@ prep.step_measure_align_cow <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_align_cow <- function(object, new_data, ...) {
   for (col in object$measures) {
+    .check_alignment_grid(object, new_data[[col]])
     result <- purrr::map(
       new_data[[col]],
       .align_cow_single,
@@ -1233,6 +1274,27 @@ tunable.step_measure_align_cow <- function(x, ...) {
 
   x$value <- warped
   x
+}
+
+# Validate the point correspondence required by all alignment methods. The
+# locations field was added after the first versions of these steps were
+# released, so require_trained_grid() deliberately turns a missing field on a
+# serialized trained step into an actionable re-prep error.
+.check_alignment_grid <- function(object, measures) {
+  locations <- require_trained_grid(object$locations)
+  check_measure_grid(measures, locations)
+  invisible(NULL)
+}
+
+.alignment_training_grids <- function(training, measure_cols) {
+  locations <- check_measure_grid(training[[measure_cols[1L]]])
+  if (length(measure_cols) > 1L) {
+    for (col in measure_cols[-1L]) {
+      check_measure_grid(training[[col]], locations)
+    }
+  }
+
+  locations
 }
 
 .cow_segment_cost <- function(sample, reference, seg_start, seg_len, warp) {

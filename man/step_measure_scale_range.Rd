@@ -49,6 +49,9 @@ applies range scaling at each measurement location. This centers and divides
 by the range (max - min) of each variable.
 }
 \details{
+Within each selected column, training and prediction samples must use the
+same measurement locations in the same order.
+
 Range scaling centers the data and divides by the range, giving bounded
 values suitable for methods sensitive to variable scale.
 

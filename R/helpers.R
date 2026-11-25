@@ -2,6 +2,44 @@
 # Move between lists of tibbles and matrices (and back)
 # Callers that compare points by location must also check their axes.
 
+require_trained_grid <- function(locations) {
+  if (is.null(locations)) {
+    cli::cli_abort(c(
+      "The trained step has no recorded coordinate grid.",
+      "i" = "Prep the recipe again with its training data before baking."
+    ))
+  }
+  locations
+}
+
+check_measure_grid <- function(x, locations = NULL) {
+  if (length(x) == 0L) {
+    return(invisible(locations))
+  }
+  if (is.null(locations)) {
+    locations <- x[[1L]][["location"]]
+  }
+  for (i in seq_along(x)) {
+    axis <- x[[i]][["location"]]
+    if (!is.numeric(axis) || !all(is.finite(axis))) {
+      cli::cli_abort(
+        "Sample {i} must have finite, one-dimensional measurement locations."
+      )
+    }
+    if (length(axis) != length(locations)) {
+      cli::cli_abort(
+        "Cannot match the reference grid for sample {i}: different point counts."
+      )
+    }
+    if (!isTRUE(all(axis == locations))) {
+      cli::cli_abort(
+        "Sample {i} must have the same locations in the same order as the reference grid."
+      )
+    }
+  }
+  invisible(locations)
+}
+
 measure_to_matrix <- function(x) {
   values <- purrr::map(x, "value")
   if (length(unique(lengths(values))) > 1L) {

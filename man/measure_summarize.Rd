@@ -33,7 +33,9 @@ location across all samples. This is useful for understanding your data,
 computing reference spectra, or identifying outliers.
 }
 \details{
-This function does NOT transform data; it summarizes it. Common uses:
+Within each selected column, samples must have the same measurement
+locations in the same order. Separate columns can use different grids.
+Common uses include:
 \itemize{
 \item \strong{Mean spectrum}: The average spectrum across all samples
 \item \strong{Reference spectrum}: For MSC-style corrections

@@ -44,6 +44,9 @@
 #' The polynomial terms (\eqn{\lambda}, \eqn{\lambda^2}, etc.) account for
 #' wavelength-dependent baseline effects that vary between samples.
 #'
+#' EMSC is a pointwise correction. The step records the ordered training grid
+#' and requires prediction measurements to use that same grid.
+#'
 #' **When to use EMSC vs MSC:**
 #' - Use MSC for simple additive/multiplicative scatter
 #' - Use EMSC when scatter effects vary with wavelength
@@ -144,6 +147,12 @@ prep.step_measure_emsc <- function(x, training, info = NULL, ...) {
 
   # Compute reference spectrum
   measure_col <- measure_cols[1]
+  locations <- check_measure_grid(training[[measure_col]])
+  if (length(measure_cols) > 1L) {
+    for (col in measure_cols[-1]) {
+      check_measure_grid(training[[col]], locations)
+    }
+  }
   mat <- measure_to_matrix(training[[measure_col]])
 
   if (is.numeric(x$reference)) {
@@ -161,8 +170,6 @@ prep.step_measure_emsc <- function(x, training, info = NULL, ...) {
   }
 
   # Get locations for polynomial terms
-  locations <- training[[measure_col]][[1]]$location
-
   step_measure_emsc_new(
     degree = x$degree,
     reference = x$reference,
@@ -240,8 +247,12 @@ prep.step_measure_emsc <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_emsc <- function(object, new_data, ...) {
   ref_spectrum <- object$ref_spectrum
-  locations <- object$locations
+  locations <- require_trained_grid(object$locations)
   degree <- object$degree
+
+  for (col in object$measures) {
+    check_measure_grid(new_data[[col]], locations)
+  }
 
   for (col in object$measures) {
     result <- purrr::map(new_data[[col]], function(m) {
@@ -319,6 +330,8 @@ tunable.step_measure_emsc <- function(x, ...) {
 #' @param trained Logical indicating if the step has been trained.
 #' @param weights The learned orthogonal weights (after training).
 #' @param loadings The learned orthogonal loadings (after training).
+#' @param locations The numeric training locations for the measure column
+#'   (after training).
 #' @param skip Logical. Should the step be skipped when baking?
 #' @param id Unique step identifier.
 #'
@@ -339,6 +352,7 @@ tunable.step_measure_emsc <- function(x, ...) {
 #' - The recipe must have at least one outcome variable with role "outcome"
 #' - Outcomes are automatically detected from the recipe's role definitions
 #' - Multiple outcomes are supported (multivariate Y)
+#' - The spectral grid must be the same ordered grid used during training
 #'
 #' OSC was originally described by Wold et al. (1998) for NIR spectroscopy.
 #'
@@ -371,7 +385,8 @@ step_measure_osc <- function(
   weights = NULL,
   loadings = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_osc")
+  id = recipes::rand_id("measure_osc"),
+  locations = NULL
 ) {
   if (
     !is.numeric(n_components) ||
@@ -407,7 +422,8 @@ step_measure_osc <- function(
       weights = weights,
       loadings = loadings,
       skip = skip,
-      id = id
+      id = id,
+      locations = locations
     )
   )
 }
@@ -422,7 +438,8 @@ step_measure_osc_new <- function(
   weights,
   loadings,
   skip,
-  id
+  id,
+  locations
 ) {
   recipes::step(
     subclass = "measure_osc",
@@ -434,6 +451,7 @@ step_measure_osc_new <- function(
     trained = trained,
     weights = weights,
     loadings = loadings,
+    locations = locations,
     skip = skip,
     id = id
   )
@@ -553,6 +571,7 @@ prep.step_measure_osc <- function(x, training, info = NULL, ...) {
   }
 
   # Extract spectral matrix
+  locations <- check_measure_grid(training[[measure_cols[1]]])
   X <- measure_to_matrix(training[[measure_cols[1]]])
 
   # Center X and Y
@@ -578,7 +597,8 @@ prep.step_measure_osc <- function(x, training, info = NULL, ...) {
     weights = osc_result$weights,
     loadings = osc_result$loadings,
     skip = x$skip,
-    id = x$id
+    id = x$id,
+    locations = locations
   )
 }
 
@@ -587,6 +607,9 @@ bake.step_measure_osc <- function(object, new_data, ...) {
   weights <- object$weights
   loadings <- object$loadings
   measure_col <- object$measures[1]
+  locations <- require_trained_grid(object$locations)
+
+  check_measure_grid(new_data[[measure_col]], locations)
 
   # Get the spectral matrix
   X <- measure_to_matrix(new_data[[measure_col]])
@@ -609,12 +632,9 @@ bake.step_measure_osc <- function(object, new_data, ...) {
     X_centered <- X_centered - t_k %*% t(p_k)
   }
 
-  # Get locations from first spectrum
-  loc <- new_data[[measure_col]][[1]]$location
-
   # Convert back to measure list
   new_data[[measure_col]] <- new_measure_list(
-    matrix_to_measure(X_centered, loc)
+    matrix_to_measure(X_centered, locations)
   )
 
   tibble::as_tibble(new_data)

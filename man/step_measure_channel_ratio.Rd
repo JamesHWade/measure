@@ -77,8 +77,11 @@ can be useful for:
 }
 }
 \note{
-Channels must be aligned to the same grid before computing ratios. Use
-\code{\link[=step_measure_channel_align]{step_measure_channel_align()}} first if grids differ.
+Ratios are computed on the numerator grid. When channel grids differ, the
+denominator is interpolated to that grid for each sample (with boundary
+values used outside its range), and \code{prep()} warns about mismatched training
+grids. Use \code{\link[=step_measure_channel_align]{step_measure_channel_align()}} first when that interpolation is
+not appropriate.
 }
 \examples{
 library(recipes)

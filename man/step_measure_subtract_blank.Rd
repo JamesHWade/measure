@@ -99,6 +99,11 @@ in the internal format produced by \code{\link[=step_measure_input_wide]{step_me
 \section{Tidying}{
 When you \code{\link[recipes:tidy.recipe]{tidy()}} this step, a tibble with columns
 \code{terms}, \code{method}, \code{blank_source}, and \code{id} is returned.
+
+Numeric blanks are positional references. The step records the ordered
+training grid and requires prediction measurements to use that same grid.
+Coordinate-bearing blanks (\code{measure_tbl} or data frames) may still be
+interpolated to the training grid.
 }
 
 \examples{

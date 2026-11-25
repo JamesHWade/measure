@@ -47,8 +47,10 @@
 #' - **mean**: Simple average across channels (special case of weighted_sum).
 #'
 #' @note
-#' Channels must be aligned to the same grid before combining. Use
-#' [step_measure_channel_align()] first if grids differ.
+#' For `weighted_sum` and `mean`, channels must use the same ordered grid
+#' within each sample. Use [step_measure_channel_align()] first if grids differ.
+#' `stack` preserves each channel's own coordinates (and may therefore produce
+#' a sparse nD measurement), while `concat` accepts independent channel grids.
 #'
 #' @family measure-channel
 #' @export
@@ -174,15 +176,10 @@ prep.step_measure_channel_combine <- function(x, training, info = NULL, ...) {
     weights <- rep(1 / length(measure_cols), length(measure_cols))
   }
 
-  # Validate grids are aligned (check first sample)
-  grids <- lapply(measure_cols, function(col) training[[col]][[1]]$location)
-  if (!all(sapply(grids[-1], function(g) identical(g, grids[[1]])))) {
-    cli::cli_warn(
-      c(
-        "Channels have different grids.",
-        "i" = "Use {.fn step_measure_channel_align} first for best results."
-      )
-    )
+  if (x$strategy %in% c("weighted_sum", "mean")) {
+    for (i in seq_len(nrow(training))) {
+      .aligned_channels(training, measure_cols, i)
+    }
   }
 
   # Store channel names for stacking
@@ -302,15 +299,18 @@ tidy.step_measure_channel_combine <- function(x, ...) {
 }
 
 .stack_channels <- function(channels, channel_names) {
-  # Use first channel's locations
-  locations <- channels[[1]]$location
-  n_locs <- length(locations)
-  n_channels <- length(channels)
+  # Retain each channel's coordinates rather than relabeling every channel
+  # with the first channel's grid. This also permits sparse nD output when
+  # channels have different point counts or coordinate sets.
+  n_locs <- vapply(channels, nrow, integer(1))
 
   # Build nD tibble
-  location_1 <- rep(locations, n_channels)
-  location_2 <- rep(seq_len(n_channels), each = n_locs)
-  values <- unlist(lapply(channels, function(ch) ch$value))
+  location_1 <- unlist(
+    lapply(channels, function(ch) ch$location),
+    use.names = FALSE
+  )
+  location_2 <- rep(seq_along(channels), n_locs)
+  values <- unlist(lapply(channels, function(ch) ch$value), use.names = FALSE)
 
   new_measure_nd_tbl(
     location_1 = location_1,
@@ -348,19 +348,32 @@ tidy.step_measure_channel_combine <- function(x, ...) {
   new_measure_list(result)
 }
 
+.aligned_channels <- function(data, measure_cols, i) {
+  channels <- lapply(measure_cols, function(col) data[[col]][[i]])
+  tryCatch(check_measure_grid(channels), error = function(e) {
+    cli::cli_abort(
+      c(
+        "Weighted channel combinations require identical ordered locations within sample {i}.",
+        "i" = "Use {.fn step_measure_channel_align} to align the channels."
+      ),
+      parent = e
+    )
+  })
+  channels
+}
+
 .combine_weighted <- function(data, measure_cols, weights) {
   n_samples <- nrow(data)
 
   result <- vector("list", n_samples)
   for (i in seq_len(n_samples)) {
-    # Get reference locations from first channel
-    ref <- data[[measure_cols[1]]][[i]]
-    locations <- ref$location
+    channels <- .aligned_channels(data, measure_cols, i)
+    locations <- channels[[1L]]$location
 
     # Weighted sum of values
     values <- rep(0, length(locations))
-    for (j in seq_along(measure_cols)) {
-      m <- data[[measure_cols[j]]][[i]]
+    for (j in seq_along(channels)) {
+      m <- channels[[j]]
       values <- values + weights[j] * m$value
     }
 

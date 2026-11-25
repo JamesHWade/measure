@@ -76,6 +76,27 @@ create_nd_test_data <- function(
   )
 }
 
+create_nd_3d_test_data <- function(n_samples = 6, seed = 98) {
+  withr::local_seed(seed)
+  grid <- expand.grid(
+    location_1 = 1:3,
+    location_2 = 1:3,
+    location_3 = 1:2
+  )
+
+  tibble::tibble(
+    id = seq_len(n_samples),
+    cube = new_measure_nd_list(lapply(seq_len(n_samples), function(i) {
+      new_measure_nd_tbl(
+        location_1 = grid$location_1,
+        location_2 = grid$location_2,
+        location_3 = grid$location_3,
+        value = rnorm(nrow(grid))
+      )
+    }))
+  )
+}
+
 # ==============================================================================
 # nD array assembly tests
 
@@ -251,7 +272,108 @@ test_that("step_measure_parafac works with centering/scaling options", {
   )
 })
 
-test_that("PARAFAC projection handles a degenerate loading mode", {
+test_that("PARAFAC projection solves overlapping component loadings jointly", {
+  axis <- expand.grid(location_1 = 1:2, location_2 = 1:2)
+  factors <- cbind(c(1, 0), c(1, 1))
+  measure <- new_measure_nd_list(list(
+    new_measure_nd_tbl(
+      location_1 = axis$location_1,
+      location_2 = axis$location_2,
+      value = c(5, 3, 3, 3)
+    )
+  ))
+
+  scores <- .project_parafac(
+    measure,
+    loadings = list(matrix(0, 1, 2), factors, factors),
+    center_values = NULL,
+    scale_values = NULL,
+    grid_info = NULL
+  )
+
+  # The signal is exactly 2 * outer(factors[, 1], factors[, 1]) +
+  # 3 * outer(factors[, 2], factors[, 2]). Separate normalized inner
+  # products incorrectly return 5 and 3.5 for this nonorthogonal case.
+  expect_equal(unname(scores), matrix(c(2, 3), nrow = 1), tolerance = 1e-12)
+})
+
+test_that("PARAFAC projection uses a minimum-norm solution for rank deficiency", {
+  grid <- expand.grid(location_1 = 1:2, location_2 = 1:2)
+  measure <- new_measure_nd_list(list(
+    new_measure_nd_tbl(
+      location_1 = grid$location_1,
+      location_2 = grid$location_2,
+      value = rep(5, nrow(grid))
+    )
+  ))
+  duplicate <- matrix(1, nrow = 2, ncol = 2)
+
+  scores <- .project_parafac(
+    measure,
+    loadings = list(matrix(0, 1, 2), duplicate, duplicate),
+    center_values = NULL,
+    scale_values = NULL,
+    grid_info = NULL
+  )
+
+  # Identical content factors identify only the sum of the component scores;
+  # the documented SVD projection chooses the minimum-norm split.
+  expect_equal(unname(scores), matrix(c(2.5, 2.5), nrow = 1), tolerance = 1e-12)
+})
+
+test_that("PARAFAC can fit and project a training tensor with a missing cell", {
+  skip_if_not_installed("multiway")
+  set.seed(952)
+  grid <- expand.grid(x = 1:5, y = 1:4)
+  samples <- lapply(1:10, function(i) {
+    values <- i * (grid$x + 1) * (grid$y + 2)
+    if (i == 2L) {
+      values[3L] <- NA_real_
+    }
+    new_measure_nd_tbl(location_1 = grid$x, location_2 = grid$y, value = values)
+  })
+  data <- tibble::tibble(signal = new_measure_nd_list(samples))
+  rec <- recipes::recipe(~., data) |>
+    step_measure_parafac(signal, n_components = 1L, center = FALSE)
+  # Both fitting and retained training scores see the same missing cell.
+  suppressWarnings(fit <- recipes::prep(rec))
+  scores <- recipes::bake(fit, new_data = NULL)$parafac_signal_1
+  expect_equal(scores / scores[1], 1:10, tolerance = 1e-5)
+})
+
+test_that("PARAFAC projection omits missing held-out cells", {
+  grid <- expand.grid(location_1 = 1:5, location_2 = 1:5)
+  factors <- list(
+    cbind(c(1, 0, 0, 1, 0), c(1, 1, 0, 0, 1)),
+    cbind(c(0, 1, 1, 0, 1), c(1, 0, 1, 1, 0))
+  )
+  signal <- outer(factors[[1]][, 1], factors[[2]][, 1]) *
+    2 +
+    outer(factors[[1]][, 2], factors[[2]][, 2]) * 3
+  values <- as.vector(signal)
+  values[13] <- NA_real_
+  measure <- new_measure_nd_list(list(
+    new_measure_nd_tbl(
+      location_1 = grid$location_1,
+      location_2 = grid$location_2,
+      value = values
+    )
+  ))
+
+  scores <- suppressWarnings({
+    .project_parafac(
+      measure,
+      loadings = list(matrix(0, 1, 2), factors[[1]], factors[[2]]),
+      center_values = NULL,
+      scale_values = NULL,
+      grid_info = list(location_1 = 1:5, location_2 = 1:5)
+    )
+  })
+
+  expect_equal(unname(scores), matrix(c(2, 3), nrow = 1), tolerance = 1e-12)
+})
+
+test_that("PARAFAC projection returns zero for an all-zero loading design", {
   grid <- expand.grid(location_1 = 1:2, location_2 = 1:2)
   measure <- new_measure_nd_list(list(
     new_measure_nd_tbl(
@@ -275,6 +397,102 @@ test_that("PARAFAC projection handles a degenerate loading mode", {
   )
 
   expect_equal(scores, matrix(0, nrow = 1, ncol = 1))
+})
+
+test_that("PARAFAC projection includes the fourth tensor mode", {
+  grid <- expand.grid(
+    location_1 = 1:3,
+    location_2 = 1:3,
+    location_3 = 1:2
+  )
+  factors <- list(
+    cbind(c(1, 0, 1), c(1, 1, 0)),
+    cbind(c(0, 1, 1), c(1, 0, 1)),
+    cbind(c(1, 1), c(1, -1))
+  )
+  rank_one <- function(component) {
+    array(
+      as.vector(
+        outer(
+          outer(factors[[1]][, component], factors[[2]][, component]),
+          factors[[3]][, component]
+        )
+      ),
+      dim = c(3, 3, 2)
+    )
+  }
+  signal <- 2 * rank_one(1) + 3 * rank_one(2)
+  measure <- new_measure_nd_list(list(
+    new_measure_nd_tbl(
+      location_1 = grid$location_1,
+      location_2 = grid$location_2,
+      location_3 = grid$location_3,
+      value = as.vector(signal)
+    )
+  ))
+
+  scores <- .project_parafac(
+    measure,
+    loadings = list(
+      matrix(0, 1, 2),
+      factors[[1]],
+      factors[[2]],
+      factors[[3]]
+    ),
+    center_values = NULL,
+    scale_values = NULL,
+    grid_info = list(
+      location_1 = 1:3,
+      location_2 = 1:3,
+      location_3 = 1:2
+    )
+  )
+
+  expect_equal(unname(scores), matrix(c(2, 3), nrow = 1), tolerance = 1e-12)
+})
+
+test_that("step_measure_parafac supports 3D prep and coordinate-ordered bake", {
+  skip_if_not_installed("multiway")
+
+  test_data <- create_nd_3d_test_data()
+  suppressWarnings({
+    rec <- recipes::recipe(~., data = test_data) |>
+      step_measure_parafac(cube, n_components = 2, center = FALSE) |>
+      recipes::prep()
+  })
+
+  expect_length(rec$steps[[1]]$loadings$cube, 4)
+  expect_equal(
+    vapply(rec$steps[[1]]$loadings$cube, nrow, integer(1)),
+    c(6L, 3L, 3L, 2L)
+  )
+
+  held_out <- test_data[1:2, ]
+  held_out$cube <- new_measure_nd_list(lapply(held_out$cube, function(m) {
+    order <- rev(seq_len(nrow(m)))
+    new_measure_nd_tbl(
+      location_1 = m$location_1[order],
+      location_2 = m$location_2[order],
+      location_3 = m$location_3[order],
+      value = m$value[order]
+    )
+  }))
+  baked <- recipes::bake(rec, new_data = held_out)
+
+  expect_equal(nrow(baked), 2L)
+  expect_true(all(paste0("parafac_cube_", 1:2) %in% names(baked)))
+  expect_false("cube" %in% names(baked))
+
+  shifted <- held_out
+  shifted$cube <- new_measure_nd_list(lapply(shifted$cube, function(m) {
+    new_measure_nd_tbl(
+      location_1 = m$location_1 + 100,
+      location_2 = m$location_2,
+      location_3 = m$location_3,
+      value = m$value
+    )
+  }))
+  expect_error(recipes::bake(rec, new_data = shifted), "grid|coordinate")
 })
 
 test_that("step_measure_parafac tidy returns parameters", {
@@ -443,6 +661,7 @@ test_that("step_measure_tucker tidy returns parameters", {
 # ==============================================================================
 
 test_that("step_measure_mcr_als constructor works", {
+  withr::local_options("rlang:::message_always" = TRUE)
   test_data <- create_nd_test_data(n_samples = 6)
 
   # MCR-ALS emits a warning about being experimental

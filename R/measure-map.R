@@ -550,7 +550,9 @@ measure_map_safely <- function(
 #'   each summary statistic.
 #'
 #' @details
-#' This function does NOT transform data; it summarizes it. Common uses:
+#' Within each selected column, samples must have the same measurement
+#' locations in the same order. Separate columns can use different grids.
+#' Common uses include:
 #'
 #' - **Mean spectrum**: The average spectrum across all samples
 #' - **Reference spectrum**: For MSC-style corrections
@@ -629,8 +631,7 @@ measure_summarize <- function(
   for (col in target_cols) {
     measure_col <- .data[[col]]
 
-    # Get locations from first sample (assume all are aligned)
-    locations <- measure_col[[1]]$location
+    locations <- check_measure_grid(measure_col)
 
     # Convert to matrix for efficient computation
     mat <- measure_to_matrix(measure_col)

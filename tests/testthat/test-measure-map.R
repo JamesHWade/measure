@@ -503,6 +503,19 @@ test_that("measure_summarize computes mean and sd by default", {
   expect_equal(result$sd[1], sd(first_values), tolerance = 1e-10)
 })
 
+test_that("measure_summarize compares only values at matching locations", {
+  samples <- list(
+    new_measure_tbl(1:3, c(1, 2, 3)),
+    new_measure_tbl(as.double(1:3), c(3, 4, 5))
+  )
+  data <- tibble::tibble(signal = new_measure_list(samples))
+  expect_equal(measure_summarize(data)$mean, c(2, 3, 4))
+
+  samples[[2]] <- new_measure_tbl(3:1, c(3, 4, 5))
+  data$signal <- new_measure_list(samples)
+  expect_error(measure_summarize(data), "reference grid")
+})
+
 test_that("measure_summarize accepts custom functions", {
   test_data <- create_test_data()
 

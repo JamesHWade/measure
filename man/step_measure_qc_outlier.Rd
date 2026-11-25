@@ -72,6 +72,10 @@ Two columns are added:
 \item \code{.outlier}: Logical flag
 \item \code{.outlier_score}: Numeric score (higher = more extreme)
 }
+
+The outlier score is computed pointwise across samples. The step records the
+ordered training grid and requires prediction measurements to use that same
+grid.
 }
 \examples{
 library(recipes)

@@ -25,8 +25,8 @@ step_measure_tucker(
 \item{...}{One or more selector functions to choose measure columns.
 If empty, all nD measure columns are used.}
 
-\item{ranks}{A vector of ranks for each mode. If a single integer,
-the same rank is used for all modes. Default is 3.}
+\item{ranks}{A vector of ranks for each measurement axis. If a single
+integer, the same rank is used for all axes. Default is 3.}
 
 \item{center}{Logical. Should data be centered before decomposition?
 Default is \code{TRUE}.}
@@ -63,7 +63,7 @@ each mode. Unlike PARAFAC, Tucker allows different ranks for each mode,
 providing more flexibility.
 \subsection{Requirements}{
 \itemize{
-\item Input must be \code{measure_nd_list} with 2+ dimensions
+\item Input must be \code{measure_nd_list} with two or three measurement axes
 \item All samples must have the same grid (regular, aligned)
 \item The \code{multiway} package must be installed (in Suggests)
 }
@@ -72,7 +72,9 @@ providing more flexibility.
 \subsection{Output}{
 
 Creates numeric feature columns representing the unfolded core tensor
-scores for each sample.
+scores for each sample. Scores are ordered in the same column-major order
+as the core tensor: the first measurement axis varies fastest, followed by
+the remaining axes.
 }
 }
 \note{

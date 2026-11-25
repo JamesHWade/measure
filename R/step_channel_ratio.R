@@ -49,8 +49,11 @@
 #' - Working with absorbance ratios
 #'
 #' @note
-#' Channels must be aligned to the same grid before computing ratios. Use
-#' [step_measure_channel_align()] first if grids differ.
+#' Ratios are computed on the numerator grid. When channel grids differ, the
+#' denominator is interpolated to that grid for each sample (with boundary
+#' values used outside its range), and `prep()` warns about mismatched training
+#' grids. Use [step_measure_channel_align()] first when that interpolation is
+#' not appropriate.
 #'
 #' @family measure-channel
 #' @export
@@ -174,15 +177,23 @@ prep.step_measure_channel_ratio <- function(x, training, info = NULL, ...) {
     )
   }
 
-  # Validate grids match (check first sample)
+  # Validate grids for every training sample. Ratio computation deliberately
+  # interpolates the denominator when needed, but the mismatch should remain
+  # visible instead of being an implicit positional pairing.
   for (i in seq_along(x$numerator)) {
-    num_grid <- training[[x$numerator[i]]][[1]]$location
-    den_grid <- training[[x$denominator[i]]][[1]]$location
-    if (!identical(num_grid, den_grid)) {
+    numerator <- training[[x$numerator[i]]]
+    denominator <- training[[x$denominator[i]]]
+    mismatched_samples <- which(vapply(
+      seq_along(numerator),
+      function(j) !.ratio_grids_match(numerator[[j]], denominator[[j]]),
+      logical(1)
+    ))
+    if (length(mismatched_samples) > 0L) {
       cli::cli_warn(
         c(
-          "Grids for {.field {x$numerator[i]}} and {.field {x$denominator[i]}} differ.",
-          "i" = "Use {.fn step_measure_channel_align} first for accurate ratios."
+          "Grids for {.field {x$numerator[i]}} and {.field {x$denominator[i]}} differ in sample{?s} {.val {mismatched_samples}}.",
+          "i" = "The denominator will be interpolated to the numerator grid.",
+          "i" = "Use {.fn step_measure_channel_align} first if that is not appropriate."
         )
       )
     }
@@ -290,9 +301,7 @@ tidy.step_measure_channel_ratio <- function(x, ...) {
 
 .compute_ratio <- function(num_m, den_m, epsilon, log_transform) {
   # Handle mismatched grids by using numerator's grid
-  interpolated <- FALSE
-  if (!identical(num_m$location, den_m$location)) {
-    interpolated <- TRUE
+  if (!.ratio_grids_match(num_m, den_m)) {
     # Interpolate denominator to numerator's grid
     den_values <- stats::approx(
       den_m$location,
@@ -327,4 +336,11 @@ tidy.step_measure_channel_ratio <- function(x, ...) {
     location = num_m$location,
     value = ratio_values
   )
+}
+
+.ratio_grids_match <- function(numerator, denominator) {
+  numerator <- numerator$location
+  denominator <- denominator$location
+  length(numerator) == length(denominator) &&
+    isTRUE(all(numerator == denominator))
 }

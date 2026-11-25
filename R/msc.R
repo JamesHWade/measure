@@ -16,6 +16,8 @@
 #' @param ref_spectra A named list of numeric vectors containing the reference
 #'   spectra computed during training for each measure column. This is `NULL`
 #'   until the step is trained.
+#' @param locations A named list of the numeric training locations for each
+#'   measure column. This is `NULL` until the step is trained.
 #' @param skip A logical. Should the step be skipped when the recipe is baked
 #'   by [bake()]? While all operations are baked when [prep()] is run, some
 #'   operations may not be able to be conducted on new data (e.g. processing
@@ -50,6 +52,11 @@
 #'
 #' The measurement locations are preserved unchanged.
 #'
+#' MSC is a pointwise correction. The step records the ordered training grid
+#' for each selected measure column and requires prediction measurements to
+#' use the same grid. Use a resampling or alignment step upstream when grids
+#' differ.
+#'
 #' # Tidying
 #'
 #' When you [`tidy()`][recipes::tidy.recipe()] this step, a tibble with columns
@@ -82,7 +89,8 @@ step_measure_msc <- function(
   trained = FALSE,
   ref_spectra = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_msc")
+  id = recipes::rand_id("measure_msc"),
+  locations = NULL
 ) {
   recipes::add_step(
     recipe,
@@ -92,7 +100,8 @@ step_measure_msc <- function(
       trained = trained,
       ref_spectra = ref_spectra,
       skip = skip,
-      id = id
+      id = id,
+      locations = locations
     )
   )
 }
@@ -103,7 +112,8 @@ step_measure_msc_new <- function(
   trained,
   ref_spectra,
   skip,
-  id
+  id,
+  locations
 ) {
   recipes::step(
     subclass = "measure_msc",
@@ -111,6 +121,7 @@ step_measure_msc_new <- function(
     role = role,
     trained = trained,
     ref_spectra = ref_spectra,
+    locations = locations,
     skip = skip,
     id = id
   )
@@ -129,7 +140,9 @@ prep.step_measure_msc <- function(x, training, info = NULL, ...) {
 
   # Compute reference spectrum for each column
   ref_spectra <- list()
+  locations <- list()
   for (col in measure_cols) {
+    locations[[col]] <- check_measure_grid(training[[col]])
     ref_spectra[[col]] <- .compute_reference_spectrum(training[[col]])
   }
 
@@ -139,13 +152,17 @@ prep.step_measure_msc <- function(x, training, info = NULL, ...) {
     trained = TRUE,
     ref_spectra = ref_spectra,
     skip = x$skip,
-    id = x$id
+    id = x$id,
+    locations = locations
   )
 }
 
 #' @export
 bake.step_measure_msc <- function(object, new_data, ...) {
   for (col in object$measures) {
+    locations <- require_trained_grid(object$locations[[col]])
+    check_measure_grid(new_data[[col]], locations)
+
     result <- .compute_msc(new_data[[col]], object$ref_spectra[[col]])
     new_data[[col]] <- new_measure_list(result)
   }

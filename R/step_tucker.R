@@ -13,8 +13,8 @@
 #' @param recipe A recipe object.
 #' @param ... One or more selector functions to choose measure columns.
 #'   If empty, all nD measure columns are used.
-#' @param ranks A vector of ranks for each mode. If a single integer,
-#'   the same rank is used for all modes. Default is 3.
+#' @param ranks A vector of ranks for each measurement axis. If a single
+#'   integer, the same rank is used for all axes. Default is 3.
 #' @param center Logical. Should data be centered before decomposition?
 #'   Default is `TRUE`.
 #' @param scale Logical. Should data be scaled before decomposition?
@@ -37,14 +37,16 @@
 #'
 #' ## Requirements
 #'
-#' - Input must be `measure_nd_list` with 2+ dimensions
+#' - Input must be `measure_nd_list` with two or three measurement axes
 #' - All samples must have the same grid (regular, aligned)
 #' - The `multiway` package must be installed (in Suggests)
 #'
 #' ## Output
 #'
 #' Creates numeric feature columns representing the unfolded core tensor
-#' scores for each sample.
+#' scores for each sample. Scores are ordered in the same column-major order
+#' as the core tensor: the first measurement axis varies fastest, followed by
+#' the remaining axes.
 #'
 #' @note
 #' This step requires the `multiway` package. Install with:
@@ -311,18 +313,25 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
 # ------------------------------------------------------------------------------
 
 .fit_tucker <- function(measure_nd_list, ranks, center, scale, max_iter, tol) {
-  # Convert to 3D array (samples x dim1 x dim2)
-  array_result <- .nd_list_to_array(measure_nd_list)
-  X <- array_result$array
+  array_result <- .nd_list_to_array(
+    measure_nd_list,
+    supported_dims = 2:3,
+    method = "Tucker"
+  )
+  preprocessing <- .fit_multiway_preprocessing(
+    array_result$array,
+    center = center,
+    scale = scale
+  )
+  X <- preprocessing$array
   grid_info <- array_result$grid_info
 
   n_samples <- dim(X)[1]
-  n_modes <- length(dim(X)) # Total modes including samples
-  ndim <- n_modes - 1 # Content dimensions (excluding samples)
+  ndim <- length(dim(X)) - 1L
 
-  # Expand ranks if single value - user specifies for content dimensions,
-
-  # we prepend a rank for the sample dimension
+  # Ranks are specified for measurement axes. The decomposition also has a
+  # sample mode, whose rank is chosen independently and is not projected at
+  # bake time.
   if (length(ranks) == 1) {
     ranks <- rep(ranks, ndim)
   }
@@ -333,31 +342,11 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
     )
   }
 
-  # multiway::tucker expects nfac for ALL modes including samples
-  # Prepend sample dimension rank (we use min(n_samples, max(ranks)) as a reasonable default)
+  # multiway::tucker expects nfac for every mode, including samples. Keep the
+  # historical sample-rank choice for compatibility with existing fits.
   sample_rank <- min(n_samples, max(ranks))
   full_ranks <- c(sample_rank, ranks)
 
-  # Center and scale along sample dimension
-  center_values <- NULL
-  scale_values <- NULL
-
-  if (center) {
-    center_values <- apply(X, c(2, 3), mean, na.rm = TRUE)
-    for (i in seq_len(n_samples)) {
-      X[i, , ] <- X[i, , ] - center_values
-    }
-  }
-
-  if (scale) {
-    scale_values <- apply(X, c(2, 3), stats::sd, na.rm = TRUE)
-    scale_values[scale_values == 0] <- 1
-    for (i in seq_len(n_samples)) {
-      X[i, , ] <- X[i, , ] / scale_values
-    }
-  }
-
-  # Fit Tucker using multiway
   fit <- multiway::tucker(
     X,
     nfac = full_ranks,
@@ -366,16 +355,15 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
     ctol = tol
   )
 
-  # multiway::tucker returns $A, $B, $C as separate matrices (not $A as a list)
-  # $A = sample scores (n_samples x ranks[1])
-  # $B = mode 2 loadings (dim1 x ranks[2])
-  # $C = mode 3 loadings (dim2 x ranks[3])
-  # Store as list for consistent access
+  # The package exposes factors as A, B, C, and (for a 4-way tensor) D. Keep
+  # the sample factor first so that `loadings[-1]` is always the set of
+  # measurement-axis factors used by `.project_tucker()`.
+  factor_names <- c("A", "B", "C", "D")[seq_along(dim(X))]
   list(
-    loadings = list(fit$A, fit$B, fit$C),
-    core = fit$G, # Core tensor
-    center_values = center_values,
-    scale_values = scale_values,
+    loadings = lapply(factor_names, function(name) fit[[name]]),
+    core = fit$G,
+    center_values = preprocessing$center_values,
+    scale_values = preprocessing$scale_values,
     grid_info = grid_info
   )
 }
@@ -388,39 +376,31 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
   scale_values,
   grid_info
 ) {
-  # Convert to array
-  array_result <- .nd_list_to_array(measure_nd_list)
-  X <- array_result$array
+  # Use the training grid recorded during prep. Rebuilding a grid from the
+  # held-out batch would silently change the meaning of each tensor position.
+  array_result <- .nd_list_to_array(
+    measure_nd_list,
+    grid_info = grid_info,
+    supported_dims = 2:3,
+    method = "Tucker"
+  )
+  X <- .apply_multiway_preprocessing(
+    array_result$array,
+    center_values = center_values,
+    scale_values = scale_values
+  )
 
-  n_samples <- dim(X)[1]
-
-  # Apply centering and scaling
-  if (!is.null(center_values)) {
-    for (i in seq_len(n_samples)) {
-      X[i, , ] <- X[i, , ] - center_values
-    }
+  # Contract each content axis with its loadings while keeping the sample
+  # axis intact. The result has shape samples x rank_1 x rank_2 [x rank_3].
+  content_loadings <- loadings[-1L]
+  for (j in seq_along(content_loadings)) {
+    mode <- j + 1L
+    shape <- dim(X)
+    permutation <- c(mode, seq_along(shape)[-mode])
+    unfolded <- matrix(aperm(X, permutation), nrow = shape[mode])
+    projected <- crossprod(content_loadings[[j]], unfolded)
+    dim(projected) <- c(ncol(content_loadings[[j]]), shape[-mode])
+    X <- aperm(projected, order(permutation))
   }
-
-  if (!is.null(scale_values)) {
-    for (i in seq_len(n_samples)) {
-      X[i, , ] <- X[i, , ] / scale_values
-    }
-  }
-
-  # Project onto loadings to get core tensor scores
-  # For Tucker, we project each mode onto its factor matrix
-  ndim <- length(dim(X)) - 1
-  n_scores <- prod(vapply(loadings[-1], ncol, integer(1))) # Exclude sample loadings
-
-  scores <- matrix(0, nrow = n_samples, ncol = n_scores)
-
-  for (i in seq_len(n_samples)) {
-    Xi <- matrix(X[i, , ], nrow = dim(X)[2], ncol = dim(X)[3])
-
-    # Project: core_i = loadings[[2]]' %*% Xi %*% loadings[[3]]
-    projected <- t(loadings[[2]]) %*% Xi %*% loadings[[3]]
-    scores[i, ] <- as.vector(projected)
-  }
-
-  scores
+  matrix(X, nrow = dim(X)[1L], ncol = prod(dim(X)[-1L]))
 }

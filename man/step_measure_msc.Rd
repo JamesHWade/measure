@@ -11,7 +11,8 @@ step_measure_msc(
   trained = FALSE,
   ref_spectra = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_msc")
+  id = recipes::rand_id("measure_msc"),
+  locations = NULL
 )
 }
 \arguments{
@@ -39,6 +40,9 @@ the outcome variable(s)). Care should be taken when using \code{skip = TRUE}
 as it may affect the computations for subsequent operations.}
 
 \item{id}{A character string that is unique to this step to identify it.}
+
+\item{locations}{A named list of the numeric training locations for each
+measure column. This is \code{NULL} until the step is trained.}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
@@ -72,6 +76,11 @@ in the internal format produced by \code{\link[=step_measure_input_wide]{step_me
 \code{\link[=step_measure_input_long]{step_measure_input_long()}}.
 
 The measurement locations are preserved unchanged.
+
+MSC is a pointwise correction. The step records the ordered training grid
+for each selected measure column and requires prediction measurements to
+use the same grid. Use a resampling or alignment step upstream when grids
+differ.
 }
 \section{Tidying}{
 When you \code{\link[recipes:tidy.recipe]{tidy()}} this step, a tibble with columns

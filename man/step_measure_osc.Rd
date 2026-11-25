@@ -15,7 +15,8 @@ step_measure_osc(
   weights = NULL,
   loadings = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_osc")
+  id = recipes::rand_id("measure_osc"),
+  locations = NULL
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ step_measure_osc(
 \item{skip}{Logical. Should the step be skipped when baking?}
 
 \item{id}{Unique step identifier.}
+
+\item{locations}{The numeric training locations for the measure column
+(after training).}
 }
 \value{
 An updated recipe with the new step added.
@@ -66,6 +70,7 @@ is not related to the response.
 \item The recipe must have at least one outcome variable with role "outcome"
 \item Outcomes are automatically detected from the recipe's role definitions
 \item Multiple outcomes are supported (multivariate Y)
+\item The spectral grid must be the same ordered grid used during training
 }
 
 OSC was originally described by Wold et al. (1998) for NIR spectroscopy.

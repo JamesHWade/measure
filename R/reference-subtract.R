@@ -77,6 +77,11 @@
 #' When you [`tidy()`][recipes::tidy.recipe()] this step, a tibble with columns
 #' `terms`, `method`, `blank_source`, and `id` is returned.
 #'
+#' Numeric blanks are positional references. The step records the ordered
+#' training grid and requires prediction measurements to use that same grid.
+#' Coordinate-bearing blanks (`measure_tbl` or data frames) may still be
+#' interpolated to the training grid.
+#'
 #' @family measure-preprocessing
 #' @seealso [step_measure_subtract_reference()] for simpler external reference
 #' @export
@@ -131,6 +136,7 @@ step_measure_subtract_blank <- function(
       role = role,
       trained = trained,
       learned_blank = learned_blank,
+      locations = NULL,
       skip = skip,
       id = id
     )
@@ -146,6 +152,7 @@ step_measure_subtract_blank_new <- function(
   role,
   trained,
   learned_blank,
+  locations,
   skip,
   id
 ) {
@@ -159,6 +166,7 @@ step_measure_subtract_blank_new <- function(
     role = role,
     trained = trained,
     learned_blank = learned_blank,
+    locations = locations,
     skip = skip,
     id = id
   )
@@ -174,6 +182,13 @@ prep.step_measure_subtract_blank <- function(x, training, info = NULL, ...) {
   } else {
     measure_cols <- x$measures
   }
+
+  locations <- stats::setNames(
+    lapply(measure_cols, function(col) {
+      check_measure_grid(training[[col]])
+    }),
+    measure_cols
+  )
 
   # Validate method
   if (!x$method %in% c("subtract", "divide")) {
@@ -244,6 +259,7 @@ prep.step_measure_subtract_blank <- function(x, training, info = NULL, ...) {
     role = x$role,
     trained = TRUE,
     learned_blank = learned_blank,
+    locations = locations,
     skip = x$skip,
     id = x$id
   )
@@ -252,6 +268,7 @@ prep.step_measure_subtract_blank <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_subtract_blank <- function(object, new_data, ...) {
   for (col in object$measures) {
+    .check_reference_correction_grid(object, new_data[[col]], col)
     blank <- object$learned_blank[[col]]
     result <- .apply_reference_correction(new_data[[col]], blank, object$method)
     new_data[[col]] <- new_measure_list(result)
@@ -342,6 +359,11 @@ required_pkgs.step_measure_subtract_blank <- function(x, ...) {
 #' externally provided reference and does not support learning from training
 #' data.
 #'
+#' A numeric `reference` is positional, so the step records the ordered
+#' training grid and requires prediction measurements to use that same grid.
+#' Coordinate-bearing references (`measure_tbl` or data frames) may still be
+#' interpolated to the training grid.
+#'
 #' @family measure-preprocessing
 #' @seealso [step_measure_subtract_blank()] for blank correction with learning
 #' @export
@@ -380,6 +402,7 @@ step_measure_subtract_reference <- function(
       role = role,
       trained = trained,
       learned_ref = learned_ref,
+      locations = NULL,
       skip = skip,
       id = id
     )
@@ -393,6 +416,7 @@ step_measure_subtract_reference_new <- function(
   role,
   trained,
   learned_ref,
+  locations,
   skip,
   id
 ) {
@@ -404,6 +428,7 @@ step_measure_subtract_reference_new <- function(
     role = role,
     trained = trained,
     learned_ref = learned_ref,
+    locations = locations,
     skip = skip,
     id = id
   )
@@ -424,6 +449,13 @@ prep.step_measure_subtract_reference <- function(
   } else {
     measure_cols <- x$measures
   }
+
+  locations <- stats::setNames(
+    lapply(measure_cols, function(col) {
+      check_measure_grid(training[[col]])
+    }),
+    measure_cols
+  )
 
   # Validate method
   if (!x$method %in% c("subtract", "divide")) {
@@ -447,6 +479,7 @@ prep.step_measure_subtract_reference <- function(
     role = x$role,
     trained = TRUE,
     learned_ref = learned_ref,
+    locations = locations,
     skip = x$skip,
     id = x$id
   )
@@ -455,6 +488,7 @@ prep.step_measure_subtract_reference <- function(
 #' @export
 bake.step_measure_subtract_reference <- function(object, new_data, ...) {
   for (col in object$measures) {
+    .check_reference_correction_grid(object, new_data[[col]], col)
     ref <- object$learned_ref[[col]]
     result <- .apply_reference_correction(new_data[[col]], ref, object$method)
     new_data[[col]] <- new_measure_list(result)
@@ -534,6 +568,9 @@ required_pkgs.step_measure_subtract_reference <- function(x, ...) {
 #' This is useful for computing relative measurements, such as absorbance
 #' from transmittance when you have both sample and reference scans.
 #'
+#' Prediction samples must use the ordered grid on which their column's
+#' reference and optional blank were prepared.
+#'
 #' @family measure-preprocessing
 #' @seealso [step_measure_subtract_blank()] for simple blank subtraction
 #' @export
@@ -578,6 +615,7 @@ step_measure_ratio_reference <- function(
       trained = trained,
       learned_ref = learned_ref,
       learned_blank = learned_blank,
+      locations = NULL,
       skip = skip,
       id = id
     )
@@ -592,6 +630,7 @@ step_measure_ratio_reference_new <- function(
   trained,
   learned_ref,
   learned_blank,
+  locations,
   skip,
   id
 ) {
@@ -604,6 +643,7 @@ step_measure_ratio_reference_new <- function(
     trained = trained,
     learned_ref = learned_ref,
     learned_blank = learned_blank,
+    locations = locations,
     skip = skip,
     id = id
   )
@@ -619,6 +659,13 @@ prep.step_measure_ratio_reference <- function(x, training, info = NULL, ...) {
   } else {
     measure_cols <- x$measures
   }
+
+  locations <- stats::setNames(
+    lapply(measure_cols, function(col) {
+      check_measure_grid(training[[col]])
+    }),
+    measure_cols
+  )
 
   # Validate and convert reference
   learned_ref <- .validate_external_reference(
@@ -647,6 +694,7 @@ prep.step_measure_ratio_reference <- function(x, training, info = NULL, ...) {
     trained = TRUE,
     learned_ref = learned_ref,
     learned_blank = learned_blank,
+    locations = locations,
     skip = x$skip,
     id = x$id
   )
@@ -655,6 +703,7 @@ prep.step_measure_ratio_reference <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_measure_ratio_reference <- function(object, new_data, ...) {
   for (col in object$measures) {
+    .check_reference_correction_grid(object, new_data[[col]], col)
     ref <- object$learned_ref[[col]]
     blank <- object$learned_blank[[col]]
     result <- .compute_ratio_reference(new_data[[col]], ref, blank)
@@ -846,4 +895,14 @@ required_pkgs.step_measure_ratio_reference <- function(x, ...) {
     x$value <- sample_val / ref_val
     x
   })
+}
+
+# Numeric and learned references are applied pointwise. The locations field
+# was added after the first versions of these steps were released, so a
+# serialized trained step without it must be re-prepped instead of silently
+# applying an unverified positional reference.
+.check_reference_correction_grid <- function(object, measures, col) {
+  locations <- require_trained_grid(object$locations[[col]])
+  check_measure_grid(measures, locations)
+  invisible(NULL)
 }
