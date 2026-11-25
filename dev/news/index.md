@@ -2,6 +2,35 @@
 
 ## measure 0.0.1.9004
 
+- Preprocessing steps that learn a value at each measurement location
+  now check the ordered coordinates at training and prediction. This
+  prevents shifted spectra from being processed or labelled on the wrong
+  grid. For older fitted steps that did not record their grid, prep the
+  recipe again with its training data
+  ([\#192](https://github.com/JamesHWade/measure/issues/192)).
+
+- `step_measure_channel_combine(strategy = "stack")` preserves each
+  channel’s coordinates, including when channels have different lengths.
+  Weighted sums and means require matching locations within each sample
+  ([\#192](https://github.com/JamesHWade/measure/issues/192)).
+
+- [`step_measure_parafac()`](https://jameshwade.github.io/measure/dev/reference/step_measure_parafac.md)
+  now fits all component scores jointly when baking. Scores can change
+  for overlapping component loadings. Linearly dependent loadings use
+  the least-squares solution with the smallest Euclidean norm
+  ([\#194](https://github.com/JamesHWade/measure/issues/194)).
+
+- [`step_measure_parafac()`](https://jameshwade.github.io/measure/dev/reference/step_measure_parafac.md)
+  and
+  [`step_measure_tucker()`](https://jameshwade.github.io/measure/dev/reference/step_measure_tucker.md)
+  now fit and project measurements with two or three axes. Both steps
+  and the two-axis
+  [`step_measure_mcr_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mcr_als.md)
+  use training coordinates to place each prediction value, so point rows
+  can be reordered without changing scores
+  ([\#192](https://github.com/JamesHWade/measure/issues/192),
+  [\#195](https://github.com/JamesHWade/measure/issues/195)).
+
 - [`render_validation_report()`](https://jameshwade.github.io/measure/dev/reference/render_validation_report.md)
   uses the caller’s R libraries when Quarto renders a report. This lets
   both templates find `measure` when it is installed in a temporary or

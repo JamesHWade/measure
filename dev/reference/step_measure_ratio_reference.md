@@ -92,6 +92,9 @@ This step computes a ratio relative to a reference spectrum:
 This is useful for computing relative measurements, such as absorbance
 from transmittance when you have both sample and reference scans.
 
+Prediction samples must use the ordered grid on which their column's
+reference and optional blank were prepared.
+
 ## See also
 
 [`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md)

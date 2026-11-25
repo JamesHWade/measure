@@ -126,7 +126,9 @@ sequence of any existing operations.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Range scaling centers the data and divides by the range, giving bounded
+    <p>Within each selected column, training and prediction samples must use the
+same measurement locations in the same order.</p>
+<p>Range scaling centers the data and divides by the range, giving bounded
 values suitable for methods sensitive to variable scale.</p>
 <p>For a data matrix \(X\), the transformation is:</p>
 <p>$$X_{scaled} = \frac{X - \bar{X}}{\max(X) - \min(X)}$$</p>

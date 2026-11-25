@@ -126,7 +126,9 @@ sequence of any existing operations.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Mean centering is a fundamental preprocessing step for multivariate analysis
+    <p>Within each selected column, training and prediction samples must use the
+same measurement locations in the same order.</p>
+<p>Mean centering is a fundamental preprocessing step for multivariate analysis
 methods like PCA and PLS. It removes the average signal at each measurement
 location.</p>
 <p>For a data matrix \(X\) with samples as rows and measurement locations as

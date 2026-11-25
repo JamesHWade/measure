@@ -143,13 +143,14 @@ Default is <code>FALSE</code>.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>PARAFAC (also known as CANDECOMP/PARAFAC or CP decomposition) decomposes
-a three-way or higher array into a sum of rank-one tensors. For measurement
-data like EEM (excitation-emission matrices) or LC-DAD, this extracts
-interpretable components corresponding to underlying chemical species.</p><div class="section">
+    <p>PARAFAC (also known as CANDECOMP/PARAFAC or CP decomposition) decomposes a
+three-way or four-way array into a sum of rank-one tensors. For measurement
+data like EEM (excitation-emission matrices) or 3D LC-DAD acquisitions,
+this extracts interpretable components corresponding to underlying chemical
+species.</p><div class="section">
 <h3 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a></h3>
 
-<ul><li><p>Input must be <code>measure_nd_list</code> with 2+ dimensions</p></li>
+<ul><li><p>Input must be <code>measure_nd_list</code> with two or three content dimensions</p></li>
 <li><p>All samples must have the same grid (regular, aligned)</p></li>
 <li><p>The <code>multiway</code> package must be installed (in Suggests)</p></li>
 </ul></div>
@@ -158,15 +159,17 @@ interpretable components corresponding to underlying chemical species.</p><div c
 <h3 id="output">Output<a class="anchor" aria-label="anchor" href="#output"></a></h3>
 
 
-<p>Creates numeric feature columns: <code>parafac_1</code>, <code>parafac_2</code>, ..., <code>parafac_n</code>
-representing each sample's scores on the extracted components.</p>
+<p>With the default prefix, each selected column produces scores named
+<code>parafac_&lt;column&gt;_1</code> through <code>parafac_&lt;column&gt;_&lt;n_components&gt;</code>.
+Baking fits the component scores jointly to the learned loading patterns.
+This avoids counting shared signal twice when those patterns overlap.
+For linearly dependent patterns it returns the least-squares solution with
+the smallest Euclidean norm.</p>
+<p>Missing cells are omitted from the projection for each sample. More than
+10% missing cells across the batch is an error. Within that limit, a
+sample with no observed values receives missing scores.</p>
 </div>
 
-    </div>
-    <div class="section level2">
-    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>This step requires the <code>multiway</code> package. Install with:
-<code>install.packages("multiway")</code></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

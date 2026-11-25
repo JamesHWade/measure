@@ -43,7 +43,9 @@ summary statistic.
 
 ## Details
 
-This function does NOT transform data; it summarizes it. Common uses:
+Within each selected column, samples must have the same measurement
+locations in the same order. Separate columns can use different grids.
+Common uses include:
 
 - **Mean spectrum**: The average spectrum across all samples
 

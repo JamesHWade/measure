@@ -18,7 +18,8 @@ step_measure_osc(
   weights = NULL,
   loadings = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_osc")
+  id = recipes::rand_id("measure_osc"),
+  locations = NULL
 )
 ```
 
@@ -68,6 +69,11 @@ step_measure_osc(
 
   Unique step identifier.
 
+- locations:
+
+  The numeric training locations for the measure column (after
+  training).
+
 ## Value
 
 An updated recipe with the new step added.
@@ -95,6 +101,8 @@ variation that is not related to the response.
 - Outcomes are automatically detected from the recipe's role definitions
 
 - Multiple outcomes are supported (multivariate Y)
+
+- The spectral grid must be the same ordered grid used during training
 
 OSC was originally described by Wold et al. (1998) for NIR spectroscopy.
 

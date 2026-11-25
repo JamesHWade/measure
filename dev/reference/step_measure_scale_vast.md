@@ -69,6 +69,9 @@ of any existing operations.
 
 ## Details
 
+Within each selected column, training and prediction samples must use
+the same measurement locations in the same order.
+
 VAST scaling divides by the product of the standard deviation and the
 coefficient of variation (CV = SD/mean). This gives more weight to
 variables that are stable across samples (low CV).

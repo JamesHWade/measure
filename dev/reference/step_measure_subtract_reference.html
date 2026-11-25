@@ -143,6 +143,10 @@ each measure column. This is <code>NULL</code> until the step is trained.</p></d
 </ul><p>Unlike <code><a href="step_measure_subtract_blank.html">step_measure_subtract_blank()</a></code>, this step always requires an
 externally provided reference and does not support learning from training
 data.</p>
+<p>A numeric <code>reference</code> is positional, so the step records the ordered
+training grid and requires prediction measurements to use that same grid.
+Coordinate-bearing references (<code>measure_tbl</code> or data frames) may still be
+interpolated to the training grid.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

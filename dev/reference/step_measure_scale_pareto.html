@@ -126,7 +126,9 @@ sequence of any existing operations.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Pareto scaling divides by the square root of the standard deviation rather
+    <p>Within each selected column, training and prediction samples must use the
+same measurement locations in the same order.</p>
+<p>Pareto scaling divides by the square root of the standard deviation rather
 than the standard deviation itself. This reduces the relative importance of
 large values while still giving more weight to larger fold changes.</p>
 <p>For a data matrix \(X\), the transformation is:</p>

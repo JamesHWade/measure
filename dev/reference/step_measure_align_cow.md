@@ -82,6 +82,13 @@ Key parameters:
 
 This is a pure R implementation based on Nielsen et al. (1998).
 
+## Coordinate grid
+
+The reference uses positions on the first selected column's training
+grid. All selected columns must use those locations in the same order
+during training and prediction. Resample spectra first if their grids
+differ.
+
 ## References
 
 Nielsen, N.P.V., Carstensen, J.M., and Smedsgaard, J. (1998). Aligning

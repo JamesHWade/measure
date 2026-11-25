@@ -140,6 +140,14 @@ Larger values allow more flexibility but may introduce artifacts.</p></li>
 </ul><p>This is a pure R implementation based on Nielsen et al. (1998).</p>
     </div>
     <div class="section level2">
+    <h2 id="coordinate-grid">Coordinate grid<a class="anchor" aria-label="anchor" href="#coordinate-grid"></a></h2>
+
+
+<p>The reference uses positions on the first selected column's training grid.
+All selected columns must use those locations in the same order during
+training and prediction. Resample spectra first if their grids differ.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Nielsen, N.P.V., Carstensen, J.M., and Smedsgaard, J. (1998).
 Aligning of single and multiple wavelength chromatographic profiles

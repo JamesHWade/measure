@@ -69,6 +69,9 @@ of any existing operations.
 
 ## Details
 
+Within each selected column, training and prediction samples must use
+the same measurement locations in the same order.
+
 Pareto scaling divides by the square root of the standard deviation
 rather than the standard deviation itself. This reduces the relative
 importance of large values while still giving more weight to larger fold

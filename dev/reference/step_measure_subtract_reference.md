@@ -93,6 +93,11 @@ Unlike
 this step always requires an externally provided reference and does not
 support learning from training data.
 
+A numeric `reference` is positional, so the step records the ordered
+training grid and requires prediction measurements to use that same
+grid. Coordinate-bearing references (`measure_tbl` or data frames) may
+still be interpolated to the training grid.
+
 ## See also
 
 [`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md)

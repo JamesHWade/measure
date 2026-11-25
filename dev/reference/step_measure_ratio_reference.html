@@ -144,6 +144,8 @@ each measure column. This is <code>NULL</code> until the step is trained.</p></d
 <li><p>With blank: <code>result = (sample - blank) / (reference - blank)</code></p></li>
 </ul><p>This is useful for computing relative measurements, such as absorbance
 from transmittance when you have both sample and reference scans.</p>
+<p>Prediction samples must use the ordered grid on which their column's
+reference and optional blank were prepared.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

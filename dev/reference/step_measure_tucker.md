@@ -36,8 +36,8 @@ step_measure_tucker(
 
 - ranks:
 
-  A vector of ranks for each mode. If a single integer, the same rank is
-  used for all modes. Default is 3.
+  A vector of ranks for each measurement axis. If a single integer, the
+  same rank is used for all axes. Default is 3.
 
 - center:
 
@@ -90,7 +90,7 @@ mode, providing more flexibility.
 
 ### Requirements
 
-- Input must be `measure_nd_list` with 2+ dimensions
+- Input must be `measure_nd_list` with two or three measurement axes
 
 - All samples must have the same grid (regular, aligned)
 
@@ -99,7 +99,9 @@ mode, providing more flexibility.
 ### Output
 
 Creates numeric feature columns representing the unfolded core tensor
-scores for each sample.
+scores for each sample. Scores are ordered in the same column-major
+order as the core tensor: the first measurement axis varies fastest,
+followed by the remaining axes.
 
 ## Note
 

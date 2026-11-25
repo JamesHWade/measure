@@ -62,6 +62,13 @@ This corrects for smooth, continuous distortions in the x-axis.
 
 Requires the `ptw` package to be installed.
 
+## Coordinate grid
+
+The reference uses positions on the first selected column's training
+grid. All selected columns must use those locations in the same order
+during training and prediction. Resample spectra first if their grids
+differ.
+
 ## References
 
 Eilers, P.H.C. (2004). Parametric Time Warping. Analytical Chemistry,

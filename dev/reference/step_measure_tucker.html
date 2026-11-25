@@ -96,8 +96,8 @@ If empty, all nD measure columns are used.</p></dd>
 
 
 <dt id="arg-ranks">ranks<a class="anchor" aria-label="anchor" href="#arg-ranks"></a></dt>
-<dd><p>A vector of ranks for each mode. If a single integer,
-the same rank is used for all modes. Default is 3.</p></dd>
+<dd><p>A vector of ranks for each measurement axis. If a single
+integer, the same rank is used for all axes. Default is 3.</p></dd>
 
 
 <dt id="arg-center">center<a class="anchor" aria-label="anchor" href="#arg-center"></a></dt>
@@ -150,7 +150,7 @@ each mode. Unlike PARAFAC, Tucker allows different ranks for each mode,
 providing more flexibility.</p><div class="section">
 <h3 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a></h3>
 
-<ul><li><p>Input must be <code>measure_nd_list</code> with 2+ dimensions</p></li>
+<ul><li><p>Input must be <code>measure_nd_list</code> with two or three measurement axes</p></li>
 <li><p>All samples must have the same grid (regular, aligned)</p></li>
 <li><p>The <code>multiway</code> package must be installed (in Suggests)</p></li>
 </ul></div>
@@ -160,7 +160,9 @@ providing more flexibility.</p><div class="section">
 
 
 <p>Creates numeric feature columns representing the unfolded core tensor
-scores for each sample.</p>
+scores for each sample. Scores are ordered in the same column-major order
+as the core tensor: the first measurement axis varies fastest, followed by
+the remaining axes.</p>
 </div>
 
     </div>

@@ -139,6 +139,8 @@ scatter effects. For a spectrum \(x_i\) and reference \(x_r\), the model is:</p>
 <p>$$EMSC(x_i) = \frac{x_i - a_i - c_i \cdot \lambda - d_i \cdot \lambda^2 - ...}{b_i}$$</p>
 <p>The polynomial terms (\(\lambda\), \(\lambda^2\), etc.) account for
 wavelength-dependent baseline effects that vary between samples.</p>
+<p>EMSC is a pointwise correction. The step records the ordered training grid
+and requires prediction measurements to use that same grid.</p>
 <p><strong>When to use EMSC vs MSC:</strong></p><ul><li><p>Use MSC for simple additive/multiplicative scatter</p></li>
 <li><p>Use EMSC when scatter effects vary with wavelength</p></li>
 <li><p>Start with degree=2, increase if needed for complex scatter</p></li>

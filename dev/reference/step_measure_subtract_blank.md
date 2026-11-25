@@ -134,6 +134,11 @@ When you
 this step, a tibble with columns `terms`, `method`, `blank_source`, and
 `id` is returned.
 
+Numeric blanks are positional references. The step records the ordered
+training grid and requires prediction measurements to use that same
+grid. Coordinate-bearing blanks (`measure_tbl` or data frames) may still
+be interpolated to the training grid.
+
 ## See also
 
 [`step_measure_subtract_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.md)

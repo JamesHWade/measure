@@ -637,8 +637,29 @@ channel_ratios$sample_id
 
 ## Multi-Way Analysis
 
-For extracting interpretable components from 2D or 3D measurement data,
-the package provides multi-way decomposition methods.
+The number of measurement axes determines which decompositions a recipe
+can fit. Each step adds the sample axis when assembling the training
+tensor.
+
+| Step | Measurement axes | Model scope |
+|----|---:|----|
+| [`step_measure_parafac()`](https://jameshwade.github.io/measure/dev/reference/step_measure_parafac.md) | 2 or 3 | Each component has one loading vector per measurement axis and one score per sample. |
+| [`step_measure_tucker()`](https://jameshwade.github.io/measure/dev/reference/step_measure_tucker.md) | 2 or 3 | Each measurement axis has its own rank. |
+| [`step_measure_mcr_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_mcr_als.md) | exactly 2 | A bilinear MCR-ALS fit after unfolding samples and the first measurement axis. |
+
+All three steps learn the coordinate grid during
+[`prep()`](https://recipes.tidymodels.org/reference/prep.html). Every
+training member must use the same set of coordinate values on every
+axis, and [`bake()`](https://recipes.tidymodels.org/reference/bake.html)
+requires held-out members to use that same grid. Coordinate rows may be
+stored in a different order because the steps index by coordinates. A
+shifted grid, a missing axis level, or an extra axis level causes an
+error. Resample or align measurements before the decomposition when
+grids differ. Missing combinations of known axis levels and missing
+signal values count as missing cells. Up to 10% missing cells in the
+batch triggers a warning, and more than 10% triggers an error. Duplicate
+coordinate tuples also cause an error. MCR-ALS requires complete values
+to fit its matrix factorization.
 
 ### PARAFAC Decomposition
 
@@ -673,14 +694,20 @@ if (requireNamespace("multiway", quietly = TRUE)) {
 #> # A tibble: 3 × 3
 #>   sample_id parafac_.measures_1 parafac_.measures_2
 #>       <int>               <dbl>               <dbl>
-#> 1         1             -0.631             -0.542  
-#> 2         2              0.606              0.00105
-#> 3         3              0.0254             0.541
+#> 1         1              -1.39               -1.41 
+#> 2         2               0.913               0.567
+#> 3         3               0.479               0.838
 ```
 
 PARAFAC is particularly useful for: - EEM fluorescence (excitation x
 emission matrices) - Resolving overlapping chromatographic peaks -
 Identifying underlying chemical species in mixtures
+
+The sample mode is fitted jointly: PARAFAC sees the complete
+sample-by-axis array during
+[`prep()`](https://recipes.tidymodels.org/reference/prep.html), then
+uses the learned axis loadings to project each held-out sample. It is
+therefore not a separate decomposition of each sample.
 
 ### Tucker Decomposition
 
@@ -749,6 +776,9 @@ bake(rec_mcr, new_data = NULL) |>
 
 > **Note:** MCR-ALS is marked as experimental. The implementation uses a
 > simple ALS algorithm suitable for exploratory analysis.
+
+MCR-ALS is intentionally limited to two measurement axes. For a third
+measurement axis, use PARAFAC or Tucker instead.
 
 ## Summary
 

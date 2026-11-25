@@ -147,9 +147,10 @@ Default is <code>FALSE</code>.</p></dd>
 contributions. It's particularly useful for:</p><ul><li><p>Chromatographic data (time x wavelength)</p></li>
 <li><p>Spectroscopic mixtures</p></li>
 <li><p>Process analytical data</p></li>
-</ul><p>Unlike PARAFAC, MCR-ALS is a bilinear method that works on 2D data
-(samples unfolded if 3D). It allows flexible constraints like
-non-negativity and unimodality.</p><div class="section">
+</ul><p>Unlike PARAFAC, MCR-ALS is a bilinear method that accepts exactly two
+measurement axes. The sample axis is unfolded alongside the first
+measurement axis. It allows flexible constraints like non-negativity and
+unimodality, but a three-axis measurement must use PARAFAC or Tucker.</p><div class="section">
 <h3 id="experimental-status">Experimental Status<a class="anchor" aria-label="anchor" href="#experimental-status"></a></h3>
 
 
@@ -159,8 +160,12 @@ non-negativity and unimodality.</p><div class="section">
 <div class="section">
 <h3 id="requirements">Requirements<a class="anchor" aria-label="anchor" href="#requirements"></a></h3>
 
-<ul><li><p>Input must be <code>measure_nd_list</code> with 2 dimensions</p></li>
-<li><p>All samples must have the same grid (regular, aligned)</p></li>
+<ul><li><p>Input must be <code>measure_nd_list</code> with exactly 2 measurement dimensions.</p></li>
+<li><p>All training samples and held-out samples must use the same coordinate
+levels on both axes. Rows may be in any order; the coordinates, rather
+than row positions, determine the array cells.</p></li>
+<li><p>The matrix factorization requires complete numeric values on that grid.
+Align and fill measurements upstream when needed.</p></li>
 </ul></div>
 
     </div>

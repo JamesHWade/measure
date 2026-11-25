@@ -172,6 +172,10 @@ in the internal format produced by <code><a href="step_measure_input_wide.html">
     <h2 id="tidying">Tidying<a class="anchor" aria-label="anchor" href="#tidying"></a></h2>
     <p>When you <code><a href="https://recipes.tidymodels.org/reference/tidy.recipe.html" class="external-link">tidy()</a></code> this step, a tibble with columns
 <code>terms</code>, <code>method</code>, <code>blank_source</code>, and <code>id</code> is returned.</p>
+<p>Numeric blanks are positional references. The step records the ordered
+training grid and requires prediction measurements to use that same grid.
+Coordinate-bearing blanks (<code>measure_tbl</code> or data frames) may still be
+interpolated to the training grid.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

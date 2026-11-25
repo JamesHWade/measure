@@ -126,7 +126,9 @@ sequence of any existing operations.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>VAST scaling divides by the product of the standard deviation and the
+    <p>Within each selected column, training and prediction samples must use the
+same measurement locations in the same order.</p>
+<p>VAST scaling divides by the product of the standard deviation and the
 coefficient of variation (CV = SD/mean). This gives more weight to variables
 that are stable across samples (low CV).</p>
 <p>For a data matrix \(X\), the transformation is:</p>

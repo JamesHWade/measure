@@ -73,7 +73,8 @@ light scatter by accounting for additive and multiplicative effects.</p>
 <span>  trained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  ref_spectra <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  skip <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  id <span class="op">=</span> <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/rand_id.html" class="external-link">rand_id</a></span><span class="op">(</span><span class="st">"measure_msc"</span><span class="op">)</span></span>
+<span>  id <span class="op">=</span> <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/rand_id.html" class="external-link">rand_id</a></span><span class="op">(</span><span class="st">"measure_msc"</span><span class="op">)</span>,</span>
+<span>  locations <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -119,6 +120,11 @@ as it may affect the computations for subsequent operations.</p></dd>
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>A character string that is unique to this step to identify it.</p></dd>
 
+
+<dt id="arg-locations">locations<a class="anchor" aria-label="anchor" href="#arg-locations"></a></dt>
+<dd><p>A named list of the numeric training locations for each
+measure column. This is <code>NULL</code> until the step is trained.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -143,6 +149,10 @@ spectroscopy caused by differences in particle size or path length.</p>
 in the internal format produced by <code><a href="step_measure_input_wide.html">step_measure_input_wide()</a></code> or
 <code><a href="step_measure_input_long.html">step_measure_input_long()</a></code>.</p>
 <p>The measurement locations are preserved unchanged.</p>
+<p>MSC is a pointwise correction. The step records the ordered training grid
+for each selected measure column and requires prediction measurements to
+use the same grid. Use a resampling or alignment step upstream when grids
+differ.</p>
     </div>
     <div class="section level2">
     <h2 id="tidying">Tidying<a class="anchor" aria-label="anchor" href="#tidying"></a></h2>

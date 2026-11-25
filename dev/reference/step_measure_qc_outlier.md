@@ -98,6 +98,10 @@ Two columns are added:
 
 - `.outlier_score`: Numeric score (higher = more extreme)
 
+The outlier score is computed pointwise across samples. The step records
+the ordered training grid and requires prediction measurements to use
+that same grid.
+
 ## See also
 
 Other measure-qc:

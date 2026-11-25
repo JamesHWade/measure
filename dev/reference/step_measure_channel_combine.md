@@ -103,9 +103,12 @@ depends on the analysis goal:
 
 ## Note
 
-Channels must be aligned to the same grid before combining. Use
+For `weighted_sum` and `mean`, channels must use the same ordered grid
+within each sample. Use
 [`step_measure_channel_align()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_align.md)
-first if grids differ.
+first if grids differ. `stack` preserves each channel's own coordinates
+(and may therefore produce a sparse nD measurement), while `concat`
+accepts independent channel grids.
 
 ## See also
 

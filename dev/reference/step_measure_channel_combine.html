@@ -151,8 +151,10 @@ location. Useful when channels should be fused into a single signal.</p></li>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Channels must be aligned to the same grid before combining. Use
-<code><a href="step_measure_channel_align.html">step_measure_channel_align()</a></code> first if grids differ.</p>
+    <p>For <code>weighted_sum</code> and <code>mean</code>, channels must use the same ordered grid
+within each sample. Use <code><a href="step_measure_channel_align.html">step_measure_channel_align()</a></code> first if grids differ.
+<code>stack</code> preserves each channel's own coordinates (and may therefore produce
+a sparse nD measurement), while <code>concat</code> accepts independent channel grids.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

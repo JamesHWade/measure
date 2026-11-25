@@ -88,6 +88,9 @@ The corrected spectrum is:
 The polynomial terms (\\\lambda\\, \\\lambda^2\\, etc.) account for
 wavelength-dependent baseline effects that vary between samples.
 
+EMSC is a pointwise correction. The step records the ordered training
+grid and requires prediction measurements to use that same grid.
+
 **When to use EMSC vs MSC:**
 
 - Use MSC for simple additive/multiplicative scatter

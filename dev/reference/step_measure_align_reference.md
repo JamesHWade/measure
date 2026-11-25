@@ -66,6 +66,13 @@ but uses an externally provided reference spectrum instead of computing
 one from training data. This is useful when you have a known standard or
 calibration spectrum.
 
+## Coordinate grid
+
+The reference uses positions on the first selected column's training
+grid. All selected columns must use those locations in the same order
+during training and prediction. Resample spectra first if their grids
+differ.
+
 ## See also
 
 Other measure-align:

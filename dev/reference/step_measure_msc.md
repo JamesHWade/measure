@@ -15,7 +15,8 @@ step_measure_msc(
   trained = FALSE,
   ref_spectra = NULL,
   skip = FALSE,
-  id = recipes::rand_id("measure_msc")
+  id = recipes::rand_id("measure_msc"),
+  locations = NULL
 )
 ```
 
@@ -63,6 +64,11 @@ step_measure_msc(
 
   A character string that is unique to this step to identify it.
 
+- locations:
+
+  A named list of the numeric training locations for each measure
+  column. This is `NULL` until the step is trained.
+
 ## Value
 
 An updated version of `recipe` with the new step added to the sequence
@@ -95,6 +101,11 @@ or
 [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md).
 
 The measurement locations are preserved unchanged.
+
+MSC is a pointwise correction. The step records the ordered training
+grid for each selected measure column and requires prediction
+measurements to use the same grid. Use a resampling or alignment step
+upstream when grids differ.
 
 ## Tidying
 

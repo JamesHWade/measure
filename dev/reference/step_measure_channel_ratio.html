@@ -160,8 +160,11 @@ can be useful for:</p><ul><li><p>Normalizing skewed distributions</p></li>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Channels must be aligned to the same grid before computing ratios. Use
-<code><a href="step_measure_channel_align.html">step_measure_channel_align()</a></code> first if grids differ.</p>
+    <p>Ratios are computed on the numerator grid. When channel grids differ, the
+denominator is interpolated to that grid for each sample (with boundary
+values used outside its range), and <code><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep()</a></code> warns about mismatched training
+grids. Use <code><a href="step_measure_channel_align.html">step_measure_channel_align()</a></code> first when that interpolation is
+not appropriate.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

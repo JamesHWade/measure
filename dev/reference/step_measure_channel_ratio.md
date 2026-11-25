@@ -102,9 +102,13 @@ which can be useful for:
 
 ## Note
 
-Channels must be aligned to the same grid before computing ratios. Use
+Ratios are computed on the numerator grid. When channel grids differ,
+the denominator is interpolated to that grid for each sample (with
+boundary values used outside its range), and
+[`prep()`](https://recipes.tidymodels.org/reference/prep.html) warns
+about mismatched training grids. Use
 [`step_measure_channel_align()`](https://jameshwade.github.io/measure/dev/reference/step_measure_channel_align.md)
-first if grids differ.
+first when that interpolation is not appropriate.
 
 ## See also
 
