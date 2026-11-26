@@ -154,6 +154,12 @@ reference:
   - step_measure_output_long
   - measure_summary_table
   - measure_slice_table
+- title: Processed Measurement Results
+  desc: Plot processed signals and render reports with technique-specific sections
+  contents:
+  - measure_results
+  - measure_report_sections
+  - render_measure_report
 - title: Peak Operations
   desc: Peak detection, integration, and analysis for chromatography
   contents:

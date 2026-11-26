@@ -26,21 +26,7 @@ expect_pack_discovery <- function(package, lib, technique, step) {
 
 test_that("an installed pack registers from its namespace load hook", {
   lib <- withr::local_tempdir()
-  fixture <- testthat::test_path("..", "fixtures", "measure.registry.fixture")
-  r <- if (.Platform$OS.type == "windows") "R.exe" else "R"
-  output <- system2(
-    file.path(R.home("bin"), r),
-    c(
-      "CMD",
-      "INSTALL",
-      "--no-test-load",
-      shQuote(paste0("--library=", lib)),
-      shQuote(fixture)
-    ),
-    stdout = TRUE,
-    stderr = TRUE
-  )
-  expect_null(attr(output, "status"), info = paste(output, collapse = "\n"))
+  install_test_pack("measure.registry.fixture", lib)
   expect_false("measure.registry.fixture" %in% measure_packs()$name)
   expect_pack_discovery(
     "measure.registry.fixture",

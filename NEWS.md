@@ -1,5 +1,10 @@
 # measure 0.0.1.9004
 
+* `measure_results()` wraps a processed measurement channel for plotting and
+  per-sample summaries. `render_measure_report()` writes those results to HTML
+  or Word. Technique packs can add tables and plots with a method for
+  `measure_report_sections()` (#185, #187).
+
 * Moving-average and median smoothing, despiking, shift alignment, finite
   and gap derivatives, and airPLS and arPLS baseline correction now accept
   `tune::tune()` for their advertised controls. `smooth_window()` generates
