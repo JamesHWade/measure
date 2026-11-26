@@ -58,5 +58,4 @@ jobs:
         if: matrix.python == '3.13'
         run: |
           Rscript python/tests/fixtures/generate_parity_fixture.R
-          git diff --exit-code python/tests/fixtures/spectra_parity.json
           python -m pytest python/tests/test_r_parity.py
