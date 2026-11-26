@@ -37,6 +37,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_linearity.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_matrix_effect.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_proficiency_score.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_results.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_uncertainty_budget.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/baseline_lambda.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/bigaussian_peak_model.html</loc></url>
@@ -131,7 +132,9 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_record.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_record_from_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_repeatability.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_report_sections.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_reproducibility.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_results.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_sample_types.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_slice.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_standardize_sample_type.html</loc></url>
@@ -176,6 +179,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/register_measure_step.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/register_peak_algorithm.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/register_peak_model.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/render_measure_report.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/render_validation_report.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/required_pkgs.recipe.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/sec_calibration.html</loc></url>

@@ -129,6 +129,20 @@ Prepare modeling data or extract tables from processed measurements
   [`measure_slice_table()`](https://jameshwade.github.io/measure/dev/reference/measure_summary_table.md)
   : Export processed measurements as tables
 
+## Processed Measurement Results
+
+Plot processed signals and render reports with technique-specific
+sections
+
+- [`measure_results()`](https://jameshwade.github.io/measure/dev/reference/measure_results.md)
+  [`summary(`*`<measure_results>`*`)`](https://jameshwade.github.io/measure/dev/reference/measure_results.md)
+  [`print(`*`<measure_results>`*`)`](https://jameshwade.github.io/measure/dev/reference/measure_results.md)
+  : Create a processed measurement results object
+- [`measure_report_sections()`](https://jameshwade.github.io/measure/dev/reference/measure_report_sections.md)
+  : Build report sections for processed measurements
+- [`render_measure_report()`](https://jameshwade.github.io/measure/dev/reference/render_measure_report.md)
+  : Render processed measurement results
+
 ## Peak Operations
 
 Peak detection, integration, and analysis for chromatography
@@ -824,6 +838,8 @@ Plotting and diagnostic functions for measure data
   : Plot Matrix Effects
 - [`autoplot(`*`<measure_proficiency_score>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_proficiency_score.md)
   : Plot Proficiency Test Scores
+- [`autoplot(`*`<measure_results>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_results.md)
+  : Plot processed measurement results
 - [`autoplot(`*`<measure_uncertainty_budget>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_uncertainty_budget.md)
   : Plot Uncertainty Budget
 - [`fortify(`*`<measure_tbl>`*`)`](https://jameshwade.github.io/measure/dev/reference/fortify-measure.md)

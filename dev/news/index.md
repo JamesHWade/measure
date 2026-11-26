@@ -2,6 +2,16 @@
 
 ## measure 0.0.1.9004
 
+- [`measure_results()`](https://jameshwade.github.io/measure/dev/reference/measure_results.md)
+  wraps a processed measurement channel for plotting and per-sample
+  summaries.
+  [`render_measure_report()`](https://jameshwade.github.io/measure/dev/reference/render_measure_report.md)
+  writes those results to HTML or Word. Technique packs can add tables
+  and plots with a method for
+  [`measure_report_sections()`](https://jameshwade.github.io/measure/dev/reference/measure_report_sections.md)
+  ([\#185](https://github.com/JamesHWade/measure/issues/185),
+  [\#187](https://github.com/JamesHWade/measure/issues/187)).
+
 - Moving-average and median smoothing, despiking, shift alignment,
   finite and gap derivatives, and airPLS and arPLS baseline correction
   now accept

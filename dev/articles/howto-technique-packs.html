@@ -104,8 +104,8 @@ The core package provides input and output steps, registry functions,
 and reusable processing steps. A pack owns the technique-specific
 analysis and declares which steps it provides.</p>
 <p>This guide shows the registration contract, wraps
-<code><a href="../reference/step_measure_map.html">step_measure_map()</a></code> in a small example step, and uses the
-public peak-processing steps.</p>
+<code><a href="../reference/step_measure_map.html">step_measure_map()</a></code> in a small example step, and carries
+processed measurements and peak areas into a report.</p>
 <table class="table">
 <colgroup>
 <col width="19%">
@@ -141,11 +141,16 @@ public peak-processing steps.</p>
 <code><a href="../reference/measure_packs.html">measure_packs()</a></code>, <code><a href="../reference/measure_steps.html">measure_steps()</a></code>
 </td>
 </tr>
+<tr class="even">
+<td>Reporting</td>
+<td>Add a pack-specific result table or plot</td>
+<td>
+<code><a href="../reference/measure_results.html">measure_results()</a></code>,
+<code><a href="../reference/measure_report_sections.html">measure_report_sections()</a></code>
+</td>
+</tr>
 </tbody>
 </table>
-<p>The registry contains package and step metadata, not measurement
-values. A numeric plot would not help explain registration or discovery,
-so the examples use a table and runnable recipe instead.</p>
 </div>
 <div class="section level2">
 <h2 id="register-a-pack-when-it-loads">Register a pack when it loads<a class="anchor" aria-label="anchor" href="#register-a-pack-when-it-loads"></a>
@@ -234,16 +239,16 @@ measurement and is retained as an ID.</p>
 then centers it, detects peaks, integrates their areas, and converts the
 peak list to ordinary predictor columns.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">peak_recipe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">concentration</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">peak_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">processing</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">concentration</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">peak_data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">sample_id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">signal</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">step_example_center_spectrum</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/step_measure_peaks_detect.html">step_measure_peaks_detect</a></span><span class="op">(</span>min_height <span class="op">=</span> <span class="fl">0.2</span>, min_distance <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_peaks_integrate.html">step_measure_peaks_integrate</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/step_measure_peaks_to_table.html">step_measure_peaks_to_table</a></span><span class="op">(</span>max_peaks <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/step_measure_peaks_integrate.html">step_measure_peaks_integrate</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">peak_features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">peak_recipe</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="va">processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">processing</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="va">peak_recipe</span> <span class="op">&lt;-</span> <span class="va">processing</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/step_measure_peaks_to_table.html">step_measure_peaks_to_table</a></span><span class="op">(</span>max_peaks <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">peak_features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">peak_recipe</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span><span class="va">peak_features</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">sample_id</span>, <span class="va">concentration</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"peak_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 8</span></span></span>
@@ -259,12 +264,63 @@ register a wrapper that applies domain-specific defaults, validation, or
 metadata while continuing to use these shared steps where they fit.</p>
 </div>
 <div class="section level2">
+<h2 id="report-measurements-alongside-peak-areas">Report measurements alongside peak areas<a class="anchor" aria-label="anchor" href="#report-measurements-alongside-peak-areas"></a>
+</h2>
+<p>Keep the baked measurements before converting peaks to predictor
+columns. The result wrapper selects the signal to plot and the sample
+metadata to carry into the summary. In a multi-detector analysis, pass
+the detector column name to <code>measures</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_results.html">measure_results</a></span><span class="op">(</span><span class="va">processed</span>, id_cols <span class="op">=</span> <span class="st">"sample_id"</span><span class="op">)</span></span>
+<span><span class="va">sections</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_report_sections.html">measure_report_sections</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
+<span><span class="va">sections</span><span class="op">[[</span><span class="st">"Sample summary"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 7</span></span></span>
+<span><span class="co">#&gt;   sample_id n_points n_missing     mean    sd    min   max</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       101      201         0 2.75<span style="color: #949494;">e</span><span style="color: #BB0000;">-18</span> 0.276 -<span style="color: #BB0000;">0.183</span> 0.817</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       102      201         0 2.75<span style="color: #949494;">e</span><span style="color: #BB0000;">-18</span> 0.276 -<span style="color: #BB0000;">0.183</span> 0.817</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       103      201         0 2.75<span style="color: #949494;">e</span><span style="color: #BB0000;">-18</span> 0.276 -<span style="color: #BB0000;">0.183</span> 0.817</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sections</span><span class="op">[[</span><span class="st">"Measurements"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
+<div class="figure">
+<img src="howto-technique-packs_files/figure-html/result-plot-1.png" class="r-plt" alt="The three simulated signals overlap, with peaks near locations 5 and 13." width="700"><p class="caption">
+Centered signals from the three simulated samples.
+</p>
+</div>
+<p>A technique pack can include the integrated peak areas alongside
+these sections. Add a subclass in the pack’s constructor and register
+its method for <code><a href="../reference/measure_report_sections.html">measure_report_sections()</a></code> in the pack
+namespace.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">peak_results</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">processed</span>, <span class="va">peak_areas</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">measure</span><span class="fu">::</span><span class="fu"><a href="../reference/measure_results.html">measure_results</a></span><span class="op">(</span><span class="va">processed</span>, id_cols <span class="op">=</span> <span class="st">"sample_id"</span><span class="op">)</span></span>
+<span>  <span class="va">x</span><span class="op">$</span><span class="va">peak_areas</span> <span class="op">&lt;-</span> <span class="va">peak_areas</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"peak_results"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">x</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co">#' @importFrom measure measure_report_sections</span></span>
+<span><span class="co">#' @export</span></span>
+<span><span class="va">measure_report_sections.peak_results</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">sections</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/UseMethod.html" class="external-link">NextMethod</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">sections</span><span class="op">[[</span><span class="st">"Integrated peak areas"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">x</span><span class="op">$</span><span class="va">peak_areas</span></span>
+<span>  <span class="va">sections</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>With the pack loaded, create the report using the same sample IDs as
+the processed spectra. Use an <code>.html</code> filename for a
+standalone HTML report or <code>.docx</code> for a Word document.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">areas</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">peak_features</span>, <span class="va">sample_id</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">ends_with</a></span><span class="op">(</span><span class="st">"_area"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">peak_results</span><span class="op">(</span><span class="va">processed</span>, <span class="va">areas</span><span class="op">)</span></span>
+<span><span class="fu">measure</span><span class="fu">::</span><span class="fu"><a href="../reference/render_measure_report.html">render_measure_report</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"peak-report.html"</span>, title <span class="op">=</span> <span class="st">"Peak areas"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="inspect-registered-packs-and-steps">Inspect registered packs and steps<a class="anchor" aria-label="anchor" href="#inspect-registered-packs-and-steps"></a>
 </h2>
 <p>The public registry functions list packs and their registered steps.
 This example inspects the registry as it exists in the current session;
 it does not register a demonstration pack or change registry state.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">registered_packs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_packs.html">measure_packs</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">registered_steps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_steps.html">measure_steps</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -298,7 +354,7 @@ registry for Size Exclusion Chromatography steps, including
 registers its pack and step metadata. The check below runs only when
 that optional package is installed; no dependency is added to
 <code>measure</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"measure.sec"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/measure_steps.html">measure_steps</a></span><span class="op">(</span>packs <span class="op">=</span> <span class="st">"measure.sec"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">step_name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"step_sec_baseline"</span>, <span class="st">"step_sec_mw_averages"</span><span class="op">)</span><span class="op">)</span></span>

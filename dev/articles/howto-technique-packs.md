@@ -18,17 +18,15 @@ analysis and declares which steps it provides.
 
 This guide shows the registration contract, wraps
 [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md)
-in a small example step, and uses the public peak-processing steps.
+in a small example step, and carries processed measurements and peak
+areas into a report.
 
 | Stage | Extension task | measure API |
 |----|----|----|
 | Package load | Register the package and its step metadata | [`register_measure_pack()`](https://jameshwade.github.io/measure/dev/reference/register_measure_pack.md), [`register_measure_step()`](https://jameshwade.github.io/measure/dev/reference/register_measure_step.md) |
 | Recipe execution | Implement or compose a step | [`step_measure_map()`](https://jameshwade.github.io/measure/dev/reference/step_measure_map.md), recipe [`prep()`](https://recipes.tidymodels.org/reference/prep.html) and [`bake()`](https://recipes.tidymodels.org/reference/bake.html) |
 | Discovery | Inspect registered packages and steps | [`measure_packs()`](https://jameshwade.github.io/measure/dev/reference/measure_packs.md), [`measure_steps()`](https://jameshwade.github.io/measure/dev/reference/measure_steps.md) |
-
-The registry contains package and step metadata, not measurement values.
-A numeric plot would not help explain registration or discovery, so the
-examples use a table and runnable recipe instead.
+| Reporting | Add a pack-specific result table or plot | [`measure_results()`](https://jameshwade.github.io/measure/dev/reference/measure_results.md), [`measure_report_sections()`](https://jameshwade.github.io/measure/dev/reference/measure_report_sections.md) |
 
 ## Register a pack when it loads
 
@@ -129,16 +127,16 @@ list to ordinary predictor columns.
 
 ``` r
 
-peak_recipe <- recipe(concentration ~ ., data = peak_data) |>
+processing <- recipe(concentration ~ ., data = peak_data) |>
   update_role(sample_id, new_role = "id") |>
   step_measure_input_long(signal, location = vars(time)) |>
   step_example_center_spectrum() |>
   step_measure_peaks_detect(min_height = 0.2, min_distance = 10) |>
-  step_measure_peaks_integrate() |>
-  step_measure_peaks_to_table(max_peaks = 2) |>
-  prep()
+  step_measure_peaks_integrate()
 
-peak_features <- bake(peak_recipe, new_data = NULL)
+processed <- bake(prep(processing), new_data = NULL)
+peak_recipe <- processing |> step_measure_peaks_to_table(max_peaks = 2)
+peak_features <- bake(prep(peak_recipe), new_data = NULL)
 peak_features |>
   select(sample_id, concentration, starts_with("peak_"))
 #> # A tibble: 3 × 8
@@ -154,6 +152,71 @@ peak_features |>
 The peak steps are public recipe constructors. A technique pack can
 register a wrapper that applies domain-specific defaults, validation, or
 metadata while continuing to use these shared steps where they fit.
+
+## Report measurements alongside peak areas
+
+Keep the baked measurements before converting peaks to predictor
+columns. The result wrapper selects the signal to plot and the sample
+metadata to carry into the summary. In a multi-detector analysis, pass
+the detector column name to `measures`.
+
+``` r
+
+result <- measure_results(processed, id_cols = "sample_id")
+sections <- measure_report_sections(result)
+sections[["Sample summary"]]
+#> # A tibble: 3 × 7
+#>   sample_id n_points n_missing     mean    sd    min   max
+#>       <int>    <int>     <int>    <dbl> <dbl>  <dbl> <dbl>
+#> 1       101      201         0 2.75e-18 0.276 -0.183 0.817
+#> 2       102      201         0 2.75e-18 0.276 -0.183 0.817
+#> 3       103      201         0 2.75e-18 0.276 -0.183 0.817
+```
+
+``` r
+
+sections[["Measurements"]]
+```
+
+![The three simulated signals overlap, with peaks near locations 5 and
+13.](howto-technique-packs_files/figure-html/result-plot-1.png)
+
+Centered signals from the three simulated samples.
+
+A technique pack can include the integrated peak areas alongside these
+sections. Add a subclass in the pack’s constructor and register its
+method for
+[`measure_report_sections()`](https://jameshwade.github.io/measure/dev/reference/measure_report_sections.md)
+in the pack namespace.
+
+``` r
+
+peak_results <- function(processed, peak_areas) {
+  x <- measure::measure_results(processed, id_cols = "sample_id")
+  x$peak_areas <- peak_areas
+  class(x) <- c("peak_results", class(x))
+  x
+}
+
+#' @importFrom measure measure_report_sections
+#' @export
+measure_report_sections.peak_results <- function(x, ...) {
+  sections <- NextMethod()
+  sections[["Integrated peak areas"]] <- x$peak_areas
+  sections
+}
+```
+
+With the pack loaded, create the report using the same sample IDs as the
+processed spectra. Use an `.html` filename for a standalone HTML report
+or `.docx` for a Word document.
+
+``` r
+
+areas <- dplyr::select(peak_features, sample_id, dplyr::ends_with("_area"))
+result <- peak_results(processed, areas)
+measure::render_measure_report(result, "peak-report.html", title = "Peak areas")
+```
 
 ## Inspect registered packs and steps
 
