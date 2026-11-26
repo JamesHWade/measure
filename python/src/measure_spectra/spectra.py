@@ -111,17 +111,22 @@ def decode_feature_name(name: str) -> tuple[float, str | None, str | None]:
     return location, axis_unit, value_unit
 
 
-def _as_pandas(frame: Any) -> pd.DataFrame:
+def _as_pandas(frame: Any, numeric_columns: set) -> pd.DataFrame:
     """Convert a supported native frame without using a pyarrow round-trip."""
 
     if isinstance(frame, pd.DataFrame):
         result = frame.copy(deep=False)
     elif isinstance(frame, pl.DataFrame):
-        # ``DataFrame.to_pandas`` requires pyarrow in current Polars versions.
-        # ``to_dict(as_series=False)`` works for the scalar columns accepted by
-        # this interface and keeps the optional Arrow dependency out of the
-        # spectroscopy boundary.
-        result = pd.DataFrame(frame.to_dict(as_series=False))
+        # Keep declared numeric measurements numeric even when every value is
+        # null. Sample labels retain their original scalar values.
+        result = pd.DataFrame(
+            {
+                name: column.cast(pl.Float64).to_numpy()
+                if name in numeric_columns and column.dtype.is_numeric()
+                else column.to_list()
+                for name, column in frame.to_dict().items()
+            }
+        )
     else:
         supported = "pandas.DataFrame or polars.DataFrame"
         raise TypeError(f"frame must be a {supported}")
@@ -329,7 +334,7 @@ class Spectra:
             or not isinstance(value, str)
         ):
             raise TypeError("sample, location, and value must be column-name strings")
-        data = _as_pandas(frame)
+        data = _as_pandas(frame, {location, value})
         if sample not in data.columns:
             raise KeyError(f"sample column {sample!r} was not found in frame")
         if location not in data.columns:
@@ -394,7 +399,7 @@ class Spectra:
         channel_names = list(channels.keys())
         grid = _validate_coordinates(list(channels.values()), "channels")
 
-        data = _as_pandas(frame)
+        data = _as_pandas(frame, set(channels))
         if sample not in data.columns:
             raise KeyError(f"sample column {sample!r} was not found in frame")
         for channel in channel_names:

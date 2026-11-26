@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
 from measure_spectra.spectra import Spectra, decode_feature_name
 
@@ -193,3 +194,18 @@ def test_direct_constructor_rejects_lossy_coordinate_types(locations) -> None:
 def test_direct_constructor_rejects_numeric_string_values() -> None:
     with pytest.raises(TypeError, match="numeric"):
         Spectra([1.0, 2.0], [["1", "2"]], ["a"])
+
+
+def test_all_missing_numeric_signal_in_polars_long_and_wide_tables():
+    frame = pl.DataFrame(
+        {
+            "id": [2**53 + 1, 2**53 + 3],
+            "nm": [900, 900],
+            "signal": pl.Series([None, None], dtype=pl.Float64),
+        }
+    )
+    wide = Spectra.from_wide(frame, sample="id", channels={"signal": 900})
+    long = Spectra.from_long(frame, sample="id", location="nm", value="signal")
+    pd.testing.assert_frame_equal(wide.to_frame(), long.to_frame())
+    assert list(wide.sample_ids) == [2**53 + 1, 2**53 + 3]
+    assert np.isnan(wide.values).all()
