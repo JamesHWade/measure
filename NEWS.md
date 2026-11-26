@@ -1,5 +1,9 @@
 # measure 0.0.1.9004
 
+* `measure_read_jcamp()` imports infrared spectra with their units and source
+  file digest. `measure_jcamp_headers()` exposes the original declarations,
+  and `measure_write_jcamp()` exports a selected curve (#201).
+
 * `measure_results()` wraps a processed measurement channel for plotting and
   per-sample summaries. `render_measure_report()` writes those results to HTML
   or Word. Technique packs can add tables and plots with a method for
