@@ -417,6 +417,15 @@ Online repositories:
 | NMRShiftDB | NMR spectra | https://nmrshiftdb.nmr.uni-koeln.de/ |
 | Crystallography Open Database | XRD patterns | https://www.crystallography.net/cod/ |
 
+## The `measure` ecosystem
+
+`measure` is the core R package in a modular analytical measurement ecosystem. Scientific calculations live in reusable packages that can be tested independently, while agent protocols and experiment records live in the service layer:
+
+- [**`measure`**](https://jameshwade.github.io/measure/) (R) — Core measurement data structures (`measure_tbl`, `measure_nd_tbl`, `measure_record`, `measure_acquisition`), spectral/chromatographic preprocessing, peak operations, calibration, and analytical validation.
+- [**`measure.sec`**](https://jameshwade.github.io/measure.sec/) (R) — Technique pack for Size Exclusion Chromatography (SEC/GPC), registered via `measure`'s pack registry. Future technique packs (such as `measure.lc` and `measure.ms`) follow the same extension boundary.
+- [**`measure-service`**](https://jameshwade.github.io/measure-service/) (Python / MCP) — Model Context Protocol (MCP) service for AI agents and automated workflows: bounded trace import, chromatography method declarations, SQLite experiment/attempt/outcome tracking with SHA-256 provenance, and thin adapters that delegate numerical analysis to `measure` and `measure.sec`.
+- [**`measure-methods`**](https://github.com/JamesHWade/measure-methods) (Python) — R-free numerical kernel for exact solvent-use integration of declared chromatography method programs.
+
 ## Related packages
 
 measure builds on the [tidymodels](https://www.tidymodels.org/) ecosystem:

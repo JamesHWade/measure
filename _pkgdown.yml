@@ -25,10 +25,23 @@ navbar:
     - intro
     - reference
     - articles
+    - ecosystem
     right:
     - search
     - github
   components:
+    ecosystem:
+      text: Ecosystem
+      menu:
+      - text: Technique Packs
+      - text: measure.sec (SEC/GPC)
+        href: https://jameshwade.github.io/measure.sec/
+      - text: '---'
+      - text: Agent & Service Layer
+      - text: measure-service (MCP)
+        href: https://jameshwade.github.io/measure-service/
+      - text: measure-methods (Python)
+        href: https://github.com/JamesHWade/measure-methods
     articles:
       text: Articles
       menu:
