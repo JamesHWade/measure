@@ -184,7 +184,16 @@ autoplot.measure_list <- function(
     subtitle <- paste0(n_samples, " spectra")
   }
 
-  # Build base plot
+  plot_measure_lines(
+    plot_data,
+    ggplot2::aes(group = .data$sample),
+    summary,
+    alpha,
+    subtitle
+  )
+}
+
+plot_measure_lines <- function(plot_data, lines, summary, alpha, subtitle) {
   p <- ggplot2::ggplot(
     plot_data,
     ggplot2::aes(x = .data$location, y = .data$value)
@@ -193,7 +202,7 @@ autoplot.measure_list <- function(
   # Add individual lines
   p <- p +
     ggplot2::geom_line(
-      ggplot2::aes(group = .data$sample),
+      lines,
       alpha = alpha,
       linewidth = 0.3
     )

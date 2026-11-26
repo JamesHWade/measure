@@ -164,6 +164,7 @@ measurement_table_input <- function(data, measures, id_cols) {
     labels$axis_units <- unname(lapply(members, measure_dim_units))
   }
   list(
+    measures = measures,
     members = members,
     ids = tibble::as_tibble(data)[id_cols],
     labels = labels

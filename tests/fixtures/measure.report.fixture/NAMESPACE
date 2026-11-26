@@ -1,0 +1,2 @@
+export(new_sec_results)
+S3method(measure::measure_report_sections, measure_sec_results)
