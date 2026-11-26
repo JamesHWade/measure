@@ -15,3 +15,6 @@ tools/acquisition-interchange/declaration.json -text
 tools/acquisition-interchange/wire-schema.json -text
 tools/acquisition-interchange/finite-stress.bin -text
 tools/acquisition-interchange/input-manifest.json -text
+
+# Preserve the source spectrum and its published file digest.
+inst/extdata/SBO.jdx -text whitespace=cr-at-eol

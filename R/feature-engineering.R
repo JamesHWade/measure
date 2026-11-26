@@ -34,6 +34,12 @@
 #' @details
 #' This step calculates the integrated area under the curve for each specified
 #' region. The result is added as new predictor columns, one per region.
+#' Limits include observed points on both boundaries. Integration runs from the
+#' first to the last selected coordinate in acquisition order, with no
+#' interpolation to the requested bounds. For the trapezoidal rule, reversing
+#' that order reverses the sign. For direction-independent band areas, order pairs
+#' by increasing coordinate before integrating. A region with fewer than two
+#' observed coordinates returns `NA_real_`.
 #'
 #' **Column naming:**
 #' - If regions are named: `prefix + name` (e.g., `"integral_peak1"`)
