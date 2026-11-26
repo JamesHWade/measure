@@ -49,6 +49,8 @@ navbar:
         href: articles/howto-data-organization.html
       - text: Multidimensional Measurements
         href: articles/multidimensional-measurements.html
+      - text: Measure an Infrared Band
+        href: articles/howto-ir-band.html
       - text: Analytical Records
         href: articles/analytical-records.html
       - text: Acquisition and MS Traces
@@ -77,6 +79,7 @@ articles:
   desc: Task-oriented guides for solving specific problems
   contents:
   - articles/howto-baseline
+  - articles/howto-ir-band
   - articles/howto-technique-packs
   - articles/howto-tidymodels
   - articles/howto-data-organization

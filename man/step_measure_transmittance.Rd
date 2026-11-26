@@ -40,7 +40,7 @@ This step applies the inverse Beer-Lambert law transformation:
 
 \deqn{T = 10^{-A}}{T = 10^(-A)}
 
-where \eqn{A} is absorbance and \eqn{T} is transmittance.
+where \eqn{A} is absorbance and \eqn{T} is fractional transmittance.
 
 The measurement locations are preserved unchanged.
 }
