@@ -476,12 +476,11 @@ in the service layer:
   via `measure`’s pack registry. Future technique packs (such as
   `measure.lc` and `measure.ms`) follow the same extension boundary.
 - [**`measure-service`**](https://jameshwade.github.io/measure-service/)
-  — Model Context Protocol (MCP) service for AI agents and automated
-  workflows: scalar traces, 2D diode-array (DAD) planes, scan-linked
-  LC–MS XICs, resumable chromatogram batches, chromatography method
-  declarations, SQLite experiment/attempt/outcome tracking with SHA-256
-  provenance, and synthetic BO campaigns backed by `measure` and
-  `measure.sec`.
+  — Connects AI assistants (Claude, Codex, Cursor) and automated
+  workflows to `measure` and `measure.sec` over MCP: process
+  chromatograms and sample sequences, calculate SEC/GPC molecular
+  weights, inspect LC–DAD spectra and LC–MS ion chromatograms, check LC
+  gradient methods, and keep lab results linked to their raw runs.
 
 ## Related packages
 
