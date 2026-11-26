@@ -8,12 +8,13 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import pytest
-from measure_spectra import Spectra, msc, msc_reference
-from measure_spectra.steps import StepMSC, StepSavitzkyGolay, StepSNV
 from mlfeatures import FittedRecipe, Recipe, RecipeTransformer, Selectors, StepError
 from mlfeatures.testing import StepConformanceTest
 from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
+
+from measure_spectra import Spectra, msc, msc_reference
+from measure_spectra.steps import StepMSC, StepSavitzkyGolay, StepSNV
 
 
 def _frame(
@@ -203,7 +204,7 @@ def test_steps_handle_nullable_pandas_and_extended_polars_numeric_dtypes():
         {
             name: pd.Series(
                 [
-                    int(round(v * 10)) if i != 2 or j != 0 else pd.NA
+                    round(v * 10) if i != 2 or j != 0 else pd.NA
                     for j, v in enumerate(base[name])
                 ],
                 dtype="Int64",
@@ -227,7 +228,7 @@ def test_steps_handle_nullable_pandas_and_extended_polars_numeric_dtypes():
     # Complete nullable pandas Int64 for MSC.
     complete_nullable_pd = pd.DataFrame(
         {
-            name: pd.Series([int(round(v * 10)) for v in base[name]], dtype="Int64")
+            name: pd.Series([round(v * 10) for v in base[name]], dtype="Int64")
             for name in names
         }
     )
@@ -244,7 +245,7 @@ def test_steps_handle_nullable_pandas_and_extended_polars_numeric_dtypes():
         {
             name: (
                 pl.Series(
-                    [int(round(v * 100)) for v in base[name]],
+                    [round(v * 100) for v in base[name]],
                     dtype=pl.Int128,
                 )
                 if i % 2 == 0

@@ -348,7 +348,7 @@ class Spectra:
         value: str,
         axis_unit: str | None = None,
         value_unit: str | None = None,
-    ) -> "Spectra":
+    ) -> Spectra:
         """Construct spectra from one row per sample/location observation.
 
         The first sample encountered in ``frame`` establishes the ordered
@@ -413,7 +413,7 @@ class Spectra:
         channels: Mapping[Any, float],
         axis_unit: str | None = None,
         value_unit: str | None = None,
-    ) -> "Spectra":
+    ) -> Spectra:
         """Construct spectra from one scalar column per physical location.
 
         ``channels`` is an ordered mapping from frame column name to physical

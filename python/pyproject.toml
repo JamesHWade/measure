@@ -30,3 +30,6 @@ measure_savitzky_golay = "measure_spectra.steps:StepSavitzkyGolay"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff.lint]
+ignore = ["TRY004"]

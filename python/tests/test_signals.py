@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+
 from measure_spectra.signals import msc, msc_reference, savitzky_golay, snv
 
 
