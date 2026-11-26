@@ -477,13 +477,11 @@ in the service layer:
   `measure.lc` and `measure.ms`) follow the same extension boundary.
 - [**`measure-service`**](https://jameshwade.github.io/measure-service/)
   — Model Context Protocol (MCP) service for AI agents and automated
-  workflows: bounded trace import, chromatography method declarations,
-  SQLite experiment/attempt/outcome tracking with SHA-256 provenance,
-  and thin adapters that delegate numerical analysis to `measure` and
+  workflows: scalar traces, 2D diode-array (DAD) planes, scan-linked
+  LC–MS XICs, resumable chromatogram batches, chromatography method
+  declarations, SQLite experiment/attempt/outcome tracking with SHA-256
+  provenance, and synthetic BO campaigns backed by `measure` and
   `measure.sec`.
-- [**`measure-methods`**](https://github.com/JamesHWade/measure-methods)
-  — Exact solvent-use integration and timing calculations for declared
-  chromatography method programs.
 
 ## Related packages
 

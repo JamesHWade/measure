@@ -40,8 +40,6 @@ navbar:
       - text: Agent & Service Layer
       - text: measure-service (MCP)
         href: https://jameshwade.github.io/measure-service/
-      - text: measure-methods
-        href: https://github.com/JamesHWade/measure-methods
     articles:
       text: Articles
       menu:
