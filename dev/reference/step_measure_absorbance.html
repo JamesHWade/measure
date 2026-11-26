@@ -30,6 +30,7 @@ converts transmittance values to absorbance using the Beer-Lambert law."><meta p
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/multidimensional-measurements.html">Multidimensional Measurements</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-ir-band.html">Measure an Infrared Band</a></li>
     <li><a class="dropdown-item" href="../articles/analytical-records.html">Analytical Records</a></li>
     <li><a class="dropdown-item" href="../articles/acquisition-ms.html">Acquisition and MS Traces</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -112,8 +113,10 @@ process. If <code>NULL</code> (the default), all measure columns will be process
     <p>This step applies the Beer-Lambert law transformation:</p>
 <p>$$A = -\log_{10}(T)$$</p>
 <p>where \(T\) is transmittance and \(A\) is absorbance.</p>
-<p><strong>Important</strong>: Transmittance values should be in the range (0, 1] or (0, 100].
-Zero or negative values will produce <code>-Inf</code> or <code>NaN</code> with a warning.</p>
+<p>Supply transmittance as a fraction of the reference intensity. Divide
+percent transmittance by 100 before applying this step. For example,
+50 percent transmittance is input as 0.5 and yields absorbance 0.30103.
+Zero gives positive infinity and negative inputs give <code>NaN</code>, with a warning.</p>
 <p>The measurement locations are preserved unchanged.</p>
     </div>
     <div class="section level2">

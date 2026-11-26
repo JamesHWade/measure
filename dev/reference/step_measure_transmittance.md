@@ -54,7 +54,7 @@ This step applies the inverse Beer-Lambert law transformation:
 
 \$\$T = 10^{-A}\$\$
 
-where \\A\\ is absorbance and \\T\\ is transmittance.
+where \\A\\ is absorbance and \\T\\ is fractional transmittance.
 
 The measurement locations are preserved unchanged.
 

@@ -57,8 +57,10 @@ This step applies the Beer-Lambert law transformation:
 
 where \\T\\ is transmittance and \\A\\ is absorbance.
 
-**Important**: Transmittance values should be in the range (0, 1\] or
-(0, 100\]. Zero or negative values will produce `-Inf` or `NaN` with a
+Supply transmittance as a fraction of the reference intensity. Divide
+percent transmittance by 100 before applying this step. For example, 50
+percent transmittance is input as 0.5 and yields absorbance 0.30103.
+Zero gives positive infinity and negative inputs give `NaN`, with a
 warning.
 
 The measurement locations are preserved unchanged.

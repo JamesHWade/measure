@@ -30,6 +30,7 @@ calculates integrated areas for specified x-axis regions."><meta property="og:im
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/multidimensional-measurements.html">Multidimensional Measurements</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-ir-band.html">Measure an Infrared Band</a></li>
     <li><a class="dropdown-item" href="../articles/analytical-records.html">Analytical Records</a></li>
     <li><a class="dropdown-item" href="../articles/acquisition-ms.html">Acquisition and MS Traces</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -125,7 +126,13 @@ specifying regions as <code>c(min, max)</code>. For example:
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This step calculates the integrated area under the curve for each specified
-region. The result is added as new predictor columns, one per region.</p>
+region. The result is added as new predictor columns, one per region.
+Limits include observed points on both boundaries. Integration runs from the
+first to the last selected coordinate in acquisition order, with no
+interpolation to the requested bounds. For the trapezoidal rule, reversing
+that order reverses the sign. For direction-independent band areas, order pairs
+by increasing coordinate before integrating. A region with fewer than two
+observed coordinates returns <code>NA_real_</code>.</p>
 <p><strong>Column naming:</strong></p><ul><li><p>If regions are named: <code>prefix + name</code> (e.g., <code>"integral_peak1"</code>)</p></li>
 <li><p>If regions are unnamed: <code>prefix + index</code> (e.g., <code>"integral_1"</code>)</p></li>
 </ul><p><strong>Integration methods:</strong></p><ul><li><p><code>"trapezoid"</code>: Trapezoidal rule, fast and accurate for smooth data</p></li>

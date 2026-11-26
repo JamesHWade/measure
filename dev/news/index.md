@@ -2,6 +2,10 @@
 
 ## measure 0.0.1.9004
 
+- The infrared band guide uses a measured transmittance spectrum to
+  calculate a baseline-corrected absorbance band area and export its
+  evidence ([\#202](https://github.com/JamesHWade/measure/issues/202)).
+
 - [`measure_read_jcamp()`](https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.md)
   imports infrared spectra with their units and source file digest.
   [`measure_jcamp_headers()`](https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.md)

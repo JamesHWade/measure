@@ -30,6 +30,7 @@ that converts absorbance values to transmittance."><meta property="og:image" con
     <li><a class="dropdown-item" href="../articles/howto-tidymodels.html">Integrating with tidymodels</a></li>
     <li><a class="dropdown-item" href="../articles/howto-data-organization.html">Data Organization &amp; Diagnostics</a></li>
     <li><a class="dropdown-item" href="../articles/multidimensional-measurements.html">Multidimensional Measurements</a></li>
+    <li><a class="dropdown-item" href="../articles/howto-ir-band.html">Measure an Infrared Band</a></li>
     <li><a class="dropdown-item" href="../articles/analytical-records.html">Analytical Records</a></li>
     <li><a class="dropdown-item" href="../articles/acquisition-ms.html">Acquisition and MS Traces</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -111,7 +112,7 @@ process. If <code>NULL</code> (the default), all measure columns will be process
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This step applies the inverse Beer-Lambert law transformation:</p>
 <p>$$T = 10^{-A}$$</p>
-<p>where \(A\) is absorbance and \(T\) is transmittance.</p>
+<p>where \(A\) is absorbance and \(T\) is fractional transmittance.</p>
 <p>The measurement locations are preserved unchanged.</p>
     </div>
     <div class="section level2">
