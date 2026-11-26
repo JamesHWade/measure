@@ -11,6 +11,39 @@ import numpy as np
 __all__ = ["msc", "msc_reference", "savitzky_golay", "snv"]
 
 
+def _as_real_float_array(
+    values: object, *, name: str, numeric_message: str
+) -> np.ndarray:
+    """Validate real-valued numeric input and convert it to ``float64``."""
+
+    try:
+        raw = np.asarray(values)
+    except (TypeError, ValueError) as error:
+        raise ValueError(numeric_message) from error
+
+    if raw.dtype.kind == "b":
+        raise ValueError(f"{name} must contain real-valued numbers, not booleans")
+    if np.iscomplexobj(raw) or raw.dtype.kind == "c":
+        raise ValueError(f"{name} must contain real-valued numbers")
+    if raw.dtype.kind == "O":
+        for item in raw.flat:
+            if isinstance(item, (bool, np.bool_)):
+                raise ValueError(
+                    f"{name} must contain real-valued numbers, not booleans"
+                )
+            if isinstance(item, (complex, np.complexfloating)):
+                raise ValueError(f"{name} must contain real-valued numbers")
+            if not isinstance(item, numbers.Number):
+                raise ValueError(numeric_message)
+    elif raw.dtype.kind not in "iuf":
+        raise ValueError(numeric_message)
+
+    try:
+        return np.asarray(raw, dtype=np.float64)
+    except (TypeError, ValueError) as error:
+        raise ValueError(numeric_message) from error
+
+
 def _as_float_matrix(values: object, *, name: str) -> np.ndarray:
     """Convert *values* to a two-dimensional float matrix.
 
@@ -19,18 +52,11 @@ def _as_float_matrix(values: object, *, name: str) -> np.ndarray:
     silently turn an entire spectrum into ``NaN``.
     """
 
-    try:
-        raw = np.asarray(values)
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"{name} must be a two-dimensional numeric array") from error
-
-    if np.iscomplexobj(raw):
-        raise ValueError(f"{name} must contain real-valued numbers")
-
-    try:
-        result = np.asarray(raw, dtype=np.float64)
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"{name} must be a two-dimensional numeric array") from error
+    result = _as_real_float_array(
+        values,
+        name=name,
+        numeric_message=f"{name} must be a two-dimensional numeric array",
+    )
 
     if result.ndim != 2:
         raise ValueError(f"{name} must be a 2D array of samples by channels")
@@ -44,18 +70,11 @@ def _as_float_matrix(values: object, *, name: str) -> np.ndarray:
 def _as_float_vector(values: object, *, name: str) -> np.ndarray:
     """Convert *values* to a one-dimensional finite float vector."""
 
-    try:
-        raw = np.asarray(values)
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"{name} must be a one-dimensional numeric array") from error
-
-    if np.iscomplexobj(raw):
-        raise ValueError(f"{name} must contain real-valued numbers")
-
-    try:
-        result = np.asarray(raw, dtype=np.float64)
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"{name} must be a one-dimensional numeric array") from error
+    result = _as_real_float_array(
+        values,
+        name=name,
+        numeric_message=f"{name} must be a one-dimensional numeric array",
+    )
 
     if result.ndim != 1:
         raise ValueError(f"{name} must be a one-dimensional array")
@@ -263,14 +282,18 @@ def savitzky_golay(
     width, order, derivative = _sg_parameters(axis.size, window, polyorder, deriv)
 
     half = (width - 1) // 2
-    offsets = np.arange(-half, half + 1, dtype=np.float64)
+    scale = 1.0 if half == 0 else float(half)
+    offsets = np.arange(-half, half + 1, dtype=np.float64) / scale
     powers = np.arange(order + 1, dtype=np.float64)
     basis = offsets[:, None] ** powers[None, :]
 
-    # This is the same least-squares construction used by prospectr: each row
-    # of ``operator`` contains the coefficients for one polynomial derivative.
-    operator = np.linalg.solve(basis.T @ basis, basis.T)
-    coefficients = math.factorial(derivative) * operator[derivative]
+    # Compute the least-squares polynomial operator directly via SVD on
+    # normalized offsets in [-1, 1] to keep the Vandermonde matrix well
+    # conditioned for wider windows and higher polynomial orders.
+    operator = np.linalg.pinv(basis)
+    coefficients = (math.factorial(derivative) / (scale**derivative)) * operator[
+        derivative
+    ]
 
     windows = np.lib.stride_tricks.sliding_window_view(
         array,
