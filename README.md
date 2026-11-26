@@ -23,6 +23,8 @@ signal, and return a table for modeling. Native records retain raw
 curves, multidimensional arrays and ragged MS scans alongside their
 declared sample and source identities.
 
+For spectroscopy in Python, the [Python package](https://github.com/JamesHWade/measure/tree/main/python) provides SNV, multiplicative scatter correction, and Savitzky–Golay steps for mlfeatures recipes.
+
 ## Installation
 
 You can install the development version of measure from

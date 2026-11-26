@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "measure-spectra"
+version = "0.1.0a1"
+description = "Recipe-based preprocessing for analytical spectra"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2",
+    "polars>=1",
+    "narwhals>=2.19",
+    "mlfeatures @ git+https://github.com/tidymodels/mlfeatures.git@337bc4530f9d01e38f3419df9a9bb3104d2458f1",
+]
+
+[project.urls]
+Repository = "https://github.com/JamesHWade/measure"
+
+[project.optional-dependencies]
+test = ["pytest>=7", "scikit-learn>=1.4"]
+
+[project.entry-points."mlfeatures.steps"]
+measure_snv = "measure_spectra.steps:StepSNV"
+measure_msc = "measure_spectra.steps:StepMSC"
+measure_savitzky_golay = "measure_spectra.steps:StepSavitzkyGolay"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

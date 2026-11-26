@@ -31,3 +31,4 @@ docs
 ^[.]git$
 ^tools$
 ^[.]ruff_cache$
+^python$
