@@ -67,6 +67,16 @@
     <li><a class="dropdown-item" href="articles/explanation-internals.html">Internal Class System</a></li>
   </ul>
 </li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-ecosystem" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Ecosystem</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-ecosystem">
+<li><h6 class="dropdown-header" data-toc-skip>Technique Packs</h6></li>
+    <li><a class="dropdown-item" href="https://jameshwade.github.io/measure.sec/">measure.sec (SEC/GPC)</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Agent &amp; Service Layer</h6></li>
+    <li><a class="dropdown-item" href="https://jameshwade.github.io/measure-service/">measure-service (MCP)</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -1142,6 +1152,19 @@ The same ten NIR samples before and after a first derivative and standard normal
 </tbody>
 </table>
 </div>
+</div>
+<div class="section level2">
+<h2 id="the-measure-ecosystem">The <code>measure</code> ecosystem<a class="anchor" aria-label="anchor" href="#the-measure-ecosystem"></a>
+</h2>
+<p><code>measure</code> is the core analytical package in a modular measurement ecosystem. Scientific calculations live in reusable packages that can be tested independently, while agent protocols and experiment records live in the service layer:</p>
+<ul>
+<li>
+<a href="https://jameshwade.github.io/measure/"><strong><code>measure</code></strong></a>: Core measurement data structures (<code>measure_tbl</code>, <code>measure_nd_tbl</code>, <code>measure_record</code>, <code>measure_acquisition</code>), spectral/chromatographic preprocessing, peak operations, calibration, and analytical validation.</li>
+<li>
+<a href="https://jameshwade.github.io/measure.sec/"><strong><code>measure.sec</code></strong></a>: Technique pack for Size Exclusion Chromatography (SEC/GPC), registered via <code>measure</code>’s pack registry. Future technique packs (such as <code>measure.lc</code> and <code>measure.ms</code>) follow the same extension boundary.</li>
+<li>
+<a href="https://jameshwade.github.io/measure-service/"><strong><code>measure-service</code></strong></a>: Connects AI assistants (Claude, Codex, Cursor) and automated workflows to <code>measure</code> and <code>measure.sec</code> over MCP. Process chromatograms and sample sequences, calculate SEC/GPC molecular weights, inspect LC–DAD spectra and LC–MS ion chromatograms, check LC gradient methods, and keep lab results linked to their raw runs.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
