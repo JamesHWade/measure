@@ -466,21 +466,21 @@ ecosystem. Scientific calculations live in reusable packages that can be
 tested independently, while agent protocols and experiment records live
 in the service layer:
 
-- [**`measure`**](https://jameshwade.github.io/measure/) — Core
+- [**`measure`**](https://jameshwade.github.io/measure/): Core
   measurement data structures (`measure_tbl`, `measure_nd_tbl`,
   `measure_record`, `measure_acquisition`), spectral/chromatographic
   preprocessing, peak operations, calibration, and analytical
   validation.
-- [**`measure.sec`**](https://jameshwade.github.io/measure.sec/) —
+- [**`measure.sec`**](https://jameshwade.github.io/measure.sec/):
   Technique pack for Size Exclusion Chromatography (SEC/GPC), registered
   via `measure`’s pack registry. Future technique packs (such as
   `measure.lc` and `measure.ms`) follow the same extension boundary.
-- [**`measure-service`**](https://jameshwade.github.io/measure-service/)
-  — Connects AI assistants (Claude, Codex, Cursor) and automated
-  workflows to `measure` and `measure.sec` over MCP: process
-  chromatograms and sample sequences, calculate SEC/GPC molecular
-  weights, inspect LC–DAD spectra and LC–MS ion chromatograms, check LC
-  gradient methods, and keep lab results linked to their raw runs.
+- [**`measure-service`**](https://jameshwade.github.io/measure-service/):
+  Connects AI assistants (Claude, Codex, Cursor) and automated workflows
+  to `measure` and `measure.sec` over MCP. Process chromatograms and
+  sample sequences, calculate SEC/GPC molecular weights, inspect LC–DAD
+  spectra and LC–MS ion chromatograms, check LC gradient methods, and
+  keep lab results linked to their raw runs.
 
 ## Related packages
 
