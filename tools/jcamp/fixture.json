@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Ethanol",
+    "url": "https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C64175&Index=0&Type=IR",
+    "sha256": "fc9079a0d2a5d1f7d23aebb7eceb79eb1b8949a05219a1f8fa5d0c55f88898ba",
+    "n": 880,
+    "xunit": "1/CM",
+    "yunit": "ABSORBANCE",
+    "index": 601,
+    "x": 2850,
+    "y": 0.282148149,
+    "exchange": true
+  },
+  {
+    "title": "ETHYL ALCOHOL",
+    "url": "https://webbook.nist.gov/cgi/cbook.cgi?JCAMP=C64175&Index=1&Type=IR",
+    "sha256": "00905941486fad4d87b3e05aadf99ef505a343a3b199720d50f7f7272499f024",
+    "n": 2733,
+    "xunit": "MICROMETERS",
+    "yunit": "TRANSMITTANCE",
+    "index": 2733,
+    "x": 15.0145,
+    "y": 0.714,
+    "exchange": false
+  }
+]

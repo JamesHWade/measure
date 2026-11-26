@@ -423,6 +423,9 @@ reference:
   - is_measure_record
   - validate_measure_record
   - measure_record_from_long
+  - measure_read_jcamp
+  - measure_jcamp_headers
+  - measure_write_jcamp
   - read_measure_record_delim
   - write_measure_record
   - read_measure_record
