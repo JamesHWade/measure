@@ -2,6 +2,14 @@
 
 ## measure 0.0.1.9004
 
+- [`measure_read_jcamp()`](https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.md)
+  imports infrared spectra with their units and source file digest.
+  [`measure_jcamp_headers()`](https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.md)
+  exposes the original declarations, and
+  [`measure_write_jcamp()`](https://jameshwade.github.io/measure/dev/reference/measure_write_jcamp.md)
+  exports a selected curve
+  ([\#201](https://github.com/JamesHWade/measure/issues/201)).
+
 - [`measure_results()`](https://jameshwade.github.io/measure/dev/reference/measure_results.md)
   wraps a processed measurement channel for plotting and per-sample
   summaries.

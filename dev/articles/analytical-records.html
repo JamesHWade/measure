@@ -419,6 +419,69 @@ dimensionless. Likewise, <code>NA_real_</code> means an unknown signal
 observation, not zero, censoring, saturation, or a detection limit.</p>
 </div>
 <div class="section level2">
+<h2 id="exchange-an-infrared-spectrum-with-another-lab">Exchange an infrared spectrum with another lab<a class="anchor" aria-label="anchor" href="#exchange-an-infrared-spectrum-with-another-lab"></a>
+</h2>
+<p>A JCAMP-DX file can contain both numeric scale factors and free-text
+information about who collected and owns the spectrum. Inspect the
+declarations before assigning the spectrum to a sample. The installed
+example has two simulated absorption bands, a descending wavenumber
+axis, and one missing reading.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ir_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"ir-film.jdx"</span>, package <span class="op">=</span> <span class="st">"measure"</span><span class="op">)</span></span>
+<span><span class="va">headers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_read_jcamp.html">measure_jcamp_headers</a></span><span class="op">(</span><span class="va">ir_file</span><span class="op">)</span></span>
+<span><span class="va">headers</span><span class="op">[</span><span class="va">headers</span><span class="op">$</span><span class="va">label</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TITLE"</span>, <span class="st">"ORIGIN"</span>, <span class="st">"OWNER"</span>, <span class="st">"XUNITS"</span>, <span class="st">"YUNITS"</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;   label  value                  </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TITLE  Simulated film spectrum</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ORIGIN measure examples       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> OWNER  measure contributors   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> XUNITS 1/CM                   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> YUNITS ABSORBANCE</span></span>
+<span><span class="va">ir</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_read_jcamp.html">measure_read_jcamp</a></span><span class="op">(</span></span>
+<span>  <span class="va">ir_file</span>, sample_id <span class="op">=</span> <span class="st">"film"</span>, injection_id <span class="op">=</span> <span class="st">"scan-01"</span>, channel_id <span class="op">=</span> <span class="st">"ir"</span>,</span>
+<span>  curve_id <span class="op">=</span> <span class="st">"film-ir"</span>, source_id <span class="op">=</span> <span class="st">"file-01"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">spectrum</span> <span class="op">&lt;-</span> <span class="va">ir</span><span class="op">$</span><span class="va">curves</span><span class="op">$</span><span class="va">.measures</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">spectrum</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">spectrum</span><span class="op">$</span><span class="va">value</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt; &lt;measure_tbl [1 x 2]&gt;</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 2</span></span></span>
+<span><span class="co">#&gt;   location value</span></span>
+<span><span class="co">#&gt;      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     <span style="text-decoration: underline;">1</span>736 0.455</span></span></code></pre></div>
+<p>The integer ordinates in this file carry a scale factor of 0.0001.
+The plot uses the decoded absorbance and retains the missing reading at
+its original coordinate.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">spectrum</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_reverse</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Simulated film spectrum"</span>, x <span class="op">=</span> <span class="st">"Wavenumber (1/cm)"</span>, y <span class="op">=</span> <span class="st">"Absorbance"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="analytical-records_files/figure-html/infrared-film-1.png" class="r-plt" alt="Two simulated absorption bands at roughly 1736 and 1716 inverse centimeters on a descending axis, with a gap at 1670." width="576"></p>
+<p>To send the selected spectrum to a colleague, write explicit
+coordinate pairs. This representation also works for irregular grids.
+Supply the original attribution when sharing the same measurement. Keep
+the acquisition file with the digest in <code>ir$sources</code> for its
+full instrument and sample description.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">field</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">label</span><span class="op">)</span> <span class="va">headers</span><span class="op">$</span><span class="va">value</span><span class="op">[</span><span class="va">headers</span><span class="op">$</span><span class="va">label</span> <span class="op">==</span> <span class="va">label</span><span class="op">]</span></span>
+<span><span class="va">export</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">guide_dir</span>, <span class="st">"film-spectrum.jdx"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/measure_write_jcamp.html">measure_write_jcamp</a></span><span class="op">(</span><span class="va">ir</span>, <span class="va">export</span>, <span class="st">"film-ir"</span>, <span class="fu">field</span><span class="op">(</span><span class="st">"TITLE"</span><span class="op">)</span>, <span class="fu">field</span><span class="op">(</span><span class="st">"ORIGIN"</span><span class="op">)</span>, <span class="fu">field</span><span class="op">(</span><span class="st">"OWNER"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">received</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/measure_read_jcamp.html">measure_read_jcamp</a></span><span class="op">(</span><span class="va">export</span>, <span class="st">"film"</span>, <span class="st">"scan-01"</span>, <span class="st">"ir"</span>, <span class="st">"film-ir"</span>, <span class="st">"exchange-01"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">received</span><span class="op">$</span><span class="va">curves</span><span class="op">$</span><span class="va">.measures</span>, <span class="va">ir</span><span class="op">$</span><span class="va">curves</span><span class="op">$</span><span class="va">.measures</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>When exchanging missing values, check how the receiving software
+treats <code>?</code>. For an explicit pair such as <code>1670,?</code>,
+measure keeps the coordinate 1670 and a missing absorbance. In our
+interoperability test, readJDX 0.6.4 reported both entries in that pair
+as missing.</p>
+<p>Some spectrometers use compressed ordinates (SQZ, DIF, or DUP). The
+<a href="https://bryanhanson.github.io/readJDX/articles/readJDX.html" class="external-link">readJDX
+format guide</a> lists an R reader for those encodings. For a file in
+the plain-number profile, <code><a href="../reference/measure_read_jcamp.html">measure_read_jcamp()</a></code> checks each
+line’s coordinate against the declared grid before creating the record.
+The original file digest remains available even when a second export
+uses a different text layout.</p>
+</div>
+<div class="section level2">
 <h2 id="write-and-read-the-native-bundle">Write and read the native bundle<a class="anchor" aria-label="anchor" href="#write-and-read-the-native-bundle"></a>
 </h2>
 <p><code><a href="../reference/record-bundle.html">write_measure_record()</a></code> writes a new directory in the
@@ -426,7 +489,7 @@ fixed version 1 bundle format. It is distinct from reading or writing
 one delimited long table. The bundle contains a manifest and fixed CSV
 or TSV tables for sources, samples, injections, channels, curves, and
 points. The source file itself is not embedded.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bundle_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">guide_dir</span>, <span class="st">"record-bundle"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/record-bundle.html">write_measure_record</a></span><span class="op">(</span><span class="va">record</span>, path <span class="op">=</span> <span class="va">bundle_dir</span>, delim <span class="op">=</span> <span class="st">","</span><span class="op">)</span></span>
 <span><span class="va">restored</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/record-bundle.html">read_measure_record</a></span><span class="op">(</span><span class="va">bundle_dir</span>, max_bytes <span class="op">=</span> <span class="fl">10</span> <span class="op">*</span> <span class="fl">1024</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
@@ -450,7 +513,7 @@ its one input file. Both readers enforce the limit while reading.</p>
 recipe can use a channel-consistent selection directly. This example
 retains the two UV injections as separate rows and applies an existing
 sample-wise normalization step without a long-to-wide conversion.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">uv_curves</span> <span class="op">&lt;-</span> <span class="va">record</span><span class="op">$</span><span class="va">curves</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">channel_id</span> <span class="op">==</span> <span class="st">"uv"</span><span class="op">)</span></span>
 <span></span>

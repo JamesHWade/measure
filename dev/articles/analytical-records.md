@@ -323,6 +323,85 @@ The record does not convert units or treat an unknown unit as
 dimensionless. Likewise, `NA_real_` means an unknown signal observation,
 not zero, censoring, saturation, or a detection limit.
 
+## Exchange an infrared spectrum with another lab
+
+A JCAMP-DX file can contain both numeric scale factors and free-text
+information about who collected and owns the spectrum. Inspect the
+declarations before assigning the spectrum to a sample. The installed
+example has two simulated absorption bands, a descending wavenumber
+axis, and one missing reading.
+
+``` r
+
+ir_file <- system.file("extdata", "ir-film.jdx", package = "measure")
+headers <- measure_jcamp_headers(ir_file)
+headers[headers$label %in% c("TITLE", "ORIGIN", "OWNER", "XUNITS", "YUNITS"), ]
+#> # A tibble: 5 × 2
+#>   label  value                  
+#>   <chr>  <chr>                  
+#> 1 TITLE  Simulated film spectrum
+#> 2 ORIGIN measure examples       
+#> 3 OWNER  measure contributors   
+#> 4 XUNITS 1/CM                   
+#> 5 YUNITS ABSORBANCE
+ir <- measure_read_jcamp(
+  ir_file, sample_id = "film", injection_id = "scan-01", channel_id = "ir",
+  curve_id = "film-ir", source_id = "file-01"
+)
+spectrum <- ir$curves$.measures[[1]]
+spectrum[which.max(spectrum$value), ]
+#> <measure_tbl [1 x 2]>
+#> # A tibble: 1 × 2
+#>   location value
+#>      <dbl> <dbl>
+#> 1     1736 0.455
+```
+
+The integer ordinates in this file carry a scale factor of 0.0001. The
+plot uses the decoded absorbance and retains the missing reading at its
+original coordinate.
+
+``` r
+
+ggplot2::autoplot(spectrum) +
+  ggplot2::scale_x_reverse() +
+  ggplot2::labs(title = "Simulated film spectrum", x = "Wavenumber (1/cm)", y = "Absorbance")
+```
+
+![Two simulated absorption bands at roughly 1736 and 1716 inverse
+centimeters on a descending axis, with a gap at
+1670.](analytical-records_files/figure-html/infrared-film-1.png)
+
+To send the selected spectrum to a colleague, write explicit coordinate
+pairs. This representation also works for irregular grids. Supply the
+original attribution when sharing the same measurement. Keep the
+acquisition file with the digest in `ir$sources` for its full instrument
+and sample description.
+
+``` r
+
+field <- function(label) headers$value[headers$label == label]
+export <- file.path(guide_dir, "film-spectrum.jdx")
+measure_write_jcamp(ir, export, "film-ir", field("TITLE"), field("ORIGIN"), field("OWNER"))
+received <- measure_read_jcamp(export, "film", "scan-01", "ir", "film-ir", "exchange-01")
+stopifnot(identical(received$curves$.measures, ir$curves$.measures))
+```
+
+When exchanging missing values, check how the receiving software treats
+`?`. For an explicit pair such as `1670,?`, measure keeps the coordinate
+1670 and a missing absorbance. In our interoperability test, readJDX
+0.6.4 reported both entries in that pair as missing.
+
+Some spectrometers use compressed ordinates (SQZ, DIF, or DUP). The
+[readJDX format
+guide](https://bryanhanson.github.io/readJDX/articles/readJDX.html)
+lists an R reader for those encodings. For a file in the plain-number
+profile,
+[`measure_read_jcamp()`](https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.md)
+checks each line’s coordinate against the declared grid before creating
+the record. The original file digest remains available even when a
+second export uses a different text layout.
+
 ## Write and read the native bundle
 
 [`write_measure_record()`](https://jameshwade.github.io/measure/dev/reference/record-bundle.md)

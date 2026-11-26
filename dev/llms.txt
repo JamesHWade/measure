@@ -1170,6 +1170,11 @@ Explicit identities and metadata for independent measurement curves
   : Validate a measurement record
 - [`measure_record_from_long()`](https://jameshwade.github.io/measure/dev/reference/measure_record_from_long.md)
   : Import a measurement record from a long table
+- [`measure_read_jcamp()`](https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.md)
+  [`measure_jcamp_headers()`](https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.md)
+  : Read an infrared JCAMP-DX spectrum
+- [`measure_write_jcamp()`](https://jameshwade.github.io/measure/dev/reference/measure_write_jcamp.md)
+  : Write one measurement-record curve as a JCAMP-DX IR spectrum
 - [`read_measure_record_delim()`](https://jameshwade.github.io/measure/dev/reference/read_measure_record_delim.md)
   : Read one CSV or TSV file into a measurement record
 - [`write_measure_record()`](https://jameshwade.github.io/measure/dev/reference/record-bundle.md)
