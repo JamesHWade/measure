@@ -134,6 +134,7 @@ prep.step_measure_qc_snr <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_qc_snr <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   col <- object$measures[1] # Use first measure column
 
   snr_values <- purrr::map_dbl(
@@ -170,6 +171,11 @@ tidy.step_measure_qc_snr <- function(x, ...) {
     noise_method = x$noise_method,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_qc_snr <- function(x, ...) {
+  "measure"
 }
 
 .compute_snr <- function(x, signal_method, noise_method) {
@@ -381,6 +387,7 @@ prep.step_measure_qc_saturated <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_qc_saturated <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   col <- object$measures[1]
 
   sat_results <- purrr::map(
@@ -429,6 +436,11 @@ tidy.step_measure_qc_saturated <- function(x, ...) {
     lower_limit = x$lower_limit %||% NA_real_,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_qc_saturated <- function(x, ...) {
+  "measure"
 }
 
 .detect_saturation <- function(x, upper_limit, lower_limit, tolerance) {
@@ -572,6 +584,7 @@ prep.step_measure_impute <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_impute <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- purrr::map(
       new_data[[col]],
@@ -610,6 +623,11 @@ tidy.step_measure_impute <- function(x, ...) {
     max_gap = x$max_gap,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_impute <- function(x, ...) {
+  "measure"
 }
 
 .impute_single <- function(x, method, max_gap) {
@@ -895,6 +913,7 @@ prep.step_measure_qc_outlier <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_qc_outlier <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   col <- object$measures[1]
   locations <- require_trained_grid(object$locations)
   check_measure_grid(new_data[[col]], locations)
@@ -963,4 +982,9 @@ tidy.step_measure_qc_outlier <- function(x, ...) {
     n_components = x$n_components %||% NA_integer_,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_qc_outlier <- function(x, ...) {
+  "measure"
 }

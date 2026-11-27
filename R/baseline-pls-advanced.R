@@ -288,6 +288,7 @@ prep.step_measure_baseline_aspls <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_aspls <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   lambda <- object$lambda
   alpha <- object$alpha
   max_iter <- object$max_iter
@@ -339,6 +340,11 @@ tidy.step_measure_baseline_aspls <- function(x, ...) {
     alpha = x$alpha,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_aspls <- function(x, ...) {
+  "measure"
 }
 
 #' @rdname tunable_measure
@@ -632,6 +638,7 @@ prep.step_measure_baseline_iarpls <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_iarpls <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   lambda <- object$lambda
   lambda_1 <- object$lambda_1
   max_iter <- object$max_iter
@@ -681,6 +688,11 @@ tidy.step_measure_baseline_iarpls <- function(x, ...) {
     lambda_1 = x$lambda_1,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_iarpls <- function(x, ...) {
+  "measure"
 }
 
 #' @rdname tunable_measure
@@ -929,6 +941,7 @@ prep.step_measure_baseline_fastchrom <- function(
 
 #' @export
 bake.step_measure_baseline_fastchrom <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   lambda <- object$lambda
   window <- object$window
   max_iter <- object$max_iter
@@ -979,6 +992,11 @@ tidy.step_measure_baseline_fastchrom <- function(x, ...) {
     window = x$window,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_fastchrom <- function(x, ...) {
+  "measure"
 }
 
 #' @rdname tunable_measure

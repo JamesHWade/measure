@@ -228,6 +228,7 @@ prep.step_measure_baseline_custom <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_custom <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   # Evaluate quosures to get actual argument values
   fn_args <- lapply(object$fn_args, rlang::eval_tidy)
   unresolved <- which(vapply(

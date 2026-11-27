@@ -135,6 +135,7 @@ prep.step_measure_center <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_center <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     params <- object$learned_params[[col]]
     locations <- require_trained_grid(params$locations)
@@ -327,6 +328,7 @@ prep.step_measure_scale_auto <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_scale_auto <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     params <- object$learned_params[[col]]
     locations <- require_trained_grid(params$locations)
@@ -533,6 +535,7 @@ prep.step_measure_scale_pareto <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_scale_pareto <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     params <- object$learned_params[[col]]
     locations <- require_trained_grid(params$locations)
@@ -732,6 +735,7 @@ prep.step_measure_scale_range <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_scale_range <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     params <- object$learned_params[[col]]
     locations <- require_trained_grid(params$locations)
@@ -946,6 +950,7 @@ prep.step_measure_scale_vast <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_scale_vast <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     params <- object$learned_params[[col]]
     locations <- require_trained_grid(params$locations)

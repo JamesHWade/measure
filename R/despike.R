@@ -170,6 +170,7 @@ prep.step_measure_despike <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_despike <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- purrr::map(
       new_data[[col]],
@@ -218,6 +219,11 @@ tidy.step_measure_despike <- function(x, ...) {
     method = x$method,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_despike <- function(x, ...) {
+  "measure"
 }
 
 .despike_single <- function(x, window, threshold, method, max_width) {

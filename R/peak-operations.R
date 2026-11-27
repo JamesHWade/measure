@@ -818,6 +818,7 @@ prep.step_measure_peaks_detect <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_peaks_detect <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   algorithm <- object$algorithm
   min_height <- object$min_height
   min_distance <- object$min_distance
@@ -921,6 +922,11 @@ tidy.step_measure_peaks_detect <- function(x, ...) {
     snr_threshold = .tidy_step_parameter(x$snr_threshold),
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_peaks_detect <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -1210,6 +1216,7 @@ prep.step_measure_peaks_integrate <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_peaks_integrate <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   method <- object$method
   baseline <- object$baseline
 
@@ -1290,6 +1297,11 @@ tidy.step_measure_peaks_integrate <- function(x, ...) {
     baseline = x$baseline,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_peaks_integrate <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -1717,6 +1729,7 @@ prep.step_measure_peaks_properties <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_peaks_properties <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   peaks_cols <- find_peaks_cols(new_data)
   measure_cols <- object$measures
 
@@ -1767,6 +1780,11 @@ tidy.step_measure_peaks_properties <- function(x, ...) {
     properties = list(x$properties),
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_peaks_properties <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -2018,6 +2036,11 @@ tidy.step_measure_peaks_filter <- function(x, ...) {
   )
 }
 
+#' @export
+required_pkgs.step_measure_peaks_filter <- function(x, ...) {
+  "measure"
+}
+
 # ==============================================================================
 # step_measure_peaks_to_table
 # ==============================================================================
@@ -2218,6 +2241,11 @@ tidy.step_measure_peaks_to_table <- function(x, ...) {
     properties = list(x$properties),
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_peaks_to_table <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -2496,6 +2524,11 @@ prep.step_measure_peaks_deconvolve <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_peaks_deconvolve <- function(object, new_data, ...) {
+  recipes::check_new_data(
+    c(object$peaks_col, object$measures_col),
+    object,
+    new_data
+  )
   model_spec <- object$model
   optimizer <- object$optimizer
   max_iter <- object$max_iter
@@ -2797,4 +2830,9 @@ tidy.step_measure_peaks_deconvolve <- function(x, ...) {
     quality_threshold = .tidy_step_parameter(x$quality_threshold),
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_peaks_deconvolve <- function(x, ...) {
+  "measure"
 }

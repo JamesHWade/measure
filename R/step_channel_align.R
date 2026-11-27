@@ -188,6 +188,7 @@ prep.step_measure_channel_align <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_channel_align <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measure_cols, object, new_data)
   for (col in object$measure_cols) {
     result <- purrr::map(
       new_data[[col]],
@@ -245,6 +246,11 @@ tidy.step_measure_channel_align <- function(x, ...) {
       id = x$id
     )
   }
+}
+
+#' @export
+required_pkgs.step_measure_channel_align <- function(x, ...) {
+  "measure"
 }
 
 # ------------------------------------------------------------------------------

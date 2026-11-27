@@ -134,6 +134,7 @@ prep.step_measure_output_long <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_output_long <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   col <- object$measures
 
   # Find list columns that may have been preserved by step_measure_input_long
@@ -289,4 +290,9 @@ tidy.step_measure_output_long <- function(x, ...) {
   }
   res$id <- x$id
   res
+}
+
+#' @export
+required_pkgs.step_measure_output_long <- function(x, ...) {
+  "measure"
 }

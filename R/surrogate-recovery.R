@@ -237,6 +237,7 @@ prep.step_measure_surrogate_recovery <- function(
 
 #' @export
 bake.step_measure_surrogate_recovery <- function(object, new_data, ...) {
+  recipes::check_new_data(object$col_names, object, new_data)
   # Get expected values
   if (!is.null(object$expected_col)) {
     if (!object$expected_col %in% names(new_data)) {
@@ -360,4 +361,9 @@ tidy.step_measure_surrogate_recovery <- function(x, ...) {
       id = character()
     )
   }
+}
+
+#' @export
+required_pkgs.step_measure_surrogate_recovery <- function(x, ...) {
+  "measure"
 }

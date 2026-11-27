@@ -204,6 +204,7 @@ prep.step_measure_savitzky_golay <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_savitzky_golay <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     res <-

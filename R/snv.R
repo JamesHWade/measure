@@ -115,6 +115,7 @@ prep.step_measure_snv <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_snv <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- .compute_snv(new_data[[col]])
     new_data[[col]] <- new_measure_list(result)
@@ -153,6 +154,11 @@ tidy.step_measure_snv <- function(x, ...) {
     terms = terms,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_snv <- function(x, ...) {
+  "measure"
 }
 
 # ------------------------------------------------------------------------------

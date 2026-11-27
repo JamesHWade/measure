@@ -151,6 +151,7 @@ prep.step_measure_smooth_wavelet <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_smooth_wavelet <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   rlang::check_installed("wavethresh", reason = "for wavelet denoising")
 
   for (col in object$measures) {

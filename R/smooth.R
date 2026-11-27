@@ -139,6 +139,7 @@ prep.step_measure_smooth_ma <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_smooth_ma <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- purrr::map(
@@ -184,6 +185,11 @@ tidy.step_measure_smooth_ma <- function(x, ...) {
     window = .tidy_step_parameter(x$window),
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_smooth_ma <- function(x, ...) {
+  "measure"
 }
 
 .smooth_ma_single <- function(x, window, edge_method) {
@@ -340,6 +346,7 @@ prep.step_measure_smooth_median <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_smooth_median <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- purrr::map(
@@ -385,6 +392,11 @@ tidy.step_measure_smooth_median <- function(x, ...) {
     window = .tidy_step_parameter(x$window),
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_smooth_median <- function(x, ...) {
+  "measure"
 }
 
 .smooth_median_single <- function(x, window, edge_method) {
@@ -561,6 +573,7 @@ prep.step_measure_smooth_gaussian <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_smooth_gaussian <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- purrr::map(
@@ -604,6 +617,11 @@ tidy.step_measure_smooth_gaussian <- function(x, ...) {
     window = x$window,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_smooth_gaussian <- function(x, ...) {
+  "measure"
 }
 
 .smooth_gaussian_single <- function(x, sigma, window, edge_method) {
@@ -772,6 +790,7 @@ prep.step_measure_filter_fourier <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_filter_fourier <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- purrr::map(
@@ -814,6 +833,11 @@ tidy.step_measure_filter_fourier <- function(x, ...) {
     type = x$type,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_filter_fourier <- function(x, ...) {
+  "measure"
 }
 
 .filter_fourier_single <- function(x, cutoff, type) {

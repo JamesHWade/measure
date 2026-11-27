@@ -184,6 +184,7 @@ prep.step_measure_dilution_correct <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_dilution_correct <- function(object, new_data, ...) {
+  recipes::check_new_data(object$col_names, object, new_data)
   # Validate dilution column exists in new data
 
   if (!object$dilution_col %in% names(new_data)) {
@@ -295,4 +296,9 @@ tidy.step_measure_dilution_correct <- function(x, ...) {
       id = character()
     )
   }
+}
+
+#' @export
+required_pkgs.step_measure_dilution_correct <- function(x, ...) {
+  "measure"
 }

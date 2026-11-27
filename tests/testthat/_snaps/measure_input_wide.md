@@ -103,9 +103,8 @@
       bake.step_measure_input_wide(rec$steps[[1]], training[c("sample_id", "x_001",
         "outcome")])
     Condition
-      Error in `bake.step_measure_input_wide()`:
-      ! Required measurement column not found in `new_data`: x_002.
-      i These columns were selected when the recipe was prepared.
+      Error in `step_measure_input_wide()`:
+      ! The following required column is missing from `new_data`: x_002.
 
 # wide input rejects matrix-valued measurement columns
 

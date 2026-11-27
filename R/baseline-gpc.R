@@ -191,6 +191,7 @@ prep.step_measure_baseline_gpc <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_gpc <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- .compute_baseline_gpc(
       new_data[[col]],

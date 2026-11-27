@@ -140,6 +140,7 @@ prep.step_measure_detrend <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_detrend <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- .compute_detrend(new_data[[col]], degree = object$degree)
     new_data[[col]] <- new_measure_list(result)

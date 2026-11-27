@@ -225,6 +225,7 @@ prep.step_measure_tucker <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_tucker <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measure_cols, object, new_data)
   for (col in object$measure_cols) {
     scores <- .project_tucker(
       new_data[[col]],
@@ -306,6 +307,11 @@ tidy.step_measure_tucker <- function(x, type = "parameters", ...) {
       id = x$id
     )
   }
+}
+
+#' @export
+required_pkgs.step_measure_tucker <- function(x, ...) {
+  c("measure", "multiway")
 }
 
 # ------------------------------------------------------------------------------

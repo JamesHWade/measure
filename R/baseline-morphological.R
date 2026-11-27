@@ -187,6 +187,7 @@ prep.step_measure_baseline_morphological <- function(
 
 #' @export
 bake.step_measure_baseline_morphological <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   window_size <- object$window_size
   iterations <- object$iterations
 
@@ -236,4 +237,9 @@ tidy.step_measure_baseline_morphological <- function(x, ...) {
     iterations = x$iterations,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_morphological <- function(x, ...) {
+  "measure"
 }

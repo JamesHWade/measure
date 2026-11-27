@@ -246,6 +246,7 @@ prep.step_measure_emsc <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_emsc <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   ref_spectrum <- object$ref_spectrum
   locations <- require_trained_grid(object$locations)
   degree <- object$degree
@@ -604,6 +605,7 @@ prep.step_measure_osc <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_osc <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   weights <- object$weights
   loadings <- object$loadings
   measure_col <- object$measures[1]

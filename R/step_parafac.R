@@ -221,6 +221,7 @@ prep.step_measure_parafac <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_parafac <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measure_cols, object, new_data)
   for (col in object$measure_cols) {
     scores <- .project_parafac(
       new_data[[col]],
@@ -302,6 +303,11 @@ tidy.step_measure_parafac <- function(x, type = "parameters", ...) {
       id = x$id
     )
   }
+}
+
+#' @export
+required_pkgs.step_measure_parafac <- function(x, ...) {
+  c("measure", "multiway")
 }
 
 # ------------------------------------------------------------------------------

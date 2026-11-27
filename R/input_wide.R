@@ -155,14 +155,8 @@ prep.step_measure_input_wide <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_input_wide <- function(object, new_data, ...) {
+  recipes::check_new_data(object$columns, object, new_data)
   columns <- unname(object$columns)
-  missing_cols <- setdiff(columns, names(new_data))
-  if (length(missing_cols) > 0) {
-    cli::cli_abort(c(
-      "Required measurement column{?s} not found in {.arg new_data}: {.field {missing_cols}}.",
-      "i" = "These columns were selected when the recipe was prepared."
-    ))
-  }
   check_wide_measure_columns(new_data, columns)
 
   output_col <- object$col_name
@@ -209,6 +203,11 @@ tidy.step_measure_input_wide <- function(x, ...) {
   }
   res$id <- x$id
   res
+}
+
+#' @export
+required_pkgs.step_measure_input_wide <- function(x, ...) {
+  "measure"
 }
 
 
