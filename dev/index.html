@@ -98,27 +98,24 @@
 </div>
 <!-- badges: start -->
 
-<p>measure extends <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a> with preprocessing steps for analytical measurement data such as spectroscopy, chromatography, and other instrument-generated signals. It provides a <a href="https://recipes.tidymodels.org/" class="external-link">recipes</a>-style interface for common spectral preprocessing techniques.</p>
-<p>Use recipes to convert long or wide measurements, preprocess each signal, and return a table for modeling. Native records retain raw curves, multidimensional arrays and ragged MS scans alongside their declared sample and source identities.</p>
-<p>For spectroscopy in Python, the <a href="https://github.com/JamesHWade/measure/tree/main/python" class="external-link">Python package</a> provides SNV, multiplicative scatter correction, and Savitzky–Golay steps for mlfeatures recipes.</p>
+<p>measure brings analytical instrument data (spectroscopy, chromatography, mass spectrometry, and other curve-based measurements) into <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a>.</p>
+<p>Instead of preprocessing spectra in ad-hoc scripts before modeling, you add <code>step_measure_*()</code> steps to a <a href="https://recipes.tidymodels.org/" class="external-link">recipes</a> pipeline. Parameters learned from the training set stay inside resampling splits, tunable steps work directly with <a href="https://tune.tidymodels.org/" class="external-link">tune</a>, and the output comes back as an ordinary data frame for modeling or reporting.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of measure from <a href="https://github.com/" class="external-link">GitHub</a>:</p>
+<p>Install the development version from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"JamesHWade/measure"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>Define a recipe, add preprocessing steps, fit it with <code><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep()</a></code>, and apply it with <code><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake()</a></code>. The recipe uses all 215 NIR spectra in <code>meats_long</code>; the plot compares the same ten samples before and after preprocessing.</p>
+<p>The built-in <code>meats_long</code> dataset contains 215 near-infrared (NIR) spectra of meat samples paired with measured water, fat, and protein content (the signal column is named <code>transmittance</code> for compatibility with <code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code>, though the values are absorbance).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jameshwade.github.io/measure/">measure</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># NIR spectra with measured meat composition</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 6</span></span>
@@ -130,74 +127,65 @@
 <span><span class="co">#&gt; 4     1  60.5  22.5    16.7       4          2.62</span></span>
 <span><span class="co">#&gt; 5     1  60.5  22.5    16.7       5          2.62</span></span>
 <span><span class="co">#&gt; 6     1  60.5  22.5    16.7       6          2.62</span></span></code></pre></div>
-<p>The stored signal column is named <code>transmittance</code>, but contains the original absorbance values from <code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code>. The column name is retained for compatibility; this example does not convert the values to absorbance.</p>
-<div class="section level3">
-<h3 id="building-a-preprocessing-recipe">Building a preprocessing recipe<a class="anchor" aria-label="anchor" href="#building-a-preprocessing-recipe"></a>
-</h3>
+<p>Convert the long-format curves into measure’s internal representation, take a smoothed first derivative, apply Standard Normal Variate (SNV) scaling, and pivot the processed curves back to wide predictor columns:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Assign sample ID role (not used as predictor)</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Convert long-format measurements to internal representation</span></span>
-<span>  <span class="fu"><a href="reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Apply Savitzky-Golay smoothing with first derivative</span></span>
-<span>  <span class="fu"><a href="reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span>window_side <span class="op">=</span> <span class="fl">5</span>, differentiation_order <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Standard Normal Variate normalization</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_derivative_gap.html">step_measure_derivative_gap</a></span><span class="op">(</span>gap <span class="op">=</span> <span class="fl">3</span>, segment <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Convert back to wide format for modeling</span></span>
-<span>  <span class="fu"><a href="reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="preparing-and-applying-the-recipe">Preparing and applying the recipe<a class="anchor" aria-label="anchor" href="#preparing-and-applying-the-recipe"></a>
-</h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Prep learns any parameters from training data</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_output_wide.html">step_measure_output_wide</a></span><span class="op">(</span>prefix <span class="op">=</span> <span class="st">"nir_"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">prepped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Dropping 1 list column for wide output: channel</span></span>
-<span></span>
-<span><span class="co"># Bake applies the transformations</span></span>
 <span><span class="va">processed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">prepped</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Result is ready for modeling</span></span>
 <span><span class="va">processed</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span>
 <span><span class="co">#&gt; # A tibble: 5 × 8</span></span>
 <span><span class="co">#&gt;      id water   fat protein  nir_06  nir_07  nir_08  nir_09</span></span>
 <span><span class="co">#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1     1  60.5  22.5    16.7 -0.126  -0.110  -0.0928 -0.0745</span></span>
-<span><span class="co">#&gt; 2     2  46    40.1    13.5  0.0184  0.0381  0.0601  0.0841</span></span>
-<span><span class="co">#&gt; 3     3  71     8.4    20.5  0.105   0.114   0.125   0.136 </span></span>
-<span><span class="co">#&gt; 4     4  72.8   5.9    20.7  0.0716  0.0786  0.0871  0.0974</span></span>
-<span><span class="co">#&gt; 5     5  58.3  25.5    15.5 -0.132  -0.118  -0.101  -0.0817</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="visualizing-the-preprocessing">Visualizing the preprocessing<a class="anchor" aria-label="anchor" href="#visualizing-the-preprocessing"></a>
-</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rec_for_viz</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="co">#&gt; 1     1  60.5  22.5    16.7 -0.125  -0.110  -0.0929 -0.0739</span></span>
+<span><span class="co">#&gt; 2     2  46    40.1    13.5  0.0335  0.0526  0.0750  0.101 </span></span>
+<span><span class="co">#&gt; 3     3  71     8.4    20.5  0.113   0.121   0.131   0.142 </span></span>
+<span><span class="co">#&gt; 4     4  72.8   5.9    20.7  0.0782  0.0851  0.0931  0.102 </span></span>
+<span><span class="co">#&gt; 5     5  58.3  25.5    15.5 -0.130  -0.116  -0.0990 -0.0797</span></span></code></pre></div>
+<p>Stopping before <code><a href="reference/step_measure_output_wide.html">step_measure_output_wide()</a></code> keeps each processed spectrum in the <code>.measures</code> list column, which makes it easy to inspect how the pipeline changed the curves:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec_viz</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/recipe.html" class="external-link">recipe</a></span><span class="op">(</span><span class="va">water</span> <span class="op">+</span> <span class="va">fat</span> <span class="op">+</span> <span class="va">protein</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">meats_long</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">id</span>, new_role <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/step_measure_input_long.html">step_measure_input_long</a></span><span class="op">(</span><span class="va">transmittance</span>, location <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">channel</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay</a></span><span class="op">(</span>window_side <span class="op">=</span> <span class="fl">5</span>, differentiation_order <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/step_measure_derivative_gap.html">step_measure_derivative_gap</a></span><span class="op">(</span>gap <span class="op">=</span> <span class="fl">3</span>, segment <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/step_measure_snv.html">step_measure_snv</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">processed_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_for_viz</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="va">processed_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec_viz</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="va">sample_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">sample_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">raw_plot</span> <span class="op">&lt;-</span> <span class="va">meats_long</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">sample_ids</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="va">id</span>, location <span class="op">=</span> <span class="va">channel</span>, value <span class="op">=</span> <span class="va">transmittance</span>,</span>
-<span>            stage <span class="op">=</span> <span class="st">"Recorded absorbance"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span></span>
+<span>    sample_id <span class="op">=</span> <span class="va">id</span>,</span>
+<span>    location <span class="op">=</span> <span class="va">channel</span>,</span>
+<span>    value <span class="op">=</span> <span class="va">transmittance</span>,</span>
+<span>    stage <span class="op">=</span> <span class="st">"Raw absorbance"</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
 <span><span class="va">processed_plot</span> <span class="op">&lt;-</span> <span class="va">processed_long</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">sample_ids</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="va">id</span>, <span class="va">.measures</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.measures</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span><span class="va">sample_id</span>, <span class="va">location</span>, <span class="va">value</span>, stage <span class="op">=</span> <span class="st">"First derivative + SNV"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>stage <span class="op">=</span> <span class="st">"Gap 1st derivative + SNV"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">raw_plot</span>, <span class="va">processed_plot</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>stage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">stage</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"Recorded absorbance"</span>, <span class="st">"First derivative + SNV"</span></span>
-<span>  <span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    stage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span>
+<span>      <span class="va">stage</span>,</span>
+<span>      levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Raw absorbance"</span>, <span class="st">"Gap 1st derivative + SNV"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">location</span>, <span class="va">value</span>, group <span class="op">=</span> <span class="va">sample_id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#0072B2"</span>, alpha <span class="op">=</span> <span class="fl">0.55</span>, linewidth <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">+</span></span>
@@ -209,786 +197,26 @@
 <span>    panel.grid.minor <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="reference/figures/README-visualization-1.png" alt="Two line-chart panels plot spectrometer channel on the horizontal axis for the same ten meat samples. The upper panel shows recorded absorbance curves with different offsets and broad shapes. The lower panel shows the first derivatives after per-sample centering and scaling, with positive and negative values around zero." width="100%"><p class="caption">
-The same ten NIR samples before and after a first derivative and standard normal variate (SNV) scaling. The derivative drops five channels at each edge; SNV centers and scales each resulting spectrum. Each panel has its own response scale.
+<img src="reference/figures/README-visualization-1.png" alt="Two stacked line plots of spectrometer channel versus signal for ten meat samples. The top panel shows raw absorbance curves with broad baseline offsets; the bottom panel shows the gap first derivatives after SNV scaling, centered around zero with sharper spectral features." width="100%"><p class="caption">
+Ten NIR spectra from meats_long before and after a gap first derivative and SNV scaling.
 </p>
 </div>
 </div>
-</div>
 <div class="section level2">
-<h2 id="available-steps">Available steps<a class="anchor" aria-label="anchor" href="#available-steps"></a>
+<h2 id="whats-in-the-package">What’s in the package<a class="anchor" aria-label="anchor" href="#whats-in-the-package"></a>
 </h2>
-<div class="section level3">
-<h3 id="inputoutput-steps">Input/output steps<a class="anchor" aria-label="anchor" href="#inputoutput-steps"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_input_wide.html">step_measure_input_wide()</a></code></td>
-<td>Convert wide format (measurements in columns) to internal format</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_input_long.html">step_measure_input_long()</a></code></td>
-<td>Convert long format (measurements in rows) to internal format</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_output_wide.html">step_measure_output_wide()</a></code></td>
-<td>Convert back to wide format for modeling</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_output_long.html">step_measure_output_long()</a></code></td>
-<td>Convert back to long format</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="spectral-math">Spectral math<a class="anchor" aria-label="anchor" href="#spectral-math"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_absorbance.html">step_measure_absorbance()</a></code></td>
-<td>Convert transmittance to absorbance</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_transmittance.html">step_measure_transmittance()</a></code></td>
-<td>Convert absorbance to transmittance</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_log.html">step_measure_log()</a></code></td>
-<td>Log transformation with configurable base/offset</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_kubelka_munk.html">step_measure_kubelka_munk()</a></code></td>
-<td>Kubelka-Munk transformation for reflectance</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_derivative.html">step_measure_derivative()</a></code></td>
-<td>Simple finite difference derivatives</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_derivative_gap.html">step_measure_derivative_gap()</a></code></td>
-<td>Gap (Norris-Williams) derivatives</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="filtering-and-scatter-correction">Filtering and scatter correction<a class="anchor" aria-label="anchor" href="#filtering-and-scatter-correction"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_savitzky_golay.html">step_measure_savitzky_golay()</a></code></td>
-<td>Smoothing and/or differentiation</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_snv.html">step_measure_snv()</a></code></td>
-<td>Standard Normal Variate normalization</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_msc.html">step_measure_msc()</a></code></td>
-<td>Multiplicative Scatter Correction</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_emsc.html">step_measure_emsc()</a></code></td>
-<td>Extended MSC with wavelength-dependent correction</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_osc.html">step_measure_osc()</a></code></td>
-<td>Orthogonal Signal Correction</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="smoothing-and-noise-reduction">Smoothing and noise reduction<a class="anchor" aria-label="anchor" href="#smoothing-and-noise-reduction"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="47%">
-<col width="52%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_smooth_ma.html">step_measure_smooth_ma()</a></code></td>
-<td>Moving average smoothing</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_smooth_median.html">step_measure_smooth_median()</a></code></td>
-<td>Median filter (robust to spikes)</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_smooth_gaussian.html">step_measure_smooth_gaussian()</a></code></td>
-<td>Gaussian kernel smoothing</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_smooth_wavelet.html">step_measure_smooth_wavelet()</a></code></td>
-<td>Wavelet denoising</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_filter_fourier.html">step_measure_filter_fourier()</a></code></td>
-<td>Fourier low-pass/high-pass filtering</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_despike.html">step_measure_despike()</a></code></td>
-<td>Spike/outlier detection and removal</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="sample-wise-normalization">Sample-wise normalization<a class="anchor" aria-label="anchor" href="#sample-wise-normalization"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="49%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_normalize_sum.html">step_measure_normalize_sum()</a></code></td>
-<td>Divide by sum (total intensity)</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_normalize_max.html">step_measure_normalize_max()</a></code></td>
-<td>Divide by maximum value</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_normalize_range.html">step_measure_normalize_range()</a></code></td>
-<td>Scale to 0-1 range</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_normalize_vector.html">step_measure_normalize_vector()</a></code></td>
-<td>L2/Euclidean normalization</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_normalize_auc.html">step_measure_normalize_auc()</a></code></td>
-<td>Divide by area under curve</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_normalize_peak.html">step_measure_normalize_peak()</a></code></td>
-<td>Normalize by peak region (tunable)</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="variable-wise-scaling">Variable-wise scaling<a class="anchor" aria-label="anchor" href="#variable-wise-scaling"></a>
-</h3>
-<table class="table">
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_center.html">step_measure_center()</a></code></td>
-<td>Mean centering</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_scale_auto.html">step_measure_scale_auto()</a></code></td>
-<td>Auto-scaling (z-score)</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_scale_pareto.html">step_measure_scale_pareto()</a></code></td>
-<td>Pareto scaling</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_scale_range.html">step_measure_scale_range()</a></code></td>
-<td>Range scaling</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_scale_vast.html">step_measure_scale_vast()</a></code></td>
-<td>VAST scaling</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="baseline-correction">Baseline correction<a class="anchor" aria-label="anchor" href="#baseline-correction"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_baseline_als.html">step_measure_baseline_als()</a></code></td>
-<td>Asymmetric least squares</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_poly.html">step_measure_baseline_poly()</a></code></td>
-<td>Polynomial baseline fitting</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_rf.html">step_measure_baseline_rf()</a></code></td>
-<td>Rolling ball/LOESS baseline</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_rolling.html">step_measure_baseline_rolling()</a></code></td>
-<td>Rolling ball algorithm</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_airpls.html">step_measure_baseline_airpls()</a></code></td>
-<td>Adaptive Iteratively Reweighted PLS</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_arpls.html">step_measure_baseline_arpls()</a></code></td>
-<td>Asymmetrically Reweighted PLS</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_snip.html">step_measure_baseline_snip()</a></code></td>
-<td>SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping)</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_tophat.html">step_measure_baseline_tophat()</a></code></td>
-<td>Top-hat morphological filter</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_morph.html">step_measure_baseline_morph()</a></code></td>
-<td>Iterative morphological correction</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_minima.html">step_measure_baseline_minima()</a></code></td>
-<td>Local minima interpolation</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_baseline_auto.html">step_measure_baseline_auto()</a></code></td>
-<td>Automatic method selection</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_detrend.html">step_measure_detrend()</a></code></td>
-<td>Polynomial detrending</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="reference-corrections">Reference corrections<a class="anchor" aria-label="anchor" href="#reference-corrections"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_subtract_blank.html">step_measure_subtract_blank()</a></code></td>
-<td>Blank/background subtraction</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_subtract_reference.html">step_measure_subtract_reference()</a></code></td>
-<td>Reference spectrum subtraction</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_ratio_reference.html">step_measure_ratio_reference()</a></code></td>
-<td>Reference ratio with optional blank</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="region-operations">Region operations<a class="anchor" aria-label="anchor" href="#region-operations"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="36%">
-<col width="63%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_trim.html">step_measure_trim()</a></code></td>
-<td>Keep measurements within specified x-range</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_exclude.html">step_measure_exclude()</a></code></td>
-<td>Remove measurements within specified range(s)</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_resample.html">step_measure_resample()</a></code></td>
-<td>Interpolate to new regular grid</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="alignment-and-registration">Alignment and registration<a class="anchor" aria-label="anchor" href="#alignment-and-registration"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="45%">
-<col width="54%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_align_shift.html">step_measure_align_shift()</a></code></td>
-<td>Cross-correlation shift alignment</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_align_reference.html">step_measure_align_reference()</a></code></td>
-<td>Align to external reference spectrum</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_align_dtw.html">step_measure_align_dtw()</a></code></td>
-<td>Dynamic Time Warping alignment</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_align_ptw.html">step_measure_align_ptw()</a></code></td>
-<td>Parametric Time Warping</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_align_cow.html">step_measure_align_cow()</a></code></td>
-<td>Correlation Optimized Warping (tunable)</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="quality-control">Quality control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
-</h3>
-<table class="table">
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_qc_snr.html">step_measure_qc_snr()</a></code></td>
-<td>Calculate signal-to-noise ratio</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_qc_saturated.html">step_measure_qc_saturated()</a></code></td>
-<td>Detect saturated measurements</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_qc_outlier.html">step_measure_qc_outlier()</a></code></td>
-<td>Detect outlier samples</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_impute.html">step_measure_impute()</a></code></td>
-<td>Interpolate missing values</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="peak-operations">Peak operations<a class="anchor" aria-label="anchor" href="#peak-operations"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_peaks_detect.html">step_measure_peaks_detect()</a></code></td>
-<td>Detect peaks using prominence or derivative methods</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_peaks_integrate.html">step_measure_peaks_integrate()</a></code></td>
-<td>Calculate peak areas</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_peaks_filter.html">step_measure_peaks_filter()</a></code></td>
-<td>Filter peaks by height, area, or count</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_peaks_deconvolve.html">step_measure_peaks_deconvolve()</a></code></td>
-<td>Deconvolve overlapping peaks</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_peaks_to_table.html">step_measure_peaks_to_table()</a></code></td>
-<td>Convert peaks to wide format for modeling</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="secgpc-analysis">SEC/GPC analysis<a class="anchor" aria-label="anchor" href="#secgpc-analysis"></a>
-</h3>
-<p>Use <a href="https://jameshwade.github.io/measure.sec/">measure.sec</a> for SEC detector processing, molecular-weight calibration and distribution calculations.</p>
-</div>
-<div class="section level3">
-<h3 id="feature-engineering">Feature engineering<a class="anchor" aria-label="anchor" href="#feature-engineering"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_integrals.html">step_measure_integrals()</a></code></td>
-<td>Calculate integrated areas for specified regions</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_ratios.html">step_measure_ratios()</a></code></td>
-<td>Calculate ratios between integrated regions</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_moments.html">step_measure_moments()</a></code></td>
-<td>Calculate statistical moments from spectra</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_bin.html">step_measure_bin()</a></code></td>
-<td>Reduce spectrum to fewer points via binning</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="data-augmentation">Data augmentation<a class="anchor" aria-label="anchor" href="#data-augmentation"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="42%">
-<col width="57%">
-</colgroup>
-<thead><tr>
-<th>Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_augment_noise.html">step_measure_augment_noise()</a></code></td>
-<td>Add random noise for training augmentation</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_augment_shift.html">step_measure_augment_shift()</a></code></td>
-<td>Random x-axis shifts for shift invariance</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_augment_scale.html">step_measure_augment_scale()</a></code></td>
-<td>Random intensity scaling</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="drift-and-batch-correction">Drift and batch correction<a class="anchor" aria-label="anchor" href="#drift-and-batch-correction"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="45%">
-<col width="54%">
-</colgroup>
-<thead><tr>
-<th>Step/Function</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/step_measure_drift_qc_loess.html">step_measure_drift_qc_loess()</a></code></td>
-<td>QC-RLSC drift correction using LOESS</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_drift_linear.html">step_measure_drift_linear()</a></code></td>
-<td>Linear drift correction</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_drift_spline.html">step_measure_drift_spline()</a></code></td>
-<td>Spline-based drift correction</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_qc_bracket.html">step_measure_qc_bracket()</a></code></td>
-<td>QC bracketing interpolation</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_batch_reference.html">step_measure_batch_reference()</a></code></td>
-<td>Reference-based batch correction</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_detect_drift.html">measure_detect_drift()</a></code></td>
-<td>Detect significant drift in QC samples</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="section level2">
-<h2 id="analytical-validation-functions">Analytical validation functions<a class="anchor" aria-label="anchor" href="#analytical-validation-functions"></a>
-</h2>
-<p>Validation functions calculate calibration diagnostics, precision, recovery, uncertainty and control limits. Select acceptance criteria for the intended method and check the assumptions of each calculation.</p>
-<div class="section level3">
-<h3 id="calibration-and-quantitation">Calibration and quantitation<a class="anchor" aria-label="anchor" href="#calibration-and-quantitation"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Function</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/measure_calibration_fit.html">measure_calibration_fit()</a></code></td>
-<td>Fit weighted calibration curves (linear/quadratic)</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_calibration_predict.html">measure_calibration_predict()</a></code></td>
-<td>Predict concentrations with uncertainty</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_calibration_verify.html">measure_calibration_verify()</a></code></td>
-<td>Continuing calibration verification</td>
-</tr>
-<tr>
-<td>
-<code><a href="reference/measure_lod.html">measure_lod()</a></code> / <code><a href="reference/measure_loq.html">measure_loq()</a></code>
-</td>
-<td>Detection and quantitation limits</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="precision-and-accuracy">Precision and accuracy<a class="anchor" aria-label="anchor" href="#precision-and-accuracy"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Function</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/measure_repeatability.html">measure_repeatability()</a></code></td>
-<td>Within-run precision</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_intermediate_precision.html">measure_intermediate_precision()</a></code></td>
-<td>Between-run precision with variance components</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_reproducibility.html">measure_reproducibility()</a></code></td>
-<td>Between-lab precision</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_gage_rr.html">measure_gage_rr()</a></code></td>
-<td>Gage R&amp;R / Measurement System Analysis</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_accuracy.html">measure_accuracy()</a></code></td>
-<td>Bias, recovery, and accuracy assessment</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_linearity.html">measure_linearity()</a></code></td>
-<td>Linearity with lack-of-fit testing</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_carryover.html">measure_carryover()</a></code></td>
-<td>Carryover evaluation</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="method-comparison">Method comparison<a class="anchor" aria-label="anchor" href="#method-comparison"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr>
-<th>Function</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/measure_bland_altman.html">measure_bland_altman()</a></code></td>
-<td>Bland-Altman analysis with limits of agreement</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_deming_regression.html">measure_deming_regression()</a></code></td>
-<td>Deming regression for method comparison</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_passing_bablok.html">measure_passing_bablok()</a></code></td>
-<td>Passing-Bablok non-parametric regression</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_proficiency_score.html">measure_proficiency_score()</a></code></td>
-<td>z-scores, En scores, zeta scores for PT</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="matrix-effects-and-sample-preparation-qc">Matrix effects and sample preparation QC<a class="anchor" aria-label="anchor" href="#matrix-effects-and-sample-preparation-qc"></a>
-</h3>
-<table class="table">
-<colgroup>
-<col width="48%">
-<col width="51%">
-</colgroup>
-<thead><tr>
-<th>Function/Step</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/measure_matrix_effect.html">measure_matrix_effect()</a></code></td>
-<td>Quantify ion suppression/enhancement</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_standard_addition.html">step_measure_standard_addition()</a></code></td>
-<td>Standard addition correction</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_dilution_correct.html">step_measure_dilution_correct()</a></code></td>
-<td>Back-calculate diluted concentrations</td>
-</tr>
-<tr>
-<td><code><a href="reference/step_measure_surrogate_recovery.html">step_measure_surrogate_recovery()</a></code></td>
-<td>Surrogate/internal standard recovery</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="uncertainty-and-quality-control">Uncertainty and quality control<a class="anchor" aria-label="anchor" href="#uncertainty-and-quality-control"></a>
-</h3>
-<table class="table">
-<thead><tr>
-<th>Function</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/measure_uncertainty_budget.html">measure_uncertainty_budget()</a></code></td>
-<td>ISO GUM uncertainty budgets</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_uncertainty.html">measure_uncertainty()</a></code></td>
-<td>Combined and expanded uncertainty</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_control_limits.html">measure_control_limits()</a></code></td>
-<td>Shewhart, EWMA, or CUSUM limits</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_control_chart.html">measure_control_chart()</a></code></td>
-<td>Westgard multi-rule control charts</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_system_suitability.html">measure_system_suitability()</a></code></td>
-<td>System suitability testing</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level3">
-<h3 id="acceptance-criteria">Acceptance criteria<a class="anchor" aria-label="anchor" href="#acceptance-criteria"></a>
-</h3>
-<table class="table">
-<thead><tr>
-<th>Function</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/measure_criteria.html">measure_criteria()</a></code></td>
-<td>Define acceptance criteria</td>
-</tr>
-<tr>
-<td><code><a href="reference/measure_assess.html">measure_assess()</a></code></td>
-<td>Evaluate data against criteria</td>
-</tr>
-<tr>
-<td><code><a href="reference/criteria_presets.html">criteria_bioanalytical()</a></code></td>
-<td>FDA/EMA bioanalytical presets</td>
-</tr>
-<tr>
-<td><code><a href="reference/criteria_presets.html">criteria_ich_q2()</a></code></td>
-<td>ICH Q2 validation presets</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="section level2">
-<h2 id="learning-more">Learning more<a class="anchor" aria-label="anchor" href="#learning-more"></a>
-</h2>
+<p>measure includes over 100 recipe steps and analysis functions. The <a href="https://jameshwade.github.io/measure/dev/reference/index.html">function reference</a> lists everything; here is how the package is organized:</p>
 <ul>
-<li><a href="https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html">Preprocess spectra</a></li>
-<li><a href="https://jameshwade.github.io/measure/dev/articles/howto-baseline.html">Choose a baseline correction</a></li>
-<li><a href="https://jameshwade.github.io/measure/dev/articles/multidimensional-measurements.html">Work with multidimensional arrays</a></li>
-<li><a href="https://jameshwade.github.io/measure/dev/articles/acquisition-ms.html">Retain DAD/MS acquisitions and trace contributors</a></li>
-<li><a href="https://jameshwade.github.io/measure/dev/articles/reference-validation.html">Assess analytical validation results</a></li>
+<li>Signal preprocessing: baseline correction (ALS, polynomial, SNIP, rolling ball, airPLS, arPLS, morphological), smoothing and derivatives (moving average, Gaussian, median, Savitzky-Golay, wavelet, Fourier, gap derivatives), scatter correction (SNV, MSC, EMSC, OSC), sample normalization, variable scaling, region trimming and resampling, and chromatogram alignment (shift, DTW, PTW, COW).</li>
+<li>Peaks and features: peak detection, integration, filtering, and deconvolution (<code>step_measure_peaks_*()</code>), plus region integrals, peak ratios, moments, and binning.</li>
+<li>Calibration, QC, and method validation: weighted calibration curves (<code><a href="reference/measure_calibration_fit.html">measure_calibration_fit()</a></code>), single-analyte LC/GC batch quantitation (<code><a href="reference/measure_quantify_batch.html">measure_quantify_batch()</a></code>), drift and batch correction, LOD/LOQ, precision and accuracy, Bland-Altman, Deming and Passing-Bablok regression, ISO GUM uncertainty budgets, control charts, and ICH Q2 / bioanalytical acceptance criteria.</li>
+<li>Structured records and multi-dimensional signals: <code><a href="reference/measure_record.html">measure_record()</a></code>, <code><a href="reference/measure_acquisition.html">measure_acquisition()</a></code>, and n-dimensional measurement tables for keeping raw 1D curves, 2D arrays (such as LC-DAD or EEM), and ragged MS scans tied to sample metadata and source files, along with JCAMP-DX import and export.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a>
+<h2 id="practice-datasets">Practice datasets<a class="anchor" aria-label="anchor" href="#practice-datasets"></a>
 </h2>
-<div class="section level3">
-<h3 id="included-datasets">Included datasets<a class="anchor" aria-label="anchor" href="#included-datasets"></a>
-</h3>
-<p>The package includes datasets for examples and testing:</p>
+<p>The package ships with small datasets for examples and testing:</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -1007,200 +235,71 @@ The same ten NIR samples before and after a first derivative and standard normal
 <td><code>meats_long</code></td>
 <td>NIR</td>
 <td>215</td>
-<td>NIR absorbance spectra of meat samples (from modeldata)</td>
+<td>Meat composition spectra (long format of <code><a href="https://modeldata.tidymodels.org/reference/meats.html" class="external-link">modeldata::meats</a></code>)</td>
 </tr>
 <tr>
-<td><code>bioreactors_small</code></td>
+<td>
+<code>bioreactors_small</code> / <code>bioreactors_large</code>
+</td>
 <td>Raman</td>
-<td>210</td>
-<td>Raman spectra from 15 small-scale bioreactors</td>
-</tr>
-<tr>
-<td><code>bioreactors_large</code></td>
-<td>Raman</td>
-<td>42</td>
-<td>Raman spectra from 3 large-scale bioreactors</td>
+<td>210 / 42</td>
+<td>Bioreactor glucose monitoring (<code>data(glucose_bioreactors)</code>)</td>
 </tr>
 <tr>
 <td><code>hplc_chromatograms</code></td>
 <td>HPLC-UV</td>
 <td>20</td>
-<td>Simulated HPLC chromatograms with 5 compounds</td>
+<td>Simulated chromatograms with five compounds</td>
 </tr>
 <tr>
-<td><code>sec_chromatograms</code></td>
+<td>
+<code>sec_chromatograms</code> / <code>sec_calibration</code>
+</td>
 <td>SEC/GPC</td>
-<td>10</td>
-<td>Simulated SEC chromatograms (5 standards + 5 polymers)</td>
-</tr>
-<tr>
-<td><code>sec_calibration</code></td>
-<td>SEC/GPC</td>
-<td>5</td>
-<td>Calibration standards for molecular weight curves</td>
+<td>10 / 5</td>
+<td>Simulated polymer chromatograms and MW standards</td>
 </tr>
 <tr>
 <td><code>maldi_spectra</code></td>
 <td>MALDI-TOF</td>
 <td>16</td>
-<td>Simulated mass spectra (4 groups × 4 replicates)</td>
+<td>Simulated mass spectra across four groups</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load datasets</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats_long</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">glucose_bioreactors</span><span class="op">)</span>  <span class="co"># loads bioreactors_small and bioreactors_large</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">hplc_chromatograms</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sec_chromatograms</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sec_calibration</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">maldi_spectra</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="external-data-sources">External data sources<a class="anchor" aria-label="anchor" href="#external-data-sources"></a>
-</h3>
-<p>For additional test data beyond what’s included with measure, these sources provide publicly available analytical measurement data:</p>
-<p>R packages with spectral data:</p>
-<table class="table">
-<colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
-</colgroup>
-<thead><tr>
-<th>Package</th>
-<th>Dataset</th>
-<th>Technique</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><a href="https://modeldata.tidymodels.org/" class="external-link">modeldata</a></td>
-<td><code>meats</code></td>
-<td>NIR</td>
-<td>Meat composition (wide format version)</td>
-</tr>
-<tr>
-<td><a href="https://github.com/l-ramirez-lopez/prospectr" class="external-link">prospectr</a></td>
-<td><code>NIRsoil</code></td>
-<td>NIR</td>
-<td>Soil analysis with 825 samples</td>
-</tr>
-<tr>
-<td><a href="https://bryanhanson.github.io/ChemoSpec/" class="external-link">ChemoSpec</a></td>
-<td>Various</td>
-<td>IR, NMR</td>
-<td>Multiple spectroscopy datasets</td>
-</tr>
-<tr>
-<td><a href="http://hyperspec.r-forge.r-project.org/" class="external-link">hyperSpec</a></td>
-<td>Various</td>
-<td>Raman, IR</td>
-<td>Hyperspectral data examples</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example: Load NIRsoil from prospectr</span></span>
-<span><span class="co"># install.packages("prospectr")</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">NIRsoil</span>, package <span class="op">=</span> <span class="st">"prospectr"</span><span class="op">)</span></span></code></pre></div>
-<p>Online repositories:</p>
-<ul>
-<li>
-<a href="https://data.mendeley.com" class="external-link">Mendeley Data</a> - Search “spectroscopy”, “chromatography”, or “mass spectrometry”</li>
-<li>
-<a href="https://zenodo.org" class="external-link">Zenodo</a> - Open science data repository</li>
-<li>
-<a href="https://www.kaggle.com/datasets" class="external-link">Kaggle Datasets</a> - Community-contributed datasets</li>
-<li>
-<a href="https://webbook.nist.gov/chemistry/" class="external-link">NIST Chemistry WebBook</a> - Reference spectra (IR, MS, UV-Vis)</li>
-<li>
-<a href="https://sdbs.db.aist.go.jp/" class="external-link">SDBS</a> - Spectral Database for Organic Compounds (NMR, IR, MS)</li>
-</ul>
-<p><strong>Domain-Specific Databases:</strong></p>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr>
-<th>Database</th>
-<th>Data Type</th>
-<th>URL</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>MassBank</td>
-<td>Mass spectra</td>
-<td><a href="https://massbank.eu/MassBank/" class="external-link uri">https://massbank.eu/MassBank/</a></td>
-</tr>
-<tr>
-<td>HMDB</td>
-<td>NMR, MS metabolomics</td>
-<td><a href="https://hmdb.ca/" class="external-link uri">https://hmdb.ca/</a></td>
-</tr>
-<tr>
-<td>NMRShiftDB</td>
-<td>NMR spectra</td>
-<td><a href="https://nmrshiftdb.nmr.uni-koeln.de/" class="external-link uri">https://nmrshiftdb.nmr.uni-koeln.de/</a></td>
-</tr>
-<tr>
-<td>Crystallography Open Database</td>
-<td>XRD patterns</td>
-<td><a href="https://www.crystallography.net/cod/" class="external-link uri">https://www.crystallography.net/cod/</a></td>
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 <div class="section level2">
-<h2 id="the-measure-ecosystem">The <code>measure</code> ecosystem<a class="anchor" aria-label="anchor" href="#the-measure-ecosystem"></a>
+<h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
-<p><code>measure</code> is the core analytical package in a modular measurement ecosystem. Scientific calculations live in reusable packages that can be tested independently, while agent protocols and experiment records live in the service layer:</p>
 <ul>
+<li><a href="https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html">Getting started with spectral preprocessing</a></li>
+<li><a href="https://jameshwade.github.io/measure/dev/articles/howto-baseline.html">Choosing a baseline correction method</a></li>
+<li><a href="https://jameshwade.github.io/measure/dev/articles/howto-tidymodels.html">Integrating measure with tidymodels and tune</a></li>
+<li><a href="https://jameshwade.github.io/measure/dev/articles/howto-lc-batch.html">Quantifying a scalar LC batch</a></li>
+<li><a href="https://jameshwade.github.io/measure/dev/articles/howto-ir-band.html">Measuring an infrared band from JCAMP-DX</a></li>
 <li>
-<a href="https://jameshwade.github.io/measure/"><strong><code>measure</code></strong></a>: Core measurement data structures (<code>measure_tbl</code>, <code>measure_nd_tbl</code>, <code>measure_record</code>, <code>measure_acquisition</code>), spectral/chromatographic preprocessing, peak operations, calibration, and analytical validation.</li>
-<li>
-<a href="https://jameshwade.github.io/measure.sec/"><strong><code>measure.sec</code></strong></a>: Technique pack for Size Exclusion Chromatography (SEC/GPC), registered via <code>measure</code>’s pack registry. Future technique packs (such as <code>measure.lc</code> and <code>measure.ms</code>) follow the same extension boundary.</li>
-<li>
-<a href="https://jameshwade.github.io/measure-service/"><strong><code>measure-service</code></strong></a>: Connects AI assistants (Claude, Codex, Cursor) and automated workflows to <code>measure</code> and <code>measure.sec</code> over MCP. Process chromatograms and sample sequences, calculate SEC/GPC molecular weights, inspect LC–DAD spectra and LC–MS ion chromatograms, check LC gradient methods, and keep lab results linked to their raw runs.</li>
+<a href="https://jameshwade.github.io/measure/dev/articles/multidimensional-measurements.html">Working with multidimensional data</a> and <a href="https://jameshwade.github.io/measure/dev/articles/acquisition-ms.html">DAD/MS acquisitions</a>
+</li>
+<li><a href="https://jameshwade.github.io/measure/dev/articles/reference-validation.html">Analytical validation reference</a></li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
+<h2 id="companion-tools-and-related-packages">Companion tools and related packages<a class="anchor" aria-label="anchor" href="#companion-tools-and-related-packages"></a>
 </h2>
-<p>measure builds on the <a href="https://www.tidymodels.org/" class="external-link">tidymodels</a> ecosystem:</p>
 <ul>
 <li>
-<a href="https://recipes.tidymodels.org/" class="external-link">recipes</a> - The foundation for preprocessing pipelines</li>
+<a href="https://jameshwade.github.io/measure.sec/">measure.sec</a> adds SEC/GPC detector processing and molecular-weight distribution calculations through measure’s technique pack registry.</li>
 <li>
-<a href="https://parsnip.tidymodels.org/" class="external-link">parsnip</a> - Unified modeling interface</li>
-<li>
-<a href="https://workflows.tidymodels.org/" class="external-link">workflows</a> - Bundle preprocessing and modeling</li>
-<li>
-<a href="https://tune.tidymodels.org/" class="external-link">tune</a> - Hyperparameter tuning (works with measure’s tunable steps!)</li>
+<a href="https://jameshwade.github.io/measure-service/">measure-service</a> exposes measure and measure.sec workflows over MCP for automated and assistant-driven lab pipelines.</li>
+<li>The <a href="https://github.com/JamesHWade/measure/tree/main/python" class="external-link">Python package</a> in this repository implements SNV, MSC, and Savitzky-Golay steps for <code>mlfeatures</code>.</li>
 </ul>
-<p>For spectral analysis in R, you might also find these packages useful:</p>
-<ul>
-<li>
-<a href="https://github.com/l-ramirez-lopez/prospectr" class="external-link">prospectr</a> - Spectral preprocessing functions</li>
-<li>
-<a href="https://bryanhanson.github.io/ChemoSpec/" class="external-link">ChemoSpec</a> - Exploratory chemometrics</li>
-<li>
-<a href="https://mdatools.com/" class="external-link">mdatools</a> - Multivariate data analysis</li>
-</ul>
+<p>If you work with spectral data in R outside tidymodels, <a href="https://github.com/l-ramirez-lopez/prospectr" class="external-link">prospectr</a>, <a href="https://bryanhanson.github.io/ChemoSpec/" class="external-link">ChemoSpec</a>, and <a href="https://mdatools.com/" class="external-link">mdatools</a> are also worth a look.</p>
 </div>
 <div class="section level2">
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h2>
-<p>This package is under active development. Contributions are welcome! Please see the <a href="https://jameshwade.github.io/measure/CONTRIBUTING.html">contributing guidelines</a>.</p>
-</div>
-<div class="section level2">
-<h2 id="code-of-conduct">Code of conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
-</h2>
-<p>Please note that the measure project is released with a <a href="https://jameshwade.github.io/measure/CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<p>Bug reports, feature requests, and pull requests are welcome. See the <a href="https://jameshwade.github.io/measure/CONTRIBUTING.html">contributing guide</a> to get started.</p>
+<p>Please note that measure is released with a <a href="https://jameshwade.github.io/measure/CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

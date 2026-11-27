@@ -1,25 +1,19 @@
 # measure
 
-measure extends [tidymodels](https://www.tidymodels.org/) with
-preprocessing steps for analytical measurement data such as
-spectroscopy, chromatography, and other instrument-generated signals. It
-provides a [recipes](https://recipes.tidymodels.org/)-style interface
-for common spectral preprocessing techniques.
+measure brings analytical instrument data (spectroscopy, chromatography,
+mass spectrometry, and other curve-based measurements) into
+[tidymodels](https://www.tidymodels.org/).
 
-Use recipes to convert long or wide measurements, preprocess each
-signal, and return a table for modeling. Native records retain raw
-curves, multidimensional arrays and ragged MS scans alongside their
-declared sample and source identities.
-
-For spectroscopy in Python, the [Python
-package](https://github.com/JamesHWade/measure/tree/main/python)
-provides SNV, multiplicative scatter correction, and Savitzky–Golay
-steps for mlfeatures recipes.
+Instead of preprocessing spectra in ad-hoc scripts before modeling, you
+add `step_measure_*()` steps to a
+[recipes](https://recipes.tidymodels.org/) pipeline. Parameters learned
+from the training set stay inside resampling splits, tunable steps work
+directly with [tune](https://tune.tidymodels.org/), and the output comes
+back as an ordinary data frame for modeling or reporting.
 
 ## Installation
 
-You can install the development version of measure from
-[GitHub](https://github.com/):
+Install the development version from GitHub:
 
 ``` r
 
@@ -27,22 +21,20 @@ You can install the development version of measure from
 pak::pak("JamesHWade/measure")
 ```
 
-## Usage
+## Example
 
-Define a recipe, add preprocessing steps, fit it with
-[`prep()`](https://recipes.tidymodels.org/reference/prep.html), and
-apply it with
-[`bake()`](https://recipes.tidymodels.org/reference/bake.html). The
-recipe uses all 215 NIR spectra in `meats_long`; the plot compares the
-same ten samples before and after preprocessing.
+The built-in `meats_long` dataset contains 215 near-infrared (NIR)
+spectra of meat samples paired with measured water, fat, and protein
+content (the signal column is named `transmittance` for compatibility
+with
+[`modeldata::meats`](https://modeldata.tidymodels.org/reference/meats.html),
+though the values are absorbance).
 
 ``` r
 
 library(measure)
 library(recipes)
-library(ggplot2)
 
-# NIR spectra with measured meat composition
 data(meats_long)
 head(meats_long)
 #> # A tibble: 6 × 6
@@ -56,81 +48,76 @@ head(meats_long)
 #> 6     1  60.5  22.5    16.7       6          2.62
 ```
 
-The stored signal column is named `transmittance`, but contains the
-original absorbance values from
-[`modeldata::meats`](https://modeldata.tidymodels.org/reference/meats.html).
-The column name is retained for compatibility; this example does not
-convert the values to absorbance.
-
-### Building a preprocessing recipe
+Convert the long-format curves into measure’s internal representation,
+take a smoothed first derivative, apply Standard Normal Variate (SNV)
+scaling, and pivot the processed curves back to wide predictor columns:
 
 ``` r
 
 rec <- recipe(water + fat + protein ~ ., data = meats_long) |>
-  # Assign sample ID role (not used as predictor)
   update_role(id, new_role = "id") |>
-  # Convert long-format measurements to internal representation
   step_measure_input_long(transmittance, location = vars(channel)) |>
-  # Apply Savitzky-Golay smoothing with first derivative
-  step_measure_savitzky_golay(window_side = 5, differentiation_order = 1) |>
-  # Standard Normal Variate normalization
+  step_measure_derivative_gap(gap = 3, segment = 3) |>
   step_measure_snv() |>
-  # Convert back to wide format for modeling
   step_measure_output_wide(prefix = "nir_")
-```
 
-### Preparing and applying the recipe
-
-``` r
-
-# Prep learns any parameters from training data
 prepped <- prep(rec)
 #> Dropping 1 list column for wide output: channel
-
-# Bake applies the transformations
 processed <- bake(prepped, new_data = NULL)
-
-# Result is ready for modeling
 processed[1:5, 1:8]
 #> # A tibble: 5 × 8
 #>      id water   fat protein  nir_06  nir_07  nir_08  nir_09
 #>   <int> <dbl> <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl>
-#> 1     1  60.5  22.5    16.7 -0.126  -0.110  -0.0928 -0.0745
-#> 2     2  46    40.1    13.5  0.0184  0.0381  0.0601  0.0841
-#> 3     3  71     8.4    20.5  0.105   0.114   0.125   0.136 
-#> 4     4  72.8   5.9    20.7  0.0716  0.0786  0.0871  0.0974
-#> 5     5  58.3  25.5    15.5 -0.132  -0.118  -0.101  -0.0817
+#> 1     1  60.5  22.5    16.7 -0.125  -0.110  -0.0929 -0.0739
+#> 2     2  46    40.1    13.5  0.0335  0.0526  0.0750  0.101 
+#> 3     3  71     8.4    20.5  0.113   0.121   0.131   0.142 
+#> 4     4  72.8   5.9    20.7  0.0782  0.0851  0.0931  0.102 
+#> 5     5  58.3  25.5    15.5 -0.130  -0.116  -0.0990 -0.0797
 ```
 
-### Visualizing the preprocessing
+Stopping before
+[`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md)
+keeps each processed spectrum in the `.measures` list column, which
+makes it easy to inspect how the pipeline changed the curves:
 
 ``` r
 
-rec_for_viz <- recipe(water + fat + protein ~ ., data = meats_long) |>
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+rec_viz <- recipe(water + fat + protein ~ ., data = meats_long) |>
   update_role(id, new_role = "id") |>
   step_measure_input_long(transmittance, location = vars(channel)) |>
-  step_measure_savitzky_golay(window_side = 5, differentiation_order = 1) |>
+  step_measure_derivative_gap(gap = 3, segment = 3) |>
   step_measure_snv()
 
-processed_long <- bake(prep(rec_for_viz), new_data = NULL)
+processed_long <- bake(prep(rec_viz), new_data = NULL)
 
-library(tidyr)
-library(dplyr)
+sample_ids <- unique(meats_long$id)[1:10]
 
-sample_ids <- unique(meats_long$id)[seq_len(10)]
 raw_plot <- meats_long |>
   filter(id %in% sample_ids) |>
-  transmute(sample_id = id, location = channel, value = transmittance,
-            stage = "Recorded absorbance")
+  transmute(
+    sample_id = id,
+    location = channel,
+    value = transmittance,
+    stage = "Raw absorbance"
+  )
+
 processed_plot <- processed_long |>
   filter(id %in% sample_ids) |>
-  mutate(sample_id = id) |>
+  transmute(sample_id = id, .measures) |>
   unnest(.measures) |>
-  transmute(sample_id, location, value, stage = "First derivative + SNV")
+  mutate(stage = "Gap 1st derivative + SNV")
+
 plot_data <- bind_rows(raw_plot, processed_plot) |>
-  mutate(stage = factor(stage, levels = c(
-    "Recorded absorbance", "First derivative + SNV"
-  )))
+  mutate(
+    stage = factor(
+      stage,
+      levels = c("Raw absorbance", "Gap 1st derivative + SNV")
+    )
+  )
 
 ggplot(plot_data, aes(location, value, group = sample_id)) +
   geom_line(colour = "#0072B2", alpha = 0.55, linewidth = 0.4) +
@@ -143,378 +130,102 @@ ggplot(plot_data, aes(location, value, group = sample_id)) +
   )
 ```
 
-![Two line-chart panels plot spectrometer channel on the horizontal axis
-for the same ten meat samples. The upper panel shows recorded absorbance
-curves with different offsets and broad shapes. The lower panel shows
-the first derivatives after per-sample centering and scaling, with
-positive and negative values around
-zero.](reference/figures/README-visualization-1.png)
+![Two stacked line plots of spectrometer channel versus signal for ten
+meat samples. The top panel shows raw absorbance curves with broad
+baseline offsets; the bottom panel shows the gap first derivatives after
+SNV scaling, centered around zero with sharper spectral
+features.](reference/figures/README-visualization-1.png)
 
-The same ten NIR samples before and after a first derivative and
-standard normal variate (SNV) scaling. The derivative drops five
-channels at each edge; SNV centers and scales each resulting spectrum.
-Each panel has its own response scale.
+Ten NIR spectra from meats_long before and after a gap first derivative
+and SNV scaling.
 
-## Available steps
+## What’s in the package
 
-### Input/output steps
+measure includes over 100 recipe steps and analysis functions. The
+[function
+reference](https://jameshwade.github.io/measure/dev/reference/index.html)
+lists everything; here is how the package is organized:
 
-| Step | Description |
-|----|----|
-| [`step_measure_input_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_wide.md) | Convert wide format (measurements in columns) to internal format |
-| [`step_measure_input_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_input_long.md) | Convert long format (measurements in rows) to internal format |
-| [`step_measure_output_wide()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_wide.md) | Convert back to wide format for modeling |
-| [`step_measure_output_long()`](https://jameshwade.github.io/measure/dev/reference/step_measure_output_long.md) | Convert back to long format |
+- Signal preprocessing: baseline correction (ALS, polynomial, SNIP,
+  rolling ball, airPLS, arPLS, morphological), smoothing and derivatives
+  (moving average, Gaussian, median, Savitzky-Golay, wavelet, Fourier,
+  gap derivatives), scatter correction (SNV, MSC, EMSC, OSC), sample
+  normalization, variable scaling, region trimming and resampling, and
+  chromatogram alignment (shift, DTW, PTW, COW).
+- Peaks and features: peak detection, integration, filtering, and
+  deconvolution (`step_measure_peaks_*()`), plus region integrals, peak
+  ratios, moments, and binning.
+- Calibration, QC, and method validation: weighted calibration curves
+  ([`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md)),
+  single-analyte LC/GC batch quantitation
+  ([`measure_quantify_batch()`](https://jameshwade.github.io/measure/dev/reference/measure_quantify_batch.md)),
+  drift and batch correction, LOD/LOQ, precision and accuracy,
+  Bland-Altman, Deming and Passing-Bablok regression, ISO GUM
+  uncertainty budgets, control charts, and ICH Q2 / bioanalytical
+  acceptance criteria.
+- Structured records and multi-dimensional signals:
+  [`measure_record()`](https://jameshwade.github.io/measure/dev/reference/measure_record.md),
+  [`measure_acquisition()`](https://jameshwade.github.io/measure/dev/reference/measure_acquisition.md),
+  and n-dimensional measurement tables for keeping raw 1D curves, 2D
+  arrays (such as LC-DAD or EEM), and ragged MS scans tied to sample
+  metadata and source files, along with JCAMP-DX import and export.
 
-### Spectral math
+## Practice datasets
 
-| Step | Description |
-|----|----|
-| [`step_measure_absorbance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_absorbance.md) | Convert transmittance to absorbance |
-| [`step_measure_transmittance()`](https://jameshwade.github.io/measure/dev/reference/step_measure_transmittance.md) | Convert absorbance to transmittance |
-| [`step_measure_log()`](https://jameshwade.github.io/measure/dev/reference/step_measure_log.md) | Log transformation with configurable base/offset |
-| [`step_measure_kubelka_munk()`](https://jameshwade.github.io/measure/dev/reference/step_measure_kubelka_munk.md) | Kubelka-Munk transformation for reflectance |
-| [`step_measure_derivative()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative.md) | Simple finite difference derivatives |
-| [`step_measure_derivative_gap()`](https://jameshwade.github.io/measure/dev/reference/step_measure_derivative_gap.md) | Gap (Norris-Williams) derivatives |
-
-### Filtering and scatter correction
-
-| Step | Description |
-|----|----|
-| [`step_measure_savitzky_golay()`](https://jameshwade.github.io/measure/dev/reference/step_measure_savitzky_golay.md) | Smoothing and/or differentiation |
-| [`step_measure_snv()`](https://jameshwade.github.io/measure/dev/reference/step_measure_snv.md) | Standard Normal Variate normalization |
-| [`step_measure_msc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_msc.md) | Multiplicative Scatter Correction |
-| [`step_measure_emsc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_emsc.md) | Extended MSC with wavelength-dependent correction |
-| [`step_measure_osc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_osc.md) | Orthogonal Signal Correction |
-
-### Smoothing and noise reduction
-
-| Step | Description |
-|----|----|
-| [`step_measure_smooth_ma()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_ma.md) | Moving average smoothing |
-| [`step_measure_smooth_median()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_median.md) | Median filter (robust to spikes) |
-| [`step_measure_smooth_gaussian()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_gaussian.md) | Gaussian kernel smoothing |
-| [`step_measure_smooth_wavelet()`](https://jameshwade.github.io/measure/dev/reference/step_measure_smooth_wavelet.md) | Wavelet denoising |
-| [`step_measure_filter_fourier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_filter_fourier.md) | Fourier low-pass/high-pass filtering |
-| [`step_measure_despike()`](https://jameshwade.github.io/measure/dev/reference/step_measure_despike.md) | Spike/outlier detection and removal |
-
-### Sample-wise normalization
-
-| Step | Description |
-|----|----|
-| [`step_measure_normalize_sum()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_sum.md) | Divide by sum (total intensity) |
-| [`step_measure_normalize_max()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_max.md) | Divide by maximum value |
-| [`step_measure_normalize_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_range.md) | Scale to 0-1 range |
-| [`step_measure_normalize_vector()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_vector.md) | L2/Euclidean normalization |
-| [`step_measure_normalize_auc()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_auc.md) | Divide by area under curve |
-| [`step_measure_normalize_peak()`](https://jameshwade.github.io/measure/dev/reference/step_measure_normalize_peak.md) | Normalize by peak region (tunable) |
-
-### Variable-wise scaling
-
-| Step | Description |
-|----|----|
-| [`step_measure_center()`](https://jameshwade.github.io/measure/dev/reference/step_measure_center.md) | Mean centering |
-| [`step_measure_scale_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_auto.md) | Auto-scaling (z-score) |
-| [`step_measure_scale_pareto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_pareto.md) | Pareto scaling |
-| [`step_measure_scale_range()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_range.md) | Range scaling |
-| [`step_measure_scale_vast()`](https://jameshwade.github.io/measure/dev/reference/step_measure_scale_vast.md) | VAST scaling |
-
-### Baseline correction
-
-| Step | Description |
-|----|----|
-| [`step_measure_baseline_als()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_als.md) | Asymmetric least squares |
-| [`step_measure_baseline_poly()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_poly.md) | Polynomial baseline fitting |
-| [`step_measure_baseline_rf()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rf.md) | Rolling ball/LOESS baseline |
-| [`step_measure_baseline_rolling()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_rolling.md) | Rolling ball algorithm |
-| [`step_measure_baseline_airpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_airpls.md) | Adaptive Iteratively Reweighted PLS |
-| [`step_measure_baseline_arpls()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_arpls.md) | Asymmetrically Reweighted PLS |
-| [`step_measure_baseline_snip()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_snip.md) | SNIP (Statistics-sensitive Non-linear Iterative Peak-clipping) |
-| [`step_measure_baseline_tophat()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_tophat.md) | Top-hat morphological filter |
-| [`step_measure_baseline_morph()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_morph.md) | Iterative morphological correction |
-| [`step_measure_baseline_minima()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_minima.md) | Local minima interpolation |
-| [`step_measure_baseline_auto()`](https://jameshwade.github.io/measure/dev/reference/step_measure_baseline_auto.md) | Automatic method selection |
-| [`step_measure_detrend()`](https://jameshwade.github.io/measure/dev/reference/step_measure_detrend.md) | Polynomial detrending |
-
-### Reference corrections
-
-| Step | Description |
-|----|----|
-| [`step_measure_subtract_blank()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_blank.md) | Blank/background subtraction |
-| [`step_measure_subtract_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_subtract_reference.md) | Reference spectrum subtraction |
-| [`step_measure_ratio_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratio_reference.md) | Reference ratio with optional blank |
-
-### Region operations
-
-| Step | Description |
-|----|----|
-| [`step_measure_trim()`](https://jameshwade.github.io/measure/dev/reference/step_measure_trim.md) | Keep measurements within specified x-range |
-| [`step_measure_exclude()`](https://jameshwade.github.io/measure/dev/reference/step_measure_exclude.md) | Remove measurements within specified range(s) |
-| [`step_measure_resample()`](https://jameshwade.github.io/measure/dev/reference/step_measure_resample.md) | Interpolate to new regular grid |
-
-### Alignment and registration
-
-| Step | Description |
-|----|----|
-| [`step_measure_align_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_shift.md) | Cross-correlation shift alignment |
-| [`step_measure_align_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_reference.md) | Align to external reference spectrum |
-| [`step_measure_align_dtw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_dtw.md) | Dynamic Time Warping alignment |
-| [`step_measure_align_ptw()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_ptw.md) | Parametric Time Warping |
-| [`step_measure_align_cow()`](https://jameshwade.github.io/measure/dev/reference/step_measure_align_cow.md) | Correlation Optimized Warping (tunable) |
-
-### Quality control
-
-| Step | Description |
-|----|----|
-| [`step_measure_qc_snr()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_snr.md) | Calculate signal-to-noise ratio |
-| [`step_measure_qc_saturated()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_saturated.md) | Detect saturated measurements |
-| [`step_measure_qc_outlier()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_outlier.md) | Detect outlier samples |
-| [`step_measure_impute()`](https://jameshwade.github.io/measure/dev/reference/step_measure_impute.md) | Interpolate missing values |
-
-### Peak operations
-
-| Step | Description |
-|----|----|
-| [`step_measure_peaks_detect()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_detect.md) | Detect peaks using prominence or derivative methods |
-| [`step_measure_peaks_integrate()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_integrate.md) | Calculate peak areas |
-| [`step_measure_peaks_filter()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_filter.md) | Filter peaks by height, area, or count |
-| [`step_measure_peaks_deconvolve()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_deconvolve.md) | Deconvolve overlapping peaks |
-| [`step_measure_peaks_to_table()`](https://jameshwade.github.io/measure/dev/reference/step_measure_peaks_to_table.md) | Convert peaks to wide format for modeling |
-
-### SEC/GPC analysis
-
-Use [measure.sec](https://jameshwade.github.io/measure.sec/) for SEC
-detector processing, molecular-weight calibration and distribution
-calculations.
-
-### Feature engineering
-
-| Step | Description |
-|----|----|
-| [`step_measure_integrals()`](https://jameshwade.github.io/measure/dev/reference/step_measure_integrals.md) | Calculate integrated areas for specified regions |
-| [`step_measure_ratios()`](https://jameshwade.github.io/measure/dev/reference/step_measure_ratios.md) | Calculate ratios between integrated regions |
-| [`step_measure_moments()`](https://jameshwade.github.io/measure/dev/reference/step_measure_moments.md) | Calculate statistical moments from spectra |
-| [`step_measure_bin()`](https://jameshwade.github.io/measure/dev/reference/step_measure_bin.md) | Reduce spectrum to fewer points via binning |
-
-### Data augmentation
-
-| Step | Description |
-|----|----|
-| [`step_measure_augment_noise()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_noise.md) | Add random noise for training augmentation |
-| [`step_measure_augment_shift()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_shift.md) | Random x-axis shifts for shift invariance |
-| [`step_measure_augment_scale()`](https://jameshwade.github.io/measure/dev/reference/step_measure_augment_scale.md) | Random intensity scaling |
-
-### Drift and batch correction
-
-| Step/Function | Description |
-|----|----|
-| [`step_measure_drift_qc_loess()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_qc_loess.md) | QC-RLSC drift correction using LOESS |
-| [`step_measure_drift_linear()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_linear.md) | Linear drift correction |
-| [`step_measure_drift_spline()`](https://jameshwade.github.io/measure/dev/reference/step_measure_drift_spline.md) | Spline-based drift correction |
-| [`step_measure_qc_bracket()`](https://jameshwade.github.io/measure/dev/reference/step_measure_qc_bracket.md) | QC bracketing interpolation |
-| [`step_measure_batch_reference()`](https://jameshwade.github.io/measure/dev/reference/step_measure_batch_reference.md) | Reference-based batch correction |
-| [`measure_detect_drift()`](https://jameshwade.github.io/measure/dev/reference/measure_detect_drift.md) | Detect significant drift in QC samples |
-
-## Analytical validation functions
-
-Validation functions calculate calibration diagnostics, precision,
-recovery, uncertainty and control limits. Select acceptance criteria for
-the intended method and check the assumptions of each calculation.
-
-### Calibration and quantitation
-
-| Function | Description |
-|----|----|
-| [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md) | Fit weighted calibration curves (linear/quadratic) |
-| [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md) | Predict concentrations with uncertainty |
-| [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md) | Continuing calibration verification |
-| [`measure_lod()`](https://jameshwade.github.io/measure/dev/reference/measure_lod.md) / [`measure_loq()`](https://jameshwade.github.io/measure/dev/reference/measure_loq.md) | Detection and quantitation limits |
-
-### Precision and accuracy
-
-| Function | Description |
-|----|----|
-| [`measure_repeatability()`](https://jameshwade.github.io/measure/dev/reference/measure_repeatability.md) | Within-run precision |
-| [`measure_intermediate_precision()`](https://jameshwade.github.io/measure/dev/reference/measure_intermediate_precision.md) | Between-run precision with variance components |
-| [`measure_reproducibility()`](https://jameshwade.github.io/measure/dev/reference/measure_reproducibility.md) | Between-lab precision |
-| [`measure_gage_rr()`](https://jameshwade.github.io/measure/dev/reference/measure_gage_rr.md) | Gage R&R / Measurement System Analysis |
-| [`measure_accuracy()`](https://jameshwade.github.io/measure/dev/reference/measure_accuracy.md) | Bias, recovery, and accuracy assessment |
-| [`measure_linearity()`](https://jameshwade.github.io/measure/dev/reference/measure_linearity.md) | Linearity with lack-of-fit testing |
-| [`measure_carryover()`](https://jameshwade.github.io/measure/dev/reference/measure_carryover.md) | Carryover evaluation |
-
-### Method comparison
-
-| Function | Description |
-|----|----|
-| [`measure_bland_altman()`](https://jameshwade.github.io/measure/dev/reference/measure_bland_altman.md) | Bland-Altman analysis with limits of agreement |
-| [`measure_deming_regression()`](https://jameshwade.github.io/measure/dev/reference/measure_deming_regression.md) | Deming regression for method comparison |
-| [`measure_passing_bablok()`](https://jameshwade.github.io/measure/dev/reference/measure_passing_bablok.md) | Passing-Bablok non-parametric regression |
-| [`measure_proficiency_score()`](https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.md) | z-scores, En scores, zeta scores for PT |
-
-### Matrix effects and sample preparation QC
-
-| Function/Step | Description |
-|----|----|
-| [`measure_matrix_effect()`](https://jameshwade.github.io/measure/dev/reference/measure_matrix_effect.md) | Quantify ion suppression/enhancement |
-| [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md) | Standard addition correction |
-| [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md) | Back-calculate diluted concentrations |
-| [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md) | Surrogate/internal standard recovery |
-
-### Uncertainty and quality control
-
-| Function | Description |
-|----|----|
-| [`measure_uncertainty_budget()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty_budget.md) | ISO GUM uncertainty budgets |
-| [`measure_uncertainty()`](https://jameshwade.github.io/measure/dev/reference/measure_uncertainty.md) | Combined and expanded uncertainty |
-| [`measure_control_limits()`](https://jameshwade.github.io/measure/dev/reference/measure_control_limits.md) | Shewhart, EWMA, or CUSUM limits |
-| [`measure_control_chart()`](https://jameshwade.github.io/measure/dev/reference/measure_control_chart.md) | Westgard multi-rule control charts |
-| [`measure_system_suitability()`](https://jameshwade.github.io/measure/dev/reference/measure_system_suitability.md) | System suitability testing |
-
-### Acceptance criteria
-
-| Function | Description |
-|----|----|
-| [`measure_criteria()`](https://jameshwade.github.io/measure/dev/reference/measure_criteria.md) | Define acceptance criteria |
-| [`measure_assess()`](https://jameshwade.github.io/measure/dev/reference/measure_assess.md) | Evaluate data against criteria |
-| [`criteria_bioanalytical()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) | FDA/EMA bioanalytical presets |
-| [`criteria_ich_q2()`](https://jameshwade.github.io/measure/dev/reference/criteria_presets.md) | ICH Q2 validation presets |
-
-## Learning more
-
-- [Preprocess
-  spectra](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html)
-- [Choose a baseline
-  correction](https://jameshwade.github.io/measure/dev/articles/howto-baseline.html)
-- [Work with multidimensional
-  arrays](https://jameshwade.github.io/measure/dev/articles/multidimensional-measurements.html)
-- [Retain DAD/MS acquisitions and trace
-  contributors](https://jameshwade.github.io/measure/dev/articles/acquisition-ms.html)
-- [Assess analytical validation
-  results](https://jameshwade.github.io/measure/dev/articles/reference-validation.html)
-
-## Datasets
-
-### Included datasets
-
-The package includes datasets for examples and testing:
+The package ships with small datasets for examples and testing:
 
 | Dataset | Technique | Samples | Description |
 |----|----|----|----|
-| `meats_long` | NIR | 215 | NIR absorbance spectra of meat samples (from modeldata) |
-| `bioreactors_small` | Raman | 210 | Raman spectra from 15 small-scale bioreactors |
-| `bioreactors_large` | Raman | 42 | Raman spectra from 3 large-scale bioreactors |
-| `hplc_chromatograms` | HPLC-UV | 20 | Simulated HPLC chromatograms with 5 compounds |
-| `sec_chromatograms` | SEC/GPC | 10 | Simulated SEC chromatograms (5 standards + 5 polymers) |
-| `sec_calibration` | SEC/GPC | 5 | Calibration standards for molecular weight curves |
-| `maldi_spectra` | MALDI-TOF | 16 | Simulated mass spectra (4 groups × 4 replicates) |
+| `meats_long` | NIR | 215 | Meat composition spectra (long format of [`modeldata::meats`](https://modeldata.tidymodels.org/reference/meats.html)) |
+| `bioreactors_small` / `bioreactors_large` | Raman | 210 / 42 | Bioreactor glucose monitoring (`data(glucose_bioreactors)`) |
+| `hplc_chromatograms` | HPLC-UV | 20 | Simulated chromatograms with five compounds |
+| `sec_chromatograms` / `sec_calibration` | SEC/GPC | 10 / 5 | Simulated polymer chromatograms and MW standards |
+| `maldi_spectra` | MALDI-TOF | 16 | Simulated mass spectra across four groups |
 
-``` r
+## Learn more
 
-# Load datasets
-data(meats_long)
-data(glucose_bioreactors)  # loads bioreactors_small and bioreactors_large
-data(hplc_chromatograms)
-data(sec_chromatograms)
-data(sec_calibration)
-data(maldi_spectra)
-```
+- [Getting started with spectral
+  preprocessing](https://jameshwade.github.io/measure/dev/articles/tutorial-getting-started.html)
+- [Choosing a baseline correction
+  method](https://jameshwade.github.io/measure/dev/articles/howto-baseline.html)
+- [Integrating measure with tidymodels and
+  tune](https://jameshwade.github.io/measure/dev/articles/howto-tidymodels.html)
+- [Quantifying a scalar LC
+  batch](https://jameshwade.github.io/measure/dev/articles/howto-lc-batch.html)
+- [Measuring an infrared band from
+  JCAMP-DX](https://jameshwade.github.io/measure/dev/articles/howto-ir-band.html)
+- [Working with multidimensional
+  data](https://jameshwade.github.io/measure/dev/articles/multidimensional-measurements.html)
+  and [DAD/MS
+  acquisitions](https://jameshwade.github.io/measure/dev/articles/acquisition-ms.html)
+- [Analytical validation
+  reference](https://jameshwade.github.io/measure/dev/articles/reference-validation.html)
 
-### External data sources
+## Companion tools and related packages
 
-For additional test data beyond what’s included with measure, these
-sources provide publicly available analytical measurement data:
+- [measure.sec](https://jameshwade.github.io/measure.sec/) adds SEC/GPC
+  detector processing and molecular-weight distribution calculations
+  through measure’s technique pack registry.
+- [measure-service](https://jameshwade.github.io/measure-service/)
+  exposes measure and measure.sec workflows over MCP for automated and
+  assistant-driven lab pipelines.
+- The [Python
+  package](https://github.com/JamesHWade/measure/tree/main/python) in
+  this repository implements SNV, MSC, and Savitzky-Golay steps for
+  `mlfeatures`.
 
-R packages with spectral data:
-
-| Package | Dataset | Technique | Description |
-|----|----|----|----|
-| [modeldata](https://modeldata.tidymodels.org/) | `meats` | NIR | Meat composition (wide format version) |
-| [prospectr](https://github.com/l-ramirez-lopez/prospectr) | `NIRsoil` | NIR | Soil analysis with 825 samples |
-| [ChemoSpec](https://bryanhanson.github.io/ChemoSpec/) | Various | IR, NMR | Multiple spectroscopy datasets |
-| [hyperSpec](http://hyperspec.r-forge.r-project.org/) | Various | Raman, IR | Hyperspectral data examples |
-
-``` r
-
-# Example: Load NIRsoil from prospectr
-# install.packages("prospectr")
-data(NIRsoil, package = "prospectr")
-```
-
-Online repositories:
-
-- [Mendeley Data](https://data.mendeley.com) - Search “spectroscopy”,
-  “chromatography”, or “mass spectrometry”
-- [Zenodo](https://zenodo.org) - Open science data repository
-- [Kaggle Datasets](https://www.kaggle.com/datasets) -
-  Community-contributed datasets
-- [NIST Chemistry WebBook](https://webbook.nist.gov/chemistry/) -
-  Reference spectra (IR, MS, UV-Vis)
-- [SDBS](https://sdbs.db.aist.go.jp/) - Spectral Database for Organic
-  Compounds (NMR, IR, MS)
-
-**Domain-Specific Databases:**
-
-| Database | Data Type | URL |
-|----|----|----|
-| MassBank | Mass spectra | <https://massbank.eu/MassBank/> |
-| HMDB | NMR, MS metabolomics | <https://hmdb.ca/> |
-| NMRShiftDB | NMR spectra | <https://nmrshiftdb.nmr.uni-koeln.de/> |
-| Crystallography Open Database | XRD patterns | <https://www.crystallography.net/cod/> |
-
-## The `measure` ecosystem
-
-`measure` is the core analytical package in a modular measurement
-ecosystem. Scientific calculations live in reusable packages that can be
-tested independently, while agent protocols and experiment records live
-in the service layer:
-
-- [**`measure`**](https://jameshwade.github.io/measure/): Core
-  measurement data structures (`measure_tbl`, `measure_nd_tbl`,
-  `measure_record`, `measure_acquisition`), spectral/chromatographic
-  preprocessing, peak operations, calibration, and analytical
-  validation.
-- [**`measure.sec`**](https://jameshwade.github.io/measure.sec/):
-  Technique pack for Size Exclusion Chromatography (SEC/GPC), registered
-  via `measure`’s pack registry. Future technique packs (such as
-  `measure.lc` and `measure.ms`) follow the same extension boundary.
-- [**`measure-service`**](https://jameshwade.github.io/measure-service/):
-  Connects AI assistants (Claude, Codex, Cursor) and automated workflows
-  to `measure` and `measure.sec` over MCP. Process chromatograms and
-  sample sequences, calculate SEC/GPC molecular weights, inspect LC–DAD
-  spectra and LC–MS ion chromatograms, check LC gradient methods, and
-  keep lab results linked to their raw runs.
-
-## Related packages
-
-measure builds on the [tidymodels](https://www.tidymodels.org/)
-ecosystem:
-
-- [recipes](https://recipes.tidymodels.org/) - The foundation for
-  preprocessing pipelines
-- [parsnip](https://parsnip.tidymodels.org/) - Unified modeling
-  interface
-- [workflows](https://workflows.tidymodels.org/) - Bundle preprocessing
-  and modeling
-- [tune](https://tune.tidymodels.org/) - Hyperparameter tuning (works
-  with measure’s tunable steps!)
-
-For spectral analysis in R, you might also find these packages useful:
-
-- [prospectr](https://github.com/l-ramirez-lopez/prospectr) - Spectral
-  preprocessing functions
-- [ChemoSpec](https://bryanhanson.github.io/ChemoSpec/) - Exploratory
-  chemometrics
-- [mdatools](https://mdatools.com/) - Multivariate data analysis
+If you work with spectral data in R outside tidymodels,
+[prospectr](https://github.com/l-ramirez-lopez/prospectr),
+[ChemoSpec](https://bryanhanson.github.io/ChemoSpec/), and
+[mdatools](https://mdatools.com/) are also worth a look.
 
 ## Contributing
 
-This package is under active development. Contributions are welcome!
-Please see the [contributing
-guidelines](https://jameshwade.github.io/measure/CONTRIBUTING.html).
+Bug reports, feature requests, and pull requests are welcome. See the
+[contributing
+guide](https://jameshwade.github.io/measure/CONTRIBUTING.html) to get
+started.
 
-## Code of conduct
-
-Please note that the measure project is released with a [Contributor
-Code of
+Please note that measure is released with a [Contributor Code of
 Conduct](https://jameshwade.github.io/measure/CODE_OF_CONDUCT.html). By
 contributing to this project, you agree to abide by its terms.
