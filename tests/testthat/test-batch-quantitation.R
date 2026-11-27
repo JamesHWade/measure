@@ -381,3 +381,130 @@ test_that("measure_quantify_batch validates arguments and manifest strictly", {
     "At least 3 standard"
   )
 })
+
+test_that("measure_quantify_batch fits diluted standards using in-vial concentrations", {
+  times <- seq(3, 7, by = 0.05)
+  make_trace <- function(peak_area) {
+    val <- 0.2 +
+      (peak_area / (0.12 * sqrt(2 * pi))) *
+        exp(-0.5 * ((times - 5.0) / 0.12)^2)
+    new_measure_tbl(times, val)
+  }
+
+  ids <- c("STD-1", "STD-2", "STD-3", "QC-1", "UNK-1")
+  # Standards prepared at 2x dilution from 20, 50, 100 mg/L stocks -> 10, 25, 50 in-vial
+  # QC prepared at 2x dilution from 40 mg/L stock -> 20 in-vial
+  # Unknown injected neat (1x) at 30 mg/L -> 30 in-vial
+  in_vial <- c(10, 25, 50, 20, 30)
+  # Small noise avoids stats::summary.lm()'s "essentially perfect fit" warning
+  peak_areas <- c(20.15, 49.80, 100.10, 40.00, 60.00)
+  rec <- measure_record(
+    samples = tibble::tibble(sample_id = ids),
+    injections = tibble::tibble(injection_id = ids, sample_id = ids),
+    channels = tibble::tibble(channel_id = "uv", channel_name = "UV"),
+    curves = tibble::tibble(
+      curve_id = paste0("C-", ids),
+      injection_id = ids,
+      channel_id = rep("uv", length(ids)),
+      .measures = lapply(peak_areas, make_trace)
+    )
+  )
+  manifest <- tibble::tibble(
+    injection_id = ids,
+    injection_type = c("standard", "standard", "standard", "qc", "unknown"),
+    nominal_conc = c(20, 50, 100, 40, NA_real_),
+    dilution_factor = c(2, 2, 2, 2, 1)
+  )
+
+  batch <- measure_quantify_batch(
+    rec,
+    manifest,
+    window = c(4.5, 5.5),
+    min_prominence = 1.0
+  )
+  res <- summary(batch)
+
+  expect_equal(batch$method$lloq, 10)
+  expect_equal(batch$method$uloq, 50)
+  expect_equal(
+    unname(stats::coef(batch$calibration$model)[[2L]]),
+    2.0,
+    tolerance = 0.02
+  )
+  expect_equal(res$estimated_conc, in_vial, tolerance = 0.02)
+  expect_equal(
+    res$reported_conc,
+    c(20, 50, 100, 40, 30),
+    tolerance = 0.02
+  )
+  expect_equal(
+    res$outcome,
+    c("calibrated", "calibrated", "calibrated", "qc_pass", "ok")
+  )
+  expect_equal(
+    res$qc_status,
+    c("pass", "pass", "pass", "pass", "reported")
+  )
+  expect_true(attr(batch$verification, "overall_pass"))
+})
+
+test_that("measure_quantify_batch preserves peak source row spans for descending locations", {
+  fixture <- .load_lc_control_batch()
+  asc_batch <- measure_quantify_batch(
+    fixture$record,
+    fixture$manifest,
+    window = c(4.8, 5.6),
+    min_prominence = 1.0
+  )
+
+  raw_df <- utils::read.csv(fixture$data_path, stringsAsFactors = FALSE)
+  split_df <- split(
+    raw_df,
+    factor(raw_df$injection_id, levels = unique(raw_df$injection_id))
+  )
+  desc_df <- do.call(
+    rbind,
+    lapply(split_df, function(d) d[rev(seq_len(nrow(d))), , drop = FALSE])
+  )
+  rownames(desc_df) <- NULL
+
+  tmp_csv <- withr::local_tempfile(fileext = ".csv")
+  utils::write.csv(desc_df, tmp_csv, row.names = FALSE)
+  desc_rec <- read_measure_record_delim(
+    tmp_csv,
+    .lc_control_columns(),
+    source_id = "lc-batch-desc"
+  )
+
+  desc_batch <- measure_quantify_batch(
+    desc_rec,
+    fixture$manifest,
+    window = c(4.8, 5.6),
+    min_prominence = 1.0
+  )
+
+  asc_res <- summary(asc_batch)
+  desc_res <- summary(desc_batch)
+  unique_idx <- which(desc_res$peak_status == "unique")
+
+  expect_false(anyNA(desc_res$peak_source_row_start[unique_idx]))
+  expect_false(anyNA(desc_res$peak_source_row_end[unique_idx]))
+  expect_true(all(
+    desc_res$peak_source_row_start[unique_idx] >=
+      desc_res$source_row_start[unique_idx]
+  ))
+  expect_true(all(
+    desc_res$peak_source_row_end[unique_idx] <=
+      desc_res$source_row_end[unique_idx]
+  ))
+  expect_equal(
+    desc_res$area[unique_idx],
+    asc_res$area[unique_idx],
+    tolerance = 1e-9
+  )
+  expect_equal(
+    desc_res$reported_conc,
+    asc_res$reported_conc,
+    tolerance = 1e-9
+  )
+})

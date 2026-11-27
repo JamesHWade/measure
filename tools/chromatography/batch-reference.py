@@ -101,7 +101,8 @@ def integrate_local_trapezoid(
     right_base: float,
 ) -> float:
     """Integrate signal above the straight line joining the observed endpoints."""
-    pts = [(x, y) for x, y in zip(locations, values) if left_base <= x <= right_base]
+    lo, hi = sorted((left_base, right_base))
+    pts = sorted((x, y) for x, y in zip(locations, values) if lo <= x <= hi)
     if len(pts) < 2:
         return math.nan
     x0, y0 = pts[0]
@@ -206,14 +207,11 @@ def main() -> None:
         }
         if len(in_win) == 1:
             pk = in_win[0]
+            lo, hi = sorted((pk["left_base"], pk["right_base"]))
             area = integrate_local_trapezoid(
                 locs, vals, pk["left_base"], pk["right_base"]
             )
-            pk_rows = [
-                r
-                for x, r in zip(locs, src_rows)
-                if pk["left_base"] <= x <= pk["right_base"]
-            ]
+            pk_rows = [r for x, r in zip(locs, src_rows) if lo <= x <= hi]
             item.update(
                 {
                     "peak_location": pk["location"],
@@ -231,12 +229,13 @@ def main() -> None:
         for d in detected
         if d["injection_type"] == "standard" and d["peak_status"] == "unique"
     ]
+    std_in_vial = [d["nominal_conc"] / d["dilution_factor"] for d in stds]
     intercept, slope, r_squared = ols_fit(
-        [d["nominal_conc"] for d in stds],
+        std_in_vial,
         [d["area"] for d in stds],
     )
-    lloq = min(d["nominal_conc"] for d in stds if d["nominal_conc"] > 0)
-    uloq = max(d["nominal_conc"] for d in stds)
+    lloq = min(c for c in std_in_vial if c > 0)
+    uloq = max(std_in_vial)
     blank_max_area = (blank_max_pct_lloq / 100.0) * abs(intercept + slope * lloq)
 
     rows = []

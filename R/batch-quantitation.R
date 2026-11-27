@@ -391,8 +391,9 @@ measure_quantify_batch <- function(
 
       curve_tbl <- baked$.measures[[i]]
       src_rows <- baked$.source_rows[[i]]
-      in_peak <- curve_tbl$location >= left_base[[i]] &
-        curve_tbl$location <= right_base[[i]]
+      peak_bounds <- sort(c(left_base[[i]], right_base[[i]]))
+      in_peak <- curve_tbl$location >= peak_bounds[[1L]] &
+        curve_tbl$location <= peak_bounds[[2L]]
       peak_rows <- src_rows[in_peak]
       peak_rows <- peak_rows[!is.na(peak_rows)]
       if (length(peak_rows) > 0L) {
@@ -404,7 +405,7 @@ measure_quantify_batch <- function(
     }
   }
 
-  # Fit calibration curve on standards with uniquely detected peaks
+  # Fit calibration curve on standards with uniquely detected peaks (in-vial conc)
   std_fit_idx <- baked$injection_type == "standard" &
     peak_status == "unique" &
     is.finite(area) &
@@ -418,7 +419,8 @@ measure_quantify_batch <- function(
 
   cal_input <- tibble::tibble(
     injection_id = baked$injection_id[std_fit_idx],
-    nominal_conc = baked$nominal_conc[std_fit_idx],
+    nominal_conc = baked$nominal_conc[std_fit_idx] /
+      baked$dilution_factor[std_fit_idx],
     area = area[std_fit_idx]
   )
   calibration <- measure_calibration_fit(
