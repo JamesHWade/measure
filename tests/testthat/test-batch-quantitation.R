@@ -508,3 +508,92 @@ test_that("measure_quantify_batch preserves peak source row spans for descending
     tolerance = 1e-9
   )
 })
+
+test_that("measure_quantify_batch marks non-finite quadratic standard predictions as fail", {
+  times <- seq(3, 7, by = 0.05)
+  make_trace <- function(peak_area) {
+    val <- 0.2 +
+      (peak_area / (0.12 * sqrt(2 * pi))) *
+        exp(-0.5 * ((times - 5.0) / 0.12)^2)
+    new_measure_tbl(times, val)
+  }
+
+  ids <- c("STD-1", "STD-2", "STD-3", "STD-4", "STD-5", "UNK-1")
+  # Areas c(9.9, 11, 14, 19, 26) for conc 1:5 place STD-1 below the fitted
+  # parabola's vertex, yielding NA from .inverse_predict_quadratic().
+  areas <- c(9.9, 11, 14, 19, 26, 16)
+  rec <- measure_record(
+    samples = tibble::tibble(sample_id = ids),
+    injections = tibble::tibble(injection_id = ids, sample_id = ids),
+    channels = tibble::tibble(channel_id = "uv", channel_name = "UV"),
+    curves = tibble::tibble(
+      curve_id = paste0("C-", ids),
+      injection_id = ids,
+      channel_id = rep("uv", length(ids)),
+      .measures = lapply(areas, make_trace)
+    )
+  )
+  manifest <- tibble::tibble(
+    injection_id = ids,
+    injection_type = c(rep("standard", 5L), "unknown"),
+    nominal_conc = c(1, 2, 3, 4, 5, NA_real_),
+    dilution_factor = rep(1, 6L)
+  )
+
+  batch <- measure_quantify_batch(
+    rec,
+    manifest,
+    window = c(4.5, 5.5),
+    min_prominence = 1.0,
+    model = "quadratic"
+  )
+  res <- summary(batch)
+
+  expect_true(is.na(res$estimated_conc[[1L]]))
+  expect_true(is.na(res$deviation_pct[[1L]]))
+  expect_equal(res$outcome[[1L]], "calibrated")
+  expect_equal(res$qc_status[[1L]], "fail")
+  expect_equal(res$outcome[[6L]], "ok")
+  expect_equal(res$qc_status[[6L]], "reported")
+  expect_true(is.finite(res$reported_conc[[6L]]))
+})
+
+test_that("measure_quantify_batch rejects incompatible axis or signal units across batch curves", {
+  fixture <- .load_lc_control_batch()
+
+  bad_sig <- fixture$record
+  bad_sig$curves$value_unit[[9L]] <- "AU"
+  expect_error(
+    measure_quantify_batch(
+      bad_sig,
+      fixture$manifest,
+      window = c(4.8, 5.6),
+      min_prominence = 1.0
+    ),
+    "incompatible signal units"
+  )
+
+  bad_axis <- fixture$record
+  bad_axis$curves$axis_unit[[9L]] <- "s"
+  expect_error(
+    measure_quantify_batch(
+      bad_axis,
+      fixture$manifest,
+      window = c(4.8, 5.6),
+      min_prominence = 1.0
+    ),
+    "incompatible axis units"
+  )
+
+  partial_sig <- fixture$record
+  partial_sig$curves$value_unit[[9L]] <- NA_character_
+  expect_error(
+    measure_quantify_batch(
+      partial_sig,
+      fixture$manifest,
+      window = c(4.8, 5.6),
+      min_prominence = 1.0
+    ),
+    "incompatible signal units"
+  )
+})

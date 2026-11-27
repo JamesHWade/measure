@@ -313,6 +313,7 @@ measure_quantify_batch <- function(
   batch_curves$injection_type <- manifest_tbl$injection_type
   batch_curves$nominal_conc <- manifest_tbl$nominal_conc
   batch_curves$dilution_factor <- manifest_tbl$dilution_factor
+  .validate_batch_curve_units(batch_curves)
 
   # Run core peak detection + integration recipe on the scalar curves
   id_cols <- setdiff(names(batch_curves), ".measures")
@@ -507,13 +508,20 @@ measure_quantify_batch <- function(
         if (is.finite(nom) && nom > 0) {
           accuracy_pct[[i]] <- 100 * reported_conc[[i]] / nom
           deviation_pct[[i]] <- 100 * (reported_conc[[i]] - nom) / nom
-          qc_status[[i]] <- if (abs(deviation_pct[[i]]) <= qc_acceptance_pct) {
+          qc_status[[i]] <- if (
+            is.finite(deviation_pct[[i]]) &&
+              abs(deviation_pct[[i]]) <= qc_acceptance_pct
+          ) {
             "pass"
           } else {
             "fail"
           }
         } else {
-          qc_status[[i]] <- "pass"
+          qc_status[[i]] <- if (is.finite(estimated_conc[[i]])) {
+            "pass"
+          } else {
+            "fail"
+          }
         }
         outcome[[i]] <- "calibrated"
       }
@@ -1156,4 +1164,36 @@ measure_report_sections.measure_batch_results <- function(x, ...) {
     nominal_conc = nom,
     dilution_factor = dil
   )
+}
+
+.validate_batch_curve_units <- function(
+  batch_curves,
+  call = rlang::caller_env()
+) {
+  .check_batch_unit_column(batch_curves$axis_unit, "axis", call = call)
+  .check_batch_unit_column(batch_curves$value_unit, "signal", call = call)
+  invisible(NULL)
+}
+
+.check_batch_unit_column <- function(
+  values,
+  field_label,
+  call = rlang::caller_env()
+) {
+  normalized <- trimws(as.character(values))
+  normalized[is.na(normalized) | !nzchar(normalized)] <- NA_character_
+  uniq <- unique(normalized)
+  if (length(uniq) > 1L) {
+    shown <- uniq
+    shown[is.na(shown)] <- "<undeclared>"
+    cli::cli_abort(
+      c(
+        "Selected batch curves have incompatible {field_label} units.",
+        "x" = "Found {length(uniq)} distinct {field_label} unit{?s}: {.val {shown}}.",
+        "i" = "Convert all curves to a common {field_label} unit before running {.fn measure_quantify_batch}."
+      ),
+      call = call
+    )
+  }
+  invisible(NULL)
 }
