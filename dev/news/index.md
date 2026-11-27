@@ -2,6 +2,36 @@
 
 ## measure 0.0.1.9004
 
+- [`measure_record_curves()`](https://jameshwade.github.io/measure/dev/reference/measure_record_curves.md)
+  extracts a provenance-linked, recipe-ready curve table from a
+  `measure_record`, and
+  [`measure_quantify_batch()`](https://jameshwade.github.io/measure/dev/reference/measure_quantify_batch.md)
+  runs external calibration, dilution back-calculation, QC verification,
+  and report export over a scalar chromatography batch with explicit
+  missing, interfered, blank, and out-of-range outcomes
+  ([\#203](https://github.com/JamesHWade/measure/issues/203),
+  [\#81](https://github.com/JamesHWade/measure/issues/81),
+  [\#84](https://github.com/JamesHWade/measure/issues/84)).
+
+- [`measure_calibration_fit()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_fit.md)
+  now accepts optional `revision` and `conc_unit` metadata, records
+  `conc_range`, and aligns custom numeric `weights` across
+  `sample_type_col` and `NA` filtering.
+  [`measure_calibration_predict()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_predict.md)
+  adds optional `flag_range = TRUE` classification and safely handles
+  `NA` responses for quadratic models.
+  [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)
+  now fails `overall_pass` when any QC response is missing.
+
+- Fixed [`print()`](https://rdrr.io/r/base/print.html) pluralization
+  formatting in
+  [`step_measure_dilution_correct()`](https://jameshwade.github.io/measure/dev/reference/step_measure_dilution_correct.md),
+  [`step_measure_surrogate_recovery()`](https://jameshwade.github.io/measure/dev/reference/step_measure_surrogate_recovery.md),
+  and
+  [`step_measure_standard_addition()`](https://jameshwade.github.io/measure/dev/reference/step_measure_standard_addition.md),
+  and ensured missing assessment rows fail validation report status
+  checks.
+
 - The Python companion package `measure-spectra` supports spectroscopy
   preprocessing in mlfeatures and scikit-learn pipelines
   ([\#208](https://github.com/JamesHWade/measure/issues/208)).

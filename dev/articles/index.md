@@ -17,6 +17,8 @@ Task-oriented guides for solving specific problems
   correction](https://jameshwade.github.io/measure/dev/articles/howto-baseline.md):
 - [How-to: report an infrared
   band](https://jameshwade.github.io/measure/dev/articles/howto-ir-band.md):
+- [How-to: quantify an externally calibrated scalar chromatography
+  batch](https://jameshwade.github.io/measure/dev/articles/howto-lc-batch.md):
 - [How-to: extend measure with a technique
   pack](https://jameshwade.github.io/measure/dev/articles/howto-technique-packs.md):
 - [How-to: integrating with

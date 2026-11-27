@@ -12,6 +12,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-baseline.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-data-organization.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-ir-band.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/articles/howto-lc-batch.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-technique-packs.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/howto-tidymodels.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/articles/index.html</loc></url>
@@ -31,6 +32,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/assess_deconv_quality.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/augment.measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot-measure.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_batch_results.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_bland_altman.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/autoplot.measure_control_chart.html</loc></url>
@@ -76,6 +78,7 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/infer_axis_type.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/initialize_peak_params.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_acquisition.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_batch_results.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_calibration.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_list.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/is_measure_nd_list.html</loc></url>
@@ -130,8 +133,10 @@
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_proficiency_score.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_project.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_quality_summary.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_quantify_batch.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_record.html</loc></url>
+<url><loc>https://jameshwade.github.io/measure/dev/reference/measure_record_curves.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_record_from_long.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_repeatability.html</loc></url>
 <url><loc>https://jameshwade.github.io/measure/dev/reference/measure_report_sections.html</loc></url>

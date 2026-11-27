@@ -11,6 +11,9 @@ measure_calibration_predict(
   newdata,
   interval = c("none", "confidence", "prediction"),
   level = 0.95,
+  flag_range = FALSE,
+  lloq = NULL,
+  uloq = NULL,
   ...
 )
 ```
@@ -44,6 +47,23 @@ measure_calibration_predict(
 
   Confidence level for intervals (default 0.95).
 
+- flag_range:
+
+  Logical. If `TRUE`, adds a `.range_status` column classifying each
+  predicted concentration as `"in_range"`, `"below_range"`,
+  `"above_range"`, or `"missing"` relative to `[lloq, uloq]`. Default is
+  `FALSE`.
+
+- lloq:
+
+  Optional lower limit of quantitation for range flagging. Defaults to
+  the minimum calibration standard concentration.
+
+- uloq:
+
+  Optional upper limit of quantitation for range flagging. Defaults to
+  the maximum calibration standard concentration.
+
 - ...:
 
   Additional arguments (unused).
@@ -57,6 +77,8 @@ A tibble with columns:
 - `.pred_lower`: Lower bound (if intervals requested)
 
 - `.pred_upper`: Upper bound (if intervals requested)
+
+- `.range_status`: Range status (if `flag_range = TRUE`)
 
 ## Details
 

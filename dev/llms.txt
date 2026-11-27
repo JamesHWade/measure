@@ -1005,6 +1005,13 @@ Calibration curves, LOD/LOQ, and quantitation
   : Predict Concentrations from Calibration Curve
 - [`measure_calibration_verify()`](https://jameshwade.github.io/measure/dev/reference/measure_calibration_verify.md)
   : Verify Calibration Curve Performance
+- [`measure_quantify_batch()`](https://jameshwade.github.io/measure/dev/reference/measure_quantify_batch.md)
+  [`print(`*`<measure_batch_results>`*`)`](https://jameshwade.github.io/measure/dev/reference/measure_quantify_batch.md)
+  [`summary(`*`<measure_batch_results>`*`)`](https://jameshwade.github.io/measure/dev/reference/measure_quantify_batch.md)
+  [`tidy(`*`<measure_batch_results>`*`)`](https://jameshwade.github.io/measure/dev/reference/measure_quantify_batch.md)
+  : Quantify a scalar chromatography batch with external calibration
+- [`is_measure_batch_results()`](https://jameshwade.github.io/measure/dev/reference/is_measure_batch_results.md)
+  : Test whether an object is a batch quantitation result
 - [`is_measure_calibration()`](https://jameshwade.github.io/measure/dev/reference/is_measure_calibration.md)
   : Test if Object is a Calibration Curve
 - [`tidy(`*`<measure_calibration>`*`)`](https://jameshwade.github.io/measure/dev/reference/tidy.measure_calibration.md)
@@ -1196,6 +1203,8 @@ Explicit identities and metadata for independent measurement curves
   : Test whether an object is a measurement record
 - [`validate_measure_record()`](https://jameshwade.github.io/measure/dev/reference/validate_measure_record.md)
   : Validate a measurement record
+- [`measure_record_curves()`](https://jameshwade.github.io/measure/dev/reference/measure_record_curves.md)
+  : Extract a provenance-linked curve table from a measurement record
 - [`measure_record_from_long()`](https://jameshwade.github.io/measure/dev/reference/measure_record_from_long.md)
   : Import a measurement record from a long table
 - [`measure_read_jcamp()`](https://jameshwade.github.io/measure/dev/reference/measure_read_jcamp.md)
@@ -1349,6 +1358,8 @@ Plotting and diagnostic functions for measure data
   [`autoplot(`*`<measure_list>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
   [`autoplot(`*`<recipe>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot-measure.md)
   : Autoplot Methods for Measure Objects
+- [`autoplot(`*`<measure_batch_results>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_batch_results.md)
+  : Plot a quantified chromatography batch
 - [`autoplot(`*`<measure_bland_altman>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_bland_altman.md)
   : Plot Bland-Altman Analysis
 - [`autoplot(`*`<measure_calibration>`*`)`](https://jameshwade.github.io/measure/dev/reference/autoplot.measure_calibration.md)
@@ -1397,6 +1408,8 @@ Task-oriented guides for solving specific problems
   correction](https://jameshwade.github.io/measure/dev/articles/howto-baseline.md):
 - [How-to: report an infrared
   band](https://jameshwade.github.io/measure/dev/articles/howto-ir-band.md):
+- [How-to: quantify an externally calibrated scalar chromatography
+  batch](https://jameshwade.github.io/measure/dev/articles/howto-lc-batch.md):
 - [How-to: extend measure with a technique
   pack](https://jameshwade.github.io/measure/dev/articles/howto-technique-packs.md):
 - [How-to: integrating with

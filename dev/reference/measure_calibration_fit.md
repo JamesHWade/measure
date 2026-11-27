@@ -15,7 +15,9 @@ measure_calibration_fit(
   outlier_method = c("none", "studentized", "cook"),
   outlier_threshold = NULL,
   outlier_action = c("flag", "remove"),
-  sample_type_col = NULL
+  sample_type_col = NULL,
+  revision = NULL,
+  conc_unit = NULL
 )
 ```
 
@@ -85,6 +87,16 @@ measure_calibration_fit(
   Optional column name for sample type. If provided, only rows with
   `sample_type == "standard"` are used for fitting.
 
+- revision:
+
+  Optional non-empty character string identifying the calibration
+  revision for batch provenance.
+
+- conc_unit:
+
+  Optional character string declaring the concentration unit (e.g.,
+  `"mg/L"`).
+
 ## Value
 
 A
@@ -134,6 +146,7 @@ print(cal)
 #>   Weighting: none
 #>   Formula: response ~ nominal_conc
 #>   N points: 6
+#>   Range: 0 to 200
 #>   R²: 0.99992
 
 # Weighted calibration (1/x^2)

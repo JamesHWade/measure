@@ -10,6 +10,9 @@ used directly in a pack's own template.
 ## Usage
 
 ``` r
+# S3 method for class 'measure_batch_results'
+measure_report_sections(x, ...)
+
 measure_report_sections(x, ...)
 ```
 

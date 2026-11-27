@@ -57,6 +57,7 @@ print(cal)
 #>   Weighting: 1/x2
 #>   Formula: response ~ nominal_conc
 #>   N points: 8
+#>   Range: 1 to 500
 #>   R²: 0.9989
 ```
 
@@ -1239,7 +1240,7 @@ print(report)
 #> 
 #> ── Provenance ──
 #> 
-#> Generated: 2026-11-27 00:57:08.898233
+#> Generated: 2026-11-27 02:45:56.800581
 #> R version: 4.6.2
 #> measure version: 0.0.1.9004
 #> 
