@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 import numpy as np
 import pandas as pd
 import polars as pl
 import pytest
-from measure_spectra import Spectra, msc, msc_reference
-from measure_spectra.steps import StepMSC, StepSavitzkyGolay, StepSNV
 from mlfeatures import FittedRecipe, Recipe, RecipeTransformer, Selectors, StepError
+from mlfeatures.testing import StepConformanceTest
 from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
+
+from measure_spectra import Spectra, msc, msc_reference
+from measure_spectra.steps import StepMSC, StepSavitzkyGolay, StepSNV
 
 
 def _frame(
@@ -177,3 +181,118 @@ def test_supervised_pipeline_predicts_held_out_spectrum():
     prediction = pipeline.fit(training, target).predict(held_out)
     assert prediction.shape == (1,)
     assert np.isfinite(prediction).all()
+
+
+def test_savitzky_golay_removes_dropped_boundary_columns_from_roles():
+    frame = _frame()
+    names = list(frame.columns)
+    fitted = Recipe().add(StepSavitzkyGolay(names, window=5)).fit(frame)
+
+    expected = names[2:-2]
+    assert fitted.roles.columns_with_role("feature") == expected
+    assert fitted.roles.all_columns() == expected
+    for dropped in (*names[:2], *names[-2:]):
+        assert fitted.roles.of(dropped) == set()
+
+
+def test_steps_handle_nullable_pandas_and_extended_polars_numeric_dtypes():
+    base = _frame()
+    names = list(base.columns)
+
+    # Pandas nullable integer/float dtypes with missing values for SNV and SG.
+    nullable_pd = pd.DataFrame(
+        {
+            name: pd.Series(
+                [
+                    round(v * 10) if i != 2 or j != 0 else pd.NA
+                    for j, v in enumerate(base[name])
+                ],
+                dtype="Int64",
+            )
+            for i, name in enumerate(names)
+        }
+    )
+    snv_out = Recipe().add(StepSNV(names)).fit(nullable_pd).transform(nullable_pd)
+    assert np.isnan(snv_out.iloc[0, 2])
+    assert np.isfinite(snv_out.iloc[1:].to_numpy()).all()
+
+    sg_out = (
+        Recipe()
+        .add(StepSavitzkyGolay(names, window=5))
+        .fit(nullable_pd)
+        .transform(nullable_pd)
+    )
+    assert np.isnan(sg_out.iloc[0]).all()
+    assert np.isfinite(sg_out.iloc[1:].to_numpy()).all()
+
+    # Complete nullable pandas Int64 for MSC.
+    complete_nullable_pd = pd.DataFrame(
+        {
+            name: pd.Series([round(v * 10) for v in base[name]], dtype="Int64")
+            for name in names
+        }
+    )
+    msc_pd = (
+        Recipe()
+        .add(StepMSC(names))
+        .fit(complete_nullable_pd)
+        .transform(complete_nullable_pd)
+    )
+    assert np.isfinite(msc_pd.to_numpy()).all()
+
+    # Polars Int128 and Decimal(10, 2) columns (both valid mlfeatures NUMERIC_DTYPES).
+    polars_extended = pl.DataFrame(
+        {
+            name: (
+                pl.Series(
+                    [round(v * 100) for v in base[name]],
+                    dtype=pl.Int128,
+                )
+                if i % 2 == 0
+                else pl.Series(
+                    [Decimal(f"{v:.2f}") for v in base[name]],
+                    dtype=pl.Decimal(10, 2),
+                )
+            )
+            for i, name in enumerate(names)
+        }
+    )
+    for step in (
+        StepSNV(names),
+        StepMSC(names),
+        StepSavitzkyGolay(names, window=5),
+    ):
+        transformed = Recipe().add(step).fit(polars_extended).transform(polars_extended)
+        assert isinstance(transformed, pl.DataFrame)
+        assert np.isfinite(transformed.to_numpy()).all()
+
+
+_CONFORMANCE_FRAME = _frame()
+_CONFORMANCE_CHANNELS = list(_CONFORMANCE_FRAME.columns)
+_CONFORMANCE_DATA = {
+    **_CONFORMANCE_FRAME.to_dict("list"),
+    "batch": ["a", "b", "a"],
+}
+
+
+class TestStepSNVConformance(StepConformanceTest):
+    training_data = _CONFORMANCE_DATA
+    estimates_attr = None
+
+    def make_step(self):
+        return StepSNV(_CONFORMANCE_CHANNELS)
+
+
+class TestStepMSCConformance(StepConformanceTest):
+    training_data = _CONFORMANCE_DATA
+
+    def make_step(self):
+        return StepMSC(_CONFORMANCE_CHANNELS)
+
+
+class TestStepSavitzkyGolayConformance(StepConformanceTest):
+    training_data = _CONFORMANCE_DATA
+    estimates_attr = None
+
+    def make_step(self):
+        return StepSavitzkyGolay(_CONFORMANCE_CHANNELS, window=5, polyorder=2)

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
 from measure_spectra.signals import msc, msc_reference, savitzky_golay, snv
 
 FIXTURE = Path(__file__).with_name("fixtures") / "spectra_parity.json"

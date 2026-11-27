@@ -9,6 +9,7 @@ from mlfeatures import (
     ColSchema,
     Frame,
     Mode,
+    Roles,
     SchemaInfo,
     Selector,
     Step,
@@ -18,8 +19,17 @@ from .signals import _sg_parameters, msc, msc_reference, savitzky_golay, snv
 from .spectra import decode_feature_name
 
 
+def _block_to_float_matrix(block: Frame) -> np.ndarray:
+    """Convert a selected numeric frame block to a float64 matrix with NaN nulls."""
+
+    casted = block.select(nw.all().cast(nw.Float64))
+    if casted.implementation.is_pandas():
+        return casted.to_native().to_numpy(dtype=np.float64, na_value=np.nan)
+    return casted.to_numpy()
+
+
 class _SpectralStep(Step):
-    mode = Mode.MANY_TO_MANY
+    mode = Mode.ONE_TO_ONE
 
     def __init__(self, columns: Selector, id: str | None, default_id: str):
         self.columns = columns
@@ -69,9 +79,9 @@ class _SpectralStep(Step):
                     f"Found an additional spectral channel on the fitted grid: {name!r}"
                 )
         block = new_data.select(names)
-        if any(dtype not in NUMERIC_DTYPES for dtype in block.schema.values()):
+        if any(type(dtype) not in NUMERIC_DTYPES for dtype in block.schema.values()):
             raise TypeError("Spectral channels must contain numeric values")
-        values = self._apply(block.to_numpy(), names)
+        values = self._apply(_block_to_float_matrix(block), names)
         outputs = self.schema_out().columns
         removed = selected.difference(outputs)
         result = new_data.drop(list(removed)) if removed else new_data
@@ -84,6 +94,14 @@ class _SpectralStep(Step):
 
     def _apply(self, values: np.ndarray, names: list[str]) -> np.ndarray:
         raise NotImplementedError
+
+    def update_roles(self, roles: Roles) -> None:
+        if self._schema_in is None or self._schema_out is None:
+            return
+        removed = set(self._schema_in.columns).difference(self._schema_out.columns)
+        for col in removed:
+            for role in list(roles.of(col)):
+                roles.remove(col, role)
 
     def schema_in(self) -> ColSchema:
         if self._schema_in is None:
@@ -124,7 +142,7 @@ class StepMSC(_SpectralStep):
         super().__init__(columns, id, "measure_msc")
 
     def _fit_channels(self, names, block):
-        self._estimates = msc_reference(block.to_numpy()).tolist()
+        self._estimates = msc_reference(_block_to_float_matrix(block)).tolist()
         return names
 
     def _apply(self, values, names):

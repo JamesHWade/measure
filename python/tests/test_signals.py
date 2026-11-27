@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+
 from measure_spectra.signals import msc, msc_reference, savitzky_golay, snv
 
 
@@ -183,3 +184,54 @@ def test_savitzky_golay_validates_shape_and_axis():
         savitzky_golay(values, np.arange(6.0))
     with pytest.raises(ValueError, match="finite"):
         savitzky_golay(values, [0.0, 1.0, np.nan, 3.0, 4.0, 5.0, 6.0])
+
+
+def test_signal_kernels_reject_booleans_and_numeric_strings():
+    bool_matrix = np.array([[True, False, True, False]])
+    obj_bool_matrix = np.array([[True, 2.0, 3.0, 4.0]], dtype=object)
+    str_matrix = np.array([["1.0", "2.0", "3.0", "4.0"]])
+
+    for bad in (bool_matrix, obj_bool_matrix, str_matrix):
+        with pytest.raises(ValueError, match="numeric|boolean"):
+            snv(bad)
+        with pytest.raises(ValueError, match="numeric|boolean"):
+            msc_reference(bad)
+        with pytest.raises(ValueError, match="numeric|boolean"):
+            msc(bad, [1.0, 2.0, 3.0, 4.0])
+        with pytest.raises(ValueError, match="numeric|boolean"):
+            savitzky_golay(bad, [1.0, 2.0, 3.0, 4.0], window=3)
+
+    with pytest.raises(ValueError, match="numeric|boolean"):
+        msc([[1.0, 2.0, 3.0]], [True, False, True])
+    with pytest.raises(ValueError, match="numeric|boolean"):
+        msc([[1.0, 2.0, 3.0]], ["1.0", "2.0", "3.0"])
+    with pytest.raises(ValueError, match="numeric|boolean"):
+        savitzky_golay([[1.0, 2.0, 3.0, 4.0]], [True, False, True, False], window=3)
+    with pytest.raises(ValueError, match="numeric|boolean"):
+        savitzky_golay([[1.0, 2.0, 3.0, 4.0]], ["1", "2", "3", "4"], window=3)
+
+
+def test_savitzky_golay_first_derivative_propagates_center_nan():
+    # For window=5, polyorder=2, deriv=1, the central filter weight is 0.0.
+    # A missing point at the center of a window must still propagate NaN.
+    locations = np.arange(9.0)
+    values = np.array([[1.0, 2.0, 3.0, 4.0, np.nan, 6.0, 7.0, 8.0, 9.0]])
+
+    result = savitzky_golay(values, locations, window=5, polyorder=2, deriv=1)
+
+    assert np.isnan(result[0]).all()
+
+
+def test_savitzky_golay_wide_window_high_polyorder_stays_well_conditioned():
+    # Normal equations (basis.T @ basis) lose accuracy rapidly for wide windows
+    # with higher polynomial orders; SVD stays accurate on exact polynomials.
+    locations = np.arange(61, dtype=float)
+    x = (locations - 30.0) / 30.0
+    poly = x**8 - 0.5 * x**5 + 2.0 * x**2 - 3.0 * x + 1.0
+    dpoly = (8.0 * x**7 - 2.5 * x**4 + 4.0 * x - 3.0) / 30.0
+
+    smooth = savitzky_golay(poly[None, :], locations, window=51, polyorder=8, deriv=0)
+    first = savitzky_golay(poly[None, :], locations, window=51, polyorder=8, deriv=1)
+
+    np.testing.assert_allclose(smooth[0], poly[25:-25], rtol=1e-10, atol=1e-10)
+    np.testing.assert_allclose(first[0], dpoly[25:-25], rtol=1e-10, atol=1e-10)

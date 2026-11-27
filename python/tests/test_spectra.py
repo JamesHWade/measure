@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import pytest
+
 from measure_spectra.spectra import Spectra, decode_feature_name
 
 
@@ -128,7 +129,6 @@ def test_wide_rejects_duplicate_channel_locations_and_non_numeric_columns() -> N
 
 
 def test_polars_input_is_supported_without_requiring_arrow() -> None:
-    pl = pytest.importorskip("polars")
     frame = pl.DataFrame(
         {
             "id": ["b", "b", "a", "a"],
@@ -209,3 +209,54 @@ def test_all_missing_numeric_signal_in_polars_long_and_wide_tables():
     pd.testing.assert_frame_equal(wide.to_frame(), long.to_frame())
     assert list(wide.sample_ids) == [2**53 + 1, 2**53 + 3]
     assert np.isnan(wide.values).all()
+
+
+def test_tuple_sample_ids_work_across_constructors_and_to_frame() -> None:
+    ids = [("batch-1", 1), ("batch-1", 2)]
+    direct = Spectra([900.0, 905.0], [[1.0, 2.0], [3.0, 4.0]], ids)
+    assert direct.sample_ids.ndim == 1
+    assert direct.sample_ids.tolist() == ids
+
+    wide = pd.DataFrame({"sample": ids, "c1": [1.0, 3.0], "c2": [2.0, 4.0]})
+    from_wide = Spectra.from_wide(
+        wide, sample="sample", channels={"c1": 900.0, "c2": 905.0}
+    )
+    long = pd.DataFrame(
+        {
+            "sample": [ids[0], ids[0], ids[1], ids[1]],
+            "nm": [900.0, 905.0, 900.0, 905.0],
+            "val": [1.0, 2.0, 3.0, 4.0],
+        }
+    )
+    from_long = Spectra.from_long(long, sample="sample", location="nm", value="val")
+
+    frame = from_wide.to_frame()
+    assert not isinstance(frame.index, pd.MultiIndex)
+    assert frame.index.name == "sample"
+    assert frame.index.tolist() == ids
+    pd.testing.assert_frame_equal(from_long.to_frame(), frame)
+
+
+def test_polars_ingestion_ignores_unused_nested_columns() -> None:
+    wide_pl = pl.DataFrame(
+        {
+            "id": ["s1", "s2"],
+            "c1": [1.0, 2.0],
+            "c2": [3.0, 4.0],
+            "tags": [["a", "b"], ["c"]],
+            "meta": [{"k": 1}, {"k": 2}],
+        }
+    )
+    spectra = Spectra.from_wide(wide_pl, sample="id", channels={"c1": 100, "c2": 105})
+    np.testing.assert_array_equal(spectra.values, [[1.0, 3.0], [2.0, 4.0]])
+
+    long_pl = pl.DataFrame(
+        {
+            "id": ["s1", "s1", "s2", "s2"],
+            "nm": [100.0, 105.0, 100.0, 105.0],
+            "val": [1.0, 3.0, 2.0, 4.0],
+            "nested": [[1, 2], [3], [4, 5], []],
+        }
+    )
+    from_long = Spectra.from_long(long_pl, sample="id", location="nm", value="val")
+    pd.testing.assert_frame_equal(from_long.to_frame(), spectra.to_frame())

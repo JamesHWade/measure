@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 import numbers
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import Any
 from urllib.parse import quote, unquote
@@ -111,20 +111,28 @@ def decode_feature_name(name: str) -> tuple[float, str | None, str | None]:
     return location, axis_unit, value_unit
 
 
-def _as_pandas(frame: Any, numeric_columns: set) -> pd.DataFrame:
+def _as_pandas(
+    frame: Any,
+    required_columns: Iterable[Any],
+    numeric_columns: set[Any],
+) -> pd.DataFrame:
     """Convert a supported native frame without using a pyarrow round-trip."""
 
     if isinstance(frame, pd.DataFrame):
         result = frame.copy(deep=False)
     elif isinstance(frame, pl.DataFrame):
-        # Keep declared numeric measurements numeric even when every value is
-        # null. Sample labels retain their original scalar values.
+        # Materialize only the referenced columns and keep declared numeric
+        # measurements numeric even when every value is null. Sample labels
+        # retain their original scalar values.
+        needed = set(required_columns)
+        present = [name for name in frame.columns if name in needed]
+        selected = frame.select(present)
         result = pd.DataFrame(
             {
                 name: column.cast(pl.Float64).to_numpy()
                 if name in numeric_columns and column.dtype.is_numeric()
                 else column.to_list()
-                for name, column in frame.to_dict().items()
+                for name, column in selected.to_dict().items()
             }
         )
     else:
@@ -212,6 +220,28 @@ def _is_missing_identifier(identifier: Any) -> bool:
     return isinstance(missing, (bool, np.bool_)) and bool(missing)
 
 
+def _as_sample_id_array(values: Any) -> np.ndarray:
+    """Store sample identifiers in a guaranteed 1D object array (including tuples)."""
+
+    if isinstance(values, np.ndarray):
+        if values.ndim != 1:
+            raise ValueError("sample_ids must have one entry for every values row")
+        items = list(values)
+    elif isinstance(values, (str, bytes)):
+        raise ValueError("sample_ids must have one entry for every values row")
+    else:
+        try:
+            items = list(values)
+        except TypeError as exc:
+            raise ValueError(
+                "sample_ids must have one entry for every values row"
+            ) from exc
+
+    result = np.empty(len(items), dtype=object)
+    result[:] = items
+    return result
+
+
 def _ordered_groups(values: list[Any]) -> tuple[list[Any], dict[Any, list[int]]]:
     ordered: list[Any] = []
     groups: dict[Any, list[int]] = {}
@@ -296,7 +326,7 @@ class Spectra:
         if np.isinf(values).any():
             raise ValueError("values must not contain infinite values")
 
-        sample_ids = np.asarray(self.sample_ids, dtype=object)
+        sample_ids = _as_sample_id_array(self.sample_ids)
         if sample_ids.ndim != 1 or len(sample_ids) != values.shape[0]:
             raise ValueError("sample_ids must have one entry for every values row")
         _ordered_groups(sample_ids.tolist())
@@ -318,7 +348,7 @@ class Spectra:
         value: str,
         axis_unit: str | None = None,
         value_unit: str | None = None,
-    ) -> "Spectra":
+    ) -> Spectra:
         """Construct spectra from one row per sample/location observation.
 
         The first sample encountered in ``frame`` establishes the ordered
@@ -334,7 +364,7 @@ class Spectra:
             or not isinstance(value, str)
         ):
             raise TypeError("sample, location, and value must be column-name strings")
-        data = _as_pandas(frame, {location, value})
+        data = _as_pandas(frame, {sample, location, value}, {location, value})
         if sample not in data.columns:
             raise KeyError(f"sample column {sample!r} was not found in frame")
         if location not in data.columns:
@@ -368,7 +398,7 @@ class Spectra:
         return cls(
             grid,
             values,
-            np.asarray(sample_ids, dtype=object),
+            _as_sample_id_array(sample_ids),
             axis_unit,
             value_unit,
             _sample_name=sample,
@@ -383,7 +413,7 @@ class Spectra:
         channels: Mapping[Any, float],
         axis_unit: str | None = None,
         value_unit: str | None = None,
-    ) -> "Spectra":
+    ) -> Spectra:
         """Construct spectra from one scalar column per physical location.
 
         ``channels`` is an ordered mapping from frame column name to physical
@@ -399,7 +429,7 @@ class Spectra:
         channel_names = list(channels.keys())
         grid = _validate_coordinates(list(channels.values()), "channels")
 
-        data = _as_pandas(frame, set(channels))
+        data = _as_pandas(frame, {sample, *channel_names}, set(channels))
         if sample not in data.columns:
             raise KeyError(f"sample column {sample!r} was not found in frame")
         for channel in channel_names:
@@ -416,7 +446,7 @@ class Spectra:
         return cls(
             grid,
             values,
-            np.asarray(sample_ids, dtype=object),
+            _as_sample_id_array(sample_ids),
             axis_unit,
             value_unit,
             _sample_name=sample,
@@ -440,7 +470,9 @@ class Spectra:
     def to_frame(self) -> pd.DataFrame:
         """Return only numeric spectral features, indexed by sample labels."""
 
-        index = pd.Index(self.sample_ids.copy(), name=self._sample_name)
+        index = pd.Index(
+            self.sample_ids.copy(), name=self._sample_name, tupleize_cols=False
+        )
         return pd.DataFrame(self.values.copy(), index=index, columns=self.feature_names)
 
     def __len__(self) -> int:

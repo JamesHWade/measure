@@ -1,1 +1,1 @@
-include tests/fixtures/spectra_parity.json
+recursive-include tests *.py *.R *.json
