@@ -267,11 +267,11 @@ measure_quantify_batch <- function(
   blank_max_pct_lloq = 20
 ) {
   validate_measure_record(record)
-  integration_method <- match.arg(integration_method)
-  baseline <- match.arg(baseline)
-  model <- match.arg(model)
+  integration_method <- rlang::arg_match(integration_method)
+  baseline <- rlang::arg_match(baseline)
+  model <- rlang::arg_match(model)
   if (!is.numeric(weights)) {
-    weights <- match.arg(weights)
+    weights <- rlang::arg_match(weights)
   }
 
   .validate_batch_arguments(
@@ -776,7 +776,7 @@ autoplot.measure_batch_results <- function(
   type = c("chromatograms", "calibration"),
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
   m <- object$method
 
   if (type == "calibration") {
@@ -970,7 +970,8 @@ measure_report_sections.measure_batch_results <- function(x, ...) {
   blank_max_area,
   blank_max_pct_lloq,
   lloq,
-  uloq
+  uloq,
+  call = rlang::caller_env()
 ) {
   if (
     !is.numeric(window) ||
@@ -979,119 +980,132 @@ measure_report_sections.measure_batch_results <- function(x, ...) {
       window[[1L]] >= window[[2L]]
   ) {
     cli::cli_abort(
-      "{.arg window} must be a length-2 finite numeric vector with {.code window[1] < window[2]}."
+      "{.arg window} must be a length-2 finite numeric vector with {.code window[1] < window[2]}.",
+      call = call
     )
   }
 
-  for (pair in list(
-    list(name = "analyte", val = analyte),
-    list(name = "calibration_revision", val = calibration_revision)
-  )) {
-    if (
-      !is.character(pair$val) ||
-        length(pair$val) != 1L ||
-        is.na(pair$val) ||
-        !nzchar(trimws(pair$val))
-    ) {
-      cli::cli_abort(
-        "{.arg {pair$name}} must be a single non-empty character string."
-      )
-    }
-  }
-
-  if (
-    !is.null(conc_unit) &&
-      (!is.character(conc_unit) ||
-        length(conc_unit) != 1L ||
-        is.na(conc_unit) ||
-        !nzchar(trimws(conc_unit)))
-  ) {
+  rlang::check_string(analyte, allow_empty = FALSE, call = call)
+  if (!nzchar(trimws(analyte))) {
     cli::cli_abort(
-      "{.arg conc_unit} must be a single non-empty character string or NULL."
+      "{.arg analyte} must be a single non-empty character string.",
+      call = call
     )
   }
 
-  if (
-    !is.numeric(qc_acceptance_pct) ||
-      length(qc_acceptance_pct) != 1L ||
-      !is.finite(qc_acceptance_pct) ||
-      qc_acceptance_pct <= 0
-  ) {
-    cli::cli_abort("{.arg qc_acceptance_pct} must be a positive finite number.")
-  }
-
-  if (
-    !is.null(blank_max_area) &&
-      (!is.numeric(blank_max_area) ||
-        length(blank_max_area) != 1L ||
-        !is.finite(blank_max_area) ||
-        blank_max_area < 0)
-  ) {
+  rlang::check_string(calibration_revision, allow_empty = FALSE, call = call)
+  if (!nzchar(trimws(calibration_revision))) {
     cli::cli_abort(
-      "{.arg blank_max_area} must be a non-negative finite number or NULL."
+      "{.arg calibration_revision} must be a single non-empty character string.",
+      call = call
     )
   }
 
-  if (
-    !is.numeric(blank_max_pct_lloq) ||
-      length(blank_max_pct_lloq) != 1L ||
-      !is.finite(blank_max_pct_lloq) ||
-      blank_max_pct_lloq < 0
-  ) {
+  rlang::check_string(
+    conc_unit,
+    allow_empty = FALSE,
+    allow_null = TRUE,
+    call = call
+  )
+  if (!is.null(conc_unit) && !nzchar(trimws(conc_unit))) {
     cli::cli_abort(
-      "{.arg blank_max_pct_lloq} must be a non-negative finite number."
+      "{.arg conc_unit} must be a single non-empty character string or NULL.",
+      call = call
     )
   }
 
-  if (
-    !is.null(lloq) &&
-      (!is.numeric(lloq) || length(lloq) != 1L || !is.finite(lloq) || lloq < 0)
-  ) {
-    cli::cli_abort("{.arg lloq} must be a non-negative finite number or NULL.")
+  rlang::check_number_decimal(
+    qc_acceptance_pct,
+    allow_infinite = FALSE,
+    call = call
+  )
+  if (qc_acceptance_pct <= 0) {
+    cli::cli_abort(
+      "{.arg qc_acceptance_pct} must be a positive finite number.",
+      call = call
+    )
   }
 
-  if (
-    !is.null(uloq) &&
-      (!is.numeric(uloq) || length(uloq) != 1L || !is.finite(uloq) || uloq <= 0)
-  ) {
-    cli::cli_abort("{.arg uloq} must be a positive finite number or NULL.")
+  rlang::check_number_decimal(
+    blank_max_area,
+    min = 0,
+    allow_infinite = FALSE,
+    allow_null = TRUE,
+    call = call
+  )
+
+  rlang::check_number_decimal(
+    blank_max_pct_lloq,
+    min = 0,
+    allow_infinite = FALSE,
+    call = call
+  )
+
+  rlang::check_number_decimal(
+    lloq,
+    min = 0,
+    allow_infinite = FALSE,
+    allow_null = TRUE,
+    call = call
+  )
+
+  rlang::check_number_decimal(
+    uloq,
+    allow_infinite = FALSE,
+    allow_null = TRUE,
+    call = call
+  )
+  if (!is.null(uloq) && uloq <= 0) {
+    cli::cli_abort(
+      "{.arg uloq} must be a positive finite number or NULL.",
+      call = call
+    )
   }
 }
 
-.validate_batch_manifest <- function(manifest, available_injections) {
-  if (!is.data.frame(manifest)) {
-    cli::cli_abort("{.arg manifest} must be a data frame.")
-  }
+.validate_batch_manifest <- function(
+  manifest,
+  available_injections,
+  call = rlang::caller_env()
+) {
+  rlang::check_data_frame(manifest, call = call)
 
   required_cols <- c("injection_id", "injection_type", "nominal_conc")
   missing_cols <- setdiff(required_cols, names(manifest))
   if (length(missing_cols) > 0L) {
     cli::cli_abort(
-      "{.arg manifest} is missing required column{?s}: {.field {missing_cols}}."
+      "{.arg manifest} is missing required column{?s}: {.field {missing_cols}}.",
+      call = call
     )
   }
 
   if (nrow(manifest) == 0L) {
-    cli::cli_abort("{.arg manifest} must contain at least one injection.")
+    cli::cli_abort(
+      "{.arg manifest} must contain at least one injection.",
+      call = call
+    )
   }
 
   inj_id <- manifest$injection_id
   if (!is.character(inj_id) || anyNA(inj_id) || !all(nzchar(trimws(inj_id)))) {
     cli::cli_abort(
-      "{.field manifest$injection_id} must be non-missing, non-empty character strings."
+      "{.field manifest$injection_id} must be non-missing, non-empty character strings.",
+      call = call
     )
   }
   if (anyDuplicated(inj_id)) {
     dup <- inj_id[duplicated(inj_id)][[1L]]
     cli::cli_abort(
-      "{.field manifest$injection_id} contains duplicate ID {.val {dup}}."
+      "{.field manifest$injection_id} contains duplicate ID {.val {dup}}.",
+      call = call
     )
   }
 
   unknown_inj <- setdiff(inj_id, available_injections)
   if (length(unknown_inj) > 0L) {
     cli::cli_abort(
-      "Manifest injection{?s} not found in the selected record channel: {.val {unknown_inj}}."
+      "Manifest injection{?s} not found in the selected record channel: {.val {unknown_inj}}.",
+      call = call
     )
   }
 
@@ -1099,7 +1113,8 @@ measure_report_sections.measure_batch_results <- function(x, ...) {
   inj_type <- manifest$injection_type
   if (!is.character(inj_type) || anyNA(inj_type)) {
     cli::cli_abort(
-      "{.field manifest$injection_type} must be a non-missing character vector."
+      "{.field manifest$injection_type} must be a non-missing character vector.",
+      call = call
     )
   }
   inj_type <- tolower(trimws(inj_type))
@@ -1109,13 +1124,17 @@ measure_report_sections.measure_batch_results <- function(x, ...) {
       c(
         "Unsupported {.field injection_type} value{?s}: {.val {bad_types}}.",
         "i" = "Allowed values are {.val {valid_types}}."
-      )
+      ),
+      call = call
     )
   }
 
   nom <- manifest$nominal_conc
   if (!is.numeric(nom)) {
-    cli::cli_abort("{.field manifest$nominal_conc} must be numeric.")
+    cli::cli_abort(
+      "{.field manifest$nominal_conc} must be numeric.",
+      call = call
+    )
   }
   nom <- as.numeric(nom)
 
@@ -1123,13 +1142,15 @@ measure_report_sections.measure_batch_results <- function(x, ...) {
   if (!all(is.finite(nom[needs_nom]))) {
     bad_ids <- inj_id[needs_nom & !is.finite(nom)]
     cli::cli_abort(
-      "Standard and QC injections require finite {.field nominal_conc}: {.val {bad_ids}}."
+      "Standard and QC injections require finite {.field nominal_conc}: {.val {bad_ids}}.",
+      call = call
     )
   }
   if (any(nom[inj_type == "qc"] <= 0)) {
     bad_ids <- inj_id[inj_type == "qc" & nom <= 0]
     cli::cli_abort(
-      "QC injections require positive {.field nominal_conc}: {.val {bad_ids}}."
+      "QC injections require positive {.field nominal_conc}: {.val {bad_ids}}.",
+      call = call
     )
   }
 
@@ -1137,7 +1158,8 @@ measure_report_sections.measure_batch_results <- function(x, ...) {
     dil <- manifest$dilution_factor
     if (!is.numeric(dil) || !all(is.finite(dil)) || any(dil <= 0)) {
       cli::cli_abort(
-        "{.field manifest$dilution_factor} must contain finite positive numbers."
+        "{.field manifest$dilution_factor} must contain finite positive numbers.",
+        call = call
       )
     }
     dil <- as.numeric(dil)
@@ -1149,7 +1171,8 @@ measure_report_sections.measure_batch_results <- function(x, ...) {
     ord <- manifest$batch_order
     if (!is.numeric(ord) || !all(is.finite(ord))) {
       cli::cli_abort(
-        "{.field manifest$batch_order} must contain finite numbers."
+        "{.field manifest$batch_order} must contain finite numbers.",
+        call = call
       )
     }
     ord <- as.integer(ord)

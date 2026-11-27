@@ -1,24 +1,29 @@
-check_single_selector <- function(res, arg) {
+check_single_selector <- function(res, arg, call = rlang::caller_env()) {
   if (length(res) != 1) {
     cli::cli_abort(
       "The selection for {.arg {arg}} should only select a single column
-       ({length(res)} columns were selected)."
+       ({length(res)} columns were selected).",
+      call = call
     )
   }
 }
 
-check_measure_dims <- function(x, col = ".measures") {
+check_measure_dims <- function(
+  x,
+  col = ".measures",
+  call = rlang::caller_env()
+) {
   num_rows <- purrr::map_int(x[[col]], nrow)
   num_unique <- sort(table(num_rows), decreasing = TRUE)
   most_freq <- as.integer(names(num_unique)[1])
   if (length(num_unique) != 1) {
     which_rows <- which(num_rows != most_freq)
-    n_bad <- length(which_rows)
     chr_rows <- paste(which_rows, collapse = ", ")
     cli::cli_abort(
       "The number of rows in each measure should be the same.
                    Most samples have {most_freq} rows and these do not:
-                   {chr_rows}. Please pad the input with missing values."
+                   {chr_rows}. Please pad the input with missing values.",
+      call = call
     )
   }
   invisible(NULL)
@@ -69,7 +74,11 @@ pad_measure_dims <- function(x, col = ".measures") {
 #' @return `invisible(NULL)` on success, or throws a [cli::cli_abort()] error
 #'   if the column is neither numeric nor a non-empty list of numeric vectors.
 #' @noRd
-check_type_or_list_numeric <- function(x, col_name) {
+check_type_or_list_numeric <- function(
+  x,
+  col_name,
+  call = rlang::caller_env()
+) {
   # Accept numeric vectors directly
   if (is.numeric(x)) {
     return(invisible(NULL))
@@ -81,7 +90,8 @@ check_type_or_list_numeric <- function(x, col_name) {
     if (length(x) == 0) {
       cli::cli_abort(
         "Column {.field {col_name}} is an empty list.
-         Expected numeric data or a list of numeric vectors."
+         Expected numeric data or a list of numeric vectors.",
+        call = call
       )
     }
     all_numeric <- all(vapply(x, is.numeric, logical(1)))
@@ -94,6 +104,7 @@ check_type_or_list_numeric <- function(x, col_name) {
   cli::cli_abort(
     "Column {.field {col_name}} must be numeric (double or integer) or
      a list column containing numeric vectors.
-     Found type: {.cls {class(x)[1]}}."
+     Found type: {.cls {class(x)[1]}}.",
+    call = call
   )
 }

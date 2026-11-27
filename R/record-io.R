@@ -65,7 +65,7 @@ NULL
 #' @rdname record-bundle
 #' @export
 write_measure_record <- function(x, path, delim = c(",", "\t")) {
-  delim <- match.arg(delim)
+  delim <- rlang::arg_match(delim)
   x <- validate_measure_record(x)
   destination <- .record_io_destination(path)
   if (.record_io_path_exists(destination)) {

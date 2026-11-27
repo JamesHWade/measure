@@ -576,10 +576,10 @@ test_that("render_validation_report errors on invalid template", {
 
   report <- measure_validation_report(title = "Template Error Test")
 
-  # Invalid template should error with match.arg
+  # Invalid template should error with rlang::arg_match
   expect_error(
     render_validation_report(report, template = "nonexistent_template"),
-    "should be one of"
+    "must be one of"
   )
 })
 

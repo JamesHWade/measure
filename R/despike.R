@@ -76,7 +76,7 @@ step_measure_despike <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_despike")
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   recipes::add_step(
     recipe,

@@ -69,8 +69,8 @@ step_measure_qc_snr <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_qc_snr")
 ) {
-  signal_method <- match.arg(signal_method)
-  noise_method <- match.arg(noise_method)
+  signal_method <- rlang::arg_match(signal_method)
+  noise_method <- rlang::arg_match(noise_method)
 
   recipes::add_step(
     recipe,
@@ -512,7 +512,7 @@ step_measure_impute <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_impute")
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   recipes::add_step(
     recipe,
@@ -773,7 +773,7 @@ step_measure_qc_outlier <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_qc_outlier")
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   recipes::add_step(
     recipe,

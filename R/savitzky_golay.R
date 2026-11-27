@@ -297,7 +297,7 @@ required_pkgs.step_measure_savitzky_golay <- function(x, ...) {
     rlang::call2(
       "savitzkyGolay",
       .ns = "prospectr",
-      X = expr(dat),
+      X = rlang::expr(dat),
       m = diffs,
       p = degree,
       w = window,

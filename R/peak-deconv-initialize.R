@@ -116,7 +116,7 @@ add_param_jitter <- function(
   scale = 0.1,
   method = c("gaussian", "uniform")
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   lapply(params_list, function(params) {
     lapply(params, function(p) {

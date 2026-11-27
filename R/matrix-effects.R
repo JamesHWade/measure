@@ -422,7 +422,7 @@ autoplot.measure_matrix_effect <- function(
   show_limits = TRUE,
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
   results <- object$results
 
   # Create row index if needed

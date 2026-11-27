@@ -166,7 +166,7 @@ measure_linearity <- function(
   method = c("regression", "residual"),
   conf_level = 0.95
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   # Validate inputs
   for (col in c(conc_col, response_col)) {
@@ -737,7 +737,7 @@ autoplot.measure_linearity <- function(
   type = c("fit", "residuals"),
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
   fit <- object$model
 
   if (type == "fit") {

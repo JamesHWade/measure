@@ -262,7 +262,7 @@ autoplot.measure_calibration <- function(
   type = c("curve", "residuals", "qq", "all"),
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
 
   if (type == "all") {
     p1 <- .calibration_plot_curve(object)
@@ -270,7 +270,7 @@ autoplot.measure_calibration <- function(
     p3 <- .calibration_plot_qq(object)
 
     # Return list of plots if patchwork not available
-    if (requireNamespace("patchwork", quietly = TRUE)) {
+    if (rlang::is_installed("patchwork")) {
       return(patchwork::wrap_plots(p1, p2, p3, ncol = 2))
     } else {
       return(list(curve = p1, residuals = p2, qq = p3))

@@ -931,7 +931,6 @@ export(write_measure_acquisition)
 export(write_measure_nd)
 export(write_measure_record)
 import(recipes)
-import(rlang)
 importFrom(dplyr,
   arrange,
   mutate,
@@ -948,8 +947,11 @@ importFrom(ggplot2,
   autoplot,
   fortify
 )
-importFrom(glue,glue)
 importFrom(lifecycle,badge)
+importFrom(rlang,"%||%")
+importFrom(rlang,":=")
+importFrom(rlang,.data)
+importFrom(rlang,.env)
 importFrom(stats,
   complete.cases,
   sd

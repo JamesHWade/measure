@@ -79,7 +79,7 @@ measure_bland_altman <- function(
   conf_level = 0.95,
   regression = c("none", "linear", "quadratic")
 ) {
-  regression <- match.arg(regression)
+  regression <- rlang::arg_match(regression)
 
   # Validate inputs
   if (!is.data.frame(data)) {
@@ -294,7 +294,7 @@ measure_deming_regression <- function(
   }
 
   # Try mcr package first
-  use_mcr <- requireNamespace("mcr", quietly = TRUE)
+  use_mcr <- rlang::is_installed("mcr")
 
   if (use_mcr) {
     mcr_fit <- mcr::mcreg(x, y, method.reg = "Deming", error.ratio = lambda)
@@ -460,19 +460,10 @@ measure_passing_bablok <- function(
   alpha = 0.05
 ) {
   # Check for mcr package - required for Passing-Bablok
-  if (!requireNamespace("mcr", quietly = TRUE)) {
-    cli::cli_abort(
-      c(
-        "{.fn measure_passing_bablok} requires the {.pkg mcr} package.",
-        "i" = "Install with: {.code install.packages('mcr')}"
-      )
-    )
-  }
+  rlang::check_installed("mcr", reason = "for Passing-Bablok regression")
 
   # Validate inputs
-  if (!is.data.frame(data)) {
-    cli::cli_abort("{.arg data} must be a data frame.")
-  }
+  rlang::check_data_frame(data)
 
   for (col in c(method1_col, method2_col)) {
     if (!col %in% names(data)) {
@@ -649,7 +640,7 @@ measure_proficiency_score <- function(
   sigma = NULL,
   group_col = NULL
 ) {
-  score_type <- match.arg(score_type)
+  score_type <- rlang::arg_match(score_type)
 
   # Validate inputs
   if (!is.data.frame(data)) {
@@ -981,7 +972,7 @@ tidy.measure_proficiency_score <- function(
   type = c("scores", "summary"),
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
 
   if (type == "scores") {
     x$scores
@@ -1309,7 +1300,7 @@ autoplot.measure_proficiency_score <- function(
   type = c("bar", "point"),
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
   scores <- object$scores
 
   # Color mapping for flags

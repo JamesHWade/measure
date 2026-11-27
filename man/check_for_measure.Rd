@@ -4,10 +4,13 @@
 \alias{check_for_measure}
 \title{Check for Measure Columns}
 \usage{
-check_for_measure(x)
+check_for_measure(x, call = rlang::caller_env())
 }
 \arguments{
 \item{x}{A data frame or tibble to check.}
+
+\item{call}{The execution environment of a currently running function, e.g.
+\code{rlang::caller_env()}. Used to report the caller in error messages.}
 }
 \value{
 Invisibly returns the names of measure columns found.

@@ -87,8 +87,8 @@ step_measure_channel_align <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_channel_align")
 ) {
-  method <- match.arg(method)
-  interpolation <- match.arg(interpolation)
+  method <- rlang::arg_match(method)
+  interpolation <- rlang::arg_match(interpolation)
 
   recipes::add_step(
     recipe,

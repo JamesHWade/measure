@@ -66,7 +66,7 @@ step_measure_smooth_ma <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_smooth_ma")
 ) {
-  edge_method <- match.arg(edge_method)
+  edge_method <- rlang::arg_match(edge_method)
 
   recipes::add_step(
     recipe,
@@ -267,7 +267,7 @@ step_measure_smooth_median <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_smooth_median")
 ) {
-  edge_method <- match.arg(edge_method)
+  edge_method <- rlang::arg_match(edge_method)
 
   recipes::add_step(
     recipe,
@@ -481,7 +481,7 @@ step_measure_smooth_gaussian <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_smooth_gaussian")
 ) {
-  edge_method <- match.arg(edge_method)
+  edge_method <- rlang::arg_match(edge_method)
 
   recipes::add_step(
     recipe,
@@ -703,7 +703,7 @@ step_measure_filter_fourier <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_filter_fourier")
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
 
   recipes::add_step(
     recipe,

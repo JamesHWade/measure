@@ -77,8 +77,8 @@ uncertainty_component <- function(
   distribution = c("normal", "rectangular", "triangular", "u-shaped"),
   coverage_factor = 1
 ) {
-  type <- match.arg(type)
-  distribution <- match.arg(distribution)
+  type <- rlang::arg_match(type)
+  distribution <- rlang::arg_match(distribution)
 
   if (!is.character(name) || length(name) != 1) {
     cli::cli_abort("{.arg name} must be a single character string.")
@@ -346,7 +346,7 @@ tidy.measure_uncertainty_budget <- function(
   type = c("components", "summary"),
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
 
   if (type == "components") {
     components <- x$components

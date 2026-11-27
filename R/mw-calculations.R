@@ -681,7 +681,7 @@ step_measure_mw_distribution <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_mw_distribution")
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
 
   if (!is.null(n_points)) {
     if (!is.numeric(n_points) || length(n_points) != 1 || n_points < 10) {

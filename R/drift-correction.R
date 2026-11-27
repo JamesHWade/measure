@@ -100,7 +100,7 @@ step_measure_drift_qc_loess <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_drift_qc_loess")
 ) {
-  apply_to <- match.arg(apply_to)
+  apply_to <- rlang::arg_match(apply_to)
 
   recipes::add_step(
     recipe,
@@ -507,7 +507,7 @@ measure_detect_drift <- function(
   qc_type = NULL,
   method = c("slope", "mann_kendall", "both")
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   if (!run_order_col %in% names(data)) {
     cli::cli_abort("Column {.field {run_order_col}} not found in data.")
@@ -637,7 +637,7 @@ step_measure_drift_linear <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_drift_linear")
 ) {
-  apply_to <- match.arg(apply_to)
+  apply_to <- rlang::arg_match(apply_to)
 
   recipes::add_step(
     recipe,
@@ -931,7 +931,7 @@ step_measure_drift_spline <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_drift_spline")
 ) {
-  apply_to <- match.arg(apply_to)
+  apply_to <- rlang::arg_match(apply_to)
 
   recipes::add_step(
     recipe,
@@ -1229,7 +1229,7 @@ step_measure_qc_bracket <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_qc_bracket")
 ) {
-  apply_to <- match.arg(apply_to)
+  apply_to <- rlang::arg_match(apply_to)
 
   recipes::add_step(
     recipe,

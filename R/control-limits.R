@@ -75,7 +75,7 @@ measure_control_limits <- function(
   k = 0.5,
   h = 5
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
 
   # Validate inputs
   if (!response_col %in% names(data)) {
@@ -608,7 +608,7 @@ tidy.measure_control_chart <- function(
   type = c("data", "violations", "limits"),
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
   switch(
     type,
     data = tibble::as_tibble(x$data),

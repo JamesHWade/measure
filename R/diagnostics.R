@@ -267,7 +267,7 @@ autoplot.recipe <- function(
 ) {
   check_ggplot2()
 
-  which <- match.arg(which)
+  which <- rlang::arg_match(which)
 
   if (!recipes::fully_trained(object)) {
     cli::cli_abort(c(

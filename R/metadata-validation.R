@@ -103,7 +103,7 @@ measure_validate_metadata <- function(
   sample_types = measure_sample_types,
   action = c("error", "warn", "message")
 ) {
-  action <- match.arg(action)
+  action <- rlang::arg_match(action)
 
   if (!is.data.frame(data)) {
     cli::cli_abort("{.arg data} must be a data frame.")
@@ -265,7 +265,7 @@ measure_standardize_sample_type <- function(
   mapping = NULL,
   unknown_action = c("error", "warn", "keep", "unknown")
 ) {
-  unknown_action <- match.arg(unknown_action)
+  unknown_action <- rlang::arg_match(unknown_action)
 
   if (!is.data.frame(data)) {
     cli::cli_abort("{.arg data} must be a data frame.")

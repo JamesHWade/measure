@@ -87,7 +87,7 @@ measure_lod <- function(
   sn_threshold = 3,
   ...
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   result <- switch(
     method,
@@ -187,7 +187,7 @@ measure_loq <- function(
   precision_cv = 20,
   ...
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   result <- switch(
     method,
@@ -260,7 +260,7 @@ measure_lod_loq <- function(
   k_loq = 10,
   ...
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   # Set default k_lod based on method
   if (is.null(k_lod)) {

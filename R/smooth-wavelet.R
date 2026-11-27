@@ -78,8 +78,8 @@ step_measure_smooth_wavelet <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_smooth_wavelet")
 ) {
-  threshold_type <- match.arg(threshold_type)
-  threshold_policy <- match.arg(threshold_policy)
+  threshold_type <- rlang::arg_match(threshold_type)
+  threshold_policy <- rlang::arg_match(threshold_policy)
 
   recipes::add_step(
     recipe,

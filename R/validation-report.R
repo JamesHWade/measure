@@ -405,8 +405,8 @@ render_validation_report <- function(
   # Check for quarto
   rlang::check_installed("quarto", reason = "to render validation reports")
 
-  output_format <- match.arg(output_format)
-  template <- match.arg(template)
+  output_format <- rlang::arg_match(output_format)
+  template <- rlang::arg_match(template)
 
   # Determine output file
   if (is.null(output_file)) {
