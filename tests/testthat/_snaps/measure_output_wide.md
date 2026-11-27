@@ -98,7 +98,7 @@
       prep(step_measure_output_wide(recipe(water + fat + protein ~ ., data = meats_train)))
     Condition
       Error in `step_measure_output_wide()`:
-      Caused by error in `check_has_measure()`:
+      Caused by error in `prep()`:
       ! Measurements have not been converted to internal format.
       i Use `step_measure_input_long()` or `step_measure_input_wide()` before `step_measure_output_wide()`.
 
