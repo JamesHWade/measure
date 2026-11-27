@@ -18,3 +18,5 @@ tools/acquisition-interchange/input-manifest.json -text
 
 # Preserve the source spectrum and its published file digest.
 inst/extdata/SBO.jdx -text whitespace=cr-at-eol
+inst/extdata/lc_batch_control.csv -text
+inst/extdata/lc_batch_manifest.csv -text

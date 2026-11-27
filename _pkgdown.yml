@@ -62,6 +62,8 @@ navbar:
         href: articles/multidimensional-measurements.html
       - text: Measure an Infrared Band
         href: articles/howto-ir-band.html
+      - text: Quantify an LC Batch
+        href: articles/howto-lc-batch.html
       - text: Analytical Records
         href: articles/analytical-records.html
       - text: Acquisition and MS Traces
@@ -91,6 +93,7 @@ articles:
   contents:
   - articles/howto-baseline
   - articles/howto-ir-band
+  - articles/howto-lc-batch
   - articles/howto-technique-packs
   - articles/howto-tidymodels
   - articles/howto-data-organization
@@ -334,6 +337,8 @@ reference:
   - measure_calibration_fit
   - measure_calibration_predict
   - measure_calibration_verify
+  - measure_quantify_batch
+  - is_measure_batch_results
   - is_measure_calibration
   - tidy.measure_calibration
   - glance.measure_calibration
@@ -436,6 +441,7 @@ reference:
   - measure_record
   - is_measure_record
   - validate_measure_record
+  - measure_record_curves
   - measure_record_from_long
   - measure_read_jcamp
   - measure_jcamp_headers

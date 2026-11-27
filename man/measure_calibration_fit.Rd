@@ -13,7 +13,9 @@ measure_calibration_fit(
   outlier_method = c("none", "studentized", "cook"),
   outlier_threshold = NULL,
   outlier_action = c("flag", "remove"),
-  sample_type_col = NULL
+  sample_type_col = NULL,
+  revision = NULL,
+  conc_unit = NULL
 )
 }
 \arguments{
@@ -56,6 +58,12 @@ for studentized residuals or 1 for Cook's distance.}
 
 \item{sample_type_col}{Optional column name for sample type. If provided,
 only rows with \code{sample_type == "standard"} are used for fitting.}
+
+\item{revision}{Optional non-empty character string identifying the
+calibration revision for batch provenance.}
+
+\item{conc_unit}{Optional character string declaring the concentration unit
+(e.g., \code{"mg/L"}).}
 }
 \value{
 A \link{measure_calibration} object containing the fitted model,

@@ -906,8 +906,8 @@ print.step_measure_standard_addition <- function(
       "sample"
     )))
     n_cols <- length(x$col_names)
-    desc <- glue::glue(
-      "{n_cols} response{?s} for {n_samples} sample{?s}"
+    desc <- cli::format_inline(
+      "{cli::qty(n_cols)}{n_cols} response{?s} for {cli::qty(n_samples)}{n_samples} sample{?s}"
     )
   } else {
     desc <- "(not trained)"

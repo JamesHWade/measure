@@ -35,6 +35,10 @@
 #'   - `"remove"`: Remove from fit (with audit trail)
 #' @param sample_type_col Optional column name for sample type. If provided,
 #'   only rows with `sample_type == "standard"` are used for fitting.
+#' @param revision Optional non-empty character string identifying the
+#'   calibration revision for batch provenance.
+#' @param conc_unit Optional character string declaring the concentration unit
+#'   (e.g., `"mg/L"`).
 #'
 #' @return A [measure_calibration] object containing the fitted model,
 #'   diagnostics, and metadata.
@@ -89,12 +93,40 @@ measure_calibration_fit <- function(
   outlier_method = c("none", "studentized", "cook"),
   outlier_threshold = NULL,
   outlier_action = c("flag", "remove"),
-  sample_type_col = NULL
+  sample_type_col = NULL,
+  revision = NULL,
+  conc_unit = NULL
 ) {
   call <- match.call()
   model <- match.arg(model)
   outlier_method <- match.arg(outlier_method)
   outlier_action <- match.arg(outlier_action)
+
+  if (!is.data.frame(data)) {
+    cli::cli_abort("{.arg data} must be a data frame.")
+  }
+
+  if (
+    !is.null(revision) &&
+      (!is.character(revision) ||
+        length(revision) != 1L ||
+        is.na(revision) ||
+        !nzchar(trimws(revision)))
+  ) {
+    cli::cli_abort("{.arg revision} must be a single non-empty string or NULL.")
+  }
+
+  if (
+    !is.null(conc_unit) &&
+      (!is.character(conc_unit) ||
+        length(conc_unit) != 1L ||
+        is.na(conc_unit) ||
+        !nzchar(trimws(conc_unit)))
+  ) {
+    cli::cli_abort(
+      "{.arg conc_unit} must be a single non-empty string or NULL."
+    )
+  }
 
   # Handle weights argument
   if (is.numeric(weights)) {
@@ -109,10 +141,6 @@ measure_calibration_fit <- function(
     weights <- match.arg(weights)
     weights_type <- weights
     weight_values <- NULL
-  }
-
-  if (!is.data.frame(data)) {
-    cli::cli_abort("{.arg data} must be a data frame.")
   }
 
   # Parse formula
@@ -135,35 +163,41 @@ measure_calibration_fit <- function(
     )
   }
 
+  # Track active rows so custom weights stay aligned through filtering
+  keep_rows <- rep(TRUE, nrow(data))
+
   # Filter to standards if sample_type_col provided
-  fit_data <- data
   if (!is.null(sample_type_col)) {
     if (!sample_type_col %in% names(data)) {
       cli::cli_abort(
         "Sample type column {.field {sample_type_col}} not found in data."
       )
     }
-    fit_data <- data[data[[sample_type_col]] == "standard", , drop = FALSE]
-    if (nrow(fit_data) == 0) {
+    sample_types <- data[[sample_type_col]]
+    keep_rows <- !is.na(sample_types) & sample_types == "standard"
+    if (!any(keep_rows)) {
       cli::cli_abort("No standard samples found in data.")
     }
   }
 
   # Remove rows with NA in response or concentration
-  complete_idx <- stats::complete.cases(fit_data[, c(response_col, conc_col)])
-  fit_data <- fit_data[complete_idx, , drop = FALSE]
+  complete_idx <- stats::complete.cases(data[, c(response_col, conc_col)])
+  keep_rows <- keep_rows & complete_idx
+  fit_data <- data[keep_rows, , drop = FALSE]
 
   if (nrow(fit_data) < 3) {
     cli::cli_abort("At least 3 non-NA calibration points are required.")
   }
 
-  # Calculate weights
+  # Calculate or subset weights
   if (is.null(weight_values)) {
     weight_values <- .calculate_weights(
       fit_data[[conc_col]],
       fit_data[[response_col]],
       weights_type
     )
+  } else {
+    weight_values <- weight_values[keep_rows]
   }
 
   # Build formula based on model type and origin
@@ -246,7 +280,10 @@ measure_calibration_fit <- function(
     conc_col = conc_col,
     diagnostics = diagnostics,
     outliers = outliers,
-    call = call
+    call = call,
+    revision = revision,
+    conc_unit = conc_unit,
+    conc_range = range(fit_data[[conc_col]], na.rm = TRUE)
   )
 }
 
@@ -263,12 +300,21 @@ measure_calibration_fit <- function(
 #'   - `"confidence"`: Confidence intervals
 #'   - `"prediction"`: Prediction intervals
 #' @param level Confidence level for intervals (default 0.95).
+#' @param flag_range Logical. If `TRUE`, adds a `.range_status` column
+#'   classifying each predicted concentration as `"in_range"`,
+#'   `"below_range"`, `"above_range"`, or `"missing"` relative to `[lloq, uloq]`.
+#'   Default is `FALSE`.
+#' @param lloq Optional lower limit of quantitation for range flagging.
+#'   Defaults to the minimum calibration standard concentration.
+#' @param uloq Optional upper limit of quantitation for range flagging.
+#'   Defaults to the maximum calibration standard concentration.
 #' @param ... Additional arguments (unused).
 #'
 #' @return A tibble with columns:
 #'   - `.pred_conc`: Predicted concentration
 #'   - `.pred_lower`: Lower bound (if intervals requested)
 #'   - `.pred_upper`: Upper bound (if intervals requested)
+#'   - `.range_status`: Range status (if `flag_range = TRUE`)
 #'
 #' @details
 #' For inverse prediction (response -> concentration), the function uses
@@ -302,6 +348,9 @@ measure_calibration_predict <- function(
   newdata,
   interval = c("none", "confidence", "prediction"),
   level = 0.95,
+  flag_range = FALSE,
+  lloq = NULL,
+  uloq = NULL,
   ...
 ) {
   if (!is_measure_calibration(object)) {
@@ -320,7 +369,6 @@ measure_calibration_predict <- function(
   }
 
   responses <- newdata[[response_col]]
-  n <- length(responses)
 
   # Get model coefficients
   coefs <- stats::coef(object$model)
@@ -332,7 +380,7 @@ measure_calibration_predict <- function(
     pred_conc <- .inverse_predict_quadratic(responses, coefs, object)
   }
 
-  result <- tibble::tibble(.pred_conc = pred_conc)
+  result <- tibble::tibble(.pred_conc = as.numeric(pred_conc))
 
   # Calculate intervals if requested
   if (interval != "none") {
@@ -343,8 +391,21 @@ measure_calibration_predict <- function(
       interval,
       level
     )
-    result$.pred_lower <- interval_result$lower
-    result$.pred_upper <- interval_result$upper
+    result$.pred_lower <- as.numeric(interval_result$lower)
+    result$.pred_upper <- as.numeric(interval_result$upper)
+  }
+
+  if (isTRUE(flag_range)) {
+    cal_range <- object$conc_range %||%
+      range(object$data[[conc_col]], na.rm = TRUE)
+    lower_bound <- lloq %||% cal_range[1]
+    upper_bound <- uloq %||% cal_range[2]
+    range_status <- rep("in_range", length(pred_conc))
+    missing_idx <- is.na(pred_conc) | !is.finite(pred_conc)
+    range_status[missing_idx] <- "missing"
+    range_status[!missing_idx & pred_conc < lower_bound] <- "below_range"
+    range_status[!missing_idx & pred_conc > upper_bound] <- "above_range"
+    result$.range_status <- range_status
   }
 
   result
@@ -436,13 +497,16 @@ measure_calibration_predict <- function(
   residual_error <- 100 * abs(fitted_resp - observed_resp) / observed_resp
   residual_error[!is.finite(residual_error)] <- NA
 
+  finite_re <- residual_error[is.finite(residual_error)]
+  finite_acc <- accuracy[is.finite(accuracy)]
+
   list(
     r_squared = r_squared,
     adj_r_squared = adj_r_squared,
     sigma = sigma,
-    mean_accuracy = mean(accuracy, na.rm = TRUE),
-    max_re = max(residual_error, na.rm = TRUE),
-    mean_re = mean(residual_error, na.rm = TRUE)
+    mean_accuracy = if (length(finite_acc) > 0L) mean(finite_acc) else NA_real_,
+    max_re = if (length(finite_re) > 0L) max(finite_re) else NA_real_,
+    mean_re = if (length(finite_re) > 0L) mean(finite_re) else NA_real_
   )
 }
 
@@ -488,12 +552,12 @@ measure_calibration_predict <- function(
   intercept <- if ("(Intercept)" %in% names(coefs)) coefs["(Intercept)"] else 0
   slope <- coefs[object$conc_col]
 
-  if (abs(slope) < .Machine$double.eps) {
+  if (is.na(slope) || !is.finite(slope) || abs(slope) < .Machine$double.eps) {
     cli::cli_warn("Slope is essentially zero; cannot calculate concentrations.")
     return(rep(NA_real_, length(responses)))
   }
 
-  (responses - intercept) / slope
+  unname((responses - intercept) / slope)
 }
 
 .inverse_predict_quadratic <- function(responses, coefs, object) {
@@ -504,30 +568,48 @@ measure_calibration_predict <- function(
   quad_name <- paste0("I(", object$conc_col, "^2)")
   quad_term <- coefs[quad_name]
 
+  if (
+    is.na(linear_term) ||
+      !is.finite(linear_term) ||
+      is.na(quad_term) ||
+      !is.finite(quad_term)
+  ) {
+    return(rep(NA_real_, length(responses)))
+  }
+
+  if (abs(quad_term) < .Machine$double.eps) {
+    return(.inverse_predict_linear(responses, coefs, object))
+  }
+
   # For each response, solve: cx^2 + bx + (a - y) = 0
-  sapply(responses, function(y) {
-    # Coefficients for quadratic formula
-    a_coef <- quad_term
-    b_coef <- linear_term
-    c_coef <- intercept - y
+  vapply(
+    responses,
+    function(y) {
+      if (is.na(y) || !is.finite(y)) {
+        return(NA_real_)
+      }
+      a_coef <- quad_term
+      b_coef <- linear_term
+      c_coef <- intercept - y
 
-    discriminant <- b_coef^2 - 4 * a_coef * c_coef
+      discriminant <- b_coef^2 - 4 * a_coef * c_coef
 
-    if (discriminant < 0) {
-      return(NA_real_)
-    }
+      if (is.na(discriminant) || discriminant < 0) {
+        return(NA_real_)
+      }
 
-    # Take positive root (or root closest to calibration range)
-    roots <- (-b_coef + c(-1, 1) * sqrt(discriminant)) / (2 * a_coef)
-    roots <- roots[roots >= 0]
+      # Take positive root (or root closest to calibration range)
+      roots <- (-b_coef + c(-1, 1) * sqrt(discriminant)) / (2 * a_coef)
+      roots <- roots[is.finite(roots) & roots >= 0]
 
-    if (length(roots) == 0) {
-      return(NA_real_)
-    }
+      if (length(roots) == 0L) {
+        return(NA_real_)
+      }
 
-    # Return the root within or closest to the calibration range
-    min(roots)
-  })
+      min(roots)
+    },
+    numeric(1)
+  )
 }
 
 .calculate_prediction_intervals <- function(
@@ -757,11 +839,12 @@ measure_calibration_verify <- function(
     )
   }
 
-  # Calculate summary statistics
+  # Calculate summary statistics: missing/NA verification samples must fail
+  # overall verification rather than silently passing.
   n_total <- nrow(result)
-  n_pass <- sum(pass, na.rm = TRUE)
+  n_pass <- sum(pass %in% TRUE)
   n_fail <- n_total - n_pass
-  overall_pass <- all(pass, na.rm = TRUE)
+  overall_pass <- n_total > 0L && n_fail == 0L
 
   # Add attributes
   attr(result, "n_total") <- n_total
@@ -807,14 +890,32 @@ print.measure_calibration_verify <- function(x, ...) {
 #' @rdname tidy.measure_calibration
 #' @export
 tidy.measure_calibration_verify <- function(x, ...) {
+  finite_acc <- x$accuracy_pct[is.finite(x$accuracy_pct)]
+  finite_dev <- abs(x$deviation_pct[is.finite(x$deviation_pct)])
   tibble::tibble(
     n_samples = attr(x, "n_total"),
     n_pass = attr(x, "n_pass"),
     n_fail = attr(x, "n_fail"),
-    pass_rate = attr(x, "n_pass") / attr(x, "n_total") * 100,
+    pass_rate = if (attr(x, "n_total") > 0L) {
+      attr(x, "n_pass") / attr(x, "n_total") * 100
+    } else {
+      NA_real_
+    },
     overall_pass = attr(x, "overall_pass"),
-    mean_accuracy_pct = mean(x$accuracy_pct, na.rm = TRUE),
-    mean_abs_deviation = mean(abs(x$deviation_pct), na.rm = TRUE),
-    max_abs_deviation = max(abs(x$deviation_pct), na.rm = TRUE)
+    mean_accuracy_pct = if (length(finite_acc) > 0L) {
+      mean(finite_acc)
+    } else {
+      NA_real_
+    },
+    mean_abs_deviation = if (length(finite_dev) > 0L) {
+      mean(finite_dev)
+    } else {
+      NA_real_
+    },
+    max_abs_deviation = if (length(finite_dev) > 0L) {
+      max(finite_dev)
+    } else {
+      NA_real_
+    }
   )
 }

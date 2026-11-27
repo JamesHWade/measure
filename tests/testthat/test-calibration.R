@@ -488,3 +488,69 @@ test_that("tidy.measure_calibration_verify works", {
   expect_true("pass_rate" %in% names(tidy_result))
   expect_true("overall_pass" %in% names(tidy_result))
 })
+
+test_that("measure_calibration_fit aligns custom weights after filtering and NAs", {
+  mixed <- data.frame(
+    sample_type = c(
+      "blank",
+      "standard",
+      NA_character_,
+      "standard",
+      "standard",
+      "standard",
+      "qc"
+    ),
+    nominal_conc = c(0, 10, 20, 25, 50, 100, 40),
+    response = c(0.2, 15.2, 30.0, NA_real_, 72.1, 148.3, 60.0)
+  )
+  w <- c(0.1, 1, 0.5, 2, 1, 1, 0.5)
+
+  cal <- measure_calibration_fit(
+    mixed,
+    response ~ nominal_conc,
+    weights = w,
+    sample_type_col = "sample_type",
+    revision = "rev-2026-01",
+    conc_unit = "mg/L"
+  )
+
+  expect_equal(nrow(cal$data), 3L)
+  expect_equal(cal$revision, "rev-2026-01")
+  expect_equal(cal$conc_unit, "mg/L")
+  expect_equal(cal$conc_range, c(10, 100))
+  expect_output(print(cal), "Revision: rev-2026-01")
+  expect_output(print(cal), "Range: 10 to 100 mg/L")
+})
+
+test_that("measure_calibration_predict flags range and handles NA in quadratic fits", {
+  cal <- measure_calibration_fit(
+    cal_data[cal_data$nominal_conc > 0, ],
+    response ~ nominal_conc,
+    model = "quadratic"
+  )
+
+  preds <- measure_calibration_predict(
+    cal,
+    data.frame(response = c(2, 72.1, 450, NA_real_)),
+    flag_range = TRUE
+  )
+
+  expect_equal(
+    preds$.range_status,
+    c("below_range", "in_range", "above_range", "missing")
+  )
+  expect_true(is.na(preds$.pred_conc[[4L]]))
+})
+
+test_that("measure_calibration_verify fails overall_pass when a QC response is NA", {
+  cal <- measure_calibration_fit(cal_data, response ~ nominal_conc)
+  qc_with_na <- data.frame(
+    nominal_conc = c(25, 75),
+    response = c(35.5, NA_real_)
+  )
+
+  result <- measure_calibration_verify(cal, qc_with_na)
+  expect_equal(attr(result, "n_pass"), 1L)
+  expect_equal(attr(result, "n_fail"), 1L)
+  expect_false(attr(result, "overall_pass"))
+})

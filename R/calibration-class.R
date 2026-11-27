@@ -62,8 +62,16 @@ new_measure_calibration <- function(
   conc_col,
   diagnostics = list(),
   outliers = NULL,
-  call = NULL
+  call = NULL,
+  revision = NULL,
+  conc_unit = NULL,
+  conc_range = NULL
 ) {
+  if (is.null(conc_range) && is.data.frame(data) && conc_col %in% names(data)) {
+    vals <- data[[conc_col]]
+    vals <- vals[is.finite(vals)]
+    conc_range <- if (length(vals) > 0L) range(vals) else c(NA_real_, NA_real_)
+  }
   structure(
     list(
       model = model,
@@ -75,7 +83,10 @@ new_measure_calibration <- function(
       conc_col = conc_col,
       diagnostics = diagnostics,
       outliers = outliers,
-      call = call
+      call = call,
+      revision = revision,
+      conc_unit = conc_unit,
+      conc_range = conc_range
     ),
     class = "measure_calibration"
   )
@@ -108,6 +119,23 @@ print.measure_calibration <- function(x, ...) {
   cat("  Weighting: ", x$weights_type, "\n", sep = "")
   cat("  Formula: ", deparse(x$formula), "\n", sep = "")
   cat("  N points: ", nrow(x$data), "\n", sep = "")
+
+  if (!is.null(x$revision)) {
+    cat("  Revision: ", x$revision, "\n", sep = "")
+  }
+
+  if (!is.null(x$conc_range) && all(is.finite(x$conc_range))) {
+    unit_suffix <- if (!is.null(x$conc_unit)) paste0(" ", x$conc_unit) else ""
+    cat(
+      "  Range: ",
+      format(x$conc_range[1], digits = 5),
+      " to ",
+      format(x$conc_range[2], digits = 5),
+      unit_suffix,
+      "\n",
+      sep = ""
+    )
+  }
 
   if (!is.null(x$diagnostics$r_squared)) {
     cat(

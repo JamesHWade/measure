@@ -1,5 +1,22 @@
 # measure 0.0.1.9004
 
+* `measure_record_curves()` extracts a provenance-linked, recipe-ready curve
+  table from a `measure_record`, and `measure_quantify_batch()` runs external
+  calibration, dilution back-calculation, QC verification, and report export
+  over a scalar chromatography batch with explicit missing, interfered, blank,
+  and out-of-range outcomes (#203, #81, #84).
+
+* `measure_calibration_fit()` now accepts optional `revision` and `conc_unit`
+  metadata, records `conc_range`, and aligns custom numeric `weights` across
+  `sample_type_col` and `NA` filtering. `measure_calibration_predict()` adds
+  optional `flag_range = TRUE` classification and safely handles `NA` responses
+  for quadratic models. `measure_calibration_verify()` now fails `overall_pass`
+  when any QC response is missing.
+
+* Fixed `print()` pluralization formatting in `step_measure_dilution_correct()`,
+  `step_measure_surrogate_recovery()`, and `step_measure_standard_addition()`,
+  and ensured missing assessment rows fail validation report status checks.
+
 * The Python companion package `measure-spectra` supports spectroscopy
   preprocessing in mlfeatures and scikit-learn pipelines (#208).
 
