@@ -9,6 +9,9 @@ measure_calibration_predict(
   newdata,
   interval = c("none", "confidence", "prediction"),
   level = 0.95,
+  flag_range = FALSE,
+  lloq = NULL,
+  uloq = NULL,
   ...
 )
 }
@@ -28,6 +31,17 @@ calibration formula.}
 
 \item{level}{Confidence level for intervals (default 0.95).}
 
+\item{flag_range}{Logical. If \code{TRUE}, adds a \code{.range_status} column
+classifying each predicted concentration as \code{"in_range"},
+\code{"below_range"}, \code{"above_range"}, or \code{"missing"} relative to \verb{[lloq, uloq]}.
+Default is \code{FALSE}.}
+
+\item{lloq}{Optional lower limit of quantitation for range flagging.
+Defaults to the minimum calibration standard concentration.}
+
+\item{uloq}{Optional upper limit of quantitation for range flagging.
+Defaults to the maximum calibration standard concentration.}
+
 \item{...}{Additional arguments (unused).}
 }
 \value{
@@ -36,6 +50,7 @@ A tibble with columns:
 \item \code{.pred_conc}: Predicted concentration
 \item \code{.pred_lower}: Lower bound (if intervals requested)
 \item \code{.pred_upper}: Upper bound (if intervals requested)
+\item \code{.range_status}: Range status (if \code{flag_range = TRUE})
 }
 }
 \description{

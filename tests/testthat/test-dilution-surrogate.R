@@ -466,3 +466,21 @@ test_that("step_measure_dilution_correct divide with zero handled", {
   expect_true(is.na(result$analyte[2])) # 100 / 0 = NA (warned)
   expect_equal(result$analyte[3], 25) # 100 / 4
 })
+
+test_that("print methods format singular and plural counts without raw cli markup", {
+  dil_data <- data.frame(dilution_factor = c(1, 2), analyte = c(10, 20))
+  dil_rec <- recipes::recipe(~., data = dil_data) |>
+    step_measure_dilution_correct(analyte, dilution_col = "dilution_factor") |>
+    recipes::prep()
+  dil_out <- capture.output(print(dil_rec))
+  expect_false(any(grepl("\\{\\?s\\}", dil_out)))
+  expect_true(any(grepl("1 column \\(multiply", dil_out)))
+
+  sur_data <- data.frame(surrogate = c(95, 105))
+  sur_rec <- recipes::recipe(~., data = sur_data) |>
+    step_measure_surrogate_recovery(surrogate, expected_value = 100) |>
+    recipes::prep()
+  sur_out <- capture.output(print(sur_rec))
+  expect_false(any(grepl("\\{\\?s\\}", sur_out)))
+  expect_true(any(grepl("1 surrogate,", sur_out)))
+})

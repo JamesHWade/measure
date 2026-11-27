@@ -1,0 +1,220 @@
+---
+title: "How-to: quantify an externally calibrated scalar chromatography batch"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How-to: quantify an externally calibrated scalar chromatography batch}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+How do you carry a batch of scalar detector chromatograms from a raw file to
+reported concentrations with full provenance, QC verification, and explicit
+flags for missing, interfered, and out-of-range injections? This guide walks
+through one 13-injection externally calibrated HPLC-UV numerical control batch
+included with the package.
+
+```{r setup, message=FALSE}
+library(measure)
+library(dplyr)
+library(ggplot2)
+```
+
+## Read the batch file and manifest
+
+The control batch (`lc_batch_control.csv`) contains 13 injections on a single
+UV 254 nm channel (`3.00` to `7.50` min at `0.02` min spacing, 226 points per
+injection). Every injection includes a sloping baseline and an unrelated matrix
+peak near `3.70` min outside the declared analyte retention window
+`[4.8, 5.6]` min.
+
+`read_measure_record_delim()` reads the raw CSV bytes once, records the file's
+SHA-256 digest, and retains the exact parsed row ordinal (`.source_rows`) for
+every chromatogram point.
+
+```{r load}
+data_path <- system.file(
+  "extdata",
+  "lc_batch_control.csv",
+  package = "measure",
+  mustWork = TRUE
+)
+manifest_path <- system.file(
+  "extdata",
+  "lc_batch_manifest.csv",
+  package = "measure",
+  mustWork = TRUE
+)
+
+columns <- c(
+  sample_id = "sample_id",
+  injection_id = "injection_id",
+  channel_id = "channel_id",
+  channel_name = "channel_name",
+  curve_id = "curve_id",
+  axis_name = "axis_name",
+  axis_unit = "axis_unit",
+  value_name = "value_name",
+  value_unit = "value_unit",
+  location = "location",
+  value = "value"
+)
+
+record <- read_measure_record_delim(
+  data_path,
+  columns = columns,
+  source_id = "lc-batch-control"
+)
+expected_sha256 <- "8a9f439a1e4c413d0e6abc138ff8bc26e36282d2210a7f0573c116c3e8769949"
+stopifnot(identical(record$sources$source_sha256[[1]], expected_sha256))
+
+manifest <- utils::read.csv(manifest_path, stringsAsFactors = FALSE)
+manifest
+```
+
+The manifest declares:
+
+- **Blank (`INJ-01`)**: zero analyte; checked against a blank ceiling of 20% of
+  the fitted LLOQ response.
+- **Standards (`INJ-02` to `INJ-06`)**: five calibration levels spanning `5` to
+  `100` mg/L (`cal-control-v1`).
+- **QC injections (`INJ-07`, `INJ-08`)**: low QC (`15` mg/L, passing within
+  ±15%) and high QC (`60` mg/L, intentionally biased +22% to exercise QC failure).
+- **Unknowns (`INJ-09` to `INJ-13`)**: an undiluted in-range sample (~35 mg/L),
+  a 2x diluted sample (~40 mg/L in vial, ~80 mg/L reported), an above-ULOQ
+  sample (~135 mg/L), a missing-peak sample (non-detect), and an interfered
+  sample with two resolved peaks inside `[4.8, 5.6]` min.
+
+## Run peak integration, calibration, and QC
+
+`measure_quantify_batch()` extracts the curves via `measure_record_curves()`,
+runs `step_measure_peaks_detect()` (prominence ≥ 1.0 mAU) and
+`step_measure_peaks_integrate()` (trapezoidal area above a local linear
+baseline clamped at zero), fits unweighted linear regression
+`area ~ nominal_conc` via `measure_calibration_fit()`, checks in-vial
+concentrations against `[5, 100]` mg/L before applying `dilution_factor`, and
+verifies QC injections via `measure_calibration_verify()`.
+
+```{r quantify}
+batch <- measure_quantify_batch(
+  record = record,
+  manifest = manifest,
+  window = c(4.8, 5.6),
+  analyte = "caffeine_control",
+  conc_unit = "mg/L",
+  calibration_revision = "cal-control-v1",
+  min_prominence = 1.0,
+  integration_method = "trapezoid",
+  baseline = "local",
+  model = "linear",
+  weights = "none",
+  qc_acceptance_pct = 15,
+  blank_max_pct_lloq = 20
+)
+batch
+```
+
+Every row in `summary(batch)` carries the injection identity, peak bounds,
+integrated area, calibration revision, estimated in-vial concentration,
+dilution-adjusted reported concentration, outcome, QC status, and exact CSV
+source-row bounds for both the chromatogram and the integrated peak.
+
+```{r table}
+res <- summary(batch)
+res |>
+  select(
+    injection_id,
+    sample_id,
+    injection_type,
+    peak_count,
+    area,
+    calibration_revision,
+    dilution_factor,
+    estimated_conc,
+    reported_conc,
+    outcome,
+    qc_status,
+    peak_source_row_start,
+    peak_source_row_end
+  )
+```
+
+Notice how failure modes stay explicit rather than collapsing into valid zeros
+or silently extrapolated values:
+
+- `INJ-08` (`QC-HIGH`) fails QC (`outcome = "qc_fail"`, `qc_status = "fail"`),
+  and `batch$verification` reports `overall_pass = FALSE`.
+- `INJ-11` (`UNK-03`) retains its raw in-vial estimate (`134.91` mg/L) for
+  diagnostics while leaving `reported_conc = NA` with `outcome = "above_uloq"`.
+- `INJ-12` (`UNK-04`) reports `outcome = "missing_peak"` with `area = NA` and
+  `reported_conc = NA`.
+- `INJ-13` (`UNK-05`) detects two peaks inside `[4.8, 5.6]` min and reports
+  `outcome = "interfered_peak"` rather than silently selecting one.
+
+## Inspect chromatograms and calibration
+
+```{r plots, fig.width=7, fig.height=4.5, fig.alt="Batch UV chromatograms faceted by injection type with the 4.8 to 5.6 minute analyte retention window shaded."}
+autoplot(batch, type = "chromatograms")
+```
+
+```{r cal-plot, fig.width=6.5, fig.height=4, fig.alt="External linear calibration curve showing the five standards and overlaid QC and unknown responses."}
+autoplot(batch, type = "calibration")
+```
+
+## Compare with an independent calculation
+
+Before running the comparison, we declare tolerances of `1e-9 mAU·min` for peak
+areas and calibration parameters, `1e-9 mg/L` for estimated and reported
+concentrations, and exact agreement on file SHA-256, peak counts, outcomes, QC
+flags, and peak source-row spans.
+
+An independent standard-library Python script reads `lc_batch_control.csv` and
+`lc_batch_manifest.csv` directly from raw bytes and reproduces every quantity.
+[Independent Python reference](https://github.com/JamesHWade/measure/blob/main/tools/chromatography/batch-reference.py)
+
+```{r verify}
+tol <- 1e-9
+coefs <- stats::coef(batch$calibration$model)
+stopifnot(
+  abs(unname(coefs[[1]]) - 0.5686644570673636) < tol,
+  abs(unname(coefs[[2]]) - 1.4511419544975344) < tol,
+  abs(res$area[[2]] - 7.878024541962506) < tol,
+  abs(res$reported_conc[[9]] - 34.99324700912393) < tol,
+  abs(res$reported_conc[[10]] - 79.97846280752921) < tol,
+  is.na(res$reported_conc[[11]]),
+  identical(res$outcome[[11]], "above_uloq"),
+  identical(res$outcome[[12]], "missing_peak"),
+  identical(res$outcome[[13]], "interfered_peak")
+)
+```
+
+## Export a standalone report
+
+`measure_batch_results` implements `measure_report_sections()`, so
+`render_measure_report()` packages the method provenance, quantitation table,
+calibration plot, and chromatograms directly:
+
+```{r report, eval=FALSE}
+render_measure_report(
+  batch,
+  "lc-batch-control-report.html",
+  title = "External Calibration Batch Control (cal-control-v1)",
+  open = FALSE
+)
+```
+
+## Limitations and package boundary
+
+- **Constructed control fixture**: `lc_batch_control.csv` is an explicitly
+  constructed Gaussian-plus-baseline numerical control. It qualifies the
+  end-to-end record, integration, calibration, dilution, and flagging
+  arithmetic, while measured-method qualification on real instrument data stays
+  open in issue #84.
+- **Core vs. optional `measure.lc` pack**: Core `measure` already provides the
+  scalar relational record (`measure_record`, `read_measure_record_delim`,
+  `measure_record_curves`), peak detection/integration, calibration fitting and
+  verification, single-analyte batch quantitation (`measure_quantify_batch`),
+  and report export. Technique-specific capabilities—multi-analyte target
+  libraries, internal-standard response-factor matrices, vendor chromatogram
+  format adapters, DAD spectral deconvolution, and USP/EP chromatographic
+  system-suitability conventions—belong in an optional `measure.lc` technique
+  pack rather than core.

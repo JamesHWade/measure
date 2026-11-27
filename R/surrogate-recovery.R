@@ -324,9 +324,9 @@ print.step_measure_surrogate_recovery <- function(
 
   if (x$trained) {
     n_cols <- length(x$col_names)
-    limits <- glue::glue("[{x$min_recovery}%, {x$max_recovery}%]")
-    desc <- glue::glue(
-      "{n_cols} surrogate{?s}, action={x$action}, limits={limits}"
+    limits <- paste0("[", x$min_recovery, "%, ", x$max_recovery, "%]")
+    desc <- cli::format_inline(
+      "{cli::qty(n_cols)}{n_cols} surrogate{?s}, action={x$action}, limits={limits}"
     )
   } else {
     desc <- "(not trained)"

@@ -216,8 +216,9 @@ bake.step_measure_dilution_correct <- function(object, new_data, ...) {
         )
       )
     } else if (object$handle_zero == "warn") {
+      zero_outcome <- if (object$operation == "multiply") "0" else "NA"
       cli::cli_warn(
-        "Zero dilution factor{?s} at row{?s} {zero_idx}; setting result to NA."
+        "{cli::qty(length(zero_idx))}Zero dilution factor{?s} at row{?s} {zero_idx}; setting result to {zero_outcome}."
       )
     }
   }
@@ -265,8 +266,8 @@ print.step_measure_dilution_correct <- function(
 
   if (x$trained) {
     n_cols <- length(x$col_names)
-    desc <- glue::glue(
-      "{n_cols} column{?s} ({x$operation} by {x$dilution_col})"
+    desc <- cli::format_inline(
+      "{cli::qty(n_cols)}{n_cols} column{?s} ({x$operation} by {x$dilution_col})"
     )
   } else {
     desc <- "(not trained)"

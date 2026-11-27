@@ -1,0 +1,14 @@
+batch_order,injection_id,injection_type,nominal_conc,dilution_factor
+1,INJ-01,blank,,1.0
+2,INJ-02,standard,5,1.0
+3,INJ-03,standard,10,1.0
+4,INJ-04,standard,25,1.0
+5,INJ-05,standard,50,1.0
+6,INJ-06,standard,100,1.0
+7,INJ-07,qc,15,1.0
+8,INJ-08,qc,60,1.0
+9,INJ-09,unknown,,1.0
+10,INJ-10,unknown,,2.0
+11,INJ-11,unknown,,1.0
+12,INJ-12,unknown,,1.0
+13,INJ-13,unknown,,1.0

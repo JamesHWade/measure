@@ -926,7 +926,10 @@ tidy.measure_validation_report <- function(x, ...) {
     if ("assessment" %in% names(data) && is.data.frame(data[["assessment"]])) {
       assessment <- data[["assessment"]]
       if ("pass" %in% names(assessment)) {
-        all_pass <- all(assessment[["pass"]], na.rm = TRUE)
+        pass_vals <- assessment[["pass"]]
+        all_pass <- length(pass_vals) > 0L &&
+          !anyNA(pass_vals) &&
+          all(pass_vals)
         return(if (all_pass) "pass" else "fail")
       }
     }
