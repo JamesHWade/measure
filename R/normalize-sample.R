@@ -97,6 +97,7 @@ prep.step_measure_normalize_sum <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_normalize_sum <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- .compute_normalize_sum(input)
@@ -260,6 +261,7 @@ prep.step_measure_normalize_max <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_normalize_max <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- .compute_normalize_max(input)
@@ -430,6 +432,7 @@ prep.step_measure_normalize_range <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_normalize_range <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- .compute_normalize_range(input)
@@ -602,6 +605,7 @@ prep.step_measure_normalize_vector <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_normalize_vector <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- .compute_normalize_vector(input)
@@ -766,6 +770,7 @@ prep.step_measure_normalize_auc <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_normalize_auc <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- .compute_normalize_auc(input)
@@ -1007,6 +1012,7 @@ prep.step_measure_normalize_peak <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_normalize_peak <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     result <- .compute_normalize_peak(

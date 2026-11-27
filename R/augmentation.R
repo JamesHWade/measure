@@ -197,6 +197,7 @@ prep.step_measure_augment_noise <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_augment_noise <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   sd <- object$sd
   distribution <- object$distribution
   relative <- object$relative
@@ -399,6 +400,7 @@ prep.step_measure_augment_shift <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_augment_shift <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   max_shift <- object$max_shift
 
   for (col in object$measures) {
@@ -594,6 +596,7 @@ prep.step_measure_augment_scale <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_augment_scale <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   range <- object$range
 
   for (col in object$measures) {

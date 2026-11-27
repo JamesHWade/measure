@@ -203,6 +203,7 @@ prep.step_measure_channel_combine <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_channel_combine <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measure_cols, object, new_data)
   n_samples <- nrow(new_data)
 
   combined <- switch(
@@ -277,6 +278,11 @@ tidy.step_measure_channel_combine <- function(x, ...) {
       id = x$id
     )
   }
+}
+
+#' @export
+required_pkgs.step_measure_channel_combine <- function(x, ...) {
+  "measure"
 }
 
 # ------------------------------------------------------------------------------

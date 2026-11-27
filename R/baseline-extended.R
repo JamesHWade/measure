@@ -158,6 +158,7 @@ prep.step_measure_baseline_rolling <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_rolling <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   window_size <- object$window_size
   smoothing <- object$smoothing
 
@@ -201,6 +202,11 @@ tidy.step_measure_baseline_rolling <- function(x, ...) {
     smoothing = x$smoothing,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_rolling <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -460,6 +466,7 @@ prep.step_measure_baseline_airpls <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_airpls <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   lambda <- object$lambda
   max_iter <- object$max_iter
   tol <- object$tol
@@ -508,6 +515,11 @@ tidy.step_measure_baseline_airpls <- function(x, ...) {
     max_iter = x$max_iter,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_airpls <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -660,6 +672,7 @@ prep.step_measure_baseline_snip <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_snip <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   iterations <- object$iterations
   decreasing <- object$decreasing
 
@@ -703,6 +716,11 @@ tidy.step_measure_baseline_snip <- function(x, ...) {
     decreasing = x$decreasing,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_snip <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -882,6 +900,7 @@ prep.step_measure_baseline_arpls <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_arpls <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   lambda <- object$lambda
   ratio <- object$ratio
   max_iter <- object$max_iter
@@ -929,6 +948,11 @@ tidy.step_measure_baseline_arpls <- function(x, ...) {
     ratio = x$ratio,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_arpls <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -1070,6 +1094,7 @@ prep.step_measure_baseline_tophat <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_tophat <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   half_window <- object$half_window
 
   for (col in object$measures) {
@@ -1110,6 +1135,11 @@ tidy.step_measure_baseline_tophat <- function(x, ...) {
     half_window = x$half_window,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_tophat <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -1226,6 +1256,7 @@ prep.step_measure_baseline_morph <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_morph <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   half_window <- object$half_window
   iterations <- object$iterations
 
@@ -1276,6 +1307,11 @@ tidy.step_measure_baseline_morph <- function(x, ...) {
     iterations = x$iterations,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_morph <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -1408,6 +1444,7 @@ prep.step_measure_baseline_minima <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_minima <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   window_size <- object$window_size
   method <- object$method
 
@@ -1467,6 +1504,11 @@ tidy.step_measure_baseline_minima <- function(x, ...) {
     method = x$method,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_minima <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -1681,6 +1723,7 @@ prep.step_measure_baseline_auto <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_auto <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   method <- object$selected_method
 
   for (col in object$measures) {
@@ -1744,4 +1787,9 @@ tidy.step_measure_baseline_auto <- function(x, ...) {
     selected_method = x$selected_method %||% NA_character_,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_baseline_auto <- function(x, ...) {
+  "measure"
 }

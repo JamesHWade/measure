@@ -562,6 +562,11 @@ tidy.step_measure_input_long <- function(x, ...) {
   res
 }
 
+#' @export
+required_pkgs.step_measure_input_long <- function(x, ...) {
+  "measure"
+}
+
 
 # ------------------------------------------------------------------------------
 # Internal helpers

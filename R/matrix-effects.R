@@ -841,6 +841,7 @@ prep.step_measure_standard_addition <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_standard_addition <- function(object, new_data, ...) {
+  recipes::check_new_data(object$sample_id_col, object, new_data)
   # For standard addition, we typically work with training data only
 
   # (the calibration IS the result)
@@ -949,4 +950,9 @@ tidy.step_measure_standard_addition <- function(x, ...) {
       id = character()
     )
   }
+}
+
+#' @export
+required_pkgs.step_measure_standard_addition <- function(x, ...) {
+  "measure"
 }

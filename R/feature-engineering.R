@@ -224,6 +224,7 @@ prep.step_measure_integrals <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_integrals <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   regions <- object$regions
   method <- object$method
   prefix <- object$prefix
@@ -443,6 +444,7 @@ prep.step_measure_ratios <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_ratios <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   numerator <- object$numerator
   denominator <- object$denominator
   method <- object$method
@@ -714,6 +716,7 @@ prep.step_measure_moments <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_moments <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   moments <- object$moments
   weighted <- object$weighted
   prefix <- object$prefix
@@ -987,6 +990,7 @@ prep.step_measure_bin <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_bin <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   bin_breaks <- object$bin_breaks
   method <- object$method
 

@@ -209,6 +209,7 @@ prep.step_measure_map <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_map <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   # fn is already a function (converted in step_measure_map)
   fn <- object$fn
   capture <- object$verbosity == 0
@@ -258,6 +259,11 @@ tidy.step_measure_map <- function(x, ...) {
     terms = terms,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_map <- function(x, ...) {
+  "measure"
 }
 
 

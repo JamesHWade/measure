@@ -263,6 +263,11 @@ prep.step_measure_batch_reference <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_batch_reference <- function(object, new_data, ...) {
+  recipes::check_new_data(
+    c(object$batch_col, names(object$correction_factors)),
+    object,
+    new_data
+  )
   batches <- new_data[[object$batch_col]]
   unique_batches <- unique(batches)
 
@@ -353,4 +358,9 @@ tidy.step_measure_batch_reference <- function(x, ...) {
   })
 
   dplyr::bind_rows(results)
+}
+
+#' @export
+required_pkgs.step_measure_batch_reference <- function(x, ...) {
+  "measure"
 }

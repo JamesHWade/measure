@@ -216,6 +216,11 @@ prep.step_measure_channel_ratio <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_channel_ratio <- function(object, new_data, ...) {
+  recipes::check_new_data(
+    unique(c(object$numerator, object$denominator)),
+    object,
+    new_data
+  )
   n_samples <- nrow(new_data)
 
   for (i in seq_along(object$numerator)) {
@@ -293,6 +298,11 @@ tidy.step_measure_channel_ratio <- function(x, ...) {
       id = x$id
     )
   }
+}
+
+#' @export
+required_pkgs.step_measure_channel_ratio <- function(x, ...) {
+  "measure"
 }
 
 # ------------------------------------------------------------------------------

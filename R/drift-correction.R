@@ -261,6 +261,11 @@ prep.step_measure_drift_qc_loess <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_drift_qc_loess <- function(object, new_data, ...) {
+  recipes::check_new_data(
+    c(object$run_order_col, names(object$drift_models)),
+    object,
+    new_data
+  )
   run_order <- new_data[[object$run_order_col]]
   sample_types <- new_data[[object$sample_type_col]]
 
@@ -367,6 +372,11 @@ tidy.step_measure_drift_qc_loess <- function(x, ...) {
     span = x$span,
     degree = x$degree
   )
+}
+
+#' @export
+required_pkgs.step_measure_drift_qc_loess <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -757,6 +767,11 @@ prep.step_measure_drift_linear <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_drift_linear <- function(object, new_data, ...) {
+  recipes::check_new_data(
+    c(object$run_order_col, names(object$drift_models)),
+    object,
+    new_data
+  )
   run_order <- new_data[[object$run_order_col]]
   sample_types <- new_data[[object$sample_type_col]]
 
@@ -856,6 +871,11 @@ tidy.step_measure_drift_linear <- function(x, ...) {
       double(1)
     )
   )
+}
+
+#' @export
+required_pkgs.step_measure_drift_linear <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -1067,6 +1087,11 @@ prep.step_measure_drift_spline <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_drift_spline <- function(object, new_data, ...) {
+  recipes::check_new_data(
+    c(object$run_order_col, names(object$drift_models)),
+    object,
+    new_data
+  )
   run_order <- new_data[[object$run_order_col]]
   sample_types <- new_data[[object$sample_type_col]]
 
@@ -1153,6 +1178,11 @@ tidy.step_measure_drift_spline <- function(x, ...) {
     qc_median = unlist(x$qc_medians),
     df = vapply(x$drift_models, function(m) m$df, double(1))
   )
+}
+
+#' @export
+required_pkgs.step_measure_drift_spline <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -1353,6 +1383,11 @@ prep.step_measure_qc_bracket <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_qc_bracket <- function(object, new_data, ...) {
+  recipes::check_new_data(
+    c(object$run_order_col, names(object$qc_data)),
+    object,
+    new_data
+  )
   run_order <- new_data[[object$run_order_col]]
   sample_types <- new_data[[object$sample_type_col]]
 
@@ -1475,4 +1510,9 @@ tidy.step_measure_qc_bracket <- function(x, ...) {
     n_qc = vapply(x$qc_data, nrow, integer(1)),
     qc_target = unlist(x$qc_targets)
   )
+}
+
+#' @export
+required_pkgs.step_measure_qc_bracket <- function(x, ...) {
+  "measure"
 }

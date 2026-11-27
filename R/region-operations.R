@@ -124,6 +124,7 @@ prep.step_measure_trim <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_trim <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   range <- object$range
 
   for (col in object$measures) {
@@ -174,6 +175,11 @@ tidy.step_measure_trim <- function(x, ...) {
     range_max = x$range[2],
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_trim <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -324,6 +330,7 @@ prep.step_measure_exclude <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_exclude <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   ranges <- object$ranges
 
   for (col in object$measures) {
@@ -403,6 +410,11 @@ tidy.step_measure_exclude <- function(x, ...) {
     range_max = ranges_df$range_max,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_exclude <- function(x, ...) {
+  "measure"
 }
 
 # ==============================================================================
@@ -621,6 +633,7 @@ prep.step_measure_resample <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_resample <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   new_locs <- object$new_locations
   method <- object$method
 
@@ -894,6 +907,7 @@ prep.step_measure_interpolate <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_interpolate <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   ranges <- object$ranges
   method <- object$method
 
@@ -935,4 +949,9 @@ tidy.step_measure_interpolate <- function(x, ...) {
     method = x$method,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_interpolate <- function(x, ...) {
+  "measure"
 }

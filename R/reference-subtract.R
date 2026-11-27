@@ -267,6 +267,7 @@ prep.step_measure_subtract_blank <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_subtract_blank <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     .check_reference_correction_grid(object, new_data[[col]], col)
     blank <- object$learned_blank[[col]]
@@ -487,6 +488,7 @@ prep.step_measure_subtract_reference <- function(
 
 #' @export
 bake.step_measure_subtract_reference <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     .check_reference_correction_grid(object, new_data[[col]], col)
     ref <- object$learned_ref[[col]]
@@ -702,6 +704,7 @@ prep.step_measure_ratio_reference <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_ratio_reference <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     .check_reference_correction_grid(object, new_data[[col]], col)
     ref <- object$learned_ref[[col]]

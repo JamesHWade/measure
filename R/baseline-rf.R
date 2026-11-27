@@ -146,6 +146,7 @@ prep.step_measure_baseline_rf <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_baseline_rf <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- .compute_baseline_rf(
       new_data[[col]],

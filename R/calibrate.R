@@ -252,6 +252,7 @@ prep.step_measure_calibrate_x <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_calibrate_x <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- purrr::map(new_data[[col]], function(x) {
       x$location <- object$cal_fn(x$location)
@@ -468,6 +469,7 @@ prep.step_measure_calibrate_y <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_calibrate_y <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- purrr::map(new_data[[col]], function(x) {
       x$value <- object$cal_fn(x$value)

@@ -165,6 +165,7 @@ prep.step_measure_align_shift <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_align_shift <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     .check_alignment_grid(object, new_data[[col]])
     result <- purrr::map(
@@ -208,6 +209,11 @@ tidy.step_measure_align_shift <- function(x, ...) {
     reference = x$reference,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_align_shift <- function(x, ...) {
+  "measure"
 }
 
 .align_shift_single <- function(x, ref_spectrum, max_shift) {
@@ -398,6 +404,7 @@ prep.step_measure_align_reference <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_align_reference <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     .check_alignment_grid(object, new_data[[col]])
     result <- purrr::map(
@@ -436,6 +443,11 @@ tidy.step_measure_align_reference <- function(x, ...) {
     max_shift = x$max_shift,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_align_reference <- function(x, ...) {
+  "measure"
 }
 
 
@@ -588,6 +600,7 @@ prep.step_measure_align_dtw <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_align_dtw <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   rlang::check_installed("dtw", reason = "for DTW alignment")
 
   for (col in object$measures) {
@@ -843,6 +856,7 @@ prep.step_measure_align_ptw <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_align_ptw <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   rlang::check_installed("ptw", reason = "for PTW alignment")
 
   for (col in object$measures) {
@@ -1079,6 +1093,7 @@ prep.step_measure_align_cow <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_align_cow <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     .check_alignment_grid(object, new_data[[col]])
     result <- purrr::map(
@@ -1126,6 +1141,11 @@ tidy.step_measure_align_cow <- function(x, ...) {
     slack = x$slack,
     id = x$id
   )
+}
+
+#' @export
+required_pkgs.step_measure_align_cow <- function(x, ...) {
+  "measure"
 }
 
 #' @rdname tunable_measure

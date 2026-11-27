@@ -261,6 +261,7 @@ prep.step_measure_mw_averages <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_mw_averages <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   calibration <- object$calibration
   integration_range <- object$integration_range
   output_cols <- object$output_cols
@@ -537,6 +538,7 @@ prep.step_measure_mw_fractions <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_mw_fractions <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   calibration <- object$calibration
   integration_range <- object$integration_range
   cutoffs <- object$cutoffs
@@ -879,6 +881,7 @@ prep.step_measure_mw_distribution <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_mw_distribution <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   type <- object$type
   calibration <- object$calibration
   n_points <- object$n_points

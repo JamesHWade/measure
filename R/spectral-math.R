@@ -110,6 +110,7 @@ prep.step_measure_absorbance <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_absorbance <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- purrr::map(new_data[[col]], .absorbance_single)
     new_data[[col]] <- new_measure_list(result)
@@ -245,6 +246,7 @@ prep.step_measure_transmittance <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_transmittance <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- purrr::map(new_data[[col]], .transmittance_single)
     new_data[[col]] <- new_measure_list(result)
@@ -413,6 +415,7 @@ prep.step_measure_log <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_log <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- purrr::map(
       new_data[[col]],
@@ -568,6 +571,7 @@ prep.step_measure_kubelka_munk <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_kubelka_munk <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     result <- purrr::map(new_data[[col]], .kubelka_munk_single)
     new_data[[col]] <- new_measure_list(result)
@@ -747,6 +751,7 @@ prep.step_measure_derivative <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_derivative <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     if (!is.null(measure_value_metadata(input))) {
@@ -970,6 +975,7 @@ prep.step_measure_derivative_gap <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_measure_derivative_gap <- function(object, new_data, ...) {
+  recipes::check_new_data(object$measures, object, new_data)
   for (col in object$measures) {
     input <- new_data[[col]]
     if (!is.null(measure_value_metadata(input))) {
