@@ -98,9 +98,9 @@ measure_calibration_fit <- function(
   conc_unit = NULL
 ) {
   call <- match.call()
-  model <- match.arg(model)
-  outlier_method <- match.arg(outlier_method)
-  outlier_action <- match.arg(outlier_action)
+  model <- rlang::arg_match(model)
+  outlier_method <- rlang::arg_match(outlier_method)
+  outlier_action <- rlang::arg_match(outlier_action)
 
   if (!is.data.frame(data)) {
     cli::cli_abort("{.arg data} must be a data frame.")
@@ -138,7 +138,7 @@ measure_calibration_fit <- function(
     weight_values <- weights
     weights_type <- "custom"
   } else {
-    weights <- match.arg(weights)
+    weights <- rlang::arg_match(weights)
     weights_type <- weights
     weight_values <- NULL
   }
@@ -357,7 +357,7 @@ measure_calibration_predict <- function(
     cli::cli_abort("{.arg object} must be a {.cls measure_calibration} object.")
   }
 
-  interval <- match.arg(interval)
+  interval <- rlang::arg_match(interval)
 
   response_col <- object$response_col
   conc_col <- object$conc_col

@@ -103,7 +103,7 @@ step_measure_surrogate_recovery <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_surrogate_recovery")
 ) {
-  action <- match.arg(action)
+  action <- rlang::arg_match(action)
 
   # Validate that exactly one of expected_col or expected_value is provided
   if (is.null(expected_col) && is.null(expected_value)) {

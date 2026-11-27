@@ -88,7 +88,7 @@ step_measure_batch_reference <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_batch_reference")
 ) {
-  method <- match.arg(method)
+  method <- rlang::arg_match(method)
 
   recipes::add_step(
     recipe,

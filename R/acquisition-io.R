@@ -125,7 +125,7 @@ NULL
 #' @rdname measure-acquisition-bundle
 #' @export
 write_measure_acquisition <- function(x, path, delim = c(",", "\t")) {
-  delim <- match.arg(delim)
+  delim <- rlang::arg_match(delim)
   validate_measure_acquisition(x)
 
   destination <- .record_io_destination(path)

@@ -46,8 +46,8 @@ criterion <- function(
   description = NULL,
   priority = c("major", "critical", "minor")
 ) {
-  operator <- match.arg(operator)
-  priority <- match.arg(priority)
+  operator <- rlang::arg_match(operator)
+  priority <- rlang::arg_match(priority)
 
   if (!is.character(name) || length(name) != 1) {
     cli::cli_abort("{.arg name} must be a single character string.")
@@ -295,7 +295,7 @@ measure_assess <- function(
   criteria,
   action = c("return", "warn", "error")
 ) {
-  action <- match.arg(action)
+  action <- rlang::arg_match(action)
 
   if (!inherits(criteria, "measure_criteria")) {
     cli::cli_abort("{.arg criteria} must be a {.cls measure_criteria} object.")

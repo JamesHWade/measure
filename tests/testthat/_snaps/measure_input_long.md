@@ -100,7 +100,7 @@
       absorp, location = vars(ind)))
     Condition
       Error in `step_measure_input_long()`:
-      Caused by error in `check_measure_dims()`:
+      Caused by error in `bake()`:
       ! The number of rows in each measure should be the same. Most samples have 100 rows and these do not: 1. Please pad the input with missing values.
 
 ---
@@ -110,7 +110,7 @@
       dplyr::everything(), location = vars(ind)))
     Condition
       Error in `step_measure_input_long()`:
-      Caused by error in `check_single_selector()`:
+      Caused by error in `prep()`:
       ! The selection for `...` should only select a single column (6 columns were selected).
 
 ---

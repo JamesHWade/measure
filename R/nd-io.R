@@ -71,7 +71,7 @@ NULL
 #' @rdname measure-nd-bundle
 #' @export
 write_measure_nd <- function(x, path, delim = c(",", "\t")) {
-  delim <- match.arg(delim)
+  delim <- rlang::arg_match(delim)
   prepared <- .nd_io_prepare(x)
   destination <- .record_io_destination(path)
   if (.record_io_path_exists(destination)) {

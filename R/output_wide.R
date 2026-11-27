@@ -171,13 +171,13 @@ print.step_measure_output_wide <-
 tidy.step_measure_output_wide <- function(x, ...) {
   if (is_trained(x)) {
     res <- tibble(
-      terms = na_chr,
-      value = na_dbl
+      terms = NA_character_,
+      value = NA_real_
     )
   } else {
     res <- tibble(
-      terms = na_chr,
-      value = na_dbl
+      terms = NA_character_,
+      value = NA_real_
     )
   }
   res$id <- x$id

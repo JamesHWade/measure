@@ -86,7 +86,7 @@ step_measure_input_wide <-
     add_step(
       recipe,
       step_measure_input_wide_new(
-        terms = enquos(...),
+        terms = rlang::enquos(...),
         trained = trained,
         role = role,
         columns = columns,
@@ -198,13 +198,13 @@ tidy.step_measure_input_wide <- function(x, ...) {
   if (is_trained(x)) {
     res <- tibble(
       terms = x$columns,
-      value = na_dbl
+      value = NA_real_
     )
   } else {
     term_names <- sel2char(x$terms)
     res <- tibble(
       terms = term_names,
-      value = na_dbl
+      value = NA_real_
     )
   }
   res$id <- x$id

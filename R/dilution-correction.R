@@ -92,8 +92,8 @@ step_measure_dilution_correct <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_dilution_correct")
 ) {
-  operation <- match.arg(operation)
-  handle_zero <- match.arg(handle_zero)
+  operation <- rlang::arg_match(operation)
+  handle_zero <- rlang::arg_match(handle_zero)
 
   recipes::add_step(
     recipe,

@@ -313,7 +313,7 @@ read_measure_record_delim <- function(
 ) {
   .record_import_validate_source_id(source_id)
   .record_import_validate_allow_extra(allow_extra_columns)
-  delim <- match.arg(delim)
+  delim <- rlang::arg_match(delim)
   raw <- .record_read_raw(file, max_bytes)
   data <- .record_parse_delim(raw, delim)
   mapped <- .record_import_validate_columns(data, columns, allow_extra_columns)

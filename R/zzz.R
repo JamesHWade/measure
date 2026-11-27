@@ -33,7 +33,7 @@
 #' @return Logical indicating whether pybaselines is installed and available.
 #' @noRd
 .pybaselines_available <- function() {
-  if (!requireNamespace("reticulate", quietly = TRUE)) {
+  if (!rlang::is_installed("reticulate")) {
     return(FALSE)
   }
 
@@ -49,19 +49,16 @@
 #'
 #' @return The pybaselines Python module.
 #' @noRd
-.get_pybaselines <- function() {
+.get_pybaselines <- function(call = rlang::caller_env()) {
   if (!is.null(.measure_py$pybaselines)) {
     return(.measure_py$pybaselines)
   }
 
-  if (!requireNamespace("reticulate", quietly = TRUE)) {
-    cli::cli_abort(
-      c(
-        "The {.pkg reticulate} package is required for Python-based baseline correction.",
-        "i" = "Install it with: {.code install.packages('reticulate')}"
-      )
-    )
-  }
+  rlang::check_installed(
+    "reticulate",
+    reason = "for Python-based baseline correction",
+    call = call
+  )
 
   # Request pybaselines installation if not available
   if (!.pybaselines_available()) {
@@ -69,7 +66,8 @@
       c(
         "The Python package {.pkg pybaselines} is not installed.",
         "i" = "Install it with: {.code reticulate::py_require('pybaselines')}"
-      )
+      ),
+      call = call
     )
   }
 

@@ -46,8 +46,8 @@ validate_measure <- function(
   tolerance = 1e-6,
   action = c("error", "warn", "message")
 ) {
-  action <- match.arg(action)
-  checks <- match.arg(checks, several.ok = TRUE)
+  action <- rlang::arg_match(action)
+  checks <- rlang::arg_match(checks, multiple = TRUE)
 
   # Handle different input types
   if (is_measure_tbl(x)) {
@@ -59,10 +59,10 @@ validate_measure <- function(
   } else if (is.data.frame(x)) {
     meas_cols <- find_measure_cols(x)
     if (length(meas_cols) == 0) {
-      cli::cli_abort(
+      cli::cli_abort(c(
         "No measure column found in data frame.",
         "i" = "Use {.fn step_measure_input_wide} or {.fn step_measure_input_long} first."
-      )
+      ))
     }
     measures <- x[[meas_cols[1]]]
     names(measures) <- seq_along(measures)
@@ -578,7 +578,7 @@ check_axis_consistency <- function(
   tolerance = 1e-10,
   action = c("error", "warn", "message")
 ) {
-  action <- match.arg(action)
+  action <- rlang::arg_match(action)
 
   # Get measure_list
   if (is_measure_list(x)) {

@@ -86,7 +86,7 @@ step_measure_channel_combine <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_channel_combine")
 ) {
-  strategy <- match.arg(strategy)
+  strategy <- rlang::arg_match(strategy)
 
   recipes::add_step(
     recipe,

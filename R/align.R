@@ -72,7 +72,7 @@ step_measure_align_shift <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_align_shift")
 ) {
-  reference <- match.arg(reference)
+  reference <- rlang::arg_match(reference)
 
   recipes::add_step(
     recipe,
@@ -501,8 +501,8 @@ step_measure_align_dtw <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_align_dtw")
 ) {
-  reference <- match.arg(reference)
-  window_type <- match.arg(window_type)
+  reference <- rlang::arg_match(reference)
+  window_type <- rlang::arg_match(window_type)
 
   recipes::add_step(
     recipe,
@@ -765,7 +765,7 @@ step_measure_align_ptw <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_align_ptw")
 ) {
-  reference <- match.arg(reference)
+  reference <- rlang::arg_match(reference)
 
   recipes::add_step(
     recipe,
@@ -986,7 +986,7 @@ step_measure_align_cow <- function(
   skip = FALSE,
   id = recipes::rand_id("measure_align_cow")
 ) {
-  reference <- match.arg(reference)
+  reference <- rlang::arg_match(reference)
 
   recipes::add_step(
     recipe,

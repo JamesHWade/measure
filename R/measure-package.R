@@ -48,12 +48,11 @@
 
 ## usethis namespace: start
 #' @import recipes
-#' @import rlang
+#' @importFrom rlang %||% .data .env :=
 #' @importFrom lifecycle badge
 #' @importFrom utils globalVariables
 #' @importFrom dplyr select arrange mutate
 #' @importFrom tibble tibble
-#' @importFrom glue glue
 ## usethis namespace: end
 NULL
 

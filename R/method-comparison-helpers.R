@@ -64,9 +64,10 @@
 .test_proportional_bias <- function(
   mean_vals,
   diff_vals,
-  type = c("linear", "quadratic")
+  type = c("linear", "quadratic"),
+  call = rlang::caller_env()
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type, error_call = call)
 
   if (type == "linear") {
     fit <- stats::lm(diff_vals ~ mean_vals)

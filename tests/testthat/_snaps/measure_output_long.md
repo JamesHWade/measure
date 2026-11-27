@@ -91,7 +91,7 @@
 ---
 
     Error in `step_measure_input_long()`:
-    Caused by error in `check_measure_dims()`:
+    Caused by error in `bake()`:
     ! The number of rows in each measure should be the same. Most samples have 2 rows and these do not: 1. Please pad the input with missing values.
 
 ---
@@ -100,7 +100,7 @@
       prep(step_measure_output_long(recipe(water + fat + protein ~ ., data = meats_train)))
     Condition
       Error in `step_measure_output_long()`:
-      Caused by error in `check_has_measure()`:
+      Caused by error in `prep()`:
       ! Measurements have not been converted to internal format.
       i Use `step_measure_input_long()` or `step_measure_input_wide()` before `step_measure_output_long()`.
 

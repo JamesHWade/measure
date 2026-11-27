@@ -25,7 +25,7 @@ autoplot.measure_results <- function(
   point_size = 2.5,
   ...
 ) {
-  type <- match.arg(type)
+  type <- rlang::arg_match(type)
   input <- measurement_table_input(object$data, object$measures, object$id_cols)
   members <- input$members
   n <- length(members)
@@ -44,9 +44,7 @@ autoplot.measure_results <- function(
     if (ndim != 1L) {
       cli::cli_abort("A signal plot requires one-dimensional measurements.")
     }
-    if (!is.null(max_spectra)) {
-      rlang::check_number_whole(max_spectra, min = 1)
-    }
+    rlang::check_number_whole(max_spectra, min = 1, allow_null = TRUE)
     rlang::check_bool(summary)
     keep <- seq_len(min(n, max_spectra %||% n))
     data <- fortify.measure_list(members[keep])
