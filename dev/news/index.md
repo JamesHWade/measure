@@ -2,6 +2,10 @@
 
 ## measure 0.0.1.9004
 
+- The Python companion package `measure-spectra` supports spectroscopy
+  preprocessing in mlfeatures and scikit-learn pipelines
+  ([\#208](https://github.com/JamesHWade/measure/issues/208)).
+
 - The infrared band guide uses a measured transmittance spectrum to
   calculate a baseline-corrected absorbance band area and export its
   evidence ([\#202](https://github.com/JamesHWade/measure/issues/202)).
